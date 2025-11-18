@@ -1,12 +1,13 @@
 #!/bin/bash
 # Bash Wrapper für Docker-basierte Tests und Workflows
-# Usage: ./run-in-docker.sh [test|test-slow|orchestrator|shell|build-only] [--profile PROFILE] [--no-build]
+# Usage: ./run-in-docker.sh [test|test-slow|orchestrator|shell|build-only] [--profile PROFILE] [--no-build] [--static-image]
 
 set -e
 
 COMMAND=""
 PROFILE="local"
 NO_BUILD=0
+STATIC_IMAGE=0
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -23,6 +24,10 @@ while [[ $# -gt 0 ]]; do
             NO_BUILD=1
             shift
             ;;
+        --static-image)
+            STATIC_IMAGE=1
+            shift
+            ;;
         *)
             echo "Unknown option: $1"
             echo "Usage: $0 [test|test-slow|orchestrator|shell|build-only] [--profile PROFILE] [--no-build]"
@@ -37,8 +42,14 @@ if [ -z "$COMMAND" ]; then
     exit 1
 fi
 
-DOCKERFILE="gitbook_worker/tools/docker/Dockerfile"
-IMAGE_TAG="erda-workflow-tools"
+if [ $STATIC_IMAGE -eq 1 ]; then
+    DOCKERFILE="gitbook_worker/tools/docker/Dockerfile"
+    IMAGE_TAG="erda-workflow-tools:static"
+else
+    DOCKERFILE="gitbook_worker/tools/docker/Dockerfile.dynamic"
+    IMAGE_TAG="erda-workflow-tools:dynamic"
+fi
+echo "Using Dockerfile: $DOCKERFILE"
 CONTEXT="."
 
 # Check Docker daemon

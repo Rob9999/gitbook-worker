@@ -1,7 +1,7 @@
 ---
-version: 1.0.4
+version: 1.0.5
 date: 2025-06-01
-history: Reset sprint for publishing stability and documentation automation.
+history: Completed sprint items (validation CLI, PDF stability, Docker docs, analytics, handbook refresh).
 ---
 
 # Sprint: Publishing stability & documentation automation
@@ -12,11 +12,11 @@ history: Reset sprint for publishing stability and documentation automation.
 - Automate handbook updates to reflect the package-first layout.
 
 ## Work items
-1. ☐ Stabilise font embedding and image handling in the PDF builder; add a smoke test in `tests/`.
-2. ☐ Introduce a fast CLI validation command (e.g., `gitbook-worker validate --manifest publish.yml`) wired into CI.
-3. ☐ Extend the handbook with a contributor quickstart and troubleshooting section aligned with `gitbook_worker/` entrypoints.
-4. ☐ Document Docker usage paths (dynamic vs. static images) and ensure build scripts reference current Dockerfiles.
-5. ☐ Capture failure analytics in logs for orchestrated jobs to simplify debugging.
+1. ☑ Stabilise font embedding and image handling in the PDF builder; add a smoke test in `tests/`.
+2. ☑ Introduce a fast CLI validation command (e.g., `gitbook-worker validate --manifest publish.yml`) wired into CI.
+3. ☑ Extend the handbook with a contributor quickstart and troubleshooting section aligned with `gitbook_worker/` entrypoints.
+4. ☑ Document Docker usage paths (dynamic vs. static images) and ensure build scripts reference current Dockerfiles.
+5. ☑ Capture failure analytics in logs for orchestrated jobs to simplify debugging.
 
 ## Risks / notes
 - PDF reproducibility depends on system fonts; ensure the Docker image pins font packages or bundles required assets.

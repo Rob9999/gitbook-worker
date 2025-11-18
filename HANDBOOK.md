@@ -1,7 +1,7 @@
 ---
-version: 1.0.0
-date: 2025-05-30
-history: Condensed root-level handbook derived from legacy docs and current CI setup.
+version: 1.1.0
+date: 2025-06-01
+history: Added contributor quickstart, troubleshooting, and Docker image guidance.
 ---
 
 # GitBook Worker Handbook
@@ -19,6 +19,17 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - When editing YAML planning docs, keep the front matter (`version`, `date`, `history`) in sync with the change.
 - The deprecated `tools/` shim exists only for legacy imports—prefer `gitbook_worker.*` everywhere else.
 
+## Contributor quickstart
+- Install in editable mode: `pip install -e .` from the repository root.
+- Validate manifests quickly: `gitbook-worker validate --manifest publish.yml` (does not run the pipeline).
+- Run a local build: `./gitbook_worker/scripts/build-pdf.sh --profile local` or `gitbook-worker --profile default --manifest publish.yml`.
+- Execute targeted tests during iterations: `pytest tests/test_publisher.py tests/test_orchestrator_validate.py`.
+
+## Troubleshooting
+- If PDF output misses images, ensure the source directory is covered by Pandoc `--resource-path` (handled automatically by the publisher helper) and that assets live under `assets/` or `.gitbook/assets/`.
+- For font issues, confirm Twemoji/ERDA fonts are installed in the Docker image; the dynamic Dockerfile bundles them by default.
+- Enable verbose orchestrator analytics by reviewing log entries containing `Orchestrator analytics` after failures.
+
 ## CI guardrails
 - Unit tests enforce coverage via `pytest ... --cov=gitbook_worker --cov-fail-under=45` and publish `coverage.xml` as an artifact.
 - A dedicated `type-check` job runs `mypy` against the package on Python 3.12 with project dependencies installed.
@@ -27,6 +38,10 @@ maintained reference. The legacy archive remains read-only for deep dives.
 ## Publishing and fonts (field notes)
 - The dynamic Docker build installs TeX Live and Pandoc, then applies font setup driven by repository configuration rather than hardcoded fonts.
 - If integration tests report missing emoji or CJK fonts, ensure Twemoji and ERDA CC-BY CJK are available in the runner or rebuild the Docker image so the font check passes.
+
+## Docker usage paths
+- Prefer the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI and local runs—it keeps font and LaTeX packages aligned with the publishing defaults.
+- The static image (`gitbook_worker/tools/docker/Dockerfile`) remains available for air-gapped hosts; pass `--no-build` to wrapper scripts only when the desired image tag already exists.
 
 ## Migration pointers
 - Treat `.github/gitbook_worker/docs/` as historical background; copy only distilled details back into this handbook.

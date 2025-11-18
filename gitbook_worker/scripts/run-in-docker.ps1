@@ -1,19 +1,28 @@
 # PowerShell Wrapper für Docker-basierte Tests und Workflows
-# Usage: .\run-in-docker.ps1 [test|orchestrator|shell]
+# Usage: .\run-in-docker.ps1 [test|orchestrator|shell] [-StaticImage] [-NoBuild]
 
 param(
     [Parameter(Mandatory=$true)]
     [ValidateSet("test", "test-slow", "orchestrator", "shell", "build-only")]
     [string]$Command,
-    
+
     [string]$Profile = "local",
-    [switch]$NoBuild
+    [switch]$NoBuild,
+    [switch]$StaticImage
 )
 
 $ErrorActionPreference = "Stop"
 
-$DOCKERFILE = "gitbook_worker/tools/docker/Dockerfile"
-$IMAGE_TAG = "erda-workflow-tools"
+$workDir = Get-Location
+
+if ($StaticImage) {
+    $DOCKERFILE = "gitbook_worker/tools/docker/Dockerfile"
+    $IMAGE_TAG = "erda-workflow-tools:static"
+} else {
+    $DOCKERFILE = "gitbook_worker/tools/docker/Dockerfile.dynamic"
+    $IMAGE_TAG = "erda-workflow-tools:dynamic"
+}
+Write-Host "Using Dockerfile: $DOCKERFILE"
 $CONTEXT = "."
 
 # Stelle sicher, dass Docker läuft
