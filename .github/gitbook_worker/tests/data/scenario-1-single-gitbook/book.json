@@ -1,0 +1,11 @@
+{
+    "title": "Test GitBook Single",
+    "author": "Test Author",
+    "language": "de",
+    "description": "Test GitBook für Integrationstests - Single GitBook Szenario",
+    "root": "content/",
+    "structure": {
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
+    }
+}

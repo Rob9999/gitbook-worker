@@ -1,0 +1,24 @@
+# Docker Configuration Example
+#
+# This is an example docker_config.yml that can be placed in the repository root
+# to override default Docker naming templates.
+#
+# Uncomment and modify the sections you want to override.
+#
+# See .github/gitbook_worker_tools/README.md for full documentation.
+
+# docker_names:
+#   # Override test context
+#   test:
+#     image: "my-custom-test-image:{branch}"
+#     container: "my-test-{publish_name}"
+#   
+#   # Override production context
+#   prod:
+#     image: "my-prod-image:v{version}"
+#     container: "my-prod-container"
+#   
+#   # Add custom context
+#   staging:
+#     image: "my-staging-image:{branch}"
+#     container: "staging-{publish_name}"

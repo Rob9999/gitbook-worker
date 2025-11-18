@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Orchestrator (local)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "tools.workflow_orchestrator.orchestrator",
+      "cwd": "${workspaceFolder}/../../",
+      "args": [
+        "--profile",
+        "local",
+        "--manifest",
+        "repo/gitbook_repo/publish.yml"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ]
+}

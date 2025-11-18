@@ -1,0 +1,10 @@
+version: 0.1.0
+
+publish:
+  - path: ./docs
+    out: test-folder-fallback.pdf
+    build: true
+    source_type: folder
+    use_book_json: false
+    use_summary: false
+    keep_combined: true

@@ -1,0 +1,15 @@
+pandas
+numpy
+matplotlib
+requests
+tqdm
+pygltflib
+black
+pyyaml
+pytest
+pytest-cov
+beautifulsoup4
+emoji
+pathvalidate
+markdown
+pypandoc

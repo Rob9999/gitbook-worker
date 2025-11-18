@@ -1,0 +1,126 @@
+# README Auto-Generation Configuration
+# =============================================================================
+# Controls automatic creation of README.md files in directories without any
+# readme variant (case-insensitive check).
+#
+# This configuration uses the same smart matching pattern system as other
+# gitbook_worker configurations (frontmatter, fonts, etc.).
+#
+# Priority: publish.yml > local readme.yml > this default
+# =============================================================================
+
+version: "1.0.0"
+
+# Enable/disable automatic README generation
+enabled: true
+
+# Pattern matching for directories
+patterns:
+  # Directories to include (glob patterns, relative to repo root)
+  # Empty list means "include all"
+  include: []
+
+  # Directories to exclude (glob patterns, relative to repo root)
+  # These patterns are checked first - if a path matches exclude, it's skipped
+  exclude:
+    # Version control
+    - ".git"
+    - ".git/**"
+
+    # Build artifacts and dependencies
+    - "node_modules"
+    - "node_modules/**"
+    - "__pycache__"
+    - "__pycache__/**"
+    - ".venv"
+    - ".venv/**"
+    - "venv"
+    - "venv/**"
+    - "dist"
+    - "dist/**"
+    - "build"
+    - "build/**"
+
+    # IDE and editor files
+    - ".vscode"
+    - ".vscode/**"
+    - ".idea"
+    - ".idea/**"
+
+    # Temporary and cache directories
+    - "tmp"
+    - "tmp/**"
+    - "temp"
+    - "temp/**"
+    - ".cache"
+    - ".cache/**"
+
+    # Project-specific exclusions
+    - ".github/logs"
+    - ".github/logs/**"
+    - ".github/reports"
+    - ".github/reports/**"
+
+    # Simulation directories (project-specific)
+    - "simulations"
+    - "simulations/**"
+
+    # Special GitBook directories (should not have auto-generated README)
+    - "content/readme"
+    - "content/readme/**"
+
+# Template for generated README.md files
+template:
+  # Use directory name as header
+  use_directory_name: true
+
+  # Header level (1-6)
+  header_level: 1
+
+  # Additional content to append after header (optional)
+  # Use {{directory_name}} as placeholder
+  footer: ""
+
+  # Example with footer:
+  # footer: |
+  #
+  #   This directory contains {{directory_name}} resources.
+
+# Case-insensitive variants to check before creating README
+# If ANY of these exists (case-insensitive), skip directory
+# Note: The code also performs a case-insensitive directory scan as fallback,
+# so these are the most common variants that are checked first for performance.
+readme_variants:
+  # Standard variants (most common)
+  - "README.md"
+  - "readme.md"
+  - "Readme.md"
+  - "ReadMe.md"
+
+  # Uppercase extension variants
+  - "README.MD"
+  - "readme.MD"
+  - "Readme.MD"
+  - "ReadMe.MD"
+
+  # Common typos and alternative capitalizations
+  - "READ_ME.md"
+  - "read_me.md"
+  - "Read_Me.md"
+  - "README.txt"
+  - "readme.txt"
+  - "README.rst"
+  - "readme.rst"
+  - "README"
+  - "readme"
+
+# Logging options
+logging:
+  # Log level for README generation (debug, info, warning, error)
+  level: "info"
+
+  # Log each skipped directory (can be verbose)
+  log_skipped: false
+
+  # Log each created README
+  log_created: true

@@ -1,0 +1,33 @@
+build:
+  enable_cache: true
+  enable_logging: true
+  log_dir: ..\logs
+  output_dir: ..\true-type
+  output_filename: erda-ccby-cjk.ttf
+characters:
+  dataset_files:
+  - chinese.md
+  - japanese.md
+  - korean.md
+  - test-documents.md
+  fallback_for_undefined: true
+  include_hangul_algorithmic: true
+  include_hanzi_kanji: true
+  include_hiragana: true
+  include_katakana: true
+  include_punctuation: true
+grid:
+  em: 1000
+  pixels: 8
+metadata:
+  copyright_notice: © 2025 ERDA Project. This font is licensed under CC BY 4.0. Code
+    is licensed under MIT.
+  description: Fallback font for CJK (Chinese, Japanese, Korean) characters with CC
+    BY 4.0 license. Monospace bitmap font.
+  designer: ERDA Contributors
+  family_name: ERDA CC-BY CJK
+  full_name: ERDA CC-BY CJK Fallback
+  license: CC BY 4.0
+  license_url: https://creativecommons.org/licenses/by/4.0/
+  vendor: ERDA Project
+  version: 1.0.1

@@ -1,0 +1,123 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Font",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "build_ccby_cjk_font.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Font + Refresh Cache",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "build_ccby_cjk_font.py",
+                "--refresh-cache"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build Font + Install",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "build_ccby_cjk_font.py",
+                "--install",
+                "--refresh-cache"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator"
+            },
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Check Coverage",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "check_coverage.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests"
+            },
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Check Duplicates",
+            "type": "shell",
+            "command": "python",
+            "args": [
+                "check_hanzi_dups.py"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests"
+            },
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run All Tests",
+            "dependsOn": [
+                "Check Coverage",
+                "Check Duplicates"
+            ],
+            "group": "test",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Full Build & Test",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Build Font",
+                "Run All Tests"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

@@ -1,0 +1,190 @@
+name: Orchestrator
+
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "Profil aus publish.yml"
+        required: false
+        default: "default"
+      force_push_to_ghcr:
+        description: "Auch in privaten Repos Image nach GHCR pushen"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build_image:
+    if: ${{ !github.event.repository.private || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_push_to_ghcr == 'true') }}
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      repository: ${{ steps.repository_slug.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive lowercase repository slug
+        id: repository_slug
+        run: echo "value=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push orchestrator image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .github/gitbook_worker/tools/docker/Dockerfile.dynamic
+          push: true
+          tags: |
+            ghcr.io/${{ steps.repository_slug.outputs.value }}/publisher:sha-${{ github.sha }}
+            ghcr.io/${{ steps.repository_slug.outputs.value }}/publisher:main
+          cache-from: |
+            type=registry,ref=ghcr.io/${{ steps.repository_slug.outputs.value }}/publisher:buildcache
+          cache-to: |
+            type=registry,ref=ghcr.io/${{ steps.repository_slug.outputs.value }}/publisher:buildcache,mode=max
+
+  orchestrate:
+    needs: [build_image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    env:
+      PROFILE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.profile || 'default' }}
+      BASE_SHA: ${{ github.event.before }}
+      REPO_VISIBILITY: ${{ github.event.repository.private && 'private' || 'public' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Fetch HEAD and previous commit for git diff
+
+      - name: Set up Docker Buildx (local build)
+        if: ${{ needs.build_image.result != 'success' }}
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build orchestrator image locally
+        if: ${{ needs.build_image.result != 'success' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .github/gitbook_worker/tools/docker/Dockerfile.dynamic
+          push: false
+          load: true
+          tags: erda-publisher:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Log in to GHCR
+        if: ${{ needs.build_image.result == 'success' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull published image
+        if: ${{ needs.build_image.result == 'success' }}
+        run: |
+
+          docker pull ghcr.io/${{ needs.build_image.outputs.repository }}/publisher@${{ needs.build_image.outputs.digest }}
+
+      - name: Run workflow orchestrator
+        env:
+          IMAGE_REF: ${{ needs.build_image.result == 'success' && format('ghcr.io/{0}/publisher@{1}', needs.build_image.outputs.repository, needs.build_image.outputs.digest) || 'erda-publisher:local' }}
+
+        run: |
+          set -euo pipefail
+          IMAGE="$IMAGE_REF"
+          BASE="$BASE_SHA"
+          EXTRA_ARGS=""
+          if [ -n "$BASE" ]; then
+            EXTRA_ARGS="--base $BASE"
+          fi
+
+          # Create temp file for GITHUB_OUTPUT in workspace (accessible from Docker)
+          TEMP_OUTPUT="/tmp/github_output_$$"
+          touch "$TEMP_OUTPUT"
+
+          # Run orchestrator with exit code 2 = success (nothing to publish)
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -v "$TEMP_OUTPUT:/tmp/github_output" \
+            -w /workspace \
+            -e GITHUB_SHA="${GITHUB_SHA}" \
+            -e GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
+            -e GITHUB_OUTPUT="/tmp/github_output" \
+            -e ORCHESTRATOR_PROFILE="${PROFILE}" \
+            -e ORCHESTRATOR_REPO_VISIBILITY="${REPO_VISIBILITY}" \
+            "$IMAGE" \
+            python -m tools.workflow_orchestrator \
+              --profile "${PROFILE}" \
+              --repository "${GITHUB_REPOSITORY}" \
+              --manifest publish.yml \
+              --repo-visibility auto \
+              --commit "${GITHUB_SHA}" \
+              ${EXTRA_ARGS} \
+              --reset-others || EXIT_CODE=$?
+
+          # Handle exit codes: 0 = success, 2 = nothing to publish (also success)
+          EXIT_CODE=${EXIT_CODE:-0}
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "Nothing to publish (exit code 2) - treating as success"
+            cat "$TEMP_OUTPUT" >> "${GITHUB_OUTPUT}"
+            rm -f "$TEMP_OUTPUT"
+            exit 0
+          elif [ $EXIT_CODE -ne 0 ]; then
+            echo "Orchestrator failed with exit code $EXIT_CODE"
+            rm -f "$TEMP_OUTPUT"
+            exit $EXIT_CODE
+          fi
+
+          # Success - copy output
+          cat "$TEMP_OUTPUT" >> "${GITHUB_OUTPUT}"
+          rm -f "$TEMP_OUTPUT"
+
+      - name: Commit and push generated artifacts
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Check if there are changes to commit
+          if git diff --quiet publish/; then
+            echo "No changes to commit in publish/"
+            exit 0
+          fi
+
+          # Add and commit PDF artifacts
+          git add publish/*.pdf publish/*.md publish/CITATION.cff publish/ATTRIBUTION.md 2>/dev/null || true
+
+          # Create commit with details
+          COMMIT_MSG="chore: Update published artifacts [skip ci]
+
+          Generated by orchestrator workflow
+          Profile: ${PROFILE}
+          Commit: ${GITHUB_SHA}
+          Repository: ${GITHUB_REPOSITORY}
+
+          Signed-off-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git commit -m "$COMMIT_MSG" || {
+            echo "Nothing to commit"
+            exit 0
+          }
+
+          # Push to current branch
+          git push origin "HEAD:${GITHUB_REF#refs/heads/}"

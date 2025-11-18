@@ -1,0 +1,20 @@
+# Default smart manifest resolution rules
+#
+# version: Schema version for future extensions.
+# filenames: Candidate manifest file names that will be considered when
+#            scanning directories.
+# search: Ordered list describing where to look for a manifest when the
+#         user does not provide an explicit --manifest argument.
+#
+# Supported search entry types:
+#   - cli:       Honour the explicit CLI argument (highest priority).
+#   - cwd:       Look for the manifest in the current working directory.
+#   - repo_root: Look for the manifest in the detected repository root.
+version: 1.0.0
+filenames:
+  - publish.yml
+  - publish.yaml
+search:
+  - type: cli
+  - type: cwd
+  - type: repo_root

@@ -1,0 +1,11 @@
+{
+    "title": "Test GitBook Project",
+    "description": "Anonymized test data for GitBook Worker orchestrator testing",
+    "author": "Test Author",
+    "language": "en",
+    "root": "content/",
+    "structure": {
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
+    }
+}

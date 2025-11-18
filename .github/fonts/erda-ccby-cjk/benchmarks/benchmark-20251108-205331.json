@@ -1,0 +1,22 @@
+{
+  "success": true,
+  "runs": 3,
+  "timestamp": "2025-11-08T20:53:31.596597",
+  "system": {
+    "platform": "Windows",
+    "python_version": "3.11.3",
+    "processor": "Intel64 Family 6 Model 165 Stepping 5, GenuineIntel"
+  },
+  "git": {
+    "commit": "8437e82 (dirty)",
+    "branch": "release_candidate",
+    "dirty": true
+  },
+  "metrics": {
+    "build_time_seconds": 0.29,
+    "build_time_std_dev": 0.0,
+    "file_size_kb": 132.04,
+    "character_count": 505,
+    "chars_per_second": 1744.0
+  }
+}

@@ -1,0 +1,11 @@
+{
+    "title": "Test Project B",
+    "description": "Zweites GitBook-Projekt für Multi-GitBook-Test",
+    "author": "Test Author B",
+    "language": "de",
+    "root": "content/",
+    "structure": {
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
+    }
+}

@@ -1,0 +1,44 @@
+version: 1.0.0
+fonts:
+  CJK:
+    name: "ERDA CC-BY CJK"
+    paths:
+      - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    source_url: null
+
+  EMOJI:
+    name: "Twemoji Mozilla"
+    paths: []
+    download_url: "https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/Twemoji.Mozilla.ttf"
+    license: "CC BY 4.0"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    source_url: "https://github.com/mozilla/twemoji-colr"
+
+  MONO:
+    name: "DejaVu Sans Mono"
+    paths: [] # System font
+    license: "Bitstream Vera License + Public Domain"
+    license_url: "https://dejavu-fonts.github.io/License.html"
+    source_url: "https://dejavu-fonts.github.io/"
+    copyright: "© 2003 Bitstream, Inc.; DejaVu changes are in public domain"
+    usage_note: "Font files may not be sold separately. Embedding in documents (PDF) is unrestricted."
+
+  SANS:
+    name: "DejaVu Sans"
+    paths: [] # System font
+    license: "Bitstream Vera License + Public Domain"
+    license_url: "https://dejavu-fonts.github.io/License.html"
+    source_url: "https://dejavu-fonts.github.io/"
+    copyright: "© 2003 Bitstream, Inc.; DejaVu changes are in public domain"
+    usage_note: "Font files may not be sold separately. Embedding in documents (PDF) is unrestricted."
+
+  SERIF:
+    name: "DejaVu Serif"
+    paths: [] # System font
+    license: "Bitstream Vera License + Public Domain"
+    license_url: "https://dejavu-fonts.github.io/License.html"
+    source_url: "https://dejavu-fonts.github.io/"
+    copyright: "© 2003 Bitstream, Inc.; DejaVu changes are in public domain"
+    usage_note: "Font files may not be sold separately. Embedding in documents (PDF) is unrestricted."

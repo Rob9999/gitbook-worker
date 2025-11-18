@@ -1,9 +1,0 @@
-__pycache__
-.git
-*.pyc
-*.pyo
-*.pyd
-.gitbook_worker
-.gitignore
-.DS_Store
-*.log

@@ -1,0 +1,5 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}\\repo\\gitbook_repo\\.venv\\Scripts\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "git.ignoreLimitWarning": true
+}

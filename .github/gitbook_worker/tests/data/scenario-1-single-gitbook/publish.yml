@@ -1,0 +1,25 @@
+version: 0.1.0
+fonts:
+  - name: ERDA CC-BY CJK
+    path: ../../../../../../.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf
+publish:
+  - path: ./
+    out_format: pdf
+    out_dir: ./output
+    out: test-gitbook.pdf
+    source_type: folder
+    source_format: markdown
+    use_summary: true
+    use_book_json: true
+    summary_mode: gitbook
+    keep_combined: true
+    build: true
+    reset_build_flag: false
+    pdf_options:
+      emoji_color: true
+      main_font: DejaVu Serif
+      sans_font: DejaVu Sans
+      mono_font: DejaVu Sans Mono
+    assets:
+      - path: ./content
+        type: markdown

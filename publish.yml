@@ -1,0 +1,63 @@
+version: 0.1.0
+profiles:
+  default:
+    description: Standardprofil für die komplette Orchestrator-Pipeline.
+    steps:
+    - check_if_to_publish
+    - ensure_readme
+    - update_citation
+    - converter
+    - engineering-document-formatter
+    - publisher
+    docker:
+      use_registry: true
+      image: ghcr.io/${repo}/publisher
+      cache: true
+  local:
+    description: Lokale Ausführung ohne Registry-Zugriff.
+    steps:
+    - converter
+    - publisher
+    docker:
+      use_registry: false
+  publisher:
+    description: Führt nur den Publisher aus (z. B. für workflow_call).
+    steps:
+    - publisher
+    docker:
+      use_registry: true
+      image: ghcr.io/${repo}/publisher
+      cache: true
+meta:
+  publish_on:
+  - push
+  - workflow_dispatch
+  artifacts:
+    keep_days: 7
+fonts:
+- name: ERDA CC-BY CJK
+  path: .github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf
+publish:
+- path: ./
+  out_format: pdf
+  out_dir: ./publish
+  out: das-erda-buch.pdf
+  source_type: folder
+  source_format: markdown
+  use_summary: true
+  use_book_json: true
+  summary_mode: gitbook
+  summary_appendices_last: true
+  keep_combined: true
+  build: true
+  reset_build_flag: false
+  pdf_options:
+    emoji_color: true
+    main_font: DejaVu Serif
+    sans_font: DejaVu Sans
+    mono_font: DejaVu Sans Mono
+    mainfont_fallback: Twemoji Mozilla:mode=harf; ERDA CC-BY CJK:mode=harf
+  assets:
+  - path: ./.gitbook/assets
+    type: images
+    copy_to_output: true

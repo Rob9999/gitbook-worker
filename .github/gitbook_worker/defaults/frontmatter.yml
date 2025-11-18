@@ -1,0 +1,62 @@
+# Default front matter configuration
+#
+# This file controls whether YAML front matter is automatically injected into
+# markdown files during the workflow orchestration.
+#
+# version: Schema version for future extensions.
+# enabled: Global switch to enable/disable front matter injection (default: false).
+# patterns: Smart pattern matching to control which files get front matter.
+#   - include: List of glob patterns for files to include (relative to repo root).
+#   - exclude: List of glob patterns for files to exclude (takes precedence over include).
+# template: The YAML front matter template to inject into matching files.
+#   - Fields are key-value pairs where values can be strings, lists, booleans, or null.
+#   - Special placeholders:
+#     * {{date}}: Replaced with git last commit date of the file (YYYY-MM-DD format).
+#
+# Usage:
+#   - By default (enabled: false), no front matter is injected.
+#   - When enabled: true, files matching include patterns (and not matching exclude)
+#     will receive the template front matter if not already present.
+#   - Missing fields in existing front matter are added; existing fields remain untouched.
+#   - This configuration can be overridden per-publication in publish.yml.
+
+version: 1.0.0
+
+# Global enable/disable switch (default: false means no injection)
+enabled: false
+
+# Smart pattern matching for which files should receive front matter
+patterns:
+  # Include patterns (glob syntax, relative to repository root)
+  # Example: ["content/**/*.md", "docs/**/*.md"]
+  include:
+    - "content/**/*.md"
+
+  # Exclude patterns (take precedence over include)
+  # Example: ["**/readme.md", "**/README.md", "content/drafts/**"]
+  exclude:
+    - "**/readme.md"
+    - "**/README.md"
+
+# Front matter template (for book chapters and engineering documents)
+# This template contains 17 fields commonly used in technical documentation:
+template:
+  id: "" # Unique document identifier
+  title: "" # Document title
+  version: "v0.0.0" # Semantic version
+  state: "DRAFT" # Document state (DRAFT, REVIEW, APPROVED, etc.)
+  evolution: "" # Evolution stage or phase
+  discipline: "" # Engineering discipline or domain
+  system: [] # Related systems (list)
+  system_id: [] # System identifiers (list)
+  seq: [] # Sequence numbers or ordering (list)
+  owner: "" # Document owner or author
+  reviewers: [] # List of reviewers
+  source_of_truth: false # Whether this is the authoritative version
+  supersedes: null # Previous version this supersedes
+  superseded_by: null # Newer version that supersedes this
+  rfc_links: [] # Links to related RFCs (list)
+  adr_links: [] # Links to related ADRs (list)
+  cr_links: [] # Links to related change requests (list)
+  date: "{{date}}" # Last commit date (auto-populated from git)
+  lang: "EN" # Document language code

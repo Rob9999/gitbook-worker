@@ -1,0 +1,44 @@
+# Default Docker Configuration
+#
+# This file provides default Docker image and container naming templates
+# for the ERDA GitBook Worker toolchain.
+#
+# These defaults can be overridden by:
+# 1. docker_config.yml in repository root
+# 2. publish.yml general docker_config section
+# 3. publish.yml specific publish entry docker_config section
+#
+# Template Variables:
+# - {context}: Execution context (github-action, prod, test, docker-test)
+# - {repo_name}: Repository name (e.g., "Rob9999/erda-book")
+# - {branch}: Git branch name
+# - {publish_name}: Publish entry name from publish.yml
+# - {version}: Version tag (if provided)
+#
+# License: MIT
+
+docker_names:
+  # Default naming (fallback for all contexts)
+  default:
+    image: "erda-gitbook-{context}:{branch}"
+    container: "erda-{context}-{publish_name}"
+
+  # GitHub Actions CI/CD
+  github-action:
+    image: "ghcr.io/{repo_name}/gitbook:{branch}"
+    container: "gitbook-ci-{publish_name}-{branch}"
+
+  # Production deployment
+  prod:
+    image: "erda-gitbook:latest"
+    container: "erda-gitbook-prod"
+
+  # Local testing (pytest, unit tests)
+  test:
+    image: "erda-gitbook-test:local"
+    container: "erda-test-{publish_name}"
+
+  # Docker-based integration tests
+  docker-test:
+    image: "erda-gitbook-dockertest:latest"
+    container: "erda-dockertest-{publish_name}"

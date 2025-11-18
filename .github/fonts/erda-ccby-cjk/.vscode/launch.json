@@ -1,0 +1,60 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Build Font",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
+            "args": []
+        },
+        {
+            "name": "Build Font (with cache refresh)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
+            "args": [
+                "--refresh-cache"
+            ]
+        },
+        {
+            "name": "Build Font (verbose)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
+            "args": [
+                "--verbose"
+            ]
+        },
+        {
+            "name": "Check Coverage",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests/check_coverage.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests"
+        },
+        {
+            "name": "Check Hanzi Duplicates",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests/check_hanzi_dups.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/tests"
+        },
+        {
+            "name": "Debug Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${fileDirname}"
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+version: 0.1.0
+
+publish:
+  - path: ./
+    out: test-book.pdf
+    out_dir: ./output
+    out_format: pdf
+    build: true
+    source_type: folder
+    source_format: markdown
+    use_book_json: true
+    use_summary: true
+    keep_combined: true
+    summary_mode: gitbook
+    pdf_options:
+      emoji_color: false
+      main_font: DejaVu Serif
+      sans_font: DejaVu Sans
+      mono_font: DejaVu Sans Mono
+    assets:
+      - path: ./content
+        type: markdown
+        copy_to_output: false

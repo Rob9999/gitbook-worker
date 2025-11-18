@@ -1,0 +1,228 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Orchestrator (local)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tools.workflow_orchestrator",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                "--root",
+                "${workspaceFolder}",
+                "--manifest",
+                "publish.yml",
+                "--profile",
+                "local"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Orchestrator (ERDA Smart Worker)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.docker.run_docker",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "orchestrator",
+                "--profile",
+                "default",
+                "--use-dynamic"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Orchestrator (ERDA Smart Worker - fresh rebuild)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.docker.run_docker",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "orchestrator",
+                "--profile",
+                "default",
+                "--use-dynamic",
+                "--rebuild",
+                "--no-cache"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Orchestrator (Docker Legacy)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.docker.run_docker",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "orchestrator",
+                "--profile",
+                "default"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Emoji and Font Couverage",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "tools.emoji.scan_emojis",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Python: Update Local Environment",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pip",
+            "cwd": "${workspaceFolder}",
+            "args": [
+                "install",
+                "-r",
+                "requirements.txt"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Python: Debug gitbook_worker.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker",
+            "cwd": "${workspaceFolder}/tools/gitbook_worker/src",
+            "args": [
+                "-v", // Verbose output
+                "--clone-dir",
+                "${workspaceFolder}",
+                "--temp-dir",
+                "${workspaceFolder}/temp",
+                "--out-dir",
+                "${workspaceFolder}",
+                //"--fix-internal-links",
+                //"-s",
+                //"--check-links",
+                //"--fix-external-references",
+                //"--ai-prompt-reference",
+                //"\"Bitte überprüfe die folgende Quellenangabe auf wissenschaftliche Korrektheit und Zitierfähigkeit. Recherchiere ggf. fehlende Daten und ggf. den inhaltlich korrekten Link.\nZiel ist eine vollständige, korrekte Zitation im folgenden Format:\n\nFußnotennummer. Autor:in (Jahr): Titel. Untertitel. Verlagsort: Verlag.\nOnline verfügbar unter: [URL] (Zugriff am {today in YYYY-MM-DD}).\n\n**Notwendige Bestandteile für Zitierfähigkeit:**\n- Autor:in oder Organisation (Corporate Author)\n- Erscheinungsjahr\n- Vollständiger Titel (ggf. mit Untertitel)\n- Verlagsort\n- Verlag oder herausgebende Institution\n- Vollständige URL (bei Onlinequelle)\n- Zugriffdatum\n\nWenn Bestandteile fehlen oder unklar sind, gib eine präzise Begründung und einen konkreten Verbesserungshinweis.\n\"",
+                //"--ai-url",
+                //"${env:AI_URL}",
+                //"--ai-api-key",
+                //"${env:AI_API_KEY}",
+                //"--ai-provider",
+                //"${env:AI_PROVIDER}",
+                "https://github.com/Rob9999/erda-book.git",
+                "--branch",
+                "release_candidate",
+                "--wrap-wide-tables",
+                "--disable-longtable",
+                //"--use-docker",
+                //"--main-font",
+                //"OpenMoji Black",
+                //"Segoe UI Emoji",
+                //"--emoji-color",
+                "--pdf",
+                "${workspaceFolder}/Erda Buch",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Test: Unit Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                ".github/gitbook_worker/tests",
+                "-v",
+                "-m",
+                "not slow",
+                "--tb=short",
+                "--no-cov"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Test: Integration Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                ".github/gitbook_worker/tests",
+                "-v",
+                "-m",
+                "slow",
+                "--tb=long",
+                "--showlocals",
+                "--no-cov"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Build Font (with cache refresh)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
+            "args": [
+                "--refresh-cache"
+            ]
+        },
+        {
+            "name": "Build Font (no cache refresh)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
+            "args": []
+        },
+    ]
+}

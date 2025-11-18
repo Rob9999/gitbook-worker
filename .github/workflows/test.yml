@@ -1,0 +1,214 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: "Test-Suite auswählen"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - emoji-harness
+          - qa
+
+permissions:
+  contents: read
+
+jobs:
+  # ============================================================================
+  # Unit & Integration Tests (immer)
+  # ============================================================================
+  unit-tests:
+    if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'unit' || github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .github/gitbook_worker/tools/docker/Dockerfile.dynamic
+          push: false
+          load: true
+          tags: gitbook-worker:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run unit tests
+        run: |
+          docker run --rm -v ${PWD}:/workspace gitbook-worker:test \
+            bash -c "cd /workspace && pytest .github/gitbook_worker/tests -q -m 'not slow' --tb=short"
+
+  integration-tests:
+    if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'integration' || github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build integration test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: .github/gitbook_worker/tools/docker/Dockerfile.dynamic
+          push: false
+          load: true
+          tags: gitbook-worker:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify container font installation
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace \
+            gitbook-worker:test \
+            bash -c "fc-list | grep -i twemoji > /dev/null && echo '✓ Twemoji found' || echo '✗ Twemoji NOT found'; fc-list | grep -i erda-ccby-cjk > /dev/null && echo '✓ ERDA CC-BY CJK found' || echo '✗ ERDA CC-BY CJK NOT found'"
+
+      - name: Run PDF integration tests in container
+        run: |
+          docker run --rm \
+            -v "${PWD}:/workspace" \
+            -w /workspace \
+            gitbook-worker:test \
+            bash -c "set -euo pipefail; mkdir -p .github/gitbook_worker/tests/tmp/logs .github/gitbook_worker/tests/tmp/output .github/gitbook_worker/tests/tmp/artifacts artifacts; pytest .github/gitbook_worker/tests -q -m 'slow' --cache-clear"
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-artifacts
+          path: artifacts
+          if-no-files-found: warn
+
+  # ============================================================================
+  # Emoji & Font Compliance Tests (optional)
+  # ============================================================================
+  emoji-harness:
+    if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'emoji-harness' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install system dependencies for PDF
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-luatex texlive-fonts-recommended texlive-latex-extra texlive-lang-cjk poppler-utils wget
+
+      - name: Install Playwright
+        run: |
+          npm install playwright@1.41.2
+          npx playwright install chromium
+
+      - name: Remove unerwünschte Emoji-Fonts vom Runner
+        run: |
+          sudo rm -rf /usr/share/fonts/truetype/noto || true
+          sudo rm -rf /usr/share/fonts/opentype/noto || true
+
+      - name: Install Twemoji Mozilla font (CC BY 4.0)
+        run: |
+          sudo mkdir -p /usr/share/fonts/truetype/twemoji
+          wget -O /tmp/twemoji-mozilla.tar.gz https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/Twemoji.Mozilla.ttf
+          sudo cp /tmp/Twemoji.Mozilla.ttf /usr/share/fonts/truetype/twemoji/
+          rm -f /tmp/twemoji-mozilla.tar.gz
+
+      - name: Install ERDA CC-BY CJK font
+        run: |
+          sudo mkdir -p /usr/share/fonts/truetype/erda-ccby-cjk
+          sudo cp .github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf /usr/share/fonts/truetype/erda-ccby-cjk/
+
+      - name: Update font cache and verify
+        run: |
+          sudo fc-cache -f -v
+          echo "Installed fonts:"
+          fc-list | grep -E "Twemoji Mozilla|erda-ccby-cjk" || echo "Warning: Required fonts not found"
+
+      - name: Run emoji harness
+        run: bash .github/gitbook_worker/tools/run-emoji-harness.sh
+
+      - name: Upload harness artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: emoji-harness-artifacts
+          path: |
+            build/emoji-harness.pdf
+            build/emoji-inline-coverage.json
+            build/emoji-inline-coverage-harness.json
+            build/emoji-report.json
+            build/font-report.json
+            build/license-asset-report.json
+            build/emoji-tools-coverage.json
+
+  # ============================================================================
+  # Dokumentations-QA (optional)
+  # ============================================================================
+  qa:
+    if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'qa' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run QA checks
+        run: |
+          # Link-Audit
+          python -m tools.quality.link_audit --root . --format log
+
+          # Sources-Report
+          python -m tools.quality.sources --root . --output build/sources-report.csv
+
+      - name: Upload QA reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-reports
+          path: build/*.csv
+          if-no-files-found: warn
+
+  # ============================================================================
+  # Test Summary
+  # ============================================================================
+  test-summary:
+    needs: [unit-tests, integration-tests]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Results Summary
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> $GITHUB_STEP_SUMMARY

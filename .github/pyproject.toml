@@ -1,0 +1,28 @@
+[project]
+name = "publisher-workflow-tools"
+version = "0.1.0"
+description = "Workflow & tools for PDF Publishing"
+dependencies = [
+  "pyyaml>=6.0",
+  "pandas",
+  "matplotlib",
+  "numpy",
+  "pillow",
+  "emoji",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tools"]
+package-dir = {"" = "gitbook_worker"}
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as unit tests (no external dependencies)",
+    "integration: marks tests as integration tests (use production toolchain)",
+]
+testpaths = ["gitbook_worker/tests"]

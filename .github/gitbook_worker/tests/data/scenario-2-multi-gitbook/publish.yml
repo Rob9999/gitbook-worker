@@ -1,0 +1,26 @@
+version: 0.1.0
+
+publish:
+  - path: ./project-a
+    out: test-project-a.pdf
+    build: true
+    source_type: folder
+    use_book_json: true
+    use_summary: true
+    keep_combined: true
+    assets:
+      - path: ./project-a/content
+        type: markdown
+        copy_to_output: false
+
+  - path: ./project-b
+    out: test-project-b.pdf
+    build: true
+    source_type: folder
+    use_book_json: true
+    use_summary: true
+    keep_combined: true
+    assets:
+      - path: ./project-b/content
+        type: markdown
+        copy_to_output: false
