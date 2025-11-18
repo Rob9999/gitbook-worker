@@ -1,17 +1,21 @@
 <!-- License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/) -->
 # Emoji Rendering Harness
 
-Dieses Harnisch-Dokument bündelt alle Prüfungen rund um das farbige Emoji-Rendering im ERDA-Buch. Es wird automatisiert aus den Markdowndateien erzeugt und dient als visuelle wie auch automatisierbare Referenz.
+Dieses Dokument bündelt alle Prüfungen rund um das farbige Emoji-Rendering im
+ERDA-Buch. Es wird automatisiert aus Markdowndateien erzeugt und dient als
+visuelle wie auch automatisierbare Referenz.
 
 ## Abschnitt A – Emoji-Inventar
 
-Die folgende Tabelle listet sämtliche im Buch gefundenen Emojis, inklusive Codepoints, CLDR-Namen und Häufigkeiten.
+Die folgende Tabelle listet sämtliche im Buch gefundenen Emojis, inklusive
+Codepoints, CLDR-Namen und Häufigkeiten.
 
 {{EMOJI_INVENTORY_TABLE}}
 
 ## Abschnitt B – Satzmuster
 
-Unterschiedliche Textkontexte zeigen, ob die Inline-Darstellung konsistent bleibt.
+Unterschiedliche Textkontexte zeigen, ob die Inline-Darstellung konsistent
+bleibt.
 
 ### Inline-Fließtext
 
@@ -42,4 +46,5 @@ Vergleich der Emoji-Einbettung bei den im Buch verwendeten Schriften.
 
 ---
 
-Die Ausgabe dient als Referenz für die PDF-Konvertierung und wird im CI als Artefakt abgelegt.
+Die Ausgabe dient als Referenz für die PDF-Konvertierung und wird im CI als
+Artefakt abgelegt.

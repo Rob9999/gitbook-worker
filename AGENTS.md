@@ -1,28 +1,22 @@
-# Agent Directives for GitBook Worker (v1.0.2)
+# Agent Directives for GitBook Worker (v1.1.0)
 
-1. **Package-first layout**: The Python package now lives at repository root
-   (`gitbook_worker/`). Prefer imports via `gitbook_worker.*`; the `tools/`
-   shim is for backwards compatibility only.
-2. **Documentation location**: New development docs belong next to the package
-   (e.g. `README.md`, `SPRINT_PLAN.md`). Keep the historical archive under
-   `.github/gitbook_worker/docs/` intact for past references.
-3. **Front matter & versioning**: Planning or engineering documents must carry
-   YAML front matter with at least `version`, `date`, and a short `history` note.
-4. **Testing**: Run `pytest` from repository root for new features or fixes.
-5. **Logging**: Retain informative logging (info/warn/error) in new automation
-   code to aid traceability.
+## Scope & How to Use This File
+- Diese Anweisungen gelten für das gesamte Repository; es gibt aktuell keine verschachtelten Abweichungen.
+- Neue Regeln sollten hier ergänzt werden, damit Beitragende eine einzige, verlässliche Quelle haben.
 
-Agent Instructions
-Diese Anweisungen gelten für das gesamte Repository.
+## Projekt- und Layout-Hinweise
+1. **Package-first Layout**: Der Python-Code lebt im Wurzelverzeichnis unter `gitbook_worker/`. Nutze Importe über `gitbook_worker.*`; der Fallback unter `tools/` dient nur der Abwärtskompatibilität.
+2. **Dokumentationsort**: Neue Entwicklungsdokumente gehören an die Repo-Wurzel (z. B. `README.md`, `SPRINT_PLAN.md`). Der Archivbereich unter `.github/gitbook_worker/docs/` bleibt unverändert für historische Referenzen.
+3. **Front matter & Versionierung**: Planungs- oder Engineering-Dokumente benötigen YAML-Frontmatter mit mindestens `version`, `date` und einem kurzen `history`-Eintrag.
 
-Erwartete Aufgaben
-Lege neue Dokumentation dort an, wo Lücken erkennbar sind.
-Führe bei Änderungen immer einen kurzen Code-Review-Kommentar (schriftlich) mit den wichtigsten Beobachtungen.
-Plane nächste Schritte in einem Sprint-Planungsdokument.
-Refaktorisiere Code schrittweise und halte die Änderungen klein und nachvollziehbar.
-Best Practices
-Bevorzugt klar benannte Methoden und Variablen; vermeide Magic Numbers durch Konstanten oder Konfigurationsobjekte.
-Halte CLI-Interfaces benutzerfreundlich: valide Eingaben früh und liefere hilfreiche Fehlermeldungen.
-Ergänze neue Funktionen mit kurzen, prägnanten Markdown-Dokumenten in docs/.
-Führe vorhandene Tests aus oder ergänze neue, wenn das Verhalten geändert wird.
-Dokumentiere im Commit, was und warum angepasst wurde; vermeide große, gemischte Commits.
+## Arbeitsweise & Qualitätssicherung
+4. **Testing**: Führe `pytest` aus dem Repo-Root für neue Features oder Fixes aus. Falls Tests nicht laufen, begründe es in Commit- oder PR-Texten.
+5. **Logging**: Behalte aussagekräftige `info`/`warn`/`error`-Logs in neuer Automatisierung bei, damit Abläufe nachvollziehbar bleiben.
+6. **Code-Review-Kommentar**: Notiere zu jedem Change eine kurze schriftliche Review-Zusammenfassung mit den wichtigsten Beobachtungen.
+7. **Refactoring-Etikette**: Refaktorisiere schrittweise; halte Commits klein, thematisch fokussiert und nachvollziehbar dokumentiert.
+
+## Schreib- und Schnittstellen-Standards
+8. **Benennung & Konfiguration**: Bevorzugt klar benannte Methoden/Variablen; vermeide Magic Numbers durch Konstanten oder Konfigurationsobjekte.
+9. **CLI-Ergonomie**: Validere Eingaben früh, liefere hilfreiche Fehlermeldungen und halte Interfaces konsistent.
+10. **Dokumentationspflicht**: Ergänze neue Funktionen mit kurzen, prägnanten Markdown-Notizen in `docs/` oder passenden Unterordnern; lege bei erkannten Lücken neue Seiten an.
+11. **Release- und PR-Hinweise**: Beschreibe im Commit/PR klar, was und warum geändert wurde. Vermeide Sammel-Commits; dokumentiere Tests und bekannte Einschränkungen transparent.

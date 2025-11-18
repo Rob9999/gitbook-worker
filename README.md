@@ -1,8 +1,8 @@
 # GitBook Worker (v1.0.2)
 
-Automation toolkit for GitBook-based projects. The Python package now lives at
-repository root, can be installed via `pip install -e .`, and ships a CLI for
-running the publishing pipeline locally or inside CI.
+GitBook Worker is a streamlined automation toolkit for GitBook-based projects. The
+package lives at the repository root, installs with `pip install -e .`, and ships a
+CLI for running the publishing pipeline locally or in CI.
 
 ## Quick start
 
@@ -16,22 +16,24 @@ python -m gitbook_worker.tools.workflow_orchestrator --profile default --manifes
 
 ## Repository layout
 
-- `gitbook_worker/` – Python package with publishing, conversion, QA and Docker helpers.
-- `tests/` – pytest suites covering publishing, orchestration and emoji QA.
+- `gitbook_worker/` – Python package with publishing, conversion, QA, and Docker helpers.
+- `tests/` – pytest suites covering publishing, orchestration, and emoji QA.
 - `.github/workflows/` – CI entrypoints using the packaged CLI.
 - `tools/` – deprecated import shim for legacy `tools.*` paths.
-- `.github/gitbook_worker/docs/` – legacy documentation archive (kept for history).
+- `.github/gitbook_worker/docs/` – legacy documentation archive retained for reference.
 
 ## GitHub Actions templates
 
-The workflows under `.github/workflows/` build the Docker image from
-`gitbook_worker/tools/docker/Dockerfile.dynamic` and run the same orchestrator
-entrypoint used locally. Copy or extend these workflows to integrate the
-package into other repositories.
+Workflows under `.github/workflows/` build the Docker image from
+`gitbook_worker/tools/docker/Dockerfile.dynamic` and call the same orchestrator
+entrypoint used locally. Copy or extend these workflows to integrate the package
+into other repositories.
 
 ## Development
 
 - Add dependencies to `setup.cfg` and keep `__version__` in `gitbook_worker/__init__.py` in sync.
 - Run tests locally with `pytest -q` from the repository root.
-- CLI entrypoint: `python -m gitbook_worker.tools.workflow_orchestrator ...` or the
-  installed console script `gitbook-worker`.
+- Preferred entrypoints: `python -m gitbook_worker.tools.workflow_orchestrator ...` or the
+  console script `gitbook-worker`.
+- Repository-wide conventions live in the root `AGENTS.md`; there are no nested overrides,
+  so the file is the single source of truth for automation and documentation expectations.

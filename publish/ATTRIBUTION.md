@@ -1,7 +1,7 @@
 <!-- License: CC BY-SA 4.0 (Text); MIT (Code); CC BY 4.0/MIT (Fonts) -->
 # Medien- & Lizenz-Attribution
 
-**Lizenzmatrix (Kurz):** Texte = **CC BY-SA 4.0** · Code = **MIT** · Fonts (eigene) = **CC BY 4.0 / MIT** · Emojis = **Twemoji (CC BY 4.0)**.  
+**Lizenzmatrix (Kurz):** Texte = **CC BY-SA 4.0** · Code = **MIT** · Fonts (eigene) = **CC BY 4.0 / MIT** · Emojis = **Twemoji (CC BY 4.0)**.
 Details: siehe **Anhang J: Lizenz & Offenheit** sowie die LICENSE-Dateien.
 
 ## Überblick
