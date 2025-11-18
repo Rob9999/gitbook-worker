@@ -5,10 +5,10 @@
             "name": "Orchestrator (local)",
             "type": "debugpy",
             "request": "launch",
-            "module": "tools.workflow_orchestrator",
+            "module": "gitbook_worker.tools.workflow_orchestrator",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
@@ -36,7 +36,7 @@
                 "--use-dynamic"
             ],
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
@@ -58,7 +58,7 @@
                 "--no-cache"
             ],
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
@@ -77,7 +77,7 @@
                 "default"
             ],
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
@@ -91,7 +91,7 @@
             "module": "tools.emoji.scan_emojis",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
@@ -164,12 +164,12 @@
             "module": "pytest",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
             "args": [
-                ".github/gitbook_worker/tests",
+                "gitbook_worker/tests",
                 "-v",
                 "-m",
                 "not slow",
@@ -187,12 +187,12 @@
             "module": "pytest",
             "cwd": "${workspaceFolder}",
             "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/.github;${workspaceFolder}/.github/gitbook_worker",
+                "PYTHONPATH": "${workspaceFolder}",
                 "PYTHONIOENCODING": "utf-8",
                 "PYTHONUTF8": "1"
             },
             "args": [
-                ".github/gitbook_worker/tests",
+                "gitbook_worker/tests",
                 "-v",
                 "-m",
                 "slow",

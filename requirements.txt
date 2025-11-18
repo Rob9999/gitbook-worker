@@ -2,10 +2,10 @@
 #
 # The QA workflow expects this file to exist and installs it via
 # ``pip install -r requirements.txt`` before running tests that rely on the
-# tooling package under ``.github/gitbook_worker/tools`` as well as the
+# tooling package under ``gitbook_worker/tools`` as well as the
 # ``gitbook-worker``
 # utilities bundled with this repository.
--r .github/gitbook_worker/tools/requirements.txt
+-r gitbook_worker/tools/requirements.txt
 textstat
 # The QA test suite dynamically falls back to installing ``tabulate`` at
 # runtime when it is missing. Listing it here avoids the extra network call

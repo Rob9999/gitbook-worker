@@ -3,6 +3,7 @@
 
 # temps
 tmp/
+node_modules/
 
 # Python caches
 __pycache__/
