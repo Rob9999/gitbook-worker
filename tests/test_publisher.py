@@ -39,6 +39,33 @@ def test_font_available_uses_repo_fonts(monkeypatch, tmp_path):
     assert publisher._font_available("ERDA CC-BY CJK")
 
 
+def test_resource_paths_prioritise_source_dir(tmp_path):
+    md_file = tmp_path / "docs" / "chapter" / "test.md"
+    md_file.parent.mkdir(parents=True)
+    md_file.write_text("demo", encoding="utf-8")
+
+    paths = publisher._resource_paths_for_source(str(md_file), ["assets", "./"])
+
+    assert paths[0] == md_file.parent.as_posix()
+    # deduped entries keep stable defaults
+    assert paths[1:4] == [".", "assets", ".gitbook/assets"]
+
+
+def test_font_header_includes_manual_fallback_block():
+    header = publisher._build_font_header(
+        main_font="Main",
+        sans_font="Sans",
+        mono_font="Mono",
+        emoji_font="Emoji",
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec="Fallback:mode=harf",
+    )
+
+    assert "luaotfload.add_fallback" in header
+    assert "Fallback:mode=harf" in header
+
+
 def test_select_emoji_font_raises_when_twemoji_missing(monkeypatch, caplog):
     caplog.set_level("ERROR")
     monkeypatch.setattr(publisher, "_font_available", lambda name: False)

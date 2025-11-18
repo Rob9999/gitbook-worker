@@ -1053,6 +1053,25 @@ def _build_resource_paths(additional: Optional[Iterable[str]] = None) -> List[st
     return _dedupe_preserve_order(defaults)
 
 
+def _resource_paths_for_source(
+    md_path: str, resource_paths: Optional[Iterable[str]] = None
+) -> List[str]:
+    """Resolve stable Pandoc resource paths for images and assets.
+
+    ``pandoc`` resolves images relative to its working directory. When the
+    orchestrator runs from the repository root but the Markdown lives in a
+    subdirectory, images could be missed unless the source directory is part of
+    ``--resource-path``. This helper ensures that the Markdown parent directory
+    is always prioritised while keeping the existing defaults and any user
+    supplied additions.
+    """
+
+    parent_dir = Path(md_path).resolve().parent
+    merged = [parent_dir.as_posix()]
+    merged.extend(_build_resource_paths(resource_paths))
+    return _dedupe_preserve_order(merged)
+
+
 def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     if not isinstance(raw, Mapping):
         return {}
@@ -1898,7 +1917,7 @@ def convert_a_file(
             pdf_out,
             add_toc=False,  # Single files typically don't need TOC
             title=title,
-            resource_paths=resource_paths,
+            resource_paths=_resource_paths_for_source(md_file, resource_paths),
             emoji_options=options,
             variables=variables,
         )
@@ -2001,7 +2020,7 @@ def convert_a_folder(
             pdf_out,
             add_toc=True,
             title=title,
-            resource_paths=resource_paths,
+            resource_paths=_resource_paths_for_source(folder, resource_paths),
             emoji_options=options,
             variables=variables,
         )

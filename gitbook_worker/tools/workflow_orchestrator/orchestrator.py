@@ -10,11 +10,13 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import logging
 import json
 import os
 import shlex
 import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
@@ -458,6 +460,17 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     )
 
 
+def _log_analytics(ctx: RuntimeContext, entries: list[dict], level: int = logging.INFO) -> None:
+    payload = {
+        "profile": ctx.config.profile.name,
+        "manifest": str(ctx.config.manifest),
+        "repository": ctx.config.repository or "<local>",
+        "visibility": ctx.config.repo_visibility,
+        "steps": entries,
+    }
+    LOGGER.log(level, "Orchestrator analytics: %s", json.dumps(payload, ensure_ascii=False))
+
+
 def run(config: OrchestratorConfig) -> None:
     # Load manifest data for access to frontmatter and other settings
     manifest_data = _load_manifest(config.manifest)
@@ -468,13 +481,89 @@ def run(config: OrchestratorConfig) -> None:
         config.profile.name,
         ", ".join(steps) or "<none>",
     )
+    analytics: list[dict] = []
     for step in steps:
         handler = STEP_HANDLERS.get(step)
         if handler is None:
             raise KeyError(f"Unbekannter Schritt: {step}")
+        started = _dt.datetime.now(_dt.timezone.utc)
+        started_perf = time.perf_counter()
         LOGGER.info("Schritt '%s' starten", step)
-        handler(ctx)
+        entry: dict[str, object] = {
+            "step": step,
+            "started": started.isoformat(),
+        }
+        try:
+            handler(ctx)
+        except Exception as exc:
+            entry.update(
+                {
+                    "status": "failed",
+                    "duration_s": round(time.perf_counter() - started_perf, 3),
+                    "error": repr(exc),
+                }
+            )
+            analytics.append(entry)
+            _log_analytics(ctx, analytics, level=logging.ERROR)
+            raise
+        else:
+            entry.update(
+                {
+                    "status": "ok",
+                    "duration_s": round(time.perf_counter() - started_perf, 3),
+                }
+            )
+            analytics.append(entry)
     LOGGER.info("Orchestrator abgeschlossen")
+    _log_analytics(ctx, analytics)
+
+
+def validate_manifest(
+    *,
+    root: Path,
+    manifest: Path | None,
+    profile: str,
+    all_profiles: bool,
+    repo_visibility: str,
+    repository: str | None,
+) -> tuple[bool, list[str]]:
+    errors: list[str] = []
+
+    try:
+        _resolved_root, manifest_path = _resolve_paths(root, manifest)
+    except Exception as exc:  # pragma: no cover - defensive guard
+        return False, [str(exc)]
+
+    variables = {
+        "repo": (repository or "").lower(),
+        "profile": profile,
+        "visibility": repo_visibility,
+    }
+
+    data = _load_manifest(manifest_path)
+    profiles = data.get("profiles") or {}
+
+    target_profiles = [profile]
+    if all_profiles:
+        target_profiles = list(profiles.keys()) or [profile]
+
+    for name in target_profiles:
+        try:
+            resolved = _resolve_profile(data, name, variables)
+        except Exception as exc:  # pragma: no cover - exercised via tests
+            errors.append(f"Profil '{name}' ungültig: {exc}")
+            continue
+
+        unknown_steps = [
+            step for step in resolved.steps if step not in STEP_HANDLERS.keys()
+        ]
+        if unknown_steps:
+            errors.append(
+                f"Profil '{name}' enthält unbekannte Schritte: "
+                + ", ".join(sorted(set(unknown_steps)))
+            )
+
+    return (not errors), errors
 
 
 def _step_check_if_to_publish(ctx: RuntimeContext) -> None:
@@ -910,10 +999,7 @@ STEP_HANDLERS = {
 }
 
 
-def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Run the ERDA workflow orchestrator",
-    )
+def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
     parser.add_argument(
         "--manifest",
@@ -935,34 +1021,75 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--repository",
         help="Repository-Slug (owner/name) für Template-Substitution",
     )
-    parser.add_argument("--commit", help="Commit-SHA für Änderungsdetektion")
-    parser.add_argument("--base", help="Basis-SHA für Änderungsdetektion")
-    parser.add_argument(
+
+
+def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run the ERDA workflow orchestrator",
+    )
+    subparsers = parser.add_subparsers(dest="command")
+
+    run_parser = subparsers.add_parser("run", help="Orchestrator ausführen")
+    _add_common_args(run_parser)
+    run_parser.add_argument("--commit", help="Commit-SHA für Änderungsdetektion")
+    run_parser.add_argument("--base", help="Basis-SHA für Änderungsdetektion")
+    run_parser.add_argument(
         "--reset-others",
         action="store_true",
         help="Beim Setzen der Publish-Flags andere Einträge zurücksetzen",
     )
-    parser.add_argument(
+    run_parser.add_argument(
         "--publisher-arg",
         action="append",
         dest="publisher_arg",
         help="Zusätzliche Argumente für pipeline.py (mehrfach möglich)",
     )
-    parser.add_argument(
+    run_parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Nur anzeigen, welche Schritte ausgeführt würden",
     )
-    parser.add_argument(
+    run_parser.add_argument(
         "--step",
         action="append",
         help="Überschreibt die im Profil definierten Schritte",
     )
-    return parser.parse_args(list(argv) if argv is not None else None)
+
+    validate_parser = subparsers.add_parser(
+        "validate", help="Manifest-Validierung ohne Pipeline-Lauf"
+    )
+    _add_common_args(validate_parser)
+    validate_parser.add_argument(
+        "--all-profiles",
+        action="store_true",
+        help="Alle Profile im Manifest prüfen statt nur --profile",
+    )
+
+    args = parser.parse_args(list(argv) if argv is not None else None)
+    if args.command is None:
+        args.command = "run"
+    return args
 
 
 def main(argv: Iterable[str] | None = None) -> None:
     args = parse_args(argv)
+    if args.command == "validate":
+        ok, errors = validate_manifest(
+            root=args.root,
+            manifest=args.manifest,
+            profile=args.profile,
+            all_profiles=args.all_profiles,
+            repo_visibility=args.repo_visibility,
+            repository=args.repository,
+        )
+        for err in errors:
+            LOGGER.error(err)
+        if not ok:
+            LOGGER.error("Manifest-Validierung fehlgeschlagen")
+            sys.exit(1)
+        LOGGER.info("Manifest-Validierung erfolgreich")
+        return
+
     config = build_config(args)
     run(config)
 
@@ -972,6 +1099,7 @@ __all__ = [
     "OrchestratorProfile",
     "OrchestratorConfig",
     "build_config",
+    "validate_manifest",
     "parse_args",
     "run",
     "main",

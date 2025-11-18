@@ -12,6 +12,9 @@ pip install -e .
 
 # Run the orchestrator with the default profile
 python -m gitbook_worker.tools.workflow_orchestrator --profile default --manifest publish.yml
+
+# Validate a manifest without running the pipeline
+gitbook-worker validate --manifest publish.yml
 ```
 
 ## Repository layout
@@ -27,7 +30,9 @@ python -m gitbook_worker.tools.workflow_orchestrator --profile default --manifes
 Workflows under `.github/workflows/` build the Docker image from
 `gitbook_worker/tools/docker/Dockerfile.dynamic` and call the same orchestrator
 entrypoint used locally. Copy or extend these workflows to integrate the package
-into other repositories.
+into other repositories. The static image (`gitbook_worker/tools/docker/Dockerfile`)
+remains available for air-gapped runners; the helper scripts default to the
+dynamic variant so font and LaTeX dependencies stay in sync with CI.
 
 ## Development
 
