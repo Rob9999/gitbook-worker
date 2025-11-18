@@ -1,11 +1,13 @@
-# Agent Directives for GitBook Worker Engineers and Architects
+# Agent Directives for GitBook Worker (v1.0.2)
 
-1. **Semantic Versioning**: Add a semantic version to every development document, YAML file, etc.
-2. **Best Practices**: Follow established best practices for code quality and maintainability.
-3. **Sprint Documentation**: Create sprints and reports for work-in-progress commits in the corresponding sprint documentation folder.  
-   Example: `.github/gitbook_worker/docs/sprints/foo-sprint/bar-sprint-01.md` → `.github/gitbook_worker/docs/sprints/foo-sprint/bar-sprint-01-report-00.md`
-4. **Problem-Solving Strategy**: If you get stuck, take a break. Step back a few steps and shift your perspective to gain a smarter view, then fulfill your task.
-5. **Comprehensive Logging**: Write extensive logs (info, warning, error) to ensure traceability and debugging capability.
-6. **Documentation Location**: Place all development documents in the `.github/gitbook_worker/docs` folder for centralized documentation.
-7. **Change Tracking**: Include a change date, change history, and YAML front matter in every development document.
-8. **Version Control**: Track document evolution through semantic versioning in the front matter (e.g., `version: 1.0.0`). 
+1. **Package-first layout**: The Python package now lives at repository root
+   (`gitbook_worker/`). Prefer imports via `gitbook_worker.*`; the `tools/`
+   shim is for backwards compatibility only.
+2. **Documentation location**: New development docs belong next to the package
+   (e.g. `README.md`, `SPRINT_PLAN.md`). Keep the historical archive under
+   `.github/gitbook_worker/docs/` intact for past references.
+3. **Front matter & versioning**: Planning or engineering documents must carry
+   YAML front matter with at least `version`, `date`, and a short `history` note.
+4. **Testing**: Run `pytest` from repository root for new features or fixes.
+5. **Logging**: Retain informative logging (info/warn/error) in new automation
+   code to aid traceability.

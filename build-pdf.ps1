@@ -3,10 +3,10 @@
 .SYNOPSIS
     Wrapper for ERDA PDF build script
 .DESCRIPTION
-    This is a convenience wrapper that calls the actual build script in .github/gitbook_worker/scripts/
+    This is a convenience wrapper that calls the actual build script in gitbook_worker/scripts/
     Maintained for backward compatibility.
 .NOTES
-    The actual implementation is in: .github/gitbook_worker/scripts/build-pdf.ps1
+    The actual implementation is in: gitbook_worker/scripts/build-pdf.ps1
 #>
 
 [CmdletBinding()]

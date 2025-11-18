@@ -1,86 +1,34 @@
 # GitHub Actions Workflows
 
-Continuous integration, testing and publishing workflows for the project.
+Continuous integration and publishing workflows for GitBook Worker.
 
-## Active Workflows
+## Active workflows
 
-### `orchestrator.yml` (Main CI/CD Pipeline)
-**Trigger:** Push to any branch, manual dispatch  
-**Purpose:** Main publishing and deployment pipeline
+### `orchestrator.yml`
+- Builds `gitbook_worker/tools/docker/Dockerfile.dynamic`.
+- Runs the packaged orchestrator via `gitbook-worker --profile <profile>`.
+- Profiles are read from `publish.yml` in the repository root.
 
-- Builds Docker image from `.github/gitbook_worker/tools/docker/Dockerfile`
-- Executes `workflow_orchestrator` CLI with configured profile
-- Supports multiple profiles via `publish.yml`:
-  - `default`: Full pipeline (check, convert, publish)
-  - `local`: Local development (convert, publish only)
-  - `publisher`: Publish-only mode
+### `test.yml`
+- Builds the same Docker image and executes the pytest suites under `tests/`.
+- Supports `unit`, `integration`, `emoji-harness`, `qa`, and `all` test suites.
 
-**Manual execution:**
+## Local equivalents
+
 ```bash
-# In GitHub Actions UI
-Actions → Orchestrator → Run workflow → Select profile
-```
-
-**Local execution:**
-```bash
-cd .github
-python -m venv .venv
-.venv/Scripts/Activate.ps1  # or source .venv/bin/activate on Linux
+# Install package
+yarn install --frozen-lockfile  # if docs/assets are needed
 pip install -e .
-python -m tools.workflow_orchestrator --profile default --manifest ../publish.yml
+
+# Run orchestrator locally
+python -m gitbook_worker.tools.workflow_orchestrator --profile default --manifest publish.yml
+
+# Run tests
+pytest -q
 ```
 
-### `test.yml` (Test Suite)
-**Trigger:** Pull requests, manual dispatch  
-**Purpose:** Comprehensive test suite for code quality and compliance
+## Migration notes
 
-Test suites available:
-- **unit**: Fast unit tests for `gitbook_worker` package
-- **integration**: PDF integration tests with Pandoc/LaTeX
-- **emoji-harness**: Emoji/font compliance and licensing checks
-- **qa**: Documentation quality assurance (link audits, sources)
-- **all**: Run all test suites
-
-**Manual execution:**
-```bash
-# In GitHub Actions UI
-Actions → Tests → Run workflow → Select test suite
-```
-
-## Orchestrator Steps
-
-The orchestrator executes steps defined in `publish.yml` profiles:
-
-| Step | Purpose | Implementation |
-|------|---------|----------------|
-| `check_if_to_publish` | Detects which PDFs need rebuilding | `tools/publishing/set_publish_flag.py` |
-| `ensure_readme` | Creates missing readme.md files | Built into orchestrator |
-| `update_citation` | Updates citation.cff metadata | Built into orchestrator |
-| `converter` | Converts CSV assets to Markdown/diagrams | `tools/converter/convert_assets.py` |
-| `engineering-document-formatter` | Ensures YAML front matter | Built into orchestrator |
-| `publisher` | Builds PDFs via Pandoc | `tools/publishing/pipeline.py` |
-
-## Architecture
-
-```
-GitHub Actions Trigger
-        ↓
-orchestrator.yml
-        ↓
-   Docker Image
-        ↓
-workflow_orchestrator CLI
-        ↓
-   publish.yml (profile selection)
-        ↓
-Individual steps (tools/*)
-```
-
-## Migration Notes
-
-This workflow structure consolidates 13 legacy workflows into 2 workflows:
-- See `MIGRATION-PLAN.md` for details on the consolidation
-- All functionality from legacy workflows is preserved
-- Legacy workflows removed: check-if-to-publish.yml, converter.yml, ensure-readme.yml, 
-  update_citation.yml, engineering-document-formatter.yml, gitbook-style.yml, 
-  publisher.yml, emoji-pdf-harness.yml, pdf-integration.yml, python-package.yml, qa.yml
+The Python package previously lived under `.github/gitbook_worker/`. All tools and
+workflows now target the root-level package. The legacy documentation archive is
+kept in `.github/gitbook_worker/docs/` for reference.
