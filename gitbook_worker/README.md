@@ -1,6 +1,6 @@
 # GitBook Worker package
 
-GitBook Worker is a standalone Python package (v1.0.2) that automates PDF
+GitBook Worker (v1.0.2) is a standalone Python package for automating PDF
 publishing, conversion utilities, and QA checks for GitBook projects. Install it
 from the repository root and use the CLI locally or in CI.
 
@@ -16,13 +16,13 @@ point `python -m gitbook_worker.tools.workflow_orchestrator`.
 
 ## Components
 
-- `tools/workflow_orchestrator/` – orchestrator CLI that wires together the
+- `tools/workflow_orchestrator/` – CLI orchestrator that wires together the
   publishing steps defined in `publish.yml`.
-- `tools/publishing/` – PDF build pipeline, front matter helpers, font handling.
+- `tools/publishing/` – PDF build pipeline, front matter helpers, and font handling.
 - `tools/converter/` – CSV to Markdown/chart helpers for GitBook assets.
 - `tools/emoji/` and `tools/quality/` – emoji completeness checks and link/source
   auditing.
-- `tools/docker/` – Dockerfiles and helper scripts to mirror the CI environment.
+- `tools/docker/` – Dockerfiles and helper scripts that mirror the CI environment.
 - `defaults/` – baseline YAML configuration shipped with the package.
 - `scripts/` – thin wrappers for Docker orchestration and local convenience.
 

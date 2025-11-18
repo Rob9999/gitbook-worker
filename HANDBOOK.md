@@ -6,7 +6,8 @@ history: Condensed root-level handbook derived from legacy docs and current CI s
 
 # GitBook Worker Handbook
 
-This handbook replaces the sprawling `.github/gitbook_worker/docs/` tree with a concise, always-up-to-date reference. The legacy archive remains read-only for deep dives.
+This handbook replaces the sprawling `.github/gitbook_worker/docs/` tree with a concise,
+maintained reference. The legacy archive remains read-only for deep dives.
 
 ## Package layout at a glance
 - Python package lives at repository root under `gitbook_worker/` and exposes the `gitbook-worker` console script.
@@ -19,13 +20,13 @@ This handbook replaces the sprawling `.github/gitbook_worker/docs/` tree with a 
 - The deprecated `tools/` shim exists only for legacy imports—prefer `gitbook_worker.*` everywhere else.
 
 ## CI guardrails
-- Unit tests now enforce coverage via `pytest ... --cov=gitbook_worker --cov-fail-under=45` and publish `coverage.xml` as an artifact.
+- Unit tests enforce coverage via `pytest ... --cov=gitbook_worker --cov-fail-under=45` and publish `coverage.xml` as an artifact.
 - A dedicated `type-check` job runs `mypy` against the package on Python 3.12 with project dependencies installed.
-- Integration tests continue to validate PDF rendering inside the Docker image and confirm Twemoji + ERDA CJK fonts are present before running slow suites.
+- Integration tests validate PDF rendering inside the Docker image and confirm Twemoji + ERDA CJK fonts are present before running slow suites.
 
 ## Publishing and fonts (field notes)
 - The dynamic Docker build installs TeX Live and Pandoc, then applies font setup driven by repository configuration rather than hardcoded fonts.
-- If integration tests complain about missing emoji or CJK fonts, ensure Twemoji and ERDA CC-BY CJK are available in the runner or rebuild the Docker image so the font check passes.
+- If integration tests report missing emoji or CJK fonts, ensure Twemoji and ERDA CC-BY CJK are available in the runner or rebuild the Docker image so the font check passes.
 
 ## Migration pointers
 - Treat `.github/gitbook_worker/docs/` as historical background; copy only distilled details back into this handbook.

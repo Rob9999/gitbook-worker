@@ -8,8 +8,7 @@ This folder now focuses on CI entrypoints and shared assets. The Python package
 
 - `workflows/` – GitHub Actions definitions that call the packaged CLI.
 - `fonts/` – Legacy font assets used by the publishing pipeline.
-- `gitbook_worker/docs/` – Historical documentation and sprint notes retained for
-  reference; new docs live alongside the package at repository root.
+- `gitbook_worker/docs/` – Historical documentation and sprint notes retained for reference; new docs live alongside the package at repository root.
 
 ## Local testing
 
