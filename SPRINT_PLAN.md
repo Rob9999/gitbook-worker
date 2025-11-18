@@ -1,25 +1,24 @@
 ---
-version: 1.0.3
-date: 2025-05-30
-history: Added CI guardrails (coverage, mypy) and started handbook migration.
+version: 1.0.4
+date: 2025-06-01
+history: Reset sprint for publishing stability and documentation automation.
 ---
 
-# Sprint: Package relocation & docs refresh
+# Sprint: Publishing stability & documentation automation
 
 ## Goals
-- Finalise root-level Python package layout (`gitbook_worker/`).
-- Update CI workflows to consume the packaged CLI.
-- Refresh documentation for the new structure and entrypoints.
+- Harden PDF and HTML outputs to be reproducible across CI runners.
+- Add lightweight runtime checks for the orchestrator CLI and publish manifest.
+- Automate handbook updates to reflect the package-first layout.
 
 ## Work items
-1. ✅ Move package code to `gitbook_worker/` and expose console script `gitbook-worker`.
-2. ✅ Relocate tests to repository root and update imports to `gitbook_worker.*`.
-3. ✅ Refresh README files and agent guidance for the new layout.
-4. ✅ Add coverage gating and type-checking to CI.
-5. ✅ Trim and migrate legacy docs from `.github/gitbook_worker/docs/` into a
-   concise root-level handbook.
+1. ☐ Stabilise font embedding and image handling in the PDF builder; add a smoke test in `tests/`.
+2. ☐ Introduce a fast CLI validation command (e.g., `gitbook-worker validate --manifest publish.yml`) wired into CI.
+3. ☐ Extend the handbook with a contributor quickstart and troubleshooting section aligned with `gitbook_worker/` entrypoints.
+4. ☐ Document Docker usage paths (dynamic vs. static images) and ensure build scripts reference current Dockerfiles.
+5. ☐ Capture failure analytics in logs for orchestrated jobs to simplify debugging.
 
 ## Risks / notes
-- Legacy documentation still references the old `.github/gitbook_worker` paths;
-  cross-links will be updated incrementally.
-- Docker images now build from `gitbook_worker/tools/docker/Dockerfile.dynamic`.
+- PDF reproducibility depends on system fonts; ensure the Docker image pins font packages or bundles required assets.
+- CLI validation should remain fast (<10s) to keep CI loops tight; avoid contacting external services.
+- Handbook automation must not diverge from README; prefer shared snippets or scripts to sync sections.
