@@ -1,7 +1,7 @@
 ---
-version: 1.0.2
-date: 2025-05-19
-history: Initial restructuring sprint plan for package relocation.
+version: 1.0.3
+date: 2025-05-30
+history: Added CI guardrails (coverage, mypy) and started handbook migration.
 ---
 
 # Sprint: Package relocation & docs refresh
@@ -15,8 +15,8 @@ history: Initial restructuring sprint plan for package relocation.
 1. ✅ Move package code to `gitbook_worker/` and expose console script `gitbook-worker`.
 2. ✅ Relocate tests to repository root and update imports to `gitbook_worker.*`.
 3. ✅ Refresh README files and agent guidance for the new layout.
-4. ⏭️ Add coverage gating and type-checking to CI (follow-up).
-5. ⏭️ Trim and migrate legacy docs from `.github/gitbook_worker/docs/` into a
+4. ✅ Add coverage gating and type-checking to CI.
+5. ✅ Trim and migrate legacy docs from `.github/gitbook_worker/docs/` into a
    concise root-level handbook.
 
 ## Risks / notes

@@ -5,6 +5,7 @@ requests
 tqdm
 pygltflib
 black
+mypy
 pyyaml
 pytest
 pytest-cov
