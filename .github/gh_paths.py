@@ -10,15 +10,15 @@ print(f"INFO: Repository Root   :  {REPO_ROOT}")
 GITHUB_DIR = REPO_ROOT / ".github"
 print(f"INFO: Github Directory  :  {GITHUB_DIR}")
 
-# Absolute .github Tools Directory
-GH_TOOLS_DIR = GITHUB_DIR / "gitbook_worker" / "tools"
+# Absolute repository Tools Directory
+GH_TOOLS_DIR = REPO_ROOT / "tools"
 print(f"INFO: Tools Directory   :  {GH_TOOLS_DIR}")
 
-# Absolute .github Tools Docker Directory
-GH_DOCKER_DIR = GH_TOOLS_DIR / "docker"
+# Absolute repository Docker Directory
+GH_DOCKER_DIR = REPO_ROOT / "docker"
 print(f"INFO: Docker Directory  :  {GH_DOCKER_DIR}")
 
-# Absolute .github Logs directory
-GH_LOGS_DIR = GITHUB_DIR / "logs"
+# Absolute repository Logs directory
+GH_LOGS_DIR = REPO_ROOT / "logs"
 print(f"INFO: Logs Directory    :  {GH_LOGS_DIR}")
 GH_LOGS_DIR.mkdir(exist_ok=True)
