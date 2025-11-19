@@ -13,6 +13,7 @@
                 "PYTHONUTF8": "1"
             },
             "args": [
+                "run",
                 "--root",
                 "${workspaceFolder}",
                 "--manifest",
