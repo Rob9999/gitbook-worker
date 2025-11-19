@@ -188,7 +188,7 @@ class FontConfigLoader:
         """Get default font names for common roles.
 
         Returns:
-            Dictionary mapping role to font name (serif, sans, mono, emoji, cjk)
+            Dictionary mapping role to font name (serif, sans, mono, emoji, cjk, indic, ethiopic)
         """
         return {
             "serif": self.get_font_name("SERIF", "DejaVu Serif"),
@@ -196,6 +196,8 @@ class FontConfigLoader:
             "mono": self.get_font_name("MONO", "DejaVu Sans Mono"),
             "emoji": self.get_font_name("EMOJI", "Twemoji Mozilla"),
             "cjk": self.get_font_name("CJK", "ERDA CC-BY CJK"),
+            "indic": self.get_font_name("INDIC", "ERDA CC-BY Indic"),
+            "ethiopic": self.get_font_name("ETHIOPIC", "ERDA CC-BY Ethiopic"),
         }
 
     def match_font_key(self, font_name: Optional[str]) -> Optional[str]:

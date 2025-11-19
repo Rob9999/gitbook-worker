@@ -8,6 +8,22 @@ fonts:
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: null
 
+  INDIC:
+    name: "ERDA CC-BY Indic"
+    paths:
+      - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-indic.ttf"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    source_url: null
+
+  ETHIOPIC:
+    name: "ERDA CC-BY Ethiopic"
+    paths:
+      - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-ethiopic.ttf"
+    license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    source_url: null
+
   EMOJI:
     name: "Twemoji Color Font"
     paths: []

@@ -30,12 +30,15 @@ class FontBuildLogger:
             "glyphs_generated": 0,
             "errors": [],
             "warnings": [],
+            "missing": [],
             "character_sources": {
                 "katakana": 0,
                 "hangul": 0,
                 "hanzi": 0,
                 "punctuation": 0,
                 "fallback": 0,
+                "devanagari": 0,
+                "ethiopic": 0,
             },
         }
 
@@ -101,6 +104,13 @@ class FontBuildLogger:
         if source in self.metrics["character_sources"]:
             self.metrics["character_sources"][source] += 1
         self.debug(f"Character '{char}' (U+{ord(char):04X}) from {source}")
+
+    def track_missing(self, char: str) -> None:
+        """Record missing glyph attempts for auditability."""
+
+        entry = f"Missing bitmap for '{char}' (U+{ord(char):04X})"
+        self.metrics["missing"].append(entry)
+        self.warning(entry)
 
     def track_glyph(self, glyph_name: str, advance_width: int) -> None:
         """Track glyph generation.

@@ -186,8 +186,10 @@ def _get_default_variables() -> Dict[str, str]:
     try:
         font_config = get_font_config()
         default_fonts = font_config.get_default_fonts()
-        # Get CJK font name for mainfontfallback
+        # Get fallback font names for mainfontfallback
         cjk_font_name = font_config.get_font_name("CJK")
+        indic_font_name = font_config.get_font_name("INDIC")
+        ethiopic_font_name = font_config.get_font_name("ETHIOPIC")
     except Exception as e:
         logger.warning(
             "Konnte Font-Konfiguration nicht laden: %s. Verwende Fallback-Fonts.", e
@@ -208,10 +210,16 @@ def _get_default_variables() -> Dict[str, str]:
         "max-list-depth": "9",
     }
 
-    # Add CJK font as mainfontfallback if available
-    if cjk_font_name:
-        # Use HarfBuzz renderer for proper CJK rendering
-        variables["mainfontfallback"] = f"{cjk_font_name}:mode=harf"
+    # Add CC BY fallback chain if available
+    fallback_chain = [
+        name
+        for name in [cjk_font_name, indic_font_name, ethiopic_font_name]
+        if name
+    ]
+    if fallback_chain:
+        variables["mainfontfallback"] = "; ".join(
+            f"{name}:mode=harf" for name in fallback_chain
+        )
 
     return variables
 

@@ -12,6 +12,9 @@ This document tests the following essential Devanagari characters:
 - **Vowel Signs**: ि (vowel sign i), ी (vowel sign ii)
 - **Diacritics**: ं (anusvara), ् (virama/halant)
 
+### Additional Coverage (Pandoc warnings)
+- औ (au), अा/ा (aa), ँ (candrabindu), े (vowel sign e), ो (vowel sign o), ु (vowel sign u), ः (visarga), । (danda)
+
 ### Sample Text
 
 हिन्दी

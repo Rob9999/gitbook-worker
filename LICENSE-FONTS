@@ -5,7 +5,7 @@ This repository distributes typefaces that are required to build the ERDA
 book and its accompanying collateral. The licensing model follows the project
 policy described in `AGENTS.md` and `publish/ATTRIBUTION.md`:
 
-* **ERDA custom fonts** (e.g. `ERDA CJK`, `ERDA CC-BY CJK`) are provided under a
+* **ERDA custom fonts** (e.g. `ERDA CJK`, `ERDA CC-BY CJK`, `ERDA CC-BY Indic`, `ERDA CC-BY Ethiopic`) are provided under a
   **dual license**: you may use them either under the Creative Commons
   Attribution 4.0 International license (CC BY 4.0) or under the MIT License.
 * **Third-party fonts** that ship with the publishing toolchain keep their

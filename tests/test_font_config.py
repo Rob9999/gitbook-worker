@@ -31,6 +31,18 @@ fonts:
       - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf"
       - ".github/fonts/erda-ccby-cjk.ttf"
       - "gitbook_worker/tools/publishing/fonts/truetype/erdafont/erda-ccby-cjk.ttf"
+  INDIC:
+    name: "ERDA CC-BY Indic"
+    license: "CC BY 4.0"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    paths:
+      - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-indic.ttf"
+  ETHIOPIC:
+    name: "ERDA CC-BY Ethiopic"
+    license: "CC BY 4.0"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    paths:
+      - ".github/fonts/erda-ccby-cjk/true-type/erda-ccby-ethiopic.ttf"
   SERIF:
     name: "DejaVu Serif"
     license: "Custom (Bitstream Vera / DejaVu)"
@@ -78,7 +90,7 @@ def test_font_config_loader_init(sample_fonts_yml):
     """Test FontConfigLoader initialization."""
     loader = FontConfigLoader(config_path=sample_fonts_yml)
     assert loader._config_path == sample_fonts_yml
-    assert len(loader._fonts) == 5  # CJK, SERIF, SANS, MONO, EMOJI
+    assert len(loader._fonts) == 7  # CJK, INDIC, ETHIOPIC, SERIF, SANS, MONO, EMOJI
     assert loader.version == "1.0.0"
 
 
@@ -162,11 +174,13 @@ def test_get_all_font_keys(sample_fonts_yml):
     keys = loader.get_all_font_keys()
 
     assert "CJK" in keys
+    assert "INDIC" in keys
+    assert "ETHIOPIC" in keys
     assert "SERIF" in keys
     assert "SANS" in keys
     assert "MONO" in keys
     assert "EMOJI" in keys
-    assert len(keys) == 5
+    assert len(keys) == 7
 
 
 def test_get_default_fonts(sample_fonts_yml):
@@ -179,6 +193,8 @@ def test_get_default_fonts(sample_fonts_yml):
     assert defaults["mono"] == "DejaVu Sans Mono"
     assert defaults["emoji"] == "Twemoji Mozilla"
     assert defaults["cjk"] == "ERDA CC-BY CJK"
+    assert defaults["indic"] == "ERDA CC-BY Indic"
+    assert defaults["ethiopic"] == "ERDA CC-BY Ethiopic"
 
 
 def test_singleton_pattern():

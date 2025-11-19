@@ -1,5 +1,10 @@
 # ERDA CC BY 4.0 CJK Fallback Font
 
+> **Font family update:** neben der bisherigen CJK-Datei gibt es jetzt zwei
+> zusätzliche CC BY 4.0-Fallbacks: **ERDA CC-BY Indic** (Devanagari/Hindi) und
+> **ERDA CC-BY Ethiopic** (Ge'ez). Alle Varianten teilen sich denselben
+> Generator-Stack und Bitmaps.
+
 ## Übersicht
 
 Dieser Font ist eine minimalistische CC BY 4.0-lizenzierte Fallback-Schrift für CJK-Zeichen (Chinese, Japanese, Korean), die speziell für die Lizenztext-Übersetzungen im ERDA-Buch entwickelt wurde.
@@ -19,22 +24,30 @@ erda-ccby-cjk/
 │
 ├── generator/                # Font-Generierungs-Skripte
 │   ├── build_ccby_cjk_font.py      # Haupt-Build-Skript
+│   ├── build_ccby_indic_font.py    # Devanagari/Hindi Subfont
+│   ├── build_ccby_ethiopic_font.py # Ethiopic Mini-Fallback
+│   ├── font_family_builder.py      # Gemeinsamer Bitmap-Builder
 │   ├── font_logger.py              # Logging und Metriken
 │   ├── katakana.py                 # Katakana Zeichen (84)
 │   ├── hiragana.py                 # Hiragana Zeichen (35)
 │   ├── hangul.py                   # Hangul Jamo-Muster (11.172 Silben)
 │   ├── hanzi.py                    # Hanzi/Kanji Zeichen (206)
 │   ├── devanagari.py               # Devanagari/Hindi Zeichen (38)
+│   ├── ethiopic.py                 # Ethiopic Mini-Satz (8+)
 │   ├── punctuation.py              # Interpunktion (46)
 │   └── character_index.py          # Fast O(1) lookup index
 │
 ├── dataset/                  # Test-Daten (Lizenztext-Übersetzungen)
 │   ├── japanese.md                 # Japanische Übersetzung
 │   ├── korean.md                   # Koreanische Übersetzung
-│   └── chinese.md                  # Chinesische Übersetzung (traditionell)
+│   ├── chinese.md                  # Chinesische Übersetzung (traditionell + Simplified Alert)
+│   ├── hindi.md                    # Hindi Zusatzdataset
+│   └── ethiopic.md                 # Ethiopic Mini-Datensatz
 │
 ├── true-type/                # Build-Output
-│   └── erda-ccby-cjk.ttf           # Generierter Font (90 KB)
+│   ├── erda-ccby-cjk.ttf           # Generierter CJK-Font (90 KB)
+│   ├── erda-ccby-indic.ttf         # Devanagari/Hindi Subfont
+│   └── erda-ccby-ethiopic.ttf      # Ethiopic Mini-Fallback
 │
 ├── logs/                     # Build-Logs (timestamped)
 │   ├── font-build-YYYYMMDD-HHMMSS.log
@@ -96,6 +109,17 @@ python build_ccby_cjk_font.py
 ```
 
 **Output**: `../true-type/erda-ccby-cjk.ttf`
+
+### Indic/Ethiopic Subfonts bauen
+
+```bash
+python build_ccby_indic_font.py
+python build_ccby_ethiopic_font.py
+```
+
+**Output**:
+- `../true-type/erda-ccby-indic.ttf`
+- `../true-type/erda-ccby-ethiopic.ttf`
 
 ### Mit Font-Cache-Refresh (empfohlen)
 

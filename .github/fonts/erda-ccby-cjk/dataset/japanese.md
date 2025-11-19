@@ -70,6 +70,15 @@
 - 文 (sentence)
 - 字 (character)
 
+### Warning Glyphs (追加警告文字)
+- 観 (observe)
+- 測 (measure)
+- 穏 (calm)
+- 記 (record)
+- 録 (log)
+- 週 (week)
+- 較 (compare)
+
 ## Test Requirements
 
 ✅ All characters must render without boxes (▯)
