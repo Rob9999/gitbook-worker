@@ -23,4 +23,4 @@ version: 1.0
 ## A.3 Weiterverwendung
 - Die Tabelle kann direkt in Dataframes importiert werden.
 - Nutze relative Links wie [Kapitel 2](../chapters/chapter-02.md) für Querverweise.
-- Grafiken finden sich im Verzeichnis [`content/images`](../images/).
+- Grafiken finden sich im Verzeichnis [`content/.github/assets`](../images/).
