@@ -15,6 +15,11 @@ Diese Startseite liefert einen schnellen Überblick über das Beispielbuch, das 
 - [Kapitel 2 – Vergleichstabellen](./chapters/chapter-02.md)
 - [Vorlagen für mehrsprachige Texte](./templates/multilingual-neutral-text.md)
 - [Appendix A – Datenquellen](./appendices/appendix-a.md)
+- [Emoji-Beispiele (Smileys & Personen)](./examples/emoji-smileys-and-people.md)
+- [Emoji-Beispiele (Natur & Essen)](./examples/emoji-nature-and-food.md)
+- [Emoji-Beispiele (Aktivitäten & Reisen)](./examples/emoji-activities-and-travel.md)
+- [Emoji-Beispiele (Objekte, Symbole & Flaggen)](./examples/emoji-objects-symbols-flags.md)
+- [Appendix – Emoji- & Schriftabdeckung](./appendices/emoji-font-coverage.md)
 - [Zitationen & weiterführende Quellen](./references.md)
 
 ## Visuale Vorschau

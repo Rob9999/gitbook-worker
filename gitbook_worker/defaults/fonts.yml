@@ -9,12 +9,12 @@ fonts:
     source_url: null
 
   EMOJI:
-    name: "Twemoji Mozilla"
+    name: "Twemoji Color Font"
     paths: []
-    download_url: "https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/Twemoji.Mozilla.ttf"
+    download_url: "https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwemojiMozilla.ttf"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
-    source_url: "https://github.com/mozilla/twemoji-colr"
+    source_url: "https://github.com/13rac1/twemoji-color-font"
 
   MONO:
     name: "DejaVu Sans Mono"
