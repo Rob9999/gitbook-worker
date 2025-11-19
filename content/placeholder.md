@@ -1,4 +1,3 @@
-# Placeholder content
+# Inhaltshinweis
 
-Temporary marker to keep content path resolution stable after the package
-relocation. Replace with real chapters when the new content structure lands.
+Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bilddateien und Vorlagen. Verwende [content/index.md](./index.md) als Startpunkt.
