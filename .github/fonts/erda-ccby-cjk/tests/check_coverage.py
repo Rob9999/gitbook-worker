@@ -13,6 +13,8 @@ import generator.katakana as kata_mod
 import generator.punctuation as punct_mod
 import generator.hangul as hangul_mod
 import generator.hiragana as hira_mod
+import generator.devanagari as dev_mod
+import generator.ethiopic as ethiopic_mod
 
 
 def load_dataset_texts(dataset_dir):
@@ -40,6 +42,10 @@ if __name__ == "__main__":
     )
     punct_keys = set(punct_mod.PUNCTUATION.keys())
     hira_keys = set(hira_mod.HIRAGANA.keys())
+    dev_keys = set(dev_mod.DEVANAGARI.keys()) | set(
+        dev_mod.DEVANAGARI_EXTENDED.keys()
+    )
+    ethiopic_keys = set(ethiopic_mod.ETHIOPIC.keys())
 
     missing = {}
     covered = set()
@@ -55,7 +61,13 @@ if __name__ == "__main__":
         if ch in hira_keys:
             covered.add(ch)
             continue
+        if ch in dev_keys:
+            covered.add(ch)
+            continue
         if ch in punct_keys:
+            covered.add(ch)
+            continue
+        if ch in ethiopic_keys:
             covered.add(ch)
             continue
         # Hangul syllable block

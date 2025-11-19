@@ -97,6 +97,9 @@
 - 屬 (belong)
 - 於 (at)
 
+### Simplified Alerts (简体补充)
+- 观 团 录 据
+
 ## Test Requirements
 
 ✅ All Traditional Chinese characters must render

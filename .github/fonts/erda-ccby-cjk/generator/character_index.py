@@ -27,6 +27,7 @@ from hiragana import HIRAGANA
 from hanzi import HANZI_KANJI
 from punctuation import PUNCTUATION
 from devanagari import DEVANAGARI, DEVANAGARI_EXTENDED
+from ethiopic import ETHIOPIC
 
 
 @dataclass
@@ -113,6 +114,12 @@ class CharacterIndex:
         for char, bitmap in DEVANAGARI_EXTENDED.items():
             self._index[char] = CharacterInfo(
                 char=char, bitmap=bitmap, source="devanagari", sub_source="extended"
+            )
+
+        # Index Ethiopic
+        for char, bitmap in ETHIOPIC.items():
+            self._index[char] = CharacterInfo(
+                char=char, bitmap=bitmap, source="ethiopic"
             )
 
     def lookup(self, char: str) -> Optional[CharacterInfo]:
