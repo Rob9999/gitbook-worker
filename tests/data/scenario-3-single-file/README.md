@@ -16,9 +16,8 @@ scenario-3-single-file/
 - Enthält: `_` (Unterstrich), `&` (Ampersand), `@` (At), `!` (Ausrufezeichen)
 - Testet Filesystem-Kompatibilität und LaTeX-Escaping
 
-### 2. Mehrsprachige Inhalte (8 Schriftsysteme)
+### 2. Mehrsprachige Inhalte (7 Schriftsysteme)
 - **CJK**: Chinesisch (中文), Japanisch (日本語), Koreanisch (한국어)
-- **Kyrillisch**: Russisch (Русский)
 - **Rechts-nach-Links**: Arabisch (العربية)
 - **Andere**: Griechisch (Ελληνικά), Hindi (हिन्दी), Thai (ไทย)
 
@@ -79,7 +78,7 @@ scenario-3-single-file/
 
 - **Single File**: ✅ Ja (ohne GitBook-Struktur)
 - **Dateiname mit Sonderzeichen**: ✅ Ja (&, \_, @, !)
-- **Mehrsprachig**: ✅ 8 Schriftsysteme
+- **Mehrsprachig**: ✅ 7 Schriftsysteme
 - **Tabellen-Komplexität**: ✅ 1-100 Spalten, 5-50 Zeilen
 - **LaTeX-Escaping**: ✅ Ja
 - **Emojis**: ✅ Ja

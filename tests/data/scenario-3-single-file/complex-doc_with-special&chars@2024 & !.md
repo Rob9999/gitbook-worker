@@ -31,16 +31,7 @@ Dieses Dokument testet komplexe Features für Single-File-PDF-Generierung.
 - 클라우드 컴퓨팅 (Cloud Computing)
 - 사이버 보안 (Cybersicherheit)
 
-### 1.4 Russisch (Русский)
-
-Это тестовый документ для проверки кириллических символов. Москва - столица России.
-
-**Ключевые слова**:
-- Программирование
-- Искусственный интеллект
-- Большие данные
-
-### 1.5 Arabisch (العربية)
+### 1.4 Arabisch (العربية)
 
 هذا مستند اختبار للتحقق من عرض الأحرف العربية بشكل صحيح.
 
@@ -49,7 +40,7 @@ Dieses Dokument testet komplexe Features für Single-File-PDF-Generierung.
 - الذكاء الاصطناعي
 - البيانات الضخمة
 
-### 1.6 Griechisch (Ελληνικά)
+### 1.5 Griechisch (Ελληνικά)
 
 Αυτό είναι ένα δοκιμαστικό έγγραφο για την επαλήθευση ελληνικών χαρακτήρων.
 
@@ -58,7 +49,7 @@ Dieses Dokument testet komplexe Features für Single-File-PDF-Generierung.
 - Τεχνητή Νοημοσύνη
 - Μεγάλα Δεδομένα
 
-### 1.7 Hindi (हिन्दी)
+### 1.6 Hindi (हिन्दी)
 
 यह हिंदी वर्णों के सही प्रदर्शन की जांच के लिए एक परीक्षण दस्तावेज़ है।
 
@@ -67,7 +58,7 @@ Dieses Dokument testet komplexe Features für Single-File-PDF-Generierung.
 - कृत्रिम बुद्धिमत्ता
 - डेटा विज्ञान
 
-### 1.8 Thai (ไทย)
+### 1.7 Thai (ไทย)
 
 นี่คือเอกสารทดสอบสำหรับตรวจสอบการแสดงผลอักษรไทยอย่างถูกต้อง
 
