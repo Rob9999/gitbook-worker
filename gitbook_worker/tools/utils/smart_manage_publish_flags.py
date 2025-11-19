@@ -22,6 +22,7 @@ import json
 import logging
 import os
 import posixpath
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -39,6 +40,10 @@ from gitbook_worker.tools.utils.smart_publish_target import (
     get_target_content_root,
     load_publish_targets,
 )
+
+# Register compatibility alias so legacy ``tools.utils`` patch targets
+# affect this module instance as well.
+sys.modules["tools.utils.smart_manage_publish_flags"] = sys.modules[__name__]
 
 logger = get_logger(__name__)
 
@@ -263,7 +268,13 @@ def set_publish_flags(
             target = targets[idx]
             try:
                 content_root = get_target_content_root(target)
-                # Convert to relative path for matching
+
+                # Ensure content_root is absolute before computing a repo-relative path
+                if not content_root.is_absolute():
+                    content_root = (manifest_dir / content_root).resolve()
+                else:
+                    content_root = content_root.resolve()
+
                 try:
                     content_root_path = normalize_posix(
                         os.path.relpath(content_root, repo_root)
@@ -276,7 +287,7 @@ def set_publish_flags(
                     )
                 except ValueError:
                     # Paths on different drives on Windows
-                    content_root_path = None
+                    content_root_path = normalize_posix(content_root)
             except Exception as exc:
                 logger.debug("Failed to get content_root for target %d: %s", idx, exc)
 
