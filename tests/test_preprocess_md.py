@@ -16,6 +16,31 @@ def _wide_table(tmp_path, cols: int):
     return md
 
 
+def test_relative_markdown_links_point_to_pdf_anchor(tmp_path):
+    content_root = tmp_path / "content"
+    chapter = content_root / "chapters" / "chapter-01.md"
+    chapter.parent.mkdir(parents=True)
+    chapter.write_text("# Kapitel 1\n", encoding="utf-8")
+
+    index = content_root / "index.md"
+    index.parent.mkdir(parents=True, exist_ok=True)
+    index.write_text(
+        """
+[Kapitel 1](./chapters/chapter-01.md)
+[Detailabschnitt](./chapters/chapter-01.md#teil-1)
+![Symbol](./chapters/chapter-01.md)
+""".strip(),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(index), paper_format="a4")
+
+    assert "](#md-chapters-chapter-01)" in out
+    assert "](#teil-1)" in out
+    assert "![Symbol](./chapters/chapter-01.md)" in out
+    assert '<a id="md-index"></a>' in out
+
+
 def test_html_figure_block_converted(tmp_path):
     md = tmp_path / "figure.md"
     md.write_text(

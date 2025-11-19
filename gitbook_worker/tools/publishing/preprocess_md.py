@@ -17,6 +17,7 @@ import argparse
 import os
 import re
 from html import unescape
+from pathlib import Path
 from typing import Iterable, List
 
 from gitbook_worker.tools.logging_config import get_logger
@@ -44,6 +45,12 @@ except Exception:  # pragma: no cover - Pillow optional
     Image = None  # type: ignore
 
 logger = get_logger(__name__)
+
+
+_MARKDOWN_LINK_RE = re.compile(r"(?<!\!)\[(?P<label>[^\]]+)\]\((?P<inner>[^)]+)\)")
+_URL_SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
+_ANCHOR_CACHE: dict[Path, str] = {}
+_ANCHOR_ROOT_HINTS = ("content",)
 
 
 COLUMN_WIDTH_mm = 25  # Annahme: 25mm pro Spalte (inkl. Abstand)
@@ -117,6 +124,182 @@ def _convert_html_figures(lines: List[str]) -> List[str]:
         result.extend(buffer)
 
     return result
+
+
+def _split_link_destination(inner: str) -> tuple[str, str]:
+    """Split Markdown link destination into URL and trailing suffix."""
+
+    if not inner:
+        return "", ""
+
+    trimmed = inner.lstrip()
+    leading = inner[: len(inner) - len(trimmed)]
+    if not trimmed:
+        return "", inner
+
+    if trimmed.startswith("<"):
+        end = trimmed.find(">")
+        if end != -1:
+            url = trimmed[1:end]
+            rest = trimmed[end + 1 :]
+            return url, leading + rest
+
+    for idx, char in enumerate(trimmed):
+        if char.isspace():
+            return trimmed[:idx], leading + trimmed[idx:]
+
+    return trimmed, leading
+
+
+def _is_external_target(target: str) -> bool:
+    target_strip = target.strip()
+    if not target_strip:
+        return True
+    if target_strip.startswith(("#", "mailto:", "tel:")):
+        return True
+    if target_strip.startswith("//"):
+        return True
+    if _URL_SCHEME_RE.match(target_strip):
+        return True
+    return False
+
+
+def _relative_parts(resolved: Path) -> list[str]:
+    """Return path parts used for anchor generation."""
+
+    try:
+        normalized = resolved.resolve()
+    except OSError:
+        normalized = resolved
+
+    without_suffix = normalized.with_suffix("")
+    parts = [part for part in without_suffix.parts if part not in {os.sep, ""}]
+    lowered = [part.lower() for part in parts]
+
+    for hint in _ANCHOR_ROOT_HINTS:
+        if hint in lowered:
+            index = lowered.index(hint)
+            tail = parts[index + 1 :]
+            if tail:
+                return tail
+
+    if parts:
+        return parts[-3:]
+
+    stem = normalized.stem or normalized.name
+    return [stem or "section"]
+
+
+def _anchor_from_path(path: Path) -> str:
+    """Return a deterministic anchor ID for *path*."""
+
+    try:
+        resolved = path.resolve()
+    except OSError:
+        resolved = path
+
+    cached = _ANCHOR_CACHE.get(resolved)
+    if cached:
+        return cached
+
+    parts = _relative_parts(resolved)
+    slug_source = "-".join(parts)
+    slug = re.sub(r"[^0-9a-z]+", "-", slug_source.lower()).strip("-")
+    if not slug:
+        slug = "section"
+    anchor = f"md-{slug}"
+    _ANCHOR_CACHE[resolved] = anchor
+    return anchor
+
+
+def _insert_anchor(body: str, anchor: str) -> str:
+    """Insert the anchor *after* YAML front matter if present."""
+
+    anchor_line = f'<a id="{anchor}"></a>\n'
+    if not body.startswith("---"):
+        return anchor_line + body
+
+    lines = body.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        return anchor_line + body
+
+    closing_index: int | None = None
+    for idx, line in enumerate(lines[1:], start=1):
+        if line.strip() == "---":
+            closing_index = idx
+            break
+
+    if closing_index is None:
+        return anchor_line + body
+
+    before = "".join(lines[: closing_index + 1])
+    after = "".join(lines[closing_index + 1 :])
+    return before + anchor_line + after
+
+
+def _rewrite_link_target(target: str, *, base_dir: Path) -> str | None:
+    if _is_external_target(target):
+        return None
+
+    path_part, _, fragment = target.partition("#")
+    if not path_part.lower().endswith((".md", ".markdown")):
+        return None
+
+    candidate = Path(path_part.replace("\\", os.sep))
+    try:
+        resolved = (base_dir / candidate).resolve() if not candidate.is_absolute() else candidate.resolve()
+    except OSError:
+        resolved = (base_dir / candidate).absolute()
+
+    if not resolved.exists():
+        return None
+
+    if fragment:
+        return f"#{fragment}"
+
+    anchor = _anchor_from_path(resolved)
+    return f"#{anchor}"
+
+
+def _rewrite_internal_links(lines: List[str], *, current_file: Path) -> List[str]:
+    """Rewrite relative Markdown links to PDF-friendly anchors."""
+
+    base_dir = current_file.parent
+    rewritten: List[str] = []
+    in_fence = False
+    fence_marker = ""
+
+    for line in lines:
+        stripped = line.lstrip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            marker = stripped[:3]
+            if not in_fence:
+                in_fence = True
+                fence_marker = marker
+            elif stripped.startswith(fence_marker):
+                in_fence = False
+                fence_marker = ""
+            rewritten.append(line)
+            continue
+
+        if in_fence:
+            rewritten.append(line)
+            continue
+
+        def _replace(match: re.Match[str]) -> str:
+            label = match.group("label")
+            inner = match.group("inner")
+            url, suffix = _split_link_destination(inner)
+            if not url:
+                return match.group(0)
+            new_target = _rewrite_link_target(url, base_dir=base_dir)
+            if not new_target:
+                return match.group(0)
+            return f"[{label}]({new_target}{suffix})"
+
+        rewritten.append(_MARKDOWN_LINK_RE.sub(_replace, line))
+
+    return rewritten
 
 
 def _paper_candidates(base: PaperInfo) -> Iterable[PaperInfo]:
@@ -306,6 +489,8 @@ def process(path: str, paper_format: str = "a4") -> str:
         lines = f.readlines()
 
     lines = _convert_html_figures(lines)
+    current_file = Path(path).resolve()
+    lines = _rewrite_internal_links(lines, current_file=current_file)
 
     out: List[str] = []
     i = 0
@@ -385,7 +570,9 @@ def process(path: str, paper_format: str = "a4") -> str:
         out.append(line)
         i += 1
 
-    return "".join(out)
+    body = "".join(out)
+    anchor = _anchor_from_path(current_file)
+    return _insert_anchor(body, anchor)
 
 
 def main() -> None:
