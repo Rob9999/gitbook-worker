@@ -5,12 +5,17 @@ from pathlib import Path
 
 import pytest
 
-from gitbook_worker.tools.workflow_orchestrator import OrchestratorConfig, OrchestratorProfile, run
+from gitbook_worker.tools.workflow_orchestrator import (
+    OrchestratorConfig,
+    OrchestratorProfile,
+    run,
+)
 from gitbook_worker.tools.workflow_orchestrator.orchestrator import (
     DockerSettings,
     build_config,
     parse_args,
 )
+from gitbook_worker.tools.utils.smart_content import ContentEntry
 
 
 @pytest.fixture()
@@ -101,9 +106,14 @@ def test_run_creates_missing_readme(tmp_path: Path) -> None:
         steps=("ensure_readme",),
         docker=DockerSettings(use_registry=False, image=None, cache=False),
     )
+    entry = ContentEntry(id="default", uri="./", type="local")
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=repo,
         profile=profile,
         repo_visibility="public",
         repository="example/repo",
@@ -134,9 +144,14 @@ def test_update_citation_dry_run(tmp_path: Path) -> None:
         steps=("update_citation",),
         docker=DockerSettings(use_registry=False, image=None, cache=False),
     )
+    entry = ContentEntry(id="default", uri="./", type="local")
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=repo,
         profile=profile,
         repo_visibility="public",
         repository="example/repo",
@@ -166,9 +181,14 @@ def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
         steps=("update_citation",),
         docker=DockerSettings(use_registry=False, image=None, cache=False),
     )
+    entry = ContentEntry(id="default", uri="./", type="local")
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=repo,
         profile=profile,
         repo_visibility="public",
         repository="example/repo",

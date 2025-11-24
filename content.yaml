@@ -1,0 +1,16 @@
+version: 1.0.0
+default: de
+contents:
+  - id: de
+    type: local
+    uri: ./
+    description: German baseline content (ERDA)
+  - id: en
+    type: local
+    uri: en/
+    description: English content (placeholder)
+  - id: ua
+    type: git
+    uri: github.com:rob9999@democratic-social-wins
+    description: Book about democratic society of Ukraine
+    credentialRef: GITBOOK_CONTENT_UA_DEPLOY_KEY

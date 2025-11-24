@@ -33,6 +33,10 @@ from gitbook_worker.tools.utils.smart_manifest import (
     detect_repo_root,
     resolve_manifest,
 )
+from gitbook_worker.tools.utils.smart_content import (
+    ContentEntry,
+    load_content_config,
+)
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
 
 LOGGER = get_logger(__name__)
@@ -84,6 +88,10 @@ class OrchestratorConfig:
 
     root: Path
     manifest: Path
+    content_config_path: Path | None
+    language_id: str
+    content_entry: ContentEntry
+    language_root: Path
     profile: OrchestratorProfile
     repo_visibility: str
     repository: str | None
@@ -103,6 +111,9 @@ class RuntimeContext:
     ) -> None:
         self.config = config
         self.root = config.root
+        self.language_root = config.language_root
+        self.language_id = config.language_id
+        self.content_entry = config.content_entry
         self.python = sys.executable or "python"
         self._manifest_data = manifest_data or {}
         self._frontmatter_loader: FrontMatterConfigLoader | None = None
@@ -171,6 +182,12 @@ class RuntimeContext:
         env.setdefault("ORCHESTRATOR_REPO_VISIBILITY", self.config.repo_visibility)
         if self.config.profile.env:
             env.update(self.config.profile.env)
+        env.setdefault("GITBOOK_CONTENT_ID", self.config.language_id)
+        env.setdefault("GITBOOK_CONTENT_ROOT", str(self.language_root))
+        if self.config.content_config_path:
+            env.setdefault(
+                "GITBOOK_CONTENT_CONFIG", str(self.config.content_config_path)
+            )
         if extra:
             env.update(extra)
         return env
@@ -440,6 +457,27 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         "profile": args.profile,
         "visibility": args.repo_visibility,
     }
+
+    content_config = load_content_config(
+        explicit=args.content_config,
+        cwd=root,
+        repo_root=root,
+        allow_missing=True,
+    )
+    language_id = args.language or content_config.default_id
+    content_entry = content_config.get(language_id)
+    if not content_entry.is_local:
+        raise ValueError(
+            f"Content entry '{language_id}' references remote type '{content_entry.type}' which is not supported yet"
+        )
+    language_root = content_entry.resolve_path(root)
+    if not language_root.exists():
+        LOGGER.warning(
+            "Language root '%s' (id=%s) does not exist yet",
+            language_root,
+            language_id,
+        )
+
     manifest_data = _load_manifest(manifest)
     profile = _resolve_profile(manifest_data, args.profile, variables)
     repo_visibility = _detect_repo_visibility(args.repo_visibility)
@@ -448,6 +486,10 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     return OrchestratorConfig(
         root=root,
         manifest=manifest,
+        content_config_path=content_config.source_path,
+        language_id=language_id,
+        content_entry=content_entry,
+        language_root=language_root,
         profile=profile,
         repo_visibility=repo_visibility,
         repository=repository,
@@ -460,7 +502,9 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     )
 
 
-def _log_analytics(ctx: RuntimeContext, entries: list[dict], level: int = logging.INFO) -> None:
+def _log_analytics(
+    ctx: RuntimeContext, entries: list[dict], level: int = logging.INFO
+) -> None:
     payload = {
         "profile": ctx.config.profile.name,
         "manifest": str(ctx.config.manifest),
@@ -468,7 +512,9 @@ def _log_analytics(ctx: RuntimeContext, entries: list[dict], level: int = loggin
         "visibility": ctx.config.repo_visibility,
         "steps": entries,
     }
-    LOGGER.log(level, "Orchestrator analytics: %s", json.dumps(payload, ensure_ascii=False))
+    LOGGER.log(
+        level, "Orchestrator analytics: %s", json.dumps(payload, ensure_ascii=False)
+    )
 
 
 def run(config: OrchestratorConfig) -> None:
@@ -477,8 +523,10 @@ def run(config: OrchestratorConfig) -> None:
     ctx = RuntimeContext(config, manifest_data)
     steps = config.steps_override or config.profile.steps
     LOGGER.info(
-        "Starte Orchestrator-Profil '%s' mit Schritten: %s",
+        "Starte Orchestrator-Profil '%s' für Sprache '%s' (%s) mit Schritten: %s",
         config.profile.name,
+        config.language_id,
+        ctx.language_root,
         ", ".join(steps) or "<none>",
     )
     analytics: list[dict] = []
@@ -713,7 +761,7 @@ def _step_ensure_readme(ctx: RuntimeContext) -> None:
 
 def _step_update_citation(ctx: RuntimeContext) -> None:
     """Update citation.cff in publish/ directory and copy to root (for Zenodo/GitHub)."""
-    citation_publish = ctx.root / "publish" / "CITATION.cff"
+    citation_publish = ctx.language_root / "publish" / "CITATION.cff"
     if not citation_publish.exists():
         LOGGER.info("Keine CITATION.cff gefunden – Schritt wird übersprungen")
         return
@@ -745,7 +793,14 @@ def _step_update_citation(ctx: RuntimeContext) -> None:
     import shutil
 
     shutil.copy2(citation_publish, citation_root)
-    LOGGER.info("CITATION.cff nach Repository-Root kopiert")
+    if ctx.language_root != ctx.root:
+        LOGGER.info(
+            "CITATION.cff von Sprache '%s' (%s) nach Repository-Root kopiert",
+            ctx.language_id,
+            citation_publish.parent,
+        )
+    else:
+        LOGGER.info("CITATION.cff nach Repository-Root kopiert")
 
 
 def _step_ai_reference_check(ctx: RuntimeContext) -> None:
@@ -1020,6 +1075,17 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--repository",
         help="Repository-Slug (owner/name) für Template-Substitution",
+    )
+    parser.add_argument(
+        "--content-config",
+        type=Path,
+        help="Pfad zu content.yaml (Standard: Repository-Root)",
+    )
+    parser.add_argument(
+        "--lang",
+        "--language",
+        dest="language",
+        help="Sprach-ID aus content.yaml (Standard: content.yaml.default)",
     )
 
 

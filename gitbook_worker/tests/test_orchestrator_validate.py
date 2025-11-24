@@ -11,6 +11,7 @@ from gitbook_worker.tools.workflow_orchestrator.orchestrator import (
     run,
     validate_manifest,
 )
+from gitbook_worker.tools.utils.smart_content import ContentEntry
 
 
 @pytest.fixture()
@@ -82,9 +83,14 @@ def test_run_logs_failure_analytics(monkeypatch, caplog, manifest_file: Path):
         steps=(failing_step,),
         docker=docker_settings,
     )
+    entry = ContentEntry(id="default", uri="./", type="local")
     config = OrchestratorConfig(
         root=manifest_file.parent,
         manifest=manifest_file,
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=manifest_file.parent,
         profile=profile,
         repo_visibility="public",
         repository=None,
@@ -98,7 +104,9 @@ def test_run_logs_failure_analytics(monkeypatch, caplog, manifest_file: Path):
     with pytest.raises(RuntimeError):
         run(config)
 
-    analytics_logs = [rec.message for rec in caplog.records if "analytics" in rec.message]
+    analytics_logs = [
+        rec.message for rec in caplog.records if "analytics" in rec.message
+    ]
     assert analytics_logs, "expected analytics log entry when step fails"
 
     STEP_HANDLERS.pop(failing_step, None)
