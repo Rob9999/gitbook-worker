@@ -1,0 +1,16 @@
+version: 0.1.0
+profiles:
+  default:
+    steps:
+      - publisher
+publish:
+  - path: ./
+    out_format: pdf
+    out_dir: ./publish
+    out: placeholder.pdf
+    source_type: folder
+    source_format: markdown
+    use_summary: true
+    use_book_json: true
+    keep_combined: false
+    build: false  # enable once translation content exists

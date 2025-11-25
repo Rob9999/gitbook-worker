@@ -10,9 +10,12 @@ This handbook replaces the sprawling `.github/gitbook_worker/docs/` tree with a 
 maintained reference. The legacy archive remains read-only for deep dives.
 
 ## Package layout at a glance
+- `content.yaml` lists all languages (currently `de/` live, `en/` staging, `ua/` remote) and feeds the CLI via `--lang`.
+- Per-language content lives under `<lang>/` (`de/` already contains `content/`, `book.json`, `publish/`, etc.).
 - Python package lives at repository root under `gitbook_worker/` and exposes the `gitbook-worker` console script.
 - Tests reside in `tests/` and cover publishing, orchestrator flows, and emoji/font QA.
 - CI workflows under `.github/workflows/` mirror local usage by building the Docker image and invoking the same CLI entrypoints.
+- User-facing docs belong in `docs/`, engineering/sprint notes in `gitbook_worker/docs/` (per `AGENTS.md`).
 
 ## Local development essentials
 - Install dependencies with `pip install -r requirements.txt` and run quick checks via `pytest -q` from the repository root.
@@ -21,9 +24,9 @@ maintained reference. The legacy archive remains read-only for deep dives.
 
 ## Contributor quickstart
 - Install in editable mode: `pip install -e .` from the repository root.
-- Validate manifests quickly: `gitbook-worker validate --manifest publish.yml` (does not run the pipeline).
-- Run a local build: `./gitbook_worker/scripts/build-pdf.sh --profile local` or `gitbook-worker --profile default --manifest publish.yml`.
-- Execute targeted tests during iterations: `pytest tests/test_publisher.py tests/test_orchestrator_validate.py`.
+- Validate manifests quickly: `gitbook-worker validate --lang de --manifest de/publish.yml` (does not run the pipeline).
+- Run a local build: `./gitbook_worker/scripts/build-pdf.sh --profile local --manifest de/publish.yml` or `gitbook-worker run --lang de --profile default --manifest de/publish.yml`.
+- Execute targeted tests during iterations: `pytest tests/test_publisher.py tests/test_orchestrator_validate.py` (fixtures now resolve the default language via `content.yaml`).
 
 ## Troubleshooting
 - If PDF output misses images, ensure the source directory is covered by Pandoc `--resource-path` (handled automatically by the publisher helper) and that assets live under `assets/` or `.gitbook/assets/`.

@@ -1,7 +1,7 @@
 ---
-version: 0.1.0
+version: 0.2.0
 date: 2025-11-24
-history: Initial multilingual content guide created.
+history: Aktualisiert für das umstrukturierte Repo mit de/ als Basissprache.
 ---
 
 # Multilingual Content Guide
@@ -9,9 +9,9 @@ history: Initial multilingual content guide created.
 Diese Anleitung beschreibt, wie wir mehrere Sprachvarianten des Buchs parallel pflegen, konfigurieren und bauen.
 
 ## Überblick
-- Jede Sprache besitzt einen eigenen Ordner (`<lang-id>/`) im Repo-Root mit demselben Aufbau wie das bisherige Single-Language-Projekt.
+- Jede Sprache besitzt einen eigenen Ordner (`<lang-id>/`) im Repo-Root. `de/` enthält bereits den produktiven Buchinhalt (inkl. `content/`, `book.json`, `publish/`).
 - Eine zentrale `content.yaml` im Root listet alle Sprachvarianten, damit Skripte wie `gitbook_worker` automatisch wissen, welche Inhalte existieren und wo sie liegen.
-- Credentials für externe Quellen (z. B. Git-Repos) werden **nicht** in der YAML-Datei abgelegt, sondern über Environment-Variablen oder Secret Stores referenziert.
+- Credentials für externe Quellen (z. B. Git-Repos) werden **nicht** in der YAML-Datei abgelegt, sondern über Environment-Variablen oder Secret Stores referenziert (`credentialRef`).
 
 ## content.yaml
 ```yaml
@@ -48,8 +48,8 @@ repo/
   |- de/
   |   |- book.json
   |   |- content/
-  |   |- citation.cff
-  |   |- license/
+  |   |- CITATION.cff
+  |   |- LICENSE
   |   |- publish/
   |   \- assets/ (optional)
   |- en/
@@ -73,7 +73,7 @@ repo/
    - Ordnerstruktur aus `de/` kopieren (`en/`, `ua/`, …) und Inhalte anpassen.
    - Eintrag in `content.yaml` ergänzen; falls externe Quelle, `credentialRef` notieren.
 2. **Lokales Bauen/Testen**
-   - `gitbook-worker build --lang de` oder `--lang en` ruft den entsprechenden Ordner auf und schreibt in `<lang>/publish/`.
+  - `gitbook-worker run --lang de --manifest de/publish.yml` ruft den entsprechenden Ordner auf und schreibt in `<lang>/publish/`.
    - `pytest -k "lang"` für neue Tests, die Spracherkennung und Credential-Fehler abdecken.
 3. **CI-Integration**
    - Matrix-Build über `content.yaml`-Einträge, um pro Sprache PDF/HTML zu erzeugen.
@@ -82,7 +82,12 @@ repo/
    - Artefakte aus `<lang>/publish/` bündeln (PDF, Sammel-Markdown, Lizenz, Attribution, `citation.cff`).
    - Upload/Release pro Sprache, optional automatisiert via CLI.
 
+## Scaffolding neuer Sprachen
+- Lege den Zielordner (`en/`, `ua/` …) im Repo-Root an und kopiere die Grundstruktur aus `de/`.
+- Wenn der Content extern verwaltet wird, setze `type: git` und eine `uri`, die auf das Remote-Repo zeigt. `credentialRef` muss dann in CI/Local Secrets vorhanden sein.
+- Assets oder Fonts, die alle Sprachen benötigen, bleiben außerhalb der Sprachordner (z. B. `gitbook_worker/defaults/`) und werden per Skript eingebunden.
+
 ## Offene Punkte / Nächste Schritte
-- Loader in `gitbook_worker` implementieren, der `content.yaml` parst und die obige Logik verwendet.
-- Bestehenden Content nach `de/` migrieren und den neuen Workflow einmal komplett durchspielen.
-- Tests ergänzen (z. B. `tests/test_content_discovery.py`), damit Schema-Änderungen frühzeitig auffallen.
+- Automatisches Clonen/Checkout für `type: git`-Einträge inklusive Credential-Handling.
+- Pipeline/Publisher-Refactor, damit alle Steps implizit `language_root` aus `content.yaml` respektieren.
+- CI-Matrix über alle Sprachen (inkl. Smoke-PDF pro Sprache) sowie erweiterte Tests für Credential-Fehlerfälle.

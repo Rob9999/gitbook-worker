@@ -1,0 +1,6 @@
+{
+    "root": "content/",
+    "structure": {
+        "summary": "content/SUMMARY.md"
+    }
+}

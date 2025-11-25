@@ -9,6 +9,7 @@ import pathlib
 import subprocess
 import sys
 from collections.abc import Iterator
+from functools import lru_cache
 
 import pytest
 
@@ -22,6 +23,7 @@ for _path in (WORKER_DIR, REPO_ROOT):
 
 from . import GH_TEST_ARTIFACTS_DIR, GH_TEST_LOGS_DIR, GH_TEST_OUTPUT_DIR
 from gitbook_worker.tools.logging_config import make_specific_logger
+from gitbook_worker.tools.utils.smart_content import load_content_config
 from gitbook_worker.tools.utils.smart_manifest import (
     SmartManifestError,
     detect_repo_root,
@@ -79,9 +81,35 @@ def _find_repo_root(start_path: pathlib.Path | None = None) -> pathlib.Path:
     return detect_repo_root(base)
 
 
-def _find_publish_yml(repo_root: pathlib.Path) -> pathlib.Path:
-    """Resolve the publish manifest using the smart manifest rules."""
+@lru_cache(maxsize=1)
+def _default_language_root(repo_root: pathlib.Path) -> pathlib.Path:
+    """Return the local path for the default language configured in content.yaml."""
 
+    config = load_content_config(
+        cwd=repo_root, repo_root=repo_root, allow_missing=False
+    )
+    entry = config.get(config.default_id)
+    if not entry.is_local:
+        raise RuntimeError(
+            f"Default language '{entry.id}' is not local; tests expect a local baseline"
+        )
+    root = entry.resolve_path(repo_root)
+    if not root.exists():
+        raise FileNotFoundError(
+            f"Language root {root} (id={entry.id}) not found; sync repo before running tests"
+        )
+    return root
+
+
+def _find_publish_yml(repo_root: pathlib.Path) -> pathlib.Path:
+    """Resolve the publish manifest inside the default language root."""
+
+    language_root = _default_language_root(repo_root)
+    manifest = language_root / "publish.yml"
+    if manifest.exists():
+        return manifest
+
+    # Fallback to smart manifest rules for backwards compatibility (e.g. test fixtures)
     try:
         return resolve_manifest(explicit=None, cwd=repo_root, repo_root=repo_root)
     except SmartManifestError as exc:  # pragma: no cover - mirrors runtime behaviour
@@ -89,16 +117,24 @@ def _find_publish_yml(repo_root: pathlib.Path) -> pathlib.Path:
 
 
 def _find_book_json(start_path: pathlib.Path) -> pathlib.Path:
-    """Locate book.json by searching up the directory tree.
+    """Locate book.json using the default language root before falling back."""
 
-    This matches the logic in gitbook_style.py's _find_book_base().
-    """
+    try:
+        language_root = _default_language_root(start_path)
+    except Exception:
+        language_root = None
+
+    if language_root is not None:
+        candidate = language_root / "book.json"
+        if candidate.exists():
+            return candidate.resolve()
+
+    # Fallback to search up the tree (used by isolated test fixtures)
     for candidate in [start_path, *start_path.parents]:
         book_json = candidate / "book.json"
         if book_json.exists():
             return book_json.resolve()
 
-    # Fallback to start_path / "book.json" (may not exist)
     return (start_path / "book.json").resolve()
 
 
