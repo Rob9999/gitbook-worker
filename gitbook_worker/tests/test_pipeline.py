@@ -14,12 +14,15 @@ def publish_manifest(tmp_path: Path) -> Path:
     return manifest
 
 
-def test_resolve_options_defaults(monkeypatch: pytest.MonkeyPatch, publish_manifest: Path) -> None:
+def test_resolve_options_defaults(
+    monkeypatch: pytest.MonkeyPatch, publish_manifest: Path
+) -> None:
     monkeypatch.chdir(publish_manifest.parent)
     args = pipeline.parse_args([])
     options = pipeline._resolve_options(args)
     assert options.root == publish_manifest.parent.resolve()
     assert options.manifest == publish_manifest.resolve()
+    assert options.language_id == "default"
 
 
 def test_run_pipeline_executes_all_steps(
@@ -54,6 +57,11 @@ def test_run_pipeline_executes_all_steps(
         gitbook_use_git=True,
         publisher_args=(),
         dry_run=False,
+        language_id="default",
+        language_env={
+            "GITBOOK_CONTENT_ID": "default",
+            "GITBOOK_CONTENT_ROOT": str(publish_manifest.parent),
+        },
     )
     pipeline.run_pipeline(options)
     assert calls == ["set", "gitbook", "publisher"]
@@ -82,16 +90,23 @@ def test_pipeline_dry_run_skips_steps(
         gitbook_use_git=True,
         publisher_args=(),
         dry_run=True,
+        language_id="default",
+        language_env={
+            "GITBOOK_CONTENT_ID": "default",
+            "GITBOOK_CONTENT_ROOT": str(publish_manifest.parent),
+        },
     )
     pipeline.run_pipeline(options)
 
 
 def test_parse_publisher_args() -> None:
-    args = pipeline.parse_args([
-        "--publisher-args=--keep-combined",
-        "--publisher-args=--paper-format=a4",
-        "--publisher-args=--landscape",
-    ])
+    args = pipeline.parse_args(
+        [
+            "--publisher-args=--keep-combined",
+            "--publisher-args=--paper-format=a4",
+            "--publisher-args=--landscape",
+        ]
+    )
     assert args.publisher_args == (
         "--keep-combined",
         "--paper-format=a4",

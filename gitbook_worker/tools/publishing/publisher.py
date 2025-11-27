@@ -38,7 +38,12 @@ from functools import lru_cache
 from urllib.parse import urlparse
 
 from gitbook_worker.tools.logging_config import get_logger
+from gitbook_worker.tools.utils.language_context import (
+    build_language_env,
+    resolve_language_context,
+)
 from gitbook_worker.tools.utils.smart_manifest import (
+    DEFAULT_FILENAMES,
     SmartManifestError,
     detect_repo_root,
     resolve_manifest,
@@ -212,9 +217,7 @@ def _get_default_variables() -> Dict[str, str]:
 
     # Add CC BY fallback chain if available
     fallback_chain = [
-        name
-        for name in [cjk_font_name, indic_font_name, ethiopic_font_name]
-        if name
+        name for name in [cjk_font_name, indic_font_name, ethiopic_font_name] if name
     ]
     if fallback_chain:
         variables["mainfontfallback"] = "; ".join(
@@ -972,6 +975,12 @@ def prepareYAML() -> None:
 
 
 def find_publish_manifest(explicit: Optional[str] = None) -> str:
+    env_root = os.getenv("GITBOOK_CONTENT_ROOT")
+    if explicit is None and env_root:
+        for name in DEFAULT_FILENAMES:
+            candidate = (Path(env_root) / name).resolve()
+            if candidate.exists():
+                return str(candidate)
     cwd = Path.cwd()
     repo_root = detect_repo_root(cwd)
     try:
@@ -2221,6 +2230,18 @@ def _write_github_outputs(built: List[str], failed: List[str], manifest: str) ->
 def main() -> None:
     logger.info("Selective Publisher gestartet: argv=%s", sys.argv)
     ap = argparse.ArgumentParser(description="Selective publisher für publish.yml")
+    ap.add_argument("--root", type=Path, help="Repository root (Default: cwd)")
+    ap.add_argument(
+        "--content-config",
+        type=Path,
+        help="Pfad zu content.yaml (Default: Repository-Root)",
+    )
+    ap.add_argument(
+        "--lang",
+        "--language",
+        dest="language",
+        help="Sprach-ID aus content.yaml",
+    )
     ap.add_argument("--manifest", help="Pfad zu publish.yml|yaml (Default: Root)")
     ap.add_argument(
         "--no-apt", action="store_true", help="Keine apt-Installation versuchen"
@@ -2269,7 +2290,21 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    manifest = find_publish_manifest(args.manifest)
+    raw_root = args.root.resolve() if args.root else Path.cwd()
+    repo_root = detect_repo_root(raw_root)
+    language_ctx = resolve_language_context(
+        repo_root=repo_root,
+        language=args.language,
+        manifest=args.manifest,
+        content_config=args.content_config,
+        allow_missing_config=True,
+        allow_remote_entries=True,
+        require_manifest=True,
+        fetch_remote=True,
+    )
+    env_payload = build_language_env(language_ctx)
+    os.environ.update(env_payload)
+    manifest = str(language_ctx.require_manifest())
 
     if args.only_prepare:
         # B.1 + B

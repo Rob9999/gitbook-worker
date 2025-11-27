@@ -113,6 +113,25 @@ def temp_repo(tmp_path):
     return repo
 
 
+def test_find_publish_file_prefers_environment(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    lang_root = tmp_path / "lang"
+    lang_root.mkdir()
+    manifest = lang_root / "publish.yml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".git").mkdir()
+
+    monkeypatch.chdir(repo)
+    monkeypatch.setenv("GITBOOK_CONTENT_ROOT", str(lang_root))
+
+    resolved = find_publish_file(None)
+    assert resolved == manifest.resolve()
+
+
 class TestNormalizePosix:
     """Tests for POSIX path normalization."""
 

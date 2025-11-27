@@ -101,6 +101,53 @@ jobs:
           if-no-files-found: warn
 
   # ============================================================================
+  # Language-aware smoke validations
+  # ============================================================================
+  language-smoke:
+    if: ${{ github.event.inputs.test_suite == 'all' || github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: ["de", "en", "ua"]
+    env:
+      GITBOOK_CONTENT_UA_DEPLOY_KEY: ${{ secrets.GITBOOK_CONTENT_UA_DEPLOY_KEY }}
+    steps:
+      - name: Determine credential availability
+        id: credential_guard
+        shell: bash
+        run: |
+          if [[ "${{ matrix.lang }}" == "ua" && -z "${GITBOOK_CONTENT_UA_DEPLOY_KEY}" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "### Skipping UA smoke run" >> "$GITHUB_STEP_SUMMARY"
+            echo "Credential GITBOOK_CONTENT_UA_DEPLOY_KEY missing" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: ${{ steps.credential_guard.outputs.skip != 'true' }}
+
+      - name: Set up Python
+        if: ${{ steps.credential_guard.outputs.skip != 'true' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        if: ${{ steps.credential_guard.outputs.skip != 'true' }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Validate language manifest
+        if: ${{ steps.credential_guard.outputs.skip != 'true' }}
+        env:
+          GITBOOK_CONTENT_UA_DEPLOY_KEY: ${{ secrets.GITBOOK_CONTENT_UA_DEPLOY_KEY }}
+        run: |
+          gitbook-worker validate --lang "${{ matrix.lang }}"
+
+  # ============================================================================
   # Emoji & Font Compliance Tests (optional)
   # ============================================================================
   emoji-harness:
@@ -211,7 +258,7 @@ jobs:
   # Test Summary
   # ============================================================================
   test-summary:
-    needs: [unit-tests, integration-tests, type-check]
+    needs: [unit-tests, integration-tests, type-check, language-smoke]
     if: always()
     runs-on: ubuntu-latest
     steps:

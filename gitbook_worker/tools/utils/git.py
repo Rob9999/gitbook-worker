@@ -5,7 +5,7 @@ from __future__ import annotations
 import shutil
 import stat
 from pathlib import Path
-from typing import Optional
+from typing import Mapping, Optional
 
 from gitbook_worker.tools.logging_config import get_logger
 
@@ -33,15 +33,24 @@ def remove_tree(path: str | Path) -> None:
     shutil.rmtree(target, onerror=_handle_readonly)
 
 
-def checkout_branch(repo_dir: str | Path, branch_name: str) -> None:
+def checkout_branch(
+    repo_dir: str | Path,
+    branch_name: str,
+    *,
+    env: Mapping[str, str] | None = None,
+) -> None:
     """Check out *branch_name* inside *repo_dir* and fast-forward to origin."""
     repo_path = Path(repo_dir)
     if not repo_path.exists():
         raise FileNotFoundError(f"Repository directory not found: {repo_path}")
     repo_str = str(repo_path)
     LOGGER.info("Checking out branch %s in %s", branch_name, repo_path)
-    run(["git", "-C", repo_str, "checkout", branch_name])
-    run(["git", "-C", repo_str, "pull", "--ff-only", "origin", branch_name], check=False)
+    run(["git", "-C", repo_str, "checkout", branch_name], env=dict(env or {}))
+    run(
+        ["git", "-C", repo_str, "pull", "--ff-only", "origin", branch_name],
+        check=False,
+        env=dict(env or {}),
+    )
 
 
 def _is_git_repository(path: Path) -> bool:
@@ -54,12 +63,15 @@ def clone_or_update_repo(
     *,
     branch_name: Optional[str] = None,
     force: bool = False,
+    env: Mapping[str, str] | None = None,
 ) -> None:
     """Clone *repo_url* into *clone_dir* or update the existing checkout."""
     destination = Path(clone_dir)
     repo_str = str(destination)
     if destination.exists() and not _is_git_repository(destination):
-        LOGGER.warning("Existing path %s is not a Git repository; removing it.", destination)
+        LOGGER.warning(
+            "Existing path %s is not a Git repository; removing it.", destination
+        )
         remove_tree(destination)
 
     if destination.exists() and force:
@@ -72,17 +84,23 @@ def clone_or_update_repo(
         if branch_name:
             cmd += ["--branch", branch_name]
         cmd += [repo_url, repo_str]
-        run(cmd)
+        run(cmd, env=dict(env or {}))
         return
 
     LOGGER.info("Updating existing repository at %s", destination)
-    run(["git", "-C", repo_str, "fetch", "--all", "--tags", "--prune"])
+    run(
+        ["git", "-C", repo_str, "fetch", "--all", "--tags", "--prune"],
+        env=dict(env or {}),
+    )
     if branch_name:
-        checkout_branch(destination, branch_name)
-        run(["git", "-C", repo_str, "reset", "--hard", f"origin/{branch_name}"])
+        checkout_branch(destination, branch_name, env=env)
+        run(
+            ["git", "-C", repo_str, "reset", "--hard", f"origin/{branch_name}"],
+            env=dict(env or {}),
+        )
     else:
-        run(["git", "-C", repo_str, "pull", "--ff-only"])
-    run(["git", "-C", repo_str, "clean", "-fdx"], check=False)
+        run(["git", "-C", repo_str, "pull", "--ff-only"], env=dict(env or {}))
+    run(["git", "-C", repo_str, "clean", "-fdx"], check=False, env=dict(env or {}))
 
 
 __all__ = [

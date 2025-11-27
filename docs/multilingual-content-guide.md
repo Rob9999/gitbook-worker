@@ -1,7 +1,7 @@
 ---
-version: 0.2.0
-date: 2025-11-24
-history: Aktualisiert für das umstrukturierte Repo mit de/ als Basissprache.
+version: 0.4.0
+date: 2025-11-25
+history: Contributor-Workflow ergänzt, Shared-Asset-Sync dokumentiert, Frontmatter korrigiert.
 ---
 
 # Multilingual Content Guide
@@ -64,30 +64,29 @@ repo/
 - Gemeinsame Skripte/Packages bleiben im Root (`gitbook_worker/`, `tests/`).
 
 ## Credential-Strategie
-1. Hinterlege Secrets pro Sprache in `.env.local` (entwicklerseitig) bzw. in CI (z. B. GitHub Secrets, Azure Key Vault).
+1. Hinterlege Secrets pro Sprache in `.env.local` (entwicklerseitig) oder direkt im CI (z. B. GitHub Secrets, Azure Key Vault).
 2. Benenne die Variable identisch mit `credentialRef` aus `content.yaml` (z. B. `GITBOOK_CONTENT_UA_DEPLOY_KEY`).
-3. Der CLI-Layer liest `content.yaml`, erkennt den `credentialRef` und lädt das Secret bei Bedarf. Fehlt es, wird der Build mit einer klaren Fehlermeldung abgebrochen.
+3. Der CLI-Layer liest `content.yaml`, erkennt den `credentialRef` und lädt das Secret bei Bedarf. Der Wert kann entweder **den Pfad** zu einem privaten SSH-Key oder den **Key-Inhalt** selbst enthalten. Inline-Keys werden nach `.gitbook-content/keys/<lang>.key` geschrieben und mit restriktiven Berechtigungen versehen. Fehlt das Secret, bricht der Build mit einer klaren Fehlermeldung ab.
 
-## Typischer Workflow
-1. **Neue Sprache hinzufügen**
-   - Ordnerstruktur aus `de/` kopieren (`en/`, `ua/`, …) und Inhalte anpassen.
-   - Eintrag in `content.yaml` ergänzen; falls externe Quelle, `credentialRef` notieren.
-2. **Lokales Bauen/Testen**
-  - `gitbook-worker run --lang de --manifest de/publish.yml` ruft den entsprechenden Ordner auf und schreibt in `<lang>/publish/`.
-   - `pytest -k "lang"` für neue Tests, die Spracherkennung und Credential-Fehler abdecken.
-3. **CI-Integration**
-   - Matrix-Build über `content.yaml`-Einträge, um pro Sprache PDF/HTML zu erzeugen.
-   - Validierung: `gitbook-worker validate --lang <id>` prüft Manifest, Fonts und Publish-Ziel.
-4. **Deployment/Veröffentlichung**
-   - Artefakte aus `<lang>/publish/` bündeln (PDF, Sammel-Markdown, Lizenz, Attribution, `citation.cff`).
-   - Upload/Release pro Sprache, optional automatisiert via CLI.
+## Remote-Inhalte & Cache
+- `type: git`-Einträge werden automatisch nach `.gitbook-content/<lang-id>` geklont. Wiederholte Läufe aktualisieren diese Checkouts statt sie neu zu clonen.
+- Das Secret aus `credentialRef` wird als `GIT_SSH_COMMAND` eingebunden, damit Deploy-Keys ohne zusätzliche Wrapper funktionieren.
+- Falls bereits ein externer Checkout existiert (z. B. CI-Cache), setze `GITBOOK_CONTENT_ROOT` auf diesen Pfad und die CLI überspringt den Clone-Schritt.
+ 
+## Contributor-Workflow (Kurzfassung)
+1. **Struktur kopieren oder Remote verbinden** – dupliziere `de/` als Vorlage oder verbinde eine bestehende Git-Quelle via `type: git`.
+2. **`content.yaml` erweitern** – neuer `id`, `uri`, `type`, optional `credentialRef`; `default` nur ändern, wenn eine andere Sprache der Standard werden soll.
+3. **Shared Assets synchronisieren** – gleiche Änderungen an Frontmatter/Fonts/README-Snippets zwischen allen Sprachen ab (`gitbook_worker/defaults/*`).
+4. **Validieren & testen** – `gitbook-worker validate --lang <id>` plus fokussierte Pytests (`pytest -k <id>`), anschließend CI-Matrix erweitern.
+5. **Dokumentation aktualisieren** – Ergänzungen in `docs/contributor-new-language.md` festhalten, damit der Ablauf nachvollziehbar bleibt.
 
-## Scaffolding neuer Sprachen
-- Lege den Zielordner (`en/`, `ua/` …) im Repo-Root an und kopiere die Grundstruktur aus `de/`.
-- Wenn der Content extern verwaltet wird, setze `type: git` und eine `uri`, die auf das Remote-Repo zeigt. `credentialRef` muss dann in CI/Local Secrets vorhanden sein.
-- Assets oder Fonts, die alle Sprachen benötigen, bleiben außerhalb der Sprachordner (z. B. `gitbook_worker/defaults/`) und werden per Skript eingebunden.
+Die ausführliche Schritt-für-Schritt-Anleitung steht in `docs/contributor-new-language.md`.
+
+## Shared Assets & Templates
+- `gitbook_worker/defaults/frontmatter.yml` – Basis-Metadaten für PDF/Markdown; halte Übersetzungen synchron, damit Release-Banner und Attribution übereinstimmen.
+- `gitbook_worker/defaults/fonts.yml` – Schriftkonfiguration, die alle Sprach-Pipelines verwenden; teste neue Fonts zunächst in einer Sprache, bevor du sie global aktualisierst.
+- `gitbook_worker/defaults/readme.yml` und `smart.yml` – definieren, welche Dateien beim Publish kombiniert werden; füge neue Kapitel/Anhänge an allen Sprachen gleichzeitig hinzu.
+- Gemeinsame Assets (Logos, Fonts, Templates) sollten nicht in einzelnen Sprachordnern dupliziert werden. Leite sie stattdessen aus `gitbook_worker/defaults/` oder `gitbook_worker/tools/assets/` ab und dokumentiere Ausnahmen.
 
 ## Offene Punkte / Nächste Schritte
-- Automatisches Clonen/Checkout für `type: git`-Einträge inklusive Credential-Handling.
-- Pipeline/Publisher-Refactor, damit alle Steps implizit `language_root` aus `content.yaml` respektieren.
 - CI-Matrix über alle Sprachen (inkl. Smoke-PDF pro Sprache) sowie erweiterte Tests für Credential-Fehlerfälle.

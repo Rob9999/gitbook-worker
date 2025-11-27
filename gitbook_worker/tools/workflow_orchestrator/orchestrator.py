@@ -28,15 +28,13 @@ from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing.frontmatter_config import FrontMatterConfigLoader
 from gitbook_worker.tools.publishing.readme_config import ReadmeConfigLoader
 from gitbook_worker.tools.utils import git as git_utils
+from gitbook_worker.tools.utils.language_context import resolve_language_context
 from gitbook_worker.tools.utils.smart_manifest import (
     SmartManifestError,
     detect_repo_root,
     resolve_manifest,
 )
-from gitbook_worker.tools.utils.smart_content import (
-    ContentEntry,
-    load_content_config,
-)
+from gitbook_worker.tools.utils.smart_content import ContentEntry
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
 
 LOGGER = get_logger(__name__)
@@ -449,7 +447,7 @@ def _split_publisher_args(values: Iterable[str] | None) -> tuple[str, ...]:
 
 
 def build_config(args: argparse.Namespace) -> OrchestratorConfig:
-    root, manifest = _resolve_paths(args.root, args.manifest)
+    root = detect_repo_root(args.root.resolve())
     repository = args.repository or os.getenv("GITHUB_REPOSITORY")
     repository_template = repository.lower() if repository else ""
     variables = {
@@ -458,19 +456,21 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         "visibility": args.repo_visibility,
     }
 
-    content_config = load_content_config(
-        explicit=args.content_config,
-        cwd=root,
+    language_ctx = resolve_language_context(
         repo_root=root,
-        allow_missing=True,
+        language=args.language,
+        manifest=args.manifest,
+        content_config=args.content_config,
+        allow_missing_config=True,
+        allow_remote_entries=True,
+        require_manifest=True,
+        fetch_remote=True,
     )
-    language_id = args.language or content_config.default_id
-    content_entry = content_config.get(language_id)
-    if not content_entry.is_local:
-        raise ValueError(
-            f"Content entry '{language_id}' references remote type '{content_entry.type}' which is not supported yet"
-        )
-    language_root = content_entry.resolve_path(root)
+
+    manifest = language_ctx.require_manifest()
+    language_root = language_ctx.root
+    language_id = language_ctx.language_id
+    content_entry = language_ctx.entry
     if not language_root.exists():
         LOGGER.warning(
             "Language root '%s' (id=%s) does not exist yet",
@@ -486,7 +486,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     return OrchestratorConfig(
         root=root,
         manifest=manifest,
-        content_config_path=content_config.source_path,
+        content_config_path=language_ctx.content_config_path,
         language_id=language_id,
         content_entry=content_entry,
         language_root=language_root,

@@ -7,27 +7,23 @@ For each CSV the table is written to ``assets/tables`` and, if a matching templa
 exists under ``assets/templates``, the table is also copied to the template's
 target path. If numeric columns exist, a chart is written to ``assets/diagrams``.
 """
-from pathlib import Path
 import argparse
+import os
+from pathlib import Path
 
 import pandas as pd
 import yaml
 from gitbook_worker.tools.logging_config import get_logger
 
-from gitbook_worker.tools.utils.smart_manifest import resolve_manifest
+from gitbook_worker.tools.utils.language_context import (
+    build_language_env,
+    resolve_language_context,
+)
+from gitbook_worker.tools.utils.smart_manifest import detect_repo_root
 
 from .csv2md_and_chart import save_chart, save_markdown
 
 logger = get_logger(__name__)
-
-try:
-    from gh_paths import REPO_ROOT
-except ImportError:
-    logger.warning(
-        "Failed to gather directories from python tree. Falling back to manual resolution."
-    )
-    REPO_ROOT = Path(__file__).resolve().parents[2]
-    logger.info("REPO_ROOT : %s", REPO_ROOT)
 
 # PUBLIC, TEMPLATES and MANIFEST will be populated at runtime so the converter
 # can be used against any repository layout. They are set by main() using the
@@ -118,12 +114,41 @@ def main():
         description="Convert CSV assets to markdown and charts."
     )
     parser.add_argument(
+        "--root",
+        type=Path,
+        help="Repository root (default: cwd)",
+    )
+    parser.add_argument(
         "--manifest",
         help="Path to publish.yml (defaults to repo root or legacy location)",
     )
+    parser.add_argument(
+        "--content-config",
+        type=Path,
+        help="Pfad zu content.yaml (Default: Repository-Root)",
+    )
+    parser.add_argument(
+        "--lang",
+        "--language",
+        dest="language",
+        help="Sprach-ID aus content.yaml",
+    )
     args = parser.parse_args()
 
-    manifest_path = resolve_manifest(explicit=args.manifest, cwd=Path.cwd(), repo_root=REPO_ROOT)
+    raw_root = args.root.resolve() if args.root else Path.cwd()
+    repo_root = detect_repo_root(raw_root)
+    language_ctx = resolve_language_context(
+        repo_root=repo_root,
+        language=args.language,
+        manifest=args.manifest,
+        content_config=args.content_config,
+        allow_missing_config=True,
+        allow_remote_entries=True,
+        require_manifest=True,
+        fetch_remote=True,
+    )
+    os.environ.update(build_language_env(language_ctx))
+    manifest_path = language_ctx.require_manifest()
     global MANIFEST, PUBLIC, TEMPLATES
     MANIFEST = manifest_path
     PUBLIC = manifest_path.parent

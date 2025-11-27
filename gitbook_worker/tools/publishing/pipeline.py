@@ -40,7 +40,12 @@ from pathlib import Path
 from typing import Iterable, Mapping, MutableMapping, Sequence
 
 from gitbook_worker.tools.logging_config import get_logger
-from gitbook_worker.tools.utils.smart_manifest import detect_repo_root, resolve_manifest
+from gitbook_worker.tools.utils.language_context import (
+    build_language_env,
+    resolve_language_context,
+)
+from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
+from gitbook_worker.tools.utils.smart_manifest import detect_repo_root
 
 LOGGER = get_logger(__name__)
 
@@ -63,14 +68,19 @@ class PipelineOptions:
     gitbook_use_git: bool
     publisher_args: tuple[str, ...]
     dry_run: bool
+    language_id: str
+    language_env: Mapping[str, str]
 
 
 class CommandError(RuntimeError):
     """Raised when a subprocess exits with a non-zero status."""
 
 
-def _build_env(extra: Mapping[str, str] | None = None) -> MutableMapping[str, str]:
+def _build_env(
+    language_env: Mapping[str, str], extra: Mapping[str, str] | None = None
+) -> MutableMapping[str, str]:
     env: MutableMapping[str, str] = os.environ.copy()
+    env.update(language_env)
     if extra:
         env.update(extra)
     return env
@@ -83,6 +93,7 @@ def _format_cmd(cmd: Sequence[str]) -> str:
 def _run_command(
     cmd: Sequence[str],
     *,
+    options: PipelineOptions,
     cwd: Path | None = None,
     env: Mapping[str, str] | None = None,
     check: bool = True,
@@ -92,7 +103,7 @@ def _run_command(
     result = subprocess.run(
         list(cmd),
         cwd=str(cwd) if cwd else None,
-        env=_build_env(env),
+        env=_build_env(options.language_env, env),
         text=True,
     )
     if check and result.returncode != 0:
@@ -103,12 +114,22 @@ def _run_command(
 
 
 def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
-    raw_root = args.root.resolve()
-    root = detect_repo_root(raw_root)
-    manifest = resolve_manifest(explicit=args.manifest, cwd=Path.cwd(), repo_root=root)
+    repo_root = detect_repo_root(args.root)
+    language_ctx = resolve_language_context(
+        repo_root=repo_root,
+        language=args.language,
+        manifest=args.manifest,
+        content_config=args.content_config,
+        allow_missing_config=True,
+        allow_remote_entries=True,
+        require_manifest=True,
+        fetch_remote=True,
+    )
+    manifest = language_ctx.require_manifest()
+    language_env = build_language_env(language_ctx)
     publisher_args = tuple(args.publisher_args or ())
     return PipelineOptions(
-        root=root,
+        root=language_ctx.root,
         manifest=manifest,
         commit=args.commit,
         base=args.base,
@@ -120,6 +141,8 @@ def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
         gitbook_use_git=not args.gitbook_no_git,
         publisher_args=publisher_args,
         dry_run=args.dry_run,
+        language_id=language_ctx.language_id,
+        language_env=language_env,
     )
 
 
@@ -128,15 +151,20 @@ def _build_python_cmd(script: Path, *extra: str) -> tuple[str, ...]:
 
 
 def _run_set_publish_flag(options: PipelineOptions) -> None:
-    script = SCRIPT_DIR / "set_publish_flag.py"
-    cmd = list(_build_python_cmd(script, "--publish-file", str(options.manifest)))
-    if options.commit:
-        cmd.extend(["--commit", options.commit])
-    if options.base:
-        cmd.extend(["--base", options.base])
-    if options.reset_others:
-        cmd.append("--reset-others")
-    _run_command(cmd, cwd=options.root)
+    """Update publish flags without spawning the deprecated helper CLI."""
+
+    result = set_publish_flags(
+        manifest_path=options.manifest,
+        commit=options.commit or "HEAD",
+        base=options.base,
+        reset_others=options.reset_others,
+        dry_run=options.dry_run,
+    )
+    LOGGER.info(
+        "set_publish_flags touched %d entries (any_build_true=%s)",
+        len(result.get("modified_entries", [])),
+        result.get("any_build_true", False),
+    )
 
 
 def _run_gitbook_steps(options: PipelineOptions) -> None:
@@ -145,7 +173,11 @@ def _run_gitbook_steps(options: PipelineOptions) -> None:
         rename_args = ["rename", "--root", str(options.root)]
         if not options.gitbook_use_git:
             rename_args.append("--no-git")
-        _run_command(_build_python_cmd(script, *rename_args), cwd=options.root)
+        _run_command(
+            _build_python_cmd(script, *rename_args),
+            cwd=options.root,
+            options=options,
+        )
     if options.run_gitbook_summary:
         summary_args = ["summary", "--root", str(options.root)]
         if not options.gitbook_use_git:
@@ -169,14 +201,18 @@ def _run_gitbook_steps(options: PipelineOptions) -> None:
                         if val.strip().lower() in ("true", "yes", "y", "1"):
                             summary_args.append("--summary-appendices-last")
                     break
-        _run_command(_build_python_cmd(script, *summary_args), cwd=options.root)
+        _run_command(
+            _build_python_cmd(script, *summary_args),
+            cwd=options.root,
+            options=options,
+        )
 
 
 def _run_publisher(options: PipelineOptions) -> None:
     script = SCRIPT_DIR / "publisher.py"
     cmd = list(_build_python_cmd(script, "--manifest", str(options.manifest)))
     cmd.extend(options.publisher_args)
-    _run_command(cmd, cwd=options.root)
+    _run_command(cmd, cwd=options.root, options=options)
 
 
 def run_pipeline(options: PipelineOptions) -> None:
@@ -215,6 +251,17 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--root",
         type=Path,
         help="Repository root (default: automatisch über smart manifest Regeln)",
+    )
+    parser.add_argument(
+        "--content-config",
+        type=Path,
+        help="Pfad zu content.yaml (Default: Repository-Root)",
+    )
+    parser.add_argument(
+        "--lang",
+        "--language",
+        dest="language",
+        help="Sprach-ID aus content.yaml",
     )
     parser.add_argument(
         "--manifest",

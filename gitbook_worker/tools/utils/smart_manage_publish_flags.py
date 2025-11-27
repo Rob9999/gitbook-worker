@@ -29,9 +29,12 @@ from typing import Any, Dict, List, Optional
 import yaml
 
 from gitbook_worker.tools.logging_config import get_logger
-from gitbook_worker.tools.utils.smart_git import get_changed_files as git_get_changed_files
+from gitbook_worker.tools.utils.smart_git import (
+    get_changed_files as git_get_changed_files,
+)
 from gitbook_worker.tools.utils.smart_git import normalize_posix
 from gitbook_worker.tools.utils.smart_manifest import (
+    DEFAULT_FILENAMES,
     SmartManifestError,
     detect_repo_root,
     resolve_manifest,
@@ -53,6 +56,18 @@ logger = get_logger(__name__)
 # ============================================================================
 
 
+def _manifest_from_env() -> Path | None:
+    env_root = os.getenv("GITBOOK_CONTENT_ROOT")
+    if not env_root:
+        return None
+    base = Path(env_root)
+    for name in DEFAULT_FILENAMES:
+        candidate = (base / name).resolve()
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def find_publish_file(explicit: Optional[str] = None) -> Path:
     """Find publish.yml manifest using smart resolution.
 
@@ -65,6 +80,11 @@ def find_publish_file(explicit: Optional[str] = None) -> Path:
     Raises:
         SystemExit: If manifest cannot be found
     """
+    if explicit is None:
+        env_manifest = _manifest_from_env()
+        if env_manifest is not None:
+            return env_manifest
+
     cwd = Path.cwd()
     repo_root = detect_repo_root(cwd)
     try:
