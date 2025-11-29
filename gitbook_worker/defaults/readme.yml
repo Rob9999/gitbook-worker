@@ -68,6 +68,8 @@ patterns:
     # Special GitBook directories (should not have auto-generated README)
     - "content/readme"
     - "content/readme/**"
+    - "**/content/readme"
+    - "**/content/readme/**"
 
 # Template for generated README.md files
 template:

@@ -30,6 +30,8 @@ import os
 import shutil
 import subprocess
 import sys
+import tarfile
+import zipfile
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -64,6 +66,10 @@ if REPO_ROOT is None:
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing.font_config import FontConfigLoader, FontConfig
+from gitbook_worker.tools.publishing.font_storage import (
+    FontStorageBootstrapper,
+    FontStorageError,
+)
 
 logger = get_logger(__name__)
 
@@ -114,6 +120,11 @@ class DockerFontInstaller:
             config_path: Path to fonts.yml (auto-detected if None)
         """
         self.config = FontConfigLoader(config_path)
+        self.storage_root = (REPO_ROOT / "fonts-storage").resolve()
+        try:
+            FontStorageBootstrapper(self.storage_root).ensure_defaults()
+        except FontStorageError as exc:
+            logger.warning("Font storage bootstrap failed: %s", exc)
         self.font_dirs = {
             "system": Path("/usr/share/fonts/truetype/gitbook_worker"),
             "user": Path("/root/.fonts"),
@@ -225,22 +236,15 @@ class DockerFontInstaller:
                         f"Download succeeded but file not found: {temp_file}"
                     )
 
-                # Calculate checksum
-                checksum = self._calculate_checksum(temp_file)
-                file_size = temp_file.stat().st_size
+                downloaded = self._materialize_download(temp_file, target_dir)
+                for entry in downloaded:
+                    entry["source"] = font.download_url
+                installed_files.extend(downloaded)
 
-                installed_files.append(
-                    {
-                        "source": font.download_url,
-                        "target": str(temp_file),
-                        "size": file_size,
-                        "sha256": checksum,
-                    }
-                )
+                if not downloaded:
+                    raise RuntimeError("Downloaded archive did not contain font files")
 
-                logger.info("  ✓ Downloaded successfully!")
-                logger.info("     Size: %d bytes", file_size)
-                logger.info("     SHA256: %s", checksum[:16])
+                logger.info("  ✓ Downloaded %d file(s) successfully!", len(downloaded))
 
             except Exception as e:
                 logger.error("  ✗ Download failed for %s: %s", font.download_url, e)
@@ -311,6 +315,63 @@ class DockerFontInstaller:
         )
 
         return True
+
+    def _materialize_download(
+        self, archive_path: Path, target_dir: Path
+    ) -> List[Dict[str, str]]:
+        """Extract downloaded archive/file into target_dir.
+
+        Returns metadata entries for installed font files.
+        """
+
+        installed: List[Dict[str, str]] = []
+        suffix = archive_path.suffix.lower()
+
+        def _record(path: Path) -> Dict[str, str]:
+            checksum = self._calculate_checksum(path)
+            return {
+                "source": archive_path.name,
+                "target": str(path),
+                "size": path.stat().st_size,
+                "sha256": checksum,
+            }
+
+        font_extensions = (".ttf", ".otf", ".ttc")
+
+        if suffix == ".zip":
+            with zipfile.ZipFile(archive_path, "r") as archive:
+                for member in archive.infolist():
+                    if member.is_dir():
+                        continue
+                    if not member.filename.lower().endswith(font_extensions):
+                        continue
+                    target_file = target_dir / Path(member.filename).name
+                    with archive.open(member, "r") as src, target_file.open(
+                        "wb"
+                    ) as dst:
+                        shutil.copyfileobj(src, dst)
+                    installed.append(_record(target_file))
+        elif suffix in {".tar", ".gz", ".tgz", ".bz2", ".xz"}:
+            with tarfile.open(archive_path, "r:*") as archive:
+                for member in archive.getmembers():
+                    if not member.isfile():
+                        continue
+                    if not member.name.lower().endswith(font_extensions):
+                        continue
+                    extracted = archive.extractfile(member)
+                    if extracted is None:
+                        continue
+                    target_file = target_dir / Path(member.name).name
+                    with target_file.open("wb") as dst:
+                        shutil.copyfileobj(extracted, dst)
+                    installed.append(_record(target_file))
+        else:
+            final_path = target_dir / archive_path.name
+            shutil.move(str(archive_path), final_path)
+            installed.append(_record(final_path))
+
+        archive_path.unlink(missing_ok=True)
+        return installed
 
     def install_all_fonts(self) -> int:
         """Install all configured fonts.

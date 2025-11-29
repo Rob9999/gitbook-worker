@@ -185,8 +185,10 @@ RUN pip3 install --no-cache-dir pytest pytest-cov
 # --- Dynamic Font Configuration ---
 # This is the key difference: fonts are configured dynamically!
 # Copy necessary configuration files and tools for setup
+# Copy python package
 COPY gitbook_worker/ /tmp/gitbook_worker_setup/gitbook_worker/
-COPY publish.yml /tmp/gitbook_worker_setup/
+# Copy self-hosted font bundles required by fonts.yml (e.g., ERDA CC-BY CJK)
+COPY .github/fonts/ /tmp/gitbook_worker_setup/.github/fonts/
 
 # Set Python path for setup script to point to gitbook_worker
 ENV PYTHONPATH=/tmp/gitbook_worker_setup/gitbook_worker
