@@ -99,7 +99,8 @@ def build_bitmap_font(
             "psName": f"{font_family.replace(' ', '')}-Regular",
             "designer": "ERDA Project",
             "designerURL": "https://github.com/enkidevs/gitbook-worker",
-            "license": "CC BY 4.0",
+            "copyright": "ERDA Project — Licensed under CC BY 4.0",
+            "version": "Version 1.0",
             "manufacturer": "ERDA",
         }
     )
@@ -108,7 +109,7 @@ def build_bitmap_font(
 
     output.parent.mkdir(parents=True, exist_ok=True)
     fb.save(str(output))
-    logger.log_build_success(output)
+    logger.log_build_complete(str(output), output.stat().st_size)
 
 
 def resolve_bitmap(char: str) -> CharacterInfo | None:

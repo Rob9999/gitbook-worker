@@ -42,7 +42,13 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         default=OUTPUT_PATH,
         help="Output path for generated TTF",
     )
-    return parser.parse_args(argv)
+    parser.add_argument(
+        "--refresh-cache",
+        action="store_true",
+        help="Kompatibilitäts-Flag; wird ignoriert, erlaubt Weitergabe durch build_all",
+    )
+    args, _ = parser.parse_known_args(argv)
+    return args
 
 
 if __name__ == "__main__":
