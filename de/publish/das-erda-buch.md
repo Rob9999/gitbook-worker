@@ -59,6 +59,166 @@ Alle Links führen zu allgemein zugänglichen, neutralen Informationen und eigne
 
 \newpage
 
+<a id="md-appendices-readme"></a>
+# appendices
+
+
+\newpage
+
+---
+title: Appendix A – Datenquellen und Tabellenlayout
+date: 2024-06-01
+version: 1.0
+---
+<a id="md-appendices-appendix-a"></a>
+
+# Appendix A – Datenquellen und Tabellenlayout
+
+## A.1 Datenquellen
+1. Öffentliche Klimadatenkataloge regionaler Wetterdienste.
+2. Neutrale Beispielwerte aus firmeninternen Sandbox-Systemen.
+3. Internationale Open-Data-Repositorien wie [UN Data](https://data.un.org/) oder [World Bank Open Data](https://data.worldbank.org/).
+
+## A.2 Tabellenlayout
+| Spalte | Datentyp | Beschreibung |
+|--------|----------|--------------|
+| `timestamp` | ISO-8601 | Zeitstempel der Messung |
+| `metric` | String | Messgröße (Temperatur, Feuchte, etc.) |
+| `value` | Dezimalzahl | Gemessener Wert |
+| `unit` | String | Zugehörige Einheit |
+| `notes` | Freitext | Kontext oder Hinweise |
+
+## A.3 Weiterverwendung
+- Die Tabelle kann direkt in Dataframes importiert werden.
+- Nutze relative Links wie [Kapitel 2](#md-chapters-chapter-02) für Querverweise.
+- Grafiken finden sich im Verzeichnis [`content/.github/assets`](../images/).
+
+
+\newpage
+
+---
+title: Appendix – Emoji- & Schriftabdeckung
+description: Nachweis geeigneter Fonts für alle Schriftzeichen und farbigen Emojis im Beispielinhalt.
+date: 2024-06-05
+version: 1.0
+history:
+  - version: 1.0
+    date: 2024-06-05
+    changes: Erstfassung mit Font-Matrix und Testhinweisen.
+---
+<a id="md-appendices-emoji-font-coverage"></a>
+
+# Appendix – Emoji- & Schriftabdeckung
+
+Diese Übersicht fasst die Fonts zusammen, die sämtliche Schriftsysteme der Beispieltexte sowie alle Emoji-Sets abdecken. Alle Fonts erfüllen die Lizenzanforderungen aus `AGENTS.md` und der Datei `LICENSE-FONTS`.
+
+## Font-Matrix
+
+| Kategorie | Font | Lizenz | Quelle | Abdeckung |
+| --- | --- | --- | --- | --- |
+| Serif/Sans/Mono | DejaVu Serif · DejaVu Sans · DejaVu Sans Mono (v2.37) | Bitstream Vera License + Public-Domain-Erweiterungen | `gitbook_worker/defaults/fonts.yml` · `publish/ATTRIBUTION.md` | Latein, Griechisch, Kyrillisch sowie technische Symbole für Tabellen und Code |
+| CJK \& weitere BMP-Glyphen | ERDA CC-BY CJK | CC BY 4.0 **oder** MIT | `.github/fonts/erda-ccby-cjk` · `LICENSE-FONTS` | Chinesisch, Japanisch, Koreanisch und zusätzliche Unicode-Blöcke aus den mehrsprachigen Vorlagen |
+| Farbige Emojis | Twemoji Color Font v15.1.0 | CC BY 4.0 | https://github.com/13rac1/twemoji-color-font/releases/tag/v15.1.0 · `publish/ATTRIBUTION.md` | Alle Emoji-Kategorien einschließlich Hauttöne, ZWJ-Sequenzen und Flaggen |
+
+## Praktische Nutzung
+
+1. **Textabschnitte** – Die DejaVu-Familie fungiert als Standard für Fließtext (`SERIF`), UI-Elemente (`SANS`) und Code (`MONO`). Dadurch sind sämtliche europäischen Sprachen der Datei `content/templates/multilingual-neutral-text.md` abgedeckt.
+2. **CJK** – Sobald Kapitel oder Beispielseiten Schriftzeichen wie 日, 学 oder 정보 verwenden, sollte das Build-System die ERDA-CC-BY-CJK-Datei aus `.github/fonts/erda-ccby-cjk/true-type/` einbetten. Das geschieht automatisch über die `CJK`-Sektion in `gitbook_worker/defaults/fonts.yml`.
+3. **Emoji-Farbe** – Für die neuen Emoji-Beispielseiten wird der Twemoji-Color-Font eingebunden. Die Datei `gitbook_worker/defaults/fonts.yml` verweist auf die Download-URL, sodass CI-Builds das TTF automatisiert nachladen können.
+
+## Testhinweise
+
+- Führe `pytest -k emoji` aus, um sicherzustellen, dass das Font-Scanning keine unbekannten Schriften meldet.
+- Prüfe PDF-Exports mit mindestens einer Seite aus jeder Emoji-Kategorie (Smileys, Natur, Aktivitäten, Objekte), um Twemoji gegen CJK-Text zu testen.
+- Dokumentiere neue Fonts zusätzlich in `publish/ATTRIBUTION.md` und `LICENSE-FONTS`, falls weitere Schriftsysteme hinzukommen.
+
+
+\newpage
+
+<a id="md-chapters-readme"></a>
+# chapters
+
+
+\newpage
+
+---
+title: Kapitel 1 – Beobachtbare Muster
+date: 2024-06-01
+version: 1.0
+---
+<a id="md-chapters-chapter-01"></a>
+
+# Kapitel 1 – Beobachtbare Muster
+
+Dieses Kapitel stellt eine neutrale Beschreibung strukturierter Beobachtungen vor. Alle Beispiele basieren auf generischen Messpunkten, die sich leicht in neue Kontexte übertragen lassen.
+
+## 1.1 Methodische Schritte
+1. **Rahmen definieren:** Bestimme den Zweck der Beobachtung (z. B. Temperatur, Nutzungsverhalten oder Prozessdauer).
+2. **Messpunkte wählen:** Lege neutrale Parameter fest, die keine personenbezogenen Daten enthalten.
+3. **Dokumentation sichern:** Halte Messergebnisse tabellarisch fest und verweise auf die Quelle, z. B. öffentliche Datenkataloge.[^1]
+
+## 1.2 Beispielbeschreibung
+- *Messgebiet:* Ein fiktives Versuchsareal mit moderatem Klima.
+- *Messgeräte:* Standardisierte Sensoren mit Kalibrierzertifikat.
+- *Auswertung:* Durchschnittswerte über einen Vier-Wochen-Zeitraum.
+
+Die resultierenden Daten werden weiter unten im Buch, insbesondere in [Kapitel 2](#md-chapters-chapter-02), in Tabellenform dargestellt. Detaildaten sind außerdem in [Appendix A](#md-appendices-appendix-a) abgelegt.
+
+## 1.3 Querverweise
+| Abschnitt | Zweck | Link |
+|-----------|-------|------|
+| Vorwort | Kontext und Zielsetzung | [Zur Einleitung](#md-preface) |
+| Bildvorlage | Grafische Darstellung | [Startseite](#visuale-vorschau) |
+| Textvorlagen | Mehrsprachige Snippets | [Templates](#md-templates-multilingual-neutral-text) |
+
+[^1]: Siehe [Zitationen & Quellen](#md-references).
+
+
+\newpage
+
+---
+title: Kapitel 2 – Vergleichstabellen
+date: 2024-06-01
+version: 1.0
+---
+<a id="md-chapters-chapter-02"></a>
+
+# Kapitel 2 – Vergleichstabellen
+
+Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden können. Alle Werte sind illustrative Mittelwerte und lassen sich problemlos durch reale Messreihen ersetzen.
+
+## 2.1 Übersichtstabelle
+| Messpunkt | Woche 1 | Woche 2 | Woche 3 | Woche 4 |
+|-----------|---------|---------|---------|---------|
+| Temperaturmittel (°C) | 18.2 | 18.5 | 18.4 | 18.3 |
+| Luftfeuchte (%) | 52 | 53 | 51 | 52 |
+| Lichtstunden | 14 | 14 | 13 | 13 |
+
+## 2.2 Format-Beispiel für Verhältnisse
+| Kategorie | Anteil am Gesamtvolumen | Notiz |
+|-----------|------------------------|-------|
+| Messwerte mit direktem Sensorbezug | 40 % | Sensoren nach ISO 17025 kalibriert |
+| Berechnete Richtwerte | 35 % | Ableitung über gleitende Mittelwerte |
+| Kontextdaten | 25 % | Stammen aus öffentlichen Katalogen[^2] |
+
+Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
+
+## 2.3 Referenz auf Abbildungen
+![Rasterdarstellung der Messpunkte](../images/neutral-grid.svg)
+
+Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
+
+[^2]: Vgl. die referenzierten offenen Kataloge in [Zitationen & weiterführende Quellen](#md-references).
+
+
+\newpage
+
+<a id="md-examples-readme"></a>
+# examples
+
+
+\newpage
+
 ---
 title: Emoji-Beispiele – Aktivitäten & Reisen
 description: Häufige Sport-, Freizeit- und Transport-Emojis für Funktions- und Renderingtests.
@@ -280,74 +440,16 @@ Diese Seite gruppiert häufig genutzte Emoji-Sets nach Emotionen, Gesten und Rol
 
 \newpage
 
----
-title: Kapitel 1 – Beobachtbare Muster
-date: 2024-06-01
-version: 1.0
----
-<a id="md-chapters-chapter-01"></a>
+<a id="md-placeholder"></a>
+# Inhaltshinweis
 
-# Kapitel 1 – Beobachtbare Muster
-
-Dieses Kapitel stellt eine neutrale Beschreibung strukturierter Beobachtungen vor. Alle Beispiele basieren auf generischen Messpunkten, die sich leicht in neue Kontexte übertragen lassen.
-
-## 1.1 Methodische Schritte
-1. **Rahmen definieren:** Bestimme den Zweck der Beobachtung (z. B. Temperatur, Nutzungsverhalten oder Prozessdauer).
-2. **Messpunkte wählen:** Lege neutrale Parameter fest, die keine personenbezogenen Daten enthalten.
-3. **Dokumentation sichern:** Halte Messergebnisse tabellarisch fest und verweise auf die Quelle, z. B. öffentliche Datenkataloge.[^1]
-
-## 1.2 Beispielbeschreibung
-- *Messgebiet:* Ein fiktives Versuchsareal mit moderatem Klima.
-- *Messgeräte:* Standardisierte Sensoren mit Kalibrierzertifikat.
-- *Auswertung:* Durchschnittswerte über einen Vier-Wochen-Zeitraum.
-
-Die resultierenden Daten werden weiter unten im Buch, insbesondere in [Kapitel 2](#md-chapters-chapter-02), in Tabellenform dargestellt. Detaildaten sind außerdem in [Appendix A](#md-appendices-appendix-a) abgelegt.
-
-## 1.3 Querverweise
-| Abschnitt | Zweck | Link |
-|-----------|-------|------|
-| Vorwort | Kontext und Zielsetzung | [Zur Einleitung](#md-preface) |
-| Bildvorlage | Grafische Darstellung | [Startseite](#visuale-vorschau) |
-| Textvorlagen | Mehrsprachige Snippets | [Templates](#md-templates-multilingual-neutral-text) |
-
-[^1]: Siehe [Zitationen & Quellen](#md-references).
+Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bilddateien und Vorlagen. Verwende [content/index.md](#md-index) als Startpunkt.
 
 
 \newpage
 
----
-title: Kapitel 2 – Vergleichstabellen
-date: 2024-06-01
-version: 1.0
----
-<a id="md-chapters-chapter-02"></a>
-
-# Kapitel 2 – Vergleichstabellen
-
-Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden können. Alle Werte sind illustrative Mittelwerte und lassen sich problemlos durch reale Messreihen ersetzen.
-
-## 2.1 Übersichtstabelle
-| Messpunkt | Woche 1 | Woche 2 | Woche 3 | Woche 4 |
-|-----------|---------|---------|---------|---------|
-| Temperaturmittel (°C) | 18.2 | 18.5 | 18.4 | 18.3 |
-| Luftfeuchte (%) | 52 | 53 | 51 | 52 |
-| Lichtstunden | 14 | 14 | 13 | 13 |
-
-## 2.2 Format-Beispiel für Verhältnisse
-| Kategorie | Anteil am Gesamtvolumen | Notiz |
-|-----------|------------------------|-------|
-| Messwerte mit direktem Sensorbezug | 40 % | Sensoren nach ISO 17025 kalibriert |
-| Berechnete Richtwerte | 35 % | Ableitung über gleitende Mittelwerte |
-| Kontextdaten | 25 % | Stammen aus öffentlichen Katalogen[^2] |
-
-Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
-
-## 2.3 Referenz auf Abbildungen
-![Rasterdarstellung der Messpunkte](../images/neutral-grid.svg)
-
-Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
-
-[^2]: Vgl. die referenzierten offenen Kataloge in [Zitationen & weiterführende Quellen](#md-references).
+<a id="md-templates-readme"></a>
+# templates
 
 
 \newpage
@@ -502,84 +604,6 @@ Komanda sabit göstəricilərlə sakit bir gün qeydə aldı və bu da həftəli
 Топ тұрақты көрсеткіштер сақталған тыныш күнді сипаттап, апталық салыстыруды жеңілдететінін айтты.
 
 Diese Auflistung kann beliebig erweitert werden. Ergänze bei Bedarf Hinweise zum Schriftsystem oder zur Leserichtung (z. B. bei Arabisch oder Hebräisch).
-
-
-\newpage
-
----
-title: Appendix A – Datenquellen und Tabellenlayout
-date: 2024-06-01
-version: 1.0
----
-<a id="md-appendices-appendix-a"></a>
-
-# Appendix A – Datenquellen und Tabellenlayout
-
-## A.1 Datenquellen
-1. Öffentliche Klimadatenkataloge regionaler Wetterdienste.
-2. Neutrale Beispielwerte aus firmeninternen Sandbox-Systemen.
-3. Internationale Open-Data-Repositorien wie [UN Data](https://data.un.org/) oder [World Bank Open Data](https://data.worldbank.org/).
-
-## A.2 Tabellenlayout
-| Spalte | Datentyp | Beschreibung |
-|--------|----------|--------------|
-| `timestamp` | ISO-8601 | Zeitstempel der Messung |
-| `metric` | String | Messgröße (Temperatur, Feuchte, etc.) |
-| `value` | Dezimalzahl | Gemessener Wert |
-| `unit` | String | Zugehörige Einheit |
-| `notes` | Freitext | Kontext oder Hinweise |
-
-## A.3 Weiterverwendung
-- Die Tabelle kann direkt in Dataframes importiert werden.
-- Nutze relative Links wie [Kapitel 2](#md-chapters-chapter-02) für Querverweise.
-- Grafiken finden sich im Verzeichnis [`content/.github/assets`](../images/).
-
-
-\newpage
-
----
-title: Appendix – Emoji- & Schriftabdeckung
-description: Nachweis geeigneter Fonts für alle Schriftzeichen und farbigen Emojis im Beispielinhalt.
-date: 2024-06-05
-version: 1.0
-history:
-  - version: 1.0
-    date: 2024-06-05
-    changes: Erstfassung mit Font-Matrix und Testhinweisen.
----
-<a id="md-appendices-emoji-font-coverage"></a>
-
-# Appendix – Emoji- & Schriftabdeckung
-
-Diese Übersicht fasst die Fonts zusammen, die sämtliche Schriftsysteme der Beispieltexte sowie alle Emoji-Sets abdecken. Alle Fonts erfüllen die Lizenzanforderungen aus `AGENTS.md` und der Datei `LICENSE-FONTS`.
-
-## Font-Matrix
-
-| Kategorie | Font | Lizenz | Quelle | Abdeckung |
-| --- | --- | --- | --- | --- |
-| Serif/Sans/Mono | DejaVu Serif · DejaVu Sans · DejaVu Sans Mono (v2.37) | Bitstream Vera License + Public-Domain-Erweiterungen | `gitbook_worker/defaults/fonts.yml` · `publish/ATTRIBUTION.md` | Latein, Griechisch, Kyrillisch sowie technische Symbole für Tabellen und Code |
-| CJK \& weitere BMP-Glyphen | ERDA CC-BY CJK | CC BY 4.0 **oder** MIT | `.github/fonts/erda-ccby-cjk` · `LICENSE-FONTS` | Chinesisch, Japanisch, Koreanisch und zusätzliche Unicode-Blöcke aus den mehrsprachigen Vorlagen |
-| Farbige Emojis | Twemoji Color Font v15.1.0 | CC BY 4.0 | https://github.com/13rac1/twemoji-color-font/releases/tag/v15.1.0 · `publish/ATTRIBUTION.md` | Alle Emoji-Kategorien einschließlich Hauttöne, ZWJ-Sequenzen und Flaggen |
-
-## Praktische Nutzung
-
-1. **Textabschnitte** – Die DejaVu-Familie fungiert als Standard für Fließtext (`SERIF`), UI-Elemente (`SANS`) und Code (`MONO`). Dadurch sind sämtliche europäischen Sprachen der Datei `content/templates/multilingual-neutral-text.md` abgedeckt.
-2. **CJK** – Sobald Kapitel oder Beispielseiten Schriftzeichen wie 日, 学 oder 정보 verwenden, sollte das Build-System die ERDA-CC-BY-CJK-Datei aus `.github/fonts/erda-ccby-cjk/true-type/` einbetten. Das geschieht automatisch über die `CJK`-Sektion in `gitbook_worker/defaults/fonts.yml`.
-3. **Emoji-Farbe** – Für die neuen Emoji-Beispielseiten wird der Twemoji-Color-Font eingebunden. Die Datei `gitbook_worker/defaults/fonts.yml` verweist auf die Download-URL, sodass CI-Builds das TTF automatisiert nachladen können.
-
-## Testhinweise
-
-- Führe `pytest -k emoji` aus, um sicherzustellen, dass das Font-Scanning keine unbekannten Schriften meldet.
-- Prüfe PDF-Exports mit mindestens einer Seite aus jeder Emoji-Kategorie (Smileys, Natur, Aktivitäten, Objekte), um Twemoji gegen CJK-Text zu testen.
-- Dokumentiere neue Fonts zusätzlich in `publish/ATTRIBUTION.md` und `LICENSE-FONTS`, falls weitere Schriftsysteme hinzukommen.
-
-
-\newpage
-
-<a id="md-placeholder"></a>
-# Inhaltshinweis
-
-Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bilddateien und Vorlagen. Verwende [content/index.md](#md-index) als Startpunkt.
 
 
 \newpage

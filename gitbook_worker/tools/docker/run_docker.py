@@ -25,12 +25,27 @@ import argparse
 import sys
 from pathlib import Path
 
-# Füge den tools-Pfad zum Python-Pfad hinzu
-# __file__ ist in gitbook_worker/tools/docker/run_docker.py
-# Also: parent -> docker, parent.parent -> tools, parent.parent.parent -> gitbook_worker, etc.
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
-TOOLS_PATH = REPO_ROOT / ".github" / "gitbook_worker" / "tools"
-sys.path.insert(0, str(TOOLS_PATH))
+
+def _detect_repo_root(start: Path) -> Path:
+    """Best-effort repository root detection.
+
+    Walks up the directory tree looking for known markers (content.yaml, .git).
+    Falls back to the historical relative traversal if no marker is found.
+    """
+
+    markers = {"content.yaml", ".git"}
+    for candidate in [start, *start.parents]:
+        if any((candidate / marker).exists() for marker in markers):
+            return candidate
+    # Fallback: assume the repo root is three levels up (gitbook_worker/../..)
+    return start.parents[3]
+
+
+_THIS_FILE = Path(__file__).resolve()
+REPO_ROOT = _detect_repo_root(_THIS_FILE)
+TOOLS_PATH = REPO_ROOT / "gitbook_worker" / "tools"
+if str(TOOLS_PATH) not in sys.path:
+    sys.path.insert(0, str(TOOLS_PATH))
 
 from utils.docker_runner import main as docker_runner_main
 
@@ -49,7 +64,7 @@ def build_docker_args(
     # Wähle Dockerfile basierend auf --use-dynamic Flag
     dockerfile_name = "Dockerfile.dynamic" if use_dynamic else "Dockerfile"
     dockerfile = str(
-        REPO_ROOT / ".github" / "gitbook_worker" / "tools" / "docker" / dockerfile_name
+        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / dockerfile_name
     )
     # "ERDA Smart Worker" für dynamisches Image, Legacy für statisches
     tag = "erda-smart-worker" if use_dynamic else "erda-workflow-tools"
@@ -106,15 +121,17 @@ def build_docker_args(
         # Font-Check: Stelle sicher, dass die erforderlichen Fonts vorhanden sind
         # Note: fc-list escapes some characters (e.g., 'ERDA CC\-BY CJK'), so we use more flexible patterns
         font_guard = (
-            "fc-list | grep -qi 'Twemoji' || "
+            "fc-list | grep -Ei 'Twemoji|Twitter Color Emoji' || "
             "{ echo 'ERROR: Twemoji font missing'; exit 45; }; "
             "fc-list | grep -Ei 'ERDA.*CC.*BY.*CJK' || "
             "{ echo 'ERROR: ERDA CC-BY CJK font missing'; exit 46; }; "
         )
         orchestrator_cmd = (
-            "python3 -m gitbook_worker.tools.workflow_orchestrator --root /workspace "
-            "--manifest publish.yml --profile "
-            f"{profile}"
+            "python3 -m gitbook_worker.tools.workflow_orchestrator run "
+            "--root /workspace "
+            "--content-config content.yaml "
+            "--lang de "
+            f"--profile {profile}"
         )
         args.extend(
             [
