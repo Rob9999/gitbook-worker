@@ -2,18 +2,44 @@
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 import sys
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Iterator, Optional
 
-try:  # pragma: no cover - exercised during runtime
-    from gh_paths import GH_LOGS_DIR  # type: ignore[attr-defined]
-except ModuleNotFoundError:  # pragma: no cover - fallback for local execution
-    GH_LOGS_DIR = Path(__file__).resolve().parent.parent / "logs"
 
-GH_LOGS_DIR = Path(GH_LOGS_DIR)
+def _load_repo_local_gh_paths() -> Optional[Path]:
+    """Load gh_paths.py located next to this checkout (if available)."""
+
+    candidate = Path(__file__).resolve().parents[2] / ".github" / "gh_paths.py"
+    if not candidate.exists():
+        return None
+
+    spec = importlib.util.spec_from_file_location(
+        "_gitbook_worker_local_gh_paths", candidate
+    )
+    if not spec or not spec.loader:  # pragma: no cover - importlib edge case
+        return None
+
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    gh_logs_dir = getattr(module, "GH_LOGS_DIR", None)
+    return Path(gh_logs_dir) if gh_logs_dir else None
+
+
+_LOCAL_GH_LOGS_DIR = _load_repo_local_gh_paths()
+
+if _LOCAL_GH_LOGS_DIR is not None:
+    GH_LOGS_DIR = _LOCAL_GH_LOGS_DIR
+else:  # pragma: no cover - exercised outside repo checkouts
+    try:
+        from gh_paths import GH_LOGS_DIR as _EXTERNAL_GH_LOGS_DIR  # type: ignore[attr-defined]
+    except ModuleNotFoundError:  # pragma: no cover - fallback for local execution
+        _EXTERNAL_GH_LOGS_DIR = Path(__file__).resolve().parent.parent / "logs"
+
+    GH_LOGS_DIR = Path(_EXTERNAL_GH_LOGS_DIR)
 
 
 def get_log_directory() -> Path:

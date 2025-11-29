@@ -10,12 +10,12 @@ print(f"INFO: Repository Root   :  {REPO_ROOT}")
 GITHUB_DIR = REPO_ROOT / ".github"
 print(f"INFO: Github Directory  :  {GITHUB_DIR}")
 
-# Absolute repository Tools Directory
-GH_TOOLS_DIR = REPO_ROOT / "tools"
+# Absolute repository Tools Directory (package-first layout)
+GH_TOOLS_DIR = REPO_ROOT / "gitbook_worker" / "tools"
 print(f"INFO: Tools Directory   :  {GH_TOOLS_DIR}")
 
 # Absolute repository Docker Directory
-GH_DOCKER_DIR = REPO_ROOT / "docker"
+GH_DOCKER_DIR = GH_TOOLS_DIR / "docker"
 print(f"INFO: Docker Directory  :  {GH_DOCKER_DIR}")
 
 # Absolute repository Logs directory

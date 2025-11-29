@@ -24,6 +24,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -50,6 +51,10 @@ from gitbook_worker.tools.utils.smart_manifest import (
 )
 
 from gitbook_worker.tools.publishing.font_config import get_font_config
+from gitbook_worker.tools.publishing.smart_font_stack import (
+    SmartFontError,
+    prepare_runtime_font_loader,
+)
 from gitbook_worker.tools.publishing.markdown_combiner import (
     add_geometry_package,
     combine_markdown,
@@ -1418,25 +1423,56 @@ def prepare_publishing(
     # Font wirklich verfügbar ist und der Build andernfalls klar fehlschlägt.
     # OpenMoji references removed to ensure license compliance
 
-    # Load font configuration with smart merge (fonts.yml + publish.yml overrides)
-    font_config = get_font_config()
-
-    # Apply manifest font overrides if provided
+    manifest_fonts: List[Dict[str, str]] = []
     if manifest_specs:
         logger.info("Wende Manifest-Font-Overrides an (%d Fonts)", len(manifest_specs))
-        # Convert FontSpec list to dict format for merge
-        manifest_fonts = []
         for spec in manifest_specs:
-            font_dict = {}
+            font_dict: Dict[str, str] = {}
             if spec.name:
                 font_dict["name"] = spec.name
             if spec.path:
                 font_dict["path"] = str(spec.path)
             if spec.url:
                 font_dict["url"] = spec.url
-            manifest_fonts.append(font_dict)
+            if font_dict:
+                manifest_fonts.append(font_dict)
 
-        font_config = font_config.merge_manifest_fonts(manifest_fonts)
+    repo_font_dir = _resolve_repo_root() / ".github" / "fonts"
+
+    try:
+        smart_fonts = prepare_runtime_font_loader(
+            manifest_fonts=manifest_fonts or None,
+            extra_search_paths=[repo_font_dir],
+        )
+    except SmartFontError as exc:
+        logger.error("❌ Smart Font Stack fehlgeschlagen: %s", exc)
+        hint_cmd = [
+            sys.executable or "python",
+            "-m",
+            "gitbook_worker.tools.publishing.fonts_cli",
+            "sync",
+        ]
+        if manifest_path:
+            hint_cmd.extend(["--manifest", str(manifest_path)])
+        hint_cmd.extend(["--search-path", str(repo_font_dir)])
+        logger.error(
+            "💡 Bitte Fonts synchronisieren: %s",
+            " ".join(shlex.quote(str(part)) for part in hint_cmd),
+        )
+        logger.error(
+            "   (Exit-Code 43 wird für Pipelines weitergereicht, damit Maschinen den Fehler erkennen.)"
+        )
+        raise SystemExit(43)
+
+    font_config = smart_fonts.loader
+    if smart_fonts.downloads:
+        logger.info("✓ %d Fonts heruntergeladen", smart_fonts.downloads)
+    for resolved_font in smart_fonts.resolved_fonts:
+        logger.debug(
+            "Smart Font %s → %s",
+            resolved_font.name,
+            ", ".join(path.as_posix() for path in resolved_font.paths),
+        )
 
     # Register CJK font from merged configuration
     erda_font_locations = font_config.get_font_paths("CJK")
@@ -1454,7 +1490,6 @@ def prepare_publishing(
         logger.warning("⚠ ERDA CJK Font nicht gefunden in: %s", erda_font_locations)
 
     # Register additional fonts from repo .github/fonts directory
-    repo_font_dir = _resolve_repo_root() / ".github" / "fonts"
     if repo_font_dir.exists():
         for pattern in ("*.ttf", "*.otf"):
             for font_path in repo_font_dir.rglob(pattern):

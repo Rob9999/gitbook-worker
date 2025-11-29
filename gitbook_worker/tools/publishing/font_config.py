@@ -31,6 +31,8 @@ class FontConfig:
     license_url: str
     source_url: Optional[str] = None
     download_url: Optional[str] = None
+    sha256: Optional[str] = None
+    version: Optional[str] = None
 
 
 class FontConfigLoader:
@@ -107,6 +109,8 @@ class FontConfigLoader:
                     license_url=config.get("license_url", ""),
                     source_url=config.get("source_url"),
                     download_url=config.get("download_url") or config.get("url"),
+                    sha256=config.get("sha256"),
+                    version=config.get("version"),
                 )
 
             logger.info("✓ %d Font-Konfigurationen geladen", len(self._fonts))
@@ -304,6 +308,8 @@ class FontConfigLoader:
                     license_url=merged._fonts[key].license_url,
                     source_url=merged._fonts[key].source_url,
                     download_url=font_spec.get("url") or font_spec.get("download_url"),
+                    sha256=merged._fonts[key].sha256,
+                    version=merged._fonts[key].version,
                 )
             else:
                 logger.debug(

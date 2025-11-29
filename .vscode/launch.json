@@ -16,10 +16,33 @@
                 "run",
                 "--root",
                 "${workspaceFolder}",
-                "--manifest",
-                "publish.yml",
+                "--content-config",
+                "content.yaml",
+                "--lang",
+                "de",
                 "--profile",
                 "local"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Fonts: Sync (de manifest)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.publishing.fonts_cli",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                "sync",
+                "--manifest",
+                "de/publish.yml",
+                "--search-path",
+                ".github/fonts"
             ],
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env"
