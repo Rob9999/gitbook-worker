@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import os
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import yaml
+
+
+if os.environ.get("GITBOOK_WORKER_LOG_STDOUT_ONLY") is None:
+    os.environ["GITBOOK_WORKER_LOG_STDOUT_ONLY"] = "1"
 
 from gitbook_worker.tools.logging_config import get_logger
 

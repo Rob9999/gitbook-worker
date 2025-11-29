@@ -232,7 +232,7 @@
             "name": "Build Font (with cache refresh)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_all.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
             "args": [
@@ -243,7 +243,7 @@
             "name": "Build Font (no cache refresh)",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_ccby_cjk_font.py",
+            "program": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator/build_all.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/.github/fonts/erda-ccby-cjk/generator",
             "args": []

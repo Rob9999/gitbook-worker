@@ -60,6 +60,23 @@ _SKIP_DIRS = {
 README_FILENAMES = ("README.md", "readme.md", "Readme.md")
 
 
+class FontSyncError(RuntimeError):
+    """Raised when the orchestrator cannot prepare required fonts."""
+
+
+def _font_sync_hint(root: Path, manifest: Path | None) -> str:
+    target_manifest = manifest or (root / "publish.yml")
+    try:
+        manifest_arg = target_manifest.relative_to(root)
+    except ValueError:
+        manifest_arg = target_manifest
+    return (
+        "Font-Synchronisation fehlgeschlagen. Bitte führen Sie 'gitbook-worker-fonts"
+        f" sync --manifest {manifest_arg} --search-path .github/fonts' aus und wiederholen"
+        " Sie den Lauf."
+    )
+
+
 @dataclass(frozen=True)
 class DockerSettings:
     """Docker related configuration for a profile."""
@@ -144,6 +161,7 @@ class RuntimeContext:
         python_paths.append(str(self.tools_dir))
         unique_python_paths = list(dict.fromkeys(python_paths))
         self.python_path = os.pathsep.join(unique_python_paths)
+        self._fonts_ready = False
 
     # --- Git helpers -------------------------------------------------
 
@@ -211,6 +229,37 @@ class RuntimeContext:
             text=True,
         )
         return result
+
+    def ensure_fonts(self) -> None:
+        """Run font synchronisation once before publishing steps."""
+
+        if self._fonts_ready:
+            return
+
+        cli_cmd = [
+            self.python,
+            "-m",
+            "gitbook_worker.tools.publishing.fonts_cli",
+            "sync",
+            "--manifest",
+            str(self.config.manifest),
+            "--repo-root",
+            str(self.root),
+            "--search-path",
+            str(self.root / ".github" / "fonts"),
+        ]
+
+        env = {"GITBOOK_WORKER_LOG_STDOUT_ONLY": "1"}
+        LOGGER.info("Fonts werden synchronisiert ...")
+        try:
+            self.run_command(cli_cmd, env=env)
+        except subprocess.CalledProcessError as exc:
+            hint = _font_sync_hint(self.root, self.config.manifest)
+            LOGGER.error(hint)
+            print(hint, file=sys.stderr)
+            raise FontSyncError("Font sync failed") from exc
+        else:
+            self._fonts_ready = True
 
     def git_last_commit_date(self, path: Path) -> str:
         try:
@@ -1024,6 +1073,12 @@ def _step_publisher(ctx: RuntimeContext) -> None:
     if not pipeline.exists():
         LOGGER.warning("pipeline.py nicht gefunden – Schritt wird übersprungen")
         return
+
+    try:
+        ctx.ensure_fonts()
+    except FontSyncError as exc:
+        raise SystemExit(43) from exc
+
     cmd: list[str] = [
         ctx.python,
         str(pipeline),
@@ -1040,7 +1095,15 @@ def _step_publisher(ctx: RuntimeContext) -> None:
         cmd.append("--reset-others")
     for arg in ctx.config.publisher_args:
         cmd.extend(["--publisher-args", arg])
-    ctx.run_command(cmd)
+    try:
+        ctx.run_command(cmd)
+    except subprocess.CalledProcessError as exc:
+        if exc.returncode == 43:
+            hint = _font_sync_hint(ctx.root, ctx.config.manifest)
+            LOGGER.error(hint)
+            print(hint, file=sys.stderr)
+            raise SystemExit(43) from exc
+        raise
 
 
 STEP_HANDLERS = {
