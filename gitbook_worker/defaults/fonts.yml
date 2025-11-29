@@ -38,7 +38,8 @@ fonts:
 
   MONO:
     name: "DejaVu Sans Mono"
-    paths: [] # System font
+    paths:
+      - "fonts-storage/dejavu/DejaVuSansMono.ttf"
     license: "Bitstream Vera License + Public Domain"
     license_url: "https://dejavu-fonts.github.io/License.html"
     source_url: "https://dejavu-fonts.github.io/"
@@ -48,7 +49,8 @@ fonts:
 
   SANS:
     name: "DejaVu Sans"
-    paths: [] # System font
+    paths:
+      - "fonts-storage/dejavu/DejaVuSans.ttf"
     license: "Bitstream Vera License + Public Domain"
     license_url: "https://dejavu-fonts.github.io/License.html"
     source_url: "https://dejavu-fonts.github.io/"
@@ -58,7 +60,8 @@ fonts:
 
   SERIF:
     name: "DejaVu Serif"
-    paths: [] # System font
+    paths:
+      - "fonts-storage/dejavu/DejaVuSerif.ttf"
     license: "Bitstream Vera License + Public Domain"
     license_url: "https://dejavu-fonts.github.io/License.html"
     source_url: "https://dejavu-fonts.github.io/"

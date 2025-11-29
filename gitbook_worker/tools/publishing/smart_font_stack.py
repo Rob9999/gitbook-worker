@@ -20,8 +20,11 @@ import yaml
 from gitbook_worker.tools.logging_config import get_logger
 
 from .font_config import FontConfig, FontConfigLoader, get_font_config
+from .font_storage import FontStorageBootstrapper, FontStorageError
 
 logger = get_logger(__name__)
+
+FONT_STORAGE_DISABLE_ENV = "GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP"
 
 __all__ = [
     "SmartFontError",
@@ -97,6 +100,7 @@ class _SmartFontStack:
     ) -> None:
         self._repo_root = _detect_repo_root(repo_root)
         self._cache_dir = _determine_cache_dir(cache_dir)
+        self._maybe_bootstrap_font_storage()
         self._manifest_fonts = list(manifest_fonts or [])
         self._search_paths = self._build_search_paths(extra_search_paths)
         self._work_dir = Path(tempfile.mkdtemp(prefix="gitbook-worker-fonts-"))
@@ -115,6 +119,16 @@ class _SmartFontStack:
             base_loader = base_loader.merge_manifest_fonts(list(self._manifest_fonts))
 
         self._loader = base_loader
+
+    def _maybe_bootstrap_font_storage(self) -> None:
+        flag = os.environ.get(FONT_STORAGE_DISABLE_ENV, "").lower()
+        if flag in {"1", "true", "yes"}:
+            return
+        storage_root = self._repo_root / "fonts-storage"
+        try:
+            FontStorageBootstrapper(storage_root).ensure_defaults()
+        except FontStorageError as exc:
+            raise SmartFontError(str(exc)) from exc
 
     def resolve_fonts(self, allow_partial: bool = False) -> List[ResolvedFont]:
         resolved: List[ResolvedFont] = []
@@ -201,6 +215,7 @@ class _SmartFontStack:
         paths: List[Path] = []
         repo_candidates = [
             self._repo_root / ".github" / "fonts",
+            self._repo_root / "fonts-storage",
             self._repo_root / "fonts",
         ]
         paths.extend(repo_candidates)

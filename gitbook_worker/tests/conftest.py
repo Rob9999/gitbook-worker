@@ -8,6 +8,7 @@ import logging
 import pathlib
 import subprocess
 import sys
+import os
 from collections.abc import Iterator
 from functools import lru_cache
 
@@ -19,6 +20,9 @@ WORKER_DIR = REPO_ROOT / "gitbook_worker"
 for _path in (WORKER_DIR, REPO_ROOT):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
+
+
+os.environ.setdefault("GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP", "1")
 
 
 from . import GH_TEST_ARTIFACTS_DIR, GH_TEST_LOGS_DIR, GH_TEST_OUTPUT_DIR

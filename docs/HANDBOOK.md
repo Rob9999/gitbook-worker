@@ -1,7 +1,7 @@
 ---
 version: 1.1.0
 date: 2025-06-01
-history: Added contributor quickstart, troubleshooting, and Docker image guidance.
+history: Added contributor quickstart, troubleshooting, Docker image guidance, and fonts-storage automation notes.
 ---
 
 # GitBook Worker Handbook
@@ -50,6 +50,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 ## Publishing and fonts (field notes)
 - The dynamic Docker build installs TeX Live and Pandoc, then applies font setup driven by repository configuration rather than hardcoded fonts.
 - If integration tests report missing emoji or CJK fonts, ensure Twemoji and ERDA CC-BY CJK are available in the runner or rebuild the Docker image so the font check passes.
+- Repository builds now keep vendor fonts out of git: `fonts-storage/` (ignored) is populated automatically by `gitbook_worker.tools.publishing.font_storage.FontStorageBootstrapper` during `fonts sync` and orchestrator runs. Delete the folder to force a refresh or set `GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP=1` when developing offline.
 
 ## Docker usage paths
 - Prefer the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI and local runs—it keeps font and LaTeX packages aligned with the publishing defaults.

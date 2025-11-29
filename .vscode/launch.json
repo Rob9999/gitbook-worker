@@ -42,7 +42,9 @@
                 "--manifest",
                 "de/publish.yml",
                 "--search-path",
-                ".github/fonts"
+                ".github/fonts",
+                "--search-path",
+                "fonts-storage"
             ],
             "console": "integratedTerminal",
             "envFile": "${workspaceFolder}/.env"
