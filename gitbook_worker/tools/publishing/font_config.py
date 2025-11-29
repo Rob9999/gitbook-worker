@@ -267,6 +267,7 @@ class FontConfigLoader:
         # Create a new loader with same base config
         merged = FontConfigLoader.__new__(FontConfigLoader)
         merged._config_path = self._config_path
+        merged._version = self._version
         merged._fonts = {}
 
         # Copy all base fonts
@@ -278,6 +279,8 @@ class FontConfigLoader:
                 license_url=font.license_url,
                 source_url=font.source_url,
                 download_url=getattr(font, "download_url", None),
+                sha256=font.sha256,
+                version=font.version,
             )
 
         # Apply manifest overrides
