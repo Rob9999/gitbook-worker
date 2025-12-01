@@ -35,7 +35,9 @@ if _LOCAL_GH_LOGS_DIR is not None:
     GH_LOGS_DIR = _LOCAL_GH_LOGS_DIR
 else:  # pragma: no cover - exercised outside repo checkouts
     try:
-        from gh_paths import GH_LOGS_DIR as _EXTERNAL_GH_LOGS_DIR  # type: ignore[attr-defined]
+        from gitbook_worker.gh_paths import (  # type: ignore[attr-defined]
+            GH_LOGS_DIR as _EXTERNAL_GH_LOGS_DIR,
+        )
     except ModuleNotFoundError:  # pragma: no cover - fallback for local execution
         _EXTERNAL_GH_LOGS_DIR = Path(__file__).resolve().parent.parent / "logs"
 

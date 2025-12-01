@@ -3,7 +3,7 @@
 # 2. runf publisher.py to publish the gitbook style files to github pages
 
 import sys
-from gh_paths import REPO_ROOT, GH_TOOLS_DIR
+from gitbook_worker.gh_paths import GH_TOOLS_DIR, REPO_ROOT
 from gitbook_worker.tools.utils.run import run as run_command
 from gitbook_worker.tools.logging_config import get_logger
 

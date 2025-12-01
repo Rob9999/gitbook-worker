@@ -10,10 +10,10 @@ import pytest
 import sys
 
 try:
-    from gh_paths import GH_TOOLS_DIR, REPO_ROOT, GH_DOCKER_DIR
+    from gitbook_worker.gh_paths import GH_DOCKER_DIR, GH_TOOLS_DIR, REPO_ROOT
 except ImportError:
     print(
-        "Failed to gather directories from python tree. Falling back to manual resolution."
+        "Failed to import gitbook_worker.gh_paths. Falling back to manual resolution."
     )
     REPO_ROOT = pathlib.Path(__file__).resolve().parents[3]
     GH_TOOLS_DIR = REPO_ROOT / ".github" / "tools"

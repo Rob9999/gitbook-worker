@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Repository path helpers bundled with the gitbook_worker package."""
+
+from __future__ import annotations
+
+import pathlib
+
+# Absolute Root of the repository (package checkout or install location)
+REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
+print(f"INFO: Repository Root   :  {REPO_ROOT}")
+
+# Absolute .github Directory
+GITHUB_DIR = REPO_ROOT / ".github"
+print(f"INFO: Github Directory  :  {GITHUB_DIR}")
+
+# Absolute repository Tools Directory (package-first layout)
+GH_TOOLS_DIR = REPO_ROOT / "gitbook_worker" / "tools"
+print(f"INFO: Tools Directory   :  {GH_TOOLS_DIR}")
+
+# Absolute repository Docker Directory
+GH_DOCKER_DIR = GH_TOOLS_DIR / "docker"
+print(f"INFO: Docker Directory  :  {GH_DOCKER_DIR}")
+
+# Absolute repository Logs directory
+GH_LOGS_DIR = REPO_ROOT / "logs"
+print(f"INFO: Logs Directory    :  {GH_LOGS_DIR}")
+GH_LOGS_DIR.mkdir(exist_ok=True)

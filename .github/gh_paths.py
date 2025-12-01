@@ -1,24 +1,3 @@
-# #!/usr/bin/env python3
+"""Backwards-compatibility shim for legacy gh_paths imports."""
 
-import pathlib
-
-# Absolute Root of the repository
-REPO_ROOT = pathlib.Path(__file__).parent.parent
-print(f"INFO: Repository Root   :  {REPO_ROOT}")
-
-# Absolute .github Directory
-GITHUB_DIR = REPO_ROOT / ".github"
-print(f"INFO: Github Directory  :  {GITHUB_DIR}")
-
-# Absolute repository Tools Directory (package-first layout)
-GH_TOOLS_DIR = REPO_ROOT / "gitbook_worker" / "tools"
-print(f"INFO: Tools Directory   :  {GH_TOOLS_DIR}")
-
-# Absolute repository Docker Directory
-GH_DOCKER_DIR = GH_TOOLS_DIR / "docker"
-print(f"INFO: Docker Directory  :  {GH_DOCKER_DIR}")
-
-# Absolute repository Logs directory
-GH_LOGS_DIR = REPO_ROOT / "logs"
-print(f"INFO: Logs Directory    :  {GH_LOGS_DIR}")
-GH_LOGS_DIR.mkdir(exist_ok=True)
+from gitbook_worker.gh_paths import *  # noqa: F401,F403
