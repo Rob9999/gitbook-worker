@@ -265,6 +265,66 @@ class FontSpec:
 _ADDITIONAL_FONT_DIRS: List[Path] = []
 
 
+def _user_font_directories() -> List[Path]:
+    """Return OS-specific font directories where we place/register fonts."""
+
+    dirs: List[Path] = []
+    if sys.platform == "win32":
+        local_appdata = Path(os.environ.get("LOCALAPPDATA", ""))
+        if not local_appdata:
+            local_appdata = Path.home() / "AppData" / "Local"
+        dirs.append(local_appdata / "Microsoft" / "Windows" / "Fonts")
+    elif sys.platform == "darwin":
+        dirs.append(Path.home() / "Library" / "Fonts")
+    else:
+        dirs.append(Path.home() / ".local" / "share" / "fonts")
+
+    # Always include the POSIX-style fonts dir as a fallback (used in CI containers)
+    fallback = Path.home() / ".local" / "share" / "fonts"
+    if fallback not in dirs:
+        dirs.append(fallback)
+
+    return dirs
+
+
+def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> None:
+    """Ensure OSFONTDIR contains repo/local font directories for LuaLaTeX."""
+
+    new_dirs: List[str] = []
+    entries = list(_user_font_directories())
+    repo_root = _resolve_repo_root()
+    entries.append(repo_root / ".github" / "fonts")
+    entries.append(repo_root / "fonts-storage")
+    if additional_dirs:
+        entries.extend(additional_dirs)
+
+    for directory in entries + _ADDITIONAL_FONT_DIRS:
+        if not directory:
+            continue
+        try:
+            resolved = Path(directory).resolve()
+        except (OSError, RuntimeError):
+            resolved = Path(directory)
+        if resolved.exists():
+            new_dirs.append(str(resolved))
+
+    if not new_dirs:
+        return
+
+    separator = os.pathsep
+    existing = os.environ.get("OSFONTDIR", "")
+    merged: List[str] = []
+    if existing:
+        merged.extend([entry for entry in existing.split(separator) if entry])
+
+    for path_str in new_dirs:
+        if path_str not in merged:
+            merged.append(path_str)
+
+    os.environ["OSFONTDIR"] = separator.join(merged)
+    logger.info("ℹ OSFONTDIR aktualisiert (%d Pfade)", len(merged))
+
+
 def _resolve_repo_root() -> Path:
     """Return the repository root for the current checkout."""
 
@@ -396,6 +456,21 @@ def _clear_lualatex_caches() -> None:
         logger.info("ℹ %d LuaLaTeX Cache-Verzeichnisse gelöscht", cleared_count)
     else:
         logger.debug("ℹ Keine LuaLaTeX Cache-Verzeichnisse gefunden")
+
+
+def _update_luaotfload_database() -> None:
+    """Refresh luaotfload font database so LuaLaTeX sees new fonts."""
+
+    tool = _which("luaotfload-tool") or _which("luaotfload-tool.exe")
+    if not tool:
+        logger.debug("luaotfload-tool nicht gefunden – überspringe Update")
+        return
+
+    logger.info("🔄 Aktualisiere luaotfload Font-Datenbank ...")
+    try:
+        _run([tool, "--update", "--quiet"], check=False)
+    except Exception as exc:  # pragma: no cover - best effort only
+        logger.warning("luaotfload-tool --update fehlgeschlagen: %s", exc)
 
 
 def _ensure_dir(path: str) -> None:
@@ -1536,6 +1611,8 @@ def prepare_publishing(
                 _remember_font_dir(target.parent)
                 _register_font(target)
 
+    _configure_osfontdir([repo_font_dir])
+
     # latex-emoji.lua Filter
     lua_dir = _resolve_module_path("lua")
     lua_path = os.path.join(lua_dir, "latex-emoji.lua")
@@ -1551,6 +1628,7 @@ def prepare_publishing(
     # This ensures that LuaTeX picks up any font updates
     logger.info("🔄 Clearing LuaLaTeX font caches...")
     _clear_lualatex_caches()
+    _update_luaotfload_database()
 
     # Final font cache refresh after all font operations
     if manifest_specs or removed_fonts or font_cache_refreshed:

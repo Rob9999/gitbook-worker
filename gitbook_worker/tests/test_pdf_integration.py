@@ -24,6 +24,14 @@ pytestmark = [
 ]
 
 
+# Ensure the production publishing toolchain (fonts, filters, caches) mirrors CI
+# before any of the integration tests execute. Running this once keeps runtime
+# manageable while still prepping LuaLaTeX to discover bundled ERDA fonts.
+@pytest.fixture(scope="module", autouse=True)
+def _prepare_publishing_stack() -> None:
+    publisher.prepare_publishing(no_apt=True)
+
+
 # ============================================================================
 # Integration Tests - Using Production Toolchain
 # ============================================================================
@@ -110,8 +118,6 @@ def test_table_pdf_lualatex(tmp_path, test_content_root):
     This test uses test data from the test_content_root fixture to avoid
     depending on the full repository content structure.
     """
-    publisher.prepare_publishing(no_apt=True)
-
     # Search for table markdown files in test data
     # First check scenario content, then fall back to general test data
     search_paths = [

@@ -9,10 +9,8 @@ import shutil
 import pytest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-TEST_WORKSPACE = (
-    REPO_ROOT / ".github" / "gitbook_worker" / "tests" / "data" / "workspace"
-)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+TEST_WORKSPACE = REPO_ROOT / "gitbook_worker" / "tests" / "data" / "workspace"
 IMAGE_NAME = "test-full-orchestrator"
 CONTAINER_NAME = "test-full-orchestrator-container"
 
