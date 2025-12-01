@@ -43,7 +43,7 @@ Diese Startseite liefert einen schnellen Überblick über das Beispielbuch, das 
 - [Zitationen & weiterführende Quellen](#md-references)
 
 ## Visuale Vorschau
-![Neutrale Formen](./images/neutral-grid.svg)
+![Neutrale Formen](.gitbook/assets/neutral-grid.svg)
 
 Die Illustration zeigt abstrakte Formen ohne Bezug zu realen Personen oder markenrechtlich relevanten Themen. Sie kann beliebig oft wiederverwendet werden, um Bildkomponenten zu testen.
 
@@ -204,7 +204,7 @@ Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden kön
 Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
 
 ## 2.3 Referenz auf Abbildungen
-![Rasterdarstellung der Messpunkte](../images/neutral-grid.svg)
+![Rasterdarstellung der Messpunkte](../.gitbook/assets/neutral-grid.svg)
 
 Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
 
