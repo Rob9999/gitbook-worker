@@ -1139,7 +1139,7 @@ def _dedupe_preserve_order(values: Iterable[str]) -> List[str]:
         if candidate in seen:
             continue
         seen.add(candidate)
-        result.append(candidate)
+        result.append(Path(candidate).as_posix())
     return result
 
 

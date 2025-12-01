@@ -53,6 +53,7 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
     )
     args = parse_args(
         [
+            "run",
             "--root",
             str(temp_repo),
             "--manifest",
@@ -84,6 +85,7 @@ def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
     )
     args = parse_args(
         [
+            "run",
             "--root",
             str(temp_repo),
             "--manifest",

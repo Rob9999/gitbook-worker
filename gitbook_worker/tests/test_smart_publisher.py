@@ -29,6 +29,7 @@ def temp_manifest(tmp_path):
     """Create temporary manifest with multiple targets."""
     manifest = tmp_path / "publish.yml"
     data = {
+        "version": "0.1.0",
         "publish": [
             {
                 "path": ".",
@@ -49,7 +50,7 @@ def temp_manifest(tmp_path):
                 "source_type": "file",
                 "build": True,
             },
-        ]
+        ],
     }
     with open(manifest, "w", encoding="utf-8") as f:
         yaml.safe_dump(data, f)
@@ -79,6 +80,7 @@ def temp_gitbook_manifest(tmp_path):
     # Create manifest
     manifest = project / "publish.yml"
     data = {
+        "version": "0.1.0",
         "publish": [
             {
                 "path": ".",
@@ -86,7 +88,7 @@ def temp_gitbook_manifest(tmp_path):
                 "use_book_json": True,
                 "build": True,
             }
-        ]
+        ],
     }
     with open(manifest, "w", encoding="utf-8") as f:
         yaml.safe_dump(data, f)
@@ -97,7 +99,7 @@ def temp_gitbook_manifest(tmp_path):
 @pytest.fixture
 def mock_legacy_publisher():
     """Mock legacy publisher module."""
-    with patch("tools.utils.smart_publisher.legacy_publisher") as mock:
+    with patch("gitbook_worker.tools.utils.smart_publisher.legacy_publisher") as mock:
         # Setup default successful behavior
         mock.prepare_publishing.return_value = None
         mock.build_pdf.return_value = (True, None)
@@ -216,7 +218,7 @@ class TestPrepareEnvironment:
 
     def test_prepare_missing_legacy(self, temp_manifest):
         """Should handle missing legacy publisher."""
-        with patch("tools.utils.smart_publisher.legacy_publisher", None):
+        with patch("gitbook_worker.tools.utils.smart_publisher.legacy_publisher", None):
             publisher = SmartPublisher(temp_manifest)
             result = publisher.prepare_environment()
 
@@ -264,7 +266,7 @@ class TestBuildTarget:
 
     def test_build_missing_legacy(self, temp_manifest):
         """Should handle missing legacy publisher."""
-        with patch("tools.utils.smart_publisher.legacy_publisher", None):
+        with patch("gitbook_worker.tools.utils.smart_publisher.legacy_publisher", None):
             publisher = SmartPublisher(temp_manifest)
             target = publisher.targets[0]
 

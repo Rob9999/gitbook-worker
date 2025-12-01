@@ -6,10 +6,8 @@ import time
 import pytest
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-TEST_WORKSPACE = (
-    REPO_ROOT / ".github" / "gitbook_worker" / "tests" / "data" / "workspace"
-)
+REPO_ROOT = Path(__file__).resolve().parents[2]
+TEST_WORKSPACE = REPO_ROOT / "gitbook_worker" / "tests" / "data" / "workspace"
 IMAGE_NAME = "test-smart-worker"
 CONTAINER_NAME = "test-smart-worker-readme-container"
 
@@ -81,7 +79,12 @@ def run_ensure_readme_in_container(container_name):
         container_name,
         "bash",
         "-lc",
-        "PYTHONPATH=/workspace/gitbook_worker /venv/bin/python3 -m gitbook_worker.tools.workflow_orchestrator --root /workspace/gitbook_worker/tests/data/workspace --step ensure_readme",
+        (
+            "PYTHONPATH=/workspace/gitbook_worker /venv/bin/python3 -m "
+            "gitbook_worker.tools.workflow_orchestrator run "
+            "--root /workspace/gitbook_worker/tests/data/workspace "
+            "--step ensure_readme"
+        ),
     ]
     print("Running orchestrator ensure_readme in container...")
     res = run(cmd, check=False)
