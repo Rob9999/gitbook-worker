@@ -186,7 +186,7 @@ jobs:
           sudo rm -rf /usr/share/fonts/truetype/noto || true
           sudo rm -rf /usr/share/fonts/opentype/noto || true
 
-      - name: Install Twemoji Mozilla font (CC BY 4.0)
+      - name: Install Twitter Color Emoji font (CC BY 4.0)
         run: |
           sudo mkdir -p /usr/share/fonts/truetype/twemoji
           wget -O /tmp/twemoji-mozilla.tar.gz https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/Twemoji.Mozilla.ttf
@@ -202,7 +202,7 @@ jobs:
         run: |
           sudo fc-cache -f -v
           echo "Installed fonts:"
-          fc-list | grep -E "Twemoji Mozilla|erda-ccby-cjk" || echo "Warning: Required fonts not found"
+          fc-list | grep -E "Twitter Color Emoji|erda-ccby-cjk" || echo "Warning: Required fonts not found"
 
       - name: Run emoji harness
         run: bash gitbook_worker/tools/run-emoji-harness.sh

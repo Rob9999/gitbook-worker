@@ -28,13 +28,15 @@ fonts:
     version: "1.0.0"
 
   EMOJI:
-    name: "Twemoji Color Font"
+    name: "Twitter Color Emoji"
     paths: []
     download_url: "https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: "https://github.com/13rac1/twemoji-color-font"
     version: "15.1.0"
+    fontconfig_name: "Twitter Color Emoji"
+    usage_note: "Installed in Docker via setup_docker_environment.py from official release archive. Fontconfig family name verified via fc-scan."
 
   MONO:
     name: "DejaVu Sans Mono"

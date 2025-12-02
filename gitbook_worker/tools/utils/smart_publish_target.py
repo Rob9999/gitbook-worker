@@ -182,15 +182,26 @@ def _parse_pdf_options(raw_options: Any) -> Dict[str, Any]:
     if not isinstance(raw_options, dict):
         return {}
 
-    return {
-        "emoji_color": _as_bool(raw_options.get("emoji_color"), default=True),
-        "main_font": raw_options.get("main_font"),
-        "sans_font": raw_options.get("sans_font"),
-        "mono_font": raw_options.get("mono_font"),
-        "mainfont_fallback": raw_options.get("mainfont_fallback"),
-        "geometry": raw_options.get("geometry"),
-        "paper_format": raw_options.get("paper_format"),
-    }
+    parsed: Dict[str, Any] = {}
+
+    if "emoji_color" in raw_options:
+        parsed["emoji_color"] = _as_bool(raw_options.get("emoji_color"), default=True)
+
+    if "emoji_bxcoloremoji" in raw_options:
+        parsed["emoji_bxcoloremoji"] = _as_bool(raw_options.get("emoji_bxcoloremoji"))
+
+    for key in (
+        "main_font",
+        "sans_font",
+        "mono_font",
+        "mainfont_fallback",
+        "geometry",
+        "paper_format",
+    ):
+        if key in raw_options and raw_options.get(key) is not None:
+            parsed[key] = raw_options.get(key)
+
+    return parsed
 
 
 def _resolve_target(

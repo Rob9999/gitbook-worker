@@ -420,6 +420,28 @@ class TestAssetsAndPdfOptions:
         assert targets[0].pdf_options["geometry"] == "margin=2cm"
         assert targets[0].pdf_options["emoji_color"] is False
 
+    def test_load_pdf_options_bxcoloremoji(self, tmp_path):
+        """Should surface bxcoloremoji toggle when provided."""
+
+        manifest = tmp_path / "publish.yml"
+        data = {
+            "publish": [
+                {
+                    "path": ".",
+                    "out": "book.pdf",
+                    "pdf_options": {
+                        "emoji_bxcoloremoji": True,
+                    },
+                }
+            ]
+        }
+        with open(manifest, "w", encoding="utf-8") as f:
+            yaml.safe_dump(data, f)
+
+        targets = load_publish_targets(manifest, only_build=False)
+
+        assert targets[0].pdf_options["emoji_bxcoloremoji"] is True
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

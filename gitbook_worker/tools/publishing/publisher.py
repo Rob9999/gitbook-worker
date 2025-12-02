@@ -38,6 +38,21 @@ from collections.abc import Mapping
 from functools import lru_cache
 from urllib.parse import urlparse
 
+try:
+    from cairosvg import svg2pdf as _cairo_svg2pdf
+except (
+    ImportError,
+    OSError,
+):  # pragma: no cover - optional dependency in older environments
+    _cairo_svg2pdf = None
+
+try:
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPDF
+except (ImportError, OSError):  # pragma: no cover - optional dependency
+    svg2rlg = None
+    renderPDF = None
+
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.utils.language_context import (
     build_language_env,
@@ -90,6 +105,10 @@ _BANNED_FONT_PATTERNS: Tuple[str, ...] = (
     "sourcehansans",
     "sourcehanserif",
 )
+
+_SVG_DIR_CACHE: set[str] = set()
+_SVG_CONVERSION_WARNED = False
+_SVG_PDF_ENV_FLAG = "GITBOOK_SVG_PDF_AVAILABLE"
 
 
 def _purge_disallowed_fonts(
@@ -251,6 +270,7 @@ class EmojiOptions:
     color: bool = True
     report: bool = False
     report_dir: Optional[Path] = None
+    bxcoloremoji: Optional[bool] = None
 
 
 @dataclass(frozen=True)
@@ -629,6 +649,89 @@ def _font_available(name: str) -> bool:
     return False
 
 
+@lru_cache(maxsize=1)
+def _locate_bxcoloremoji() -> Optional[str]:
+    """Return the path to ``bxcoloremoji.sty`` if kpsewhich can resolve it."""
+
+    kpsewhich = shutil.which("kpsewhich")
+    if not kpsewhich:
+        logger.warning(
+            "⚠ kpsewhich nicht gefunden – automatische bxcoloremoji-Erkennung deaktiviert."
+        )
+        return None
+
+    try:
+        result = subprocess.run(
+            [kpsewhich, "bxcoloremoji.sty"],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+    except OSError as exc:
+        logger.warning("⚠ kpsewhich-Aufruf für bxcoloremoji fehlgeschlagen: %s", exc)
+        return None
+
+    lines = [
+        line.strip() for line in (result.stdout or "").splitlines() if line.strip()
+    ]
+    if result.returncode != 0 or not lines:
+        if result.stderr:
+            logger.debug("kpsewhich stderr: %s", result.stderr.strip())
+        logger.info(
+            "ℹ bxcoloremoji.sty konnte nicht gefunden werden (rc=%s).",
+            result.returncode,
+        )
+        return None
+
+    path = lines[-1]
+    logger.info("ℹ bxcoloremoji.sty gefunden: %s", path)
+    return path
+
+
+def _require_bxcoloremoji() -> str:
+    """Ensure bxcoloremoji is available and raise a helpful error otherwise."""
+
+    path = _locate_bxcoloremoji()
+    if path:
+        return path
+    message = (
+        "bxcoloremoji.sty wurde nicht gefunden. Installiere das TeX-Paket "
+        "'bxcoloremoji' (tlmgr install bxcoloremoji) oder deaktiviere --emoji-bxcoloremoji."
+    )
+    logger.error(message)
+    raise RuntimeError(message)
+
+
+def _decide_bxcoloremoji(options: EmojiOptions) -> bool:
+    """Decide whether latex-emoji should activate the bxcoloremoji package."""
+
+    if options.bxcoloremoji is True:
+        path = _require_bxcoloremoji()
+        logger.info("ℹ bxcoloremoji per Konfiguration erzwungen (%s).", path)
+        return True
+
+    if options.bxcoloremoji is False:
+        logger.info("ℹ bxcoloremoji explizit deaktiviert.")
+        return False
+
+    if not options.color:
+        logger.info(
+            "ℹ bxcoloremoji deaktiviert, da emoji_color=False (kein Bedarf an Farbglyphen)."
+        )
+        return False
+
+    path = _locate_bxcoloremoji()
+    if path:
+        logger.info("ℹ bxcoloremoji automatisch aktiviert (%s).", path)
+        return True
+
+    logger.warning(
+        "⚠ bxcoloremoji nicht verfügbar – verwende Lua-Fallback für Emoji-Fonts."
+    )
+    return False
+
+
 def _remember_font_dir(path: Path) -> None:
     """Track additional font directories for discovery fallbacks."""
 
@@ -720,35 +823,60 @@ def _needs_harfbuzz(font_name: str) -> bool:
 
 
 def _select_emoji_font(prefer_color: bool) -> Tuple[Optional[str], bool]:
-    """Select the best available emoji font.
+    """Select the best available emoji font from font_config.yml.
 
     Returns a tuple ``(font_name, needs_harfbuzz)`` describing the selected
     font and whether HarfBuzz rendering should be enabled for it.
 
-    TODO: Remove hardcoded font list! Violates AGENTS.md principles.
-          Should read from fonts.yml via setup_docker_environment.py
-          See: gitbook_worker/tools/docker/fonts.yml
+    Uses font_config.yml EMOJI entry as source of truth (AGENTS.md compliant).
     """
 
-    # TEMPORARY HARDCODED LIST - TO BE REMOVED
-    # This is a violation of AGENTS.md and must be replaced with dynamic font discovery
-    candidates: List[str] = []
-    if prefer_color:
-        candidates.append("Twemoji Mozilla")
-    candidates.extend(["Twemoji", "Twitter Color Emoji", "Segoe UI Emoji"])
-
-    for candidate in candidates:
-        if _font_available(candidate):
-            logger.info("ℹ Verwende Emoji-Font %s", candidate)
-            return candidate, _needs_harfbuzz(candidate)
-
-    message = "❌ Twemoji nicht gefunden – bitte Docker-Image aktualisieren oder Fonts installieren"
-    logger.error(message)
-    raise RuntimeError(
-        "Twemoji font is not available in the current environment. "
-        "Run 'fc-list | grep -i twemoji' inside the container and rebuild the Docker image "
-        "if necessary."
+    logger.info(
+        "🔍 FONT-STACK: _select_emoji_font() aufgerufen (prefer_color=%s)", prefer_color
     )
+    try:
+        font_config = get_font_config()
+        emoji_font_name = font_config.get_font_name("EMOJI")
+        logger.info("🔍 FONT-STACK: fonts.yml EMOJI entry name: %s", emoji_font_name)
+        if not emoji_font_name:
+            raise RuntimeError("EMOJI font not configured in fonts.yml")
+
+        # Try fontconfig family name first (e.g., "Twitter Color Emoji")
+        logger.info("🔍 FONT-STACK: Prüfe Verfügbarkeit von '%s'", emoji_font_name)
+        if _font_available(emoji_font_name):
+            needs_hb = _needs_harfbuzz(emoji_font_name)
+            logger.info(
+                "✅ FONT-STACK: Emoji-Font gewählt: '%s' (needs_harfbuzz=%s)",
+                emoji_font_name,
+                needs_hb,
+            )
+            return emoji_font_name, needs_hb
+
+        # Fallback: Try "Twemoji Color Font" alias (fonts.yml name field)
+        emoji_config = font_config.get_font("EMOJI")
+        if emoji_config and emoji_config.name != emoji_font_name:
+            logger.info(
+                "🔍 FONT-STACK: Primärer Name nicht verfügbar, prüfe Alias: '%s'",
+                emoji_config.name,
+            )
+            if _font_available(emoji_config.name):
+                needs_hb = _needs_harfbuzz(emoji_config.name)
+                logger.info(
+                    "✅ FONT-STACK: Emoji-Font gewählt (alias): '%s' (needs_harfbuzz=%s)",
+                    emoji_config.name,
+                    needs_hb,
+                )
+                return emoji_config.name, needs_hb
+
+        message = f"❌ Emoji-Font '{emoji_font_name}' nicht gefunden – bitte Docker-Image aktualisieren oder Fonts installieren"
+        logger.error(message)
+        raise RuntimeError(
+            f"Emoji font '{emoji_font_name}' is not available. "
+            "Run 'fc-list | grep -i emoji' inside the container and rebuild the Docker image if necessary."
+        )
+    except Exception as exc:
+        logger.error("Emoji-Font-Auswahl fehlgeschlagen: %s", exc)
+        raise
 
 
 def _lua_escape_string(value: str) -> str:
@@ -766,6 +894,10 @@ def _lua_fallback_block(spec: str) -> Optional[str]:
 def _normalize_fallback_spec(
     spec: str, *, primary_font: Optional[str], needs_harfbuzz: bool
 ) -> str:
+    logger.info("🔍 FONT-STACK: _normalize_fallback_spec() aufgerufen")
+    logger.info("🔍 FONT-STACK:   Input spec: %s", spec)
+    logger.info("🔍 FONT-STACK:   Primary font: %s", primary_font)
+    logger.info("🔍 FONT-STACK:   Needs HarfBuzz: %s", needs_harfbuzz)
     entries: List[str] = []
     seen: set[str] = set()
     primary_normalized = _normalize_font_name(primary_font) if primary_font else None
@@ -786,24 +918,25 @@ def _normalize_fallback_spec(
         entries.append(entry)
         seen.add(normalized)
 
-    add_dejavu = False
-    # Twemoji has no separate "Black" variant - removed OpenMoji-specific logic
-    # as per AGENTS.md requirement (Twemoji CC BY 4.0 only)
-    if _normalize_font_name("DejaVu Sans") not in seen:
-        add_dejavu = True
+    # Add SANS font from font_config as final fallback (AGENTS.md compliant)
+    try:
+        font_config = get_font_config()
+        sans_font_name = font_config.get_font_name("SANS", "DejaVu Sans")
+        logger.info("🔍 FONT-STACK: Füge SANS-Fallback hinzu: %s", sans_font_name)
+        sans_normalized = _normalize_font_name(sans_font_name)
+        if sans_normalized not in seen:
+            entries.append(f"{sans_font_name}:mode=harf")
+            seen.add(sans_normalized)
+    except Exception as exc:
+        logger.debug("Konnte SANS-Fallback nicht aus font_config laden: %s", exc)
+        # Absolute last resort
+        if _normalize_font_name("DejaVu Sans") not in seen:
+            logger.warning("🔍 FONT-STACK: Verwende DejaVu Sans als letzten Fallback")
+            entries.append("DejaVu Sans:mode=harf")
 
-    # ERDA font is now explicitly set in publish.yml, no need to add automatically
-    # erda_font_name = "erdaccbycjk"
-    # erda_normalized = _normalize_font_name(erda_font_name)
-    # if erda_normalized not in seen:
-    #     entries.append(f"{erda_font_name}:mode=harf")
-    #     seen.add(erda_normalized)
-
-    if add_dejavu:
-        entries.append("DejaVu Sans:mode=harf")
-        seen.add(_normalize_font_name("DejaVu Sans"))
-
-    return "; ".join(entries)
+    final_spec = "; ".join(entries)
+    logger.info("✅ FONT-STACK: Normalisierte Fallback-Spec: %s", final_spec)
+    return final_spec
 
 
 def _build_font_header(
@@ -817,6 +950,15 @@ def _build_font_header(
     manual_fallback_spec: Optional[str],
 ) -> str:
     """Render a Pandoc header snippet configuring fonts and fallbacks."""
+
+    logger.info("📄 FONT-STACK: _build_font_header() aufgerufen (FINAL FONT CHOICES)")
+    logger.info("📄 FONT-STACK:   main_font = %s", main_font)
+    logger.info("📄 FONT-STACK:   sans_font = %s", sans_font)
+    logger.info("📄 FONT-STACK:   mono_font = %s", mono_font)
+    logger.info("📄 FONT-STACK:   emoji_font = %s", emoji_font)
+    logger.info("📄 FONT-STACK:   needs_harfbuzz = %s", needs_harfbuzz)
+    logger.info("📄 FONT-STACK:   manual_fallback_spec = %s", manual_fallback_spec)
+    logger.info("📄 FONT-STACK:   include_mainfont = %s", include_mainfont)
 
     lines = ["\\usepackage{fontspec}"]
     fallback_block = (
@@ -1150,6 +1292,68 @@ def _build_resource_paths(additional: Optional[Iterable[str]] = None) -> List[st
     return _dedupe_preserve_order(defaults)
 
 
+def _mark_svg_pdf_available() -> None:
+    os.environ.setdefault(_SVG_PDF_ENV_FLAG, "1")
+
+
+def _convert_svg_to_pdf(svg_file: Path) -> bool:
+    global _SVG_CONVERSION_WARNED
+
+    if not svg_file.exists() or svg_file.suffix.lower() != ".svg":
+        return False
+
+    pdf_file = svg_file.with_suffix(".pdf")
+    try:
+        if pdf_file.exists():
+            if pdf_file.stat().st_mtime >= svg_file.stat().st_mtime:
+                _mark_svg_pdf_available()
+                return True
+        pdf_file.parent.mkdir(parents=True, exist_ok=True)
+
+        if _cairo_svg2pdf is not None:
+            _cairo_svg2pdf(url=str(svg_file), write_to=str(pdf_file))
+            _mark_svg_pdf_available()
+            logger.info("Konvertiere SVG → PDF (CairoSVG): %s", pdf_file)
+            return True
+
+        if svg2rlg is not None and renderPDF is not None:
+            drawing = svg2rlg(str(svg_file))
+            renderPDF.drawToFile(drawing, str(pdf_file))
+            _mark_svg_pdf_available()
+            logger.info("Konvertiere SVG → PDF (svglib): %s", pdf_file)
+            return True
+
+        if not _SVG_CONVERSION_WARNED:
+            logger.warning(
+                "Keine SVG-Konvertierung verfügbar – bitte cairosvg oder svglib/reportlab installieren."
+            )
+            _SVG_CONVERSION_WARNED = True
+        return False
+    except Exception as exc:  # pragma: no cover - best effort logging
+        logger.warning("Konnte SVG %s nicht nach PDF konvertieren: %s", svg_file, exc)
+        return False
+
+
+def _prepare_asset_artifacts(path: Path) -> None:
+    try:
+        resolved = path.resolve()
+    except Exception:
+        return
+
+    if not resolved.exists():
+        return
+
+    if resolved.is_dir():
+        key = resolved.as_posix()
+        if key in _SVG_DIR_CACHE:
+            return
+        _SVG_DIR_CACHE.add(key)
+        for svg_file in resolved.rglob("*.svg"):
+            _convert_svg_to_pdf(svg_file)
+    elif resolved.is_file() and resolved.suffix.lower() == ".svg":
+        _convert_svg_to_pdf(resolved)
+
+
 def _resource_paths_for_source(
     md_path: str, resource_paths: Optional[Iterable[str]] = None
 ) -> List[str]:
@@ -1177,6 +1381,9 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
 
     if "emoji_color" in raw:
         parsed["emoji_color"] = _as_bool(raw.get("emoji_color"))
+
+    if "emoji_bxcoloremoji" in raw:
+        parsed["emoji_bxcoloremoji"] = _as_bool(raw.get("emoji_bxcoloremoji"))
 
     for key in ("main_font", "sans_font", "mono_font"):
         value = raw.get(key)
@@ -1228,17 +1435,21 @@ def _resolve_asset_paths(
         candidate = Path(str(path_value))
 
         if candidate.is_absolute():
+            if candidate.exists():
+                _prepare_asset_artifacts(candidate)
             resolved.append(str(candidate))
             continue
 
         # Prefer manifest-relative resolution, fall back to the entry folder.
         manifest_candidate = (manifest_dir / candidate).resolve()
         if manifest_candidate.exists():
+            _prepare_asset_artifacts(manifest_candidate)
             resolved.append(str(manifest_candidate))
             continue
 
         entry_candidate = (entry_base / candidate).resolve()
         if entry_candidate.exists():
+            _prepare_asset_artifacts(entry_candidate)
             resolved.append(str(entry_candidate))
             continue
 
@@ -1692,7 +1903,9 @@ def _run_pandoc(
     metadata_map: Dict[str, List[str]] = {
         key: list(values) for key, values in defaults["metadata"].items()
     }
+    logger.info("🔍 FONT-STACK: Initial metadata_map from defaults: %s", metadata_map)
     if metadata:
+        logger.info("🔍 FONT-STACK: Caller-provided metadata parameter: %s", metadata)
         for key, value in metadata.items():
             if isinstance(value, Mapping):
                 try:
@@ -1719,8 +1932,14 @@ def _run_pandoc(
                 variable_map[key] = str(value)
 
     fallback_override = variable_map.pop("mainfontfallback", None)
+    logger.info(
+        "🔍 FONT-STACK: fallback_override aus variable_map: %s", fallback_override
+    )
     if fallback_override is not None:
         fallback_override = str(fallback_override).strip() or None
+        logger.info(
+            "🔍 FONT-STACK: fallback_override nach strip: %s", fallback_override
+        )
 
     options = emoji_options or EmojiOptions()
 
@@ -1729,6 +1948,12 @@ def _run_pandoc(
     else:
         metadata_map["color"] = ["false"]
 
+    use_bxcoloremoji = _decide_bxcoloremoji(options)
+    if use_bxcoloremoji:
+        metadata_map["bxcoloremoji"] = ["true"]
+    else:
+        metadata_map.pop("bxcoloremoji", None)
+
     pandoc_version = _get_pandoc_version()
     if pandoc_version:
         logger.info("ℹ Erkannte Pandoc-Version: %s", ".".join(map(str, pandoc_version)))
@@ -1736,6 +1961,11 @@ def _run_pandoc(
         logger.warning("⚠ Pandoc-Version konnte nicht bestimmt werden")
 
     emoji_font, needs_harfbuzz = _select_emoji_font(options.color)
+    logger.info(
+        "🎯 FONT-STACK: _select_emoji_font() returned: font='%s', harfbuzz=%s",
+        emoji_font,
+        needs_harfbuzz,
+    )
 
     main_font = variable_map.get("mainfont", _DEFAULT_VARIABLES["mainfont"])
     sans_font = variable_map.get(
@@ -1786,12 +2016,21 @@ def _run_pandoc(
             manual_fallback_spec = fallback_spec
 
     if emoji_font:
+        logger.info(
+            "🎯 FONT-STACK: Setze metadata_map['emojifont'] = ['%s']", emoji_font
+        )
         metadata_map["emojifont"] = [emoji_font]
         if needs_harfbuzz:
+            logger.info(
+                "🎯 FONT-STACK: Setze metadata_map['emojifontoptions'] = ['Renderer=HarfBuzz']"
+            )
             metadata_map["emojifontoptions"] = ["Renderer=HarfBuzz"]
         elif "emojifontoptions" in metadata_map:
             metadata_map.pop("emojifontoptions", None)
     else:
+        logger.warning(
+            "⚠️  FONT-STACK: Kein emoji_font - entferne emojifont aus metadata_map"
+        )
         metadata_map.pop("emojifont", None)
         metadata_map.pop("emojifontoptions", None)
 
@@ -1880,9 +2119,23 @@ def _run_pandoc(
             cmd.extend(["-H", header])
         for filter_path in filters:
             cmd.extend(["--lua-filter", filter_path])
+        logger.info(
+            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere -M Argumente aus metadata_map"
+        )
         for key, values in metadata_map.items():
             for value in values:
+                if (
+                    "emoji" in key.lower()
+                    or "color" in key.lower()
+                    or "bxcolor" in key.lower()
+                ):
+                    logger.info(
+                        "🚀 FONT-STACK ABNEHMER [Pandoc CLI]:   -M %s=%s", key, value
+                    )
                 cmd.extend(["-M", f"{key}={value}"])
+        logger.info(
+            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere --variable Argumente"
+        )
         for key, value in variable_map.items():
             # If we injected a title header, avoid passing a title variable
             # to Pandoc as this can create duplicate/unescaped title output
@@ -2145,12 +2398,21 @@ def convert_a_folder(
             logger.info("ℹ Kein Buch-Titel")
         options = emoji_options or EmojiOptions()
         _emit_emoji_report(tmp_md, Path(pdf_out), options)
+        resolved_resource_paths: List[str] = []
+        if resource_paths:
+            resolved_resource_paths.extend(resource_paths)
+        if summary_layout:
+            # Allow GitBook-style asset folders below the content root.
+            resolved_resource_paths.append(str(summary_layout.root_dir))
+
         _run_pandoc(
             tmp_md,
             pdf_out,
             add_toc=True,
             title=title,
-            resource_paths=_resource_paths_for_source(folder, resource_paths),
+            resource_paths=_resource_paths_for_source(
+                folder, resolved_resource_paths or None
+            ),
             emoji_options=options,
             variables=variables,
         )
@@ -2393,6 +2655,19 @@ def main() -> None:
         help="Disable colour emoji rendering.",
     )
     ap.add_argument(
+        "--emoji-bxcoloremoji",
+        dest="emoji_bxcoloremoji",
+        action="store_true",
+        default=None,
+        help="Force usage of the bxcoloremoji LaTeX package when rendering emojis.",
+    )
+    ap.add_argument(
+        "--no-emoji-bxcoloremoji",
+        dest="emoji_bxcoloremoji",
+        action="store_false",
+        help="Disable bxcoloremoji even if the package is available.",
+    )
+    ap.add_argument(
         "--emoji-report",
         action="store_true",
         help="Write a usage report for emojis encountered during the build.",
@@ -2452,6 +2727,7 @@ def main() -> None:
         color=args.emoji_color,
         report=args.emoji_report,
         report_dir=emoji_report_dir,
+        bxcoloremoji=args.emoji_bxcoloremoji,
     )
 
     # C + Reset je nach Erfolg
@@ -2501,11 +2777,22 @@ def main() -> None:
         variable_overrides = (
             _build_variable_overrides(pdf_options) if pdf_options else {}
         )
-        if "emoji_color" in pdf_options:
+        color_override = pdf_options.get("emoji_color") if pdf_options else None
+        bx_override = pdf_options.get("emoji_bxcoloremoji") if pdf_options else None
+        if "emoji_color" in pdf_options or "emoji_bxcoloremoji" in pdf_options:
             entry_emoji_options = EmojiOptions(
-                color=bool(pdf_options["emoji_color"]),
+                color=(
+                    bool(color_override)
+                    if color_override is not None
+                    else emoji_options.color
+                ),
                 report=emoji_options.report,
                 report_dir=emoji_options.report_dir,
+                bxcoloremoji=(
+                    bool(bx_override)
+                    if bx_override is not None
+                    else emoji_options.bxcoloremoji
+                ),
             )
         else:
             entry_emoji_options = emoji_options

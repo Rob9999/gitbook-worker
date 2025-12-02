@@ -56,6 +56,9 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    pkg-config \
+    libcairo2 \
+    libcairo2-dev \
     # Utilities for TeX Live installation
     git \
     make \
@@ -69,6 +72,7 @@ RUN apt-get update && apt-get install -y \
     fonts-symbola \
     fonts-liberation \
     fonts-freefont-ttf \
+    librsvg2-bin \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -103,12 +107,12 @@ RUN cd /tmp \
     # Install XeTeX engine and required LaTeX packages
     # Note: fmtutil-sys may fail during language pattern updates, but binaries are still functional
     && (tlmgr install \
-    xetex luatex lualatex-math luatexbase \
+    xetex luatex lualatex-math luatexbase luaotfload \
     fontspec polyglossia unicode-math \
     babel-german hyphen-german selnolig \
     fancyvrb mdwtools \
     enumitem geometry \
-    xcolor \
+    xcolor svg xkeyval zref bxcoloremoji \
     booktabs longtable \
     caption fancyhdr \
     hyperref url \

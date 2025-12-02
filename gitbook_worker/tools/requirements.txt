@@ -4,6 +4,9 @@ matplotlib
 requests
 tqdm
 pygltflib
+cairosvg
+svglib
+reportlab
 black
 mypy
 pyyaml

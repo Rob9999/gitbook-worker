@@ -187,6 +187,7 @@ class SmartPublisher:
                     color=target.pdf_options.get("emoji_color", True),
                     report=False,
                     report_dir=None,
+                    bxcoloremoji=target.pdf_options.get("emoji_bxcoloremoji"),
                 )
 
             # Prepare variables (fonts, etc.)

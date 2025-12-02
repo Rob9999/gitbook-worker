@@ -52,7 +52,14 @@ def log_warn(msg: str) -> None:
 
 
 def log_error(msg: str) -> None:
-    print(f"ERROR: {msg}")
+    print(f"ERROR: {msg}", file=sys.stderr)
+
+
+def _exit_with_error(message: str) -> int:
+    """Emit a human readable error and signal failure with exit code 1."""
+
+    log_error(message)
+    return 1
 
 
 # ------------------------------
@@ -267,6 +274,34 @@ def run_in_container(
     return cp.returncode
 
 
+def _container_exit_hint(code: int) -> str:
+    """Translate a docker run exit code into a human readable explanation."""
+
+    hints = {
+        1: (
+            "docker run returned exit code 1. The command inside the container failed; "
+            "check the stack trace or error output above for details."
+        ),
+        125: (
+            "docker run exited with 125. Docker failed to start the container (invalid "
+            "options or missing image)."
+        ),
+        126: (
+            "docker run exited with 126. The specified entrypoint/command exists but "
+            "is not executable inside the container."
+        ),
+        127: (
+            "docker run exited with 127. The container entrypoint/command could not be "
+            "found."
+        ),
+        137: (
+            "docker run exited with 137. The container was terminated (e.g. OOMKilled or "
+            "received SIGKILL/SIGTERM)."
+        ),
+    }
+    return hints.get(code, f"docker run exited with code {code}.")
+
+
 # ------------------------------
 # CLI
 # ------------------------------
@@ -347,16 +382,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         log_info(f"Detected OS: {platform.system()} {platform.release()}")
 
     if not docker_cli_available():
-        log_error(
-            "Docker CLI not found. Please install Docker Desktop or Docker Engine and ensure 'docker' is on PATH."
+        return _exit_with_error(
+            "Docker CLI not found. Please install Docker Desktop or Docker Engine and ensure 'docker' is on your PATH."
         )
-        return 1
 
     if not docker_daemon_ready(timeout_sec=0):
         log_info("Docker daemon not ready; attempting to start it.")
         if not try_start_docker_daemon(wait_timeout=args.wait):
-            log_error("Docker daemon is not ready. Please start Docker and try again.")
-            return 1
+            return _exit_with_error(
+                "Docker daemon never became ready. Start Docker Desktop/Engine and rerun the command."
+            )
 
     tag = args.tag
     dockerfile = Path(args.dockerfile)
@@ -367,14 +402,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     if needs_build:
         if args.no_build and not args.rebuild:
-            log_error(f"Image '{tag}' not found and --no-build is set.")
-            return 1
+            return _exit_with_error(
+                f"Image '{tag}' not found and --no-build was requested. Remove --no-build or allow rebuilding."
+            )
         if not dockerfile.exists():
-            log_error(f"Dockerfile not found: {dockerfile}")
-            return 1
+            return _exit_with_error(f"Dockerfile not found: {dockerfile}")
         if not context.exists():
-            log_error(f"Build context not found: {context}")
-            return 1
+            return _exit_with_error(f"Build context not found: {context}")
         log_info(
             f"Building image '{tag}' from {dockerfile} with context {context}"
             + (" (no cache)" if args.no_cache else "")
@@ -429,7 +463,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         tag, workdir, env_pairs, cmd_inside, extra_run_args=args.run_arg
     )
     if rc != 0:
-        log_error(f"docker run exited with code {rc}")
+        log_error(_container_exit_hint(rc))
     return rc
 
 

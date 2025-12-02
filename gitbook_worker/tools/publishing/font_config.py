@@ -198,7 +198,7 @@ class FontConfigLoader:
             "serif": self.get_font_name("SERIF", "DejaVu Serif"),
             "sans": self.get_font_name("SANS", "DejaVu Sans"),
             "mono": self.get_font_name("MONO", "DejaVu Sans Mono"),
-            "emoji": self.get_font_name("EMOJI", "Twemoji Mozilla"),
+            "emoji": self.get_font_name("EMOJI", "Twitter Color Emoji"),
             "cjk": self.get_font_name("CJK", "ERDA CC-BY CJK"),
             "indic": self.get_font_name("INDIC", "ERDA CC-BY Indic"),
             "ethiopic": self.get_font_name("ETHIOPIC", "ERDA CC-BY Ethiopic"),

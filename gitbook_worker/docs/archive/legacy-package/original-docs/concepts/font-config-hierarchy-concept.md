@@ -39,7 +39,7 @@ publish:
     main_font: DejaVu Serif
     sans_font: DejaVu Sans
     mono_font: DejaVu Sans Mono
-    mainfont_fallback: Twemoji Mozilla:mode=harf; [.github/fonts/erda-ccby-cjk/...]:mode=harf
+    mainfont_fallback: Twitter Color Emoji:mode=harf; [.github/fonts/erda-ccby-cjk/...]:mode=harf
 ```
 
 **Zweck:** Projekt-spezifische Font-Konfiguration für einzelne Publikationen
@@ -56,7 +56,7 @@ publish:
 │  │ SERIF: DejaVu Serif (System)                         │  │
 │  │ SANS: DejaVu Sans (System)                           │  │
 │  │ MONO: DejaVu Sans Mono (System)                      │  │
-│  │ EMOJI: Twemoji Mozilla (System)                      │  │
+│  │ EMOJI: Twitter Color Emoji (System)                  │  │
 │  └───────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────┘
                           ▼ MERGE ▼
@@ -144,7 +144,7 @@ def _match_font_key(font_name: str, available_keys: List[str]) -> Optional[str]:
         "DejaVu Serif": "SERIF",
         "DejaVu Sans": "SANS",
         "DejaVu Sans Mono": "MONO",
-        "Twemoji Mozilla": "EMOJI",
+        "Twitter Color Emoji": "EMOJI",
     }
     return mappings.get(font_name)
 ```

@@ -389,7 +389,7 @@ def test_run_pandoc_host_arguments(monkeypatch, tmp_path):
     monkeypatch.setattr(publisher, "_run", fake_run)
     monkeypatch.setattr(publisher, "_get_pandoc_version", lambda: (3, 1, 12))
     monkeypatch.setattr(
-        publisher, "_select_emoji_font", lambda color: ("Twemoji Mozilla", False)
+        publisher, "_select_emoji_font", lambda color: ("Twitter Color Emoji", False)
     )
 
     publisher._run_pandoc(
@@ -416,7 +416,7 @@ def test_run_pandoc_host_arguments(monkeypatch, tmp_path):
     assert "-f" in cmd and cmd[cmd.index("-f") + 1] == "gfm"
     assert "-t" in cmd and cmd[cmd.index("-t") + 1] == "latex"
     assert cmd.count("--lua-filter") == 2
-    assert ("-M", "emojifont=Twemoji Mozilla") in pairs
+    assert ("-M", "emojifont=Twitter Color Emoji") in pairs
     assert ("-M", "color=true") in pairs
     assert ("-M", "foo=bar") in pairs
     assert cmd.count("-M") >= 4
@@ -446,7 +446,7 @@ def test_run_pandoc_uses_default_arguments(monkeypatch, tmp_path):
     monkeypatch.setattr(publisher, "_run", fake_run)
     monkeypatch.setattr(publisher, "_get_pandoc_version", lambda: (3, 1, 12))
     monkeypatch.setattr(
-        publisher, "_select_emoji_font", lambda color: ("Twemoji Mozilla", False)
+        publisher, "_select_emoji_font", lambda color: ("Twitter Color Emoji", False)
     )
 
     publisher._run_pandoc(str(md), str(pdf), variables={"mainfontfallback": None})
@@ -459,7 +459,7 @@ def test_run_pandoc_uses_default_arguments(monkeypatch, tmp_path):
     assert cmd.count("--lua-filter") == len(defaults["lua_filters"])
     assert any(flag == "-H" and value.endswith("deeptex.sty") for flag, value in pairs)
     assert any(arg.endswith("pandoc-fonts.tex") for arg in cmd)
-    assert ("-M", "emojifont=Twemoji Mozilla") in pairs
+    assert ("-M", "emojifont=Twitter Color Emoji") in pairs
     assert ("-M", "color=true") in pairs
     assert ("--variable", "mainfont=DejaVu Serif") in pairs
     assert ("--variable", "monofont=DejaVu Sans Mono") in pairs
@@ -563,7 +563,7 @@ def test_run_pandoc_metadata_mapping_override(monkeypatch, tmp_path):
     monkeypatch.setattr(publisher, "_run", fake_run)
     monkeypatch.setattr(publisher, "_get_pandoc_version", lambda: (3, 1, 12))
     monkeypatch.setattr(
-        publisher, "_select_emoji_font", lambda color: ("Twemoji Mozilla", False)
+        publisher, "_select_emoji_font", lambda color: ("Twitter Color Emoji", False)
     )
 
     publisher._run_pandoc(
@@ -617,7 +617,7 @@ def test_run_pandoc_uses_custom_fallback_with_newer_pandoc(monkeypatch, tmp_path
     monkeypatch.setattr(
         publisher,
         "_select_emoji_font",
-        lambda color: ("Twemoji Mozilla", False),
+        lambda color: ("Twitter Color Emoji", False),
     )
 
     captured_header: dict[str, str] = {}
@@ -687,7 +687,7 @@ def test_run_pandoc_uses_custom_fallback_with_legacy_pandoc(monkeypatch, tmp_pat
     monkeypatch.setattr(
         publisher,
         "_select_emoji_font",
-        lambda color: ("Twemoji Mozilla", False),
+        lambda color: ("Twitter Color Emoji", False),
     )
 
     captured_header: dict[str, str] = {}
@@ -729,7 +729,34 @@ def test_parse_pdf_options_extracts_fallback():
             "main_font": "Demo",
             "mainfont_fallback": "Segoe UI Emoji:mode=harf",
             "emoji_color": False,
+            "emoji_bxcoloremoji": True,
         }
     )
     assert parsed["mainfont_fallback"] == "Segoe UI Emoji:mode=harf"
     assert parsed["main_font"] == "Demo"
+    assert parsed["emoji_color"] is False
+    assert parsed["emoji_bxcoloremoji"] is True
+
+
+def test_require_bxcoloremoji_raises_when_missing(monkeypatch):
+    monkeypatch.setattr(publisher, "_locate_bxcoloremoji", lambda: None)
+    with pytest.raises(RuntimeError):
+        publisher._require_bxcoloremoji()
+
+
+def test_decide_bxcoloremoji_forced_true(monkeypatch):
+    monkeypatch.setattr(publisher, "_require_bxcoloremoji", lambda: "/tex/pkg")
+    assert publisher._decide_bxcoloremoji(
+        publisher.EmojiOptions(color=True, bxcoloremoji=True)
+    )
+
+
+def test_decide_bxcoloremoji_auto_enables_when_available(monkeypatch):
+    monkeypatch.setattr(publisher, "_locate_bxcoloremoji", lambda: "/tex/pkg")
+    assert publisher._decide_bxcoloremoji(publisher.EmojiOptions(color=True))
+
+
+def test_decide_bxcoloremoji_disables_when_requested(monkeypatch):
+    assert not publisher._decide_bxcoloremoji(
+        publisher.EmojiOptions(color=True, bxcoloremoji=False)
+    )

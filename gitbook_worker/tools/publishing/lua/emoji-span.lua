@@ -66,7 +66,8 @@ end
 local function flush_emoji(buffer, result)
   if #buffer > 0 then
     local text = table.concat(buffer)
-    table.insert(result, pandoc.Span({ pandoc.Str(text) }, { "emoji" }))
+    local attr = { "", { "emoji" }, {} }
+    table.insert(result, pandoc.Span({ pandoc.Str(text) }, attr))
     for i = #buffer, 1, -1 do
       buffer[i] = nil
     end
