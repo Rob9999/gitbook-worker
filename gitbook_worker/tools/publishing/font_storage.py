@@ -173,4 +173,14 @@ _DEFAULT_FONT_BUNDLES: tuple[FontBundleSpec, ...] = (
         license_files={"LICENSE": "LICENSE.txt"},
         description="Baseline serif/sans/mono trio required for PDF output",
     ),
+    FontBundleSpec(
+        slug="twitter-color-emoji",
+        version="15.1.0",
+        url="https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip",
+        required_files={
+            "TwitterColorEmoji-SVGinOT.ttf": None,  # Checksum validation will be added after first download
+        },
+        license_files={"LICENSE.md": "LICENSE.txt"},
+        description="Twitter Color Emoji font with SVG-in-OpenType color glyphs (CC BY 4.0)",
+    ),
 )

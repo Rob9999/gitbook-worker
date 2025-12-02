@@ -1,3 +1,30 @@
+# Font Configuration - Single Source of Truth
+# ===========================================
+# This file defines ALL fonts used by GitBook Worker's publisher.
+#
+# CRITICAL DESIGN PRINCIPLE: License Compliance
+# ----------------------------------------------
+# Every font MUST be explicitly configured here to ensure:
+# - License compliance (CC-BY, MIT, OFL, etc.)
+# - Attribution requirements can be fulfilled
+# - Reproducible builds across all environments
+# - No hidden dependencies on system fonts
+#
+# The publisher will NEVER use unconfigured fonts as fallbacks.
+# If a configured font is unavailable, the build FAILS explicitly.
+# This guarantees we can always generate proper attribution for
+# every font used in published documents.
+#
+# Docker Setup: Dockerfile.dynamic reads this file and installs
+# only the configured fonts. No fonts are hardcoded in Dockerfiles.
+#
+# Each font entry must include:
+# - name: Official fontconfig family name
+# - license: License identifier (e.g., "CC BY 4.0", "MIT", "OFL 1.1")
+# - license_url: URL to full license text
+# - paths OR download_url: Where to obtain the font
+# - version: Font version for reproducibility
+#
 version: 1.0.0
 fonts:
   CJK:
@@ -29,14 +56,15 @@ fonts:
 
   EMOJI:
     name: "Twitter Color Emoji"
-    paths: []
+    paths:
+      - "fonts-storage/twitter-color-emoji/TwitterColorEmoji-SVGinOT.ttf"
     download_url: "https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: "https://github.com/13rac1/twemoji-color-font"
     version: "15.1.0"
     fontconfig_name: "Twitter Color Emoji"
-    usage_note: "Installed in Docker via setup_docker_environment.py from official release archive. Fontconfig family name verified via fc-scan."
+    usage_note: "Automatically downloaded via FontStorageBootstrapper on first use. Fontconfig family name verified via fc-scan."
 
   MONO:
     name: "DejaVu Sans Mono"

@@ -92,6 +92,22 @@ into other repositories. The static image (`gitbook_worker/tools/docker/Dockerfi
 remains available for air-gapped runners; the helper scripts default to the
 dynamic variant so font and LaTeX dependencies stay in sync with CI.
 
+## Font Management & License Compliance
+
+**Critical Design Decision**: All fonts used by the publisher MUST be explicitly configured in
+`gitbook_worker/defaults/fonts.yml`. No hardcoded font fallbacks or automatic system font
+discovery is allowed. This ensures:
+
+- **License Compliance**: Every font's license (CC-BY, MIT, OFL, etc.) is tracked and documented
+- **Attribution Requirements**: We can always generate proper attribution for all fonts used
+- **Reproducible Builds**: Identical font configuration across local, CI/CD, and Docker environments
+- **No Hidden Dependencies**: Publisher fails explicitly if configured fonts are unavailable
+
+The `Dockerfile.dynamic` reads `fonts.yml` and installs only the configured fonts. Each font entry
+must include `name`, `license`, `license_url`, and either `download_url` or `paths`. See
+`gitbook_worker/defaults/fonts.yml` for the complete font registry and
+`gitbook_worker/docs/architecture/smart-font-stack.md` for the architecture.
+
 ## Development
 
 - Add dependencies to `setup.cfg` and keep `__version__` in `gitbook_worker/__init__.py` in sync

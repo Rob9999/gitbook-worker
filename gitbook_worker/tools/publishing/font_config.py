@@ -2,8 +2,24 @@
 # -*- coding: utf-8 -*-
 """Font configuration loader for the publishing system.
 
-This module provides centralized font configuration management,
-eliminating hardcoded font paths from the codebase.
+DESIGN PRINCIPLE: Font License Compliance
+==========================================
+This module enforces strict font configuration to ensure license compliance
+and attribution requirements. Key principles:
+
+- ALL fonts loaded from fonts.yml (single source of truth)
+- NO hardcoded font paths or automatic system font discovery
+- NO fallbacks to unconfigured fonts (build fails explicitly)
+- License tracking for every font (CC-BY, MIT, OFL, etc.)
+- Attribution capability for all published documents
+
+The loader reads gitbook_worker/defaults/fonts.yml and optional overrides
+from publish.yml. If a configured font is unavailable, operations fail
+with clear error messages. This guarantees we never use fonts we cannot
+properly attribute or whose licenses we haven't documented.
+
+See AGENTS.md and docs/architecture/smart-font-stack.md for the complete
+design rationale and implementation details.
 """
 
 from __future__ import annotations

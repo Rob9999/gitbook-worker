@@ -2,18 +2,31 @@
 # -*- coding: utf-8 -*-
 """
 Selective Publisher
-- Liest publish.yml|yaml aus dem Repo-Root
-- Ermittelt alle Einträge mit build: true -> get_publish_list()
-- Bereitet Umgebung vor (PyYAML, optional Pandoc/LaTeX & Emoji-Fonts) -> prepareYAML(), prepare_publishing()
-- Baut PDFs für 'file' und 'folder' -> build_pdf()
-- Setzt nach erfolgreichem Build das Flag per reset-publish-flag.py zurück -> main()
 
-Aufrufbeispiele:
+DESIGN PRINCIPLE: Font License Compliance
+==========================================
+This publisher enforces strict font configuration to ensure license compliance and attribution:
+- ALL fonts must be explicitly configured in fonts.yml (single source of truth)
+- NO hardcoded font fallbacks allowed (violates license tracking)
+- NO automatic system font discovery (prevents attribution)
+- Font selection uses only fonts.yml entries to maintain reproducible builds
+
+This guarantees we can always fulfill attribution requirements and license obligations
+for every font used in published documents.
+
+Core Operations:
+- Reads publish.yml|yaml from repository root
+- Identifies entries with build: true -> get_publish_list()
+- Prepares environment (PyYAML, optional Pandoc/LaTeX & configured fonts) -> prepare_publishing()
+- Builds PDFs for 'file' and 'folder' types -> build_pdf()
+- Resets build flags after successful build -> main()
+
+Usage Examples:
   python gitbook_worker/tools/publishing/publisher.py
   python gitbook_worker/tools/publishing/publisher.py --manifest publish.yml --use-summary
   python gitbook_worker/tools/publishing/publisher.py --no-apt --only-prepare
 
-Optionen siehe argparse unten.
+See argparse configuration below for all options.
 """
 
 from __future__ import annotations
@@ -308,7 +321,10 @@ def _user_font_directories() -> List[Path]:
 
 
 def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> None:
-    """Ensure OSFONTDIR contains repo/local font directories for LuaLaTeX."""
+    """Ensure OSFONTDIR contains repo/local font directories for LuaLaTeX.
+
+    Also sets FONTCONFIG_FILE on Windows to enable fontconfig to find fonts-storage/.
+    """
 
     new_dirs: List[str] = []
     entries = list(_user_font_directories())
@@ -317,6 +333,14 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
     entries.append(repo_root / "fonts-storage")
     if additional_dirs:
         entries.extend(additional_dirs)
+
+    # On Windows, fontconfig needs explicit configuration to find custom font directories
+    # Set FONTCONFIG_FILE to point to fonts-storage/fonts.conf
+    if sys.platform == "win32":
+        fonts_conf = repo_root / "fonts-storage" / "fonts.conf"
+        if fonts_conf.exists():
+            os.environ["FONTCONFIG_FILE"] = str(fonts_conf.resolve())
+            logger.debug(f"✓ FONTCONFIG_FILE set to {fonts_conf}")
 
     for directory in entries + _ADDITIONAL_FONT_DIRS:
         if not directory:
@@ -476,6 +500,103 @@ def _clear_lualatex_caches() -> None:
         logger.info("ℹ %d LuaLaTeX Cache-Verzeichnisse gelöscht", cleared_count)
     else:
         logger.debug("ℹ Keine LuaLaTeX Cache-Verzeichnisse gefunden")
+
+
+def _check_fontconfig_has_font(font_name: str) -> bool:
+    """Check if fontconfig cache knows about this font.
+
+    Args:
+        font_name: Font family name (e.g., "Twitter Color Emoji")
+
+    Returns:
+        True if font is in fontconfig cache, False otherwise
+    """
+    fc_list = _which("fc-list")
+    if not fc_list:
+        logger.debug("fc-list nicht verfügbar - kann fontconfig nicht prüfen")
+        return False
+
+    try:
+        result = _run(
+            [fc_list, ":", "family"], capture_output=True, text=True, check=False
+        )
+        return font_name.lower() in result.stdout.lower()
+    except Exception as exc:
+        logger.debug("fc-list check fehlgeschlagen: %s", exc)
+        return False
+
+
+def _check_luaotfload_has_font(font_name: str) -> bool:
+    """Check if LuaTeX font database knows about this font.
+
+    Args:
+        font_name: Font family name (e.g., "Twitter Color Emoji")
+
+    Returns:
+        True if font is in LuaTeX cache, False otherwise
+    """
+    tool = _which("luaotfload-tool") or _which("luaotfload-tool.exe")
+    if not tool:
+        logger.debug("luaotfload-tool nicht verfügbar - kann LuaTeX cache nicht prüfen")
+        return False
+
+    try:
+        result = _run(
+            [tool, "--find", font_name],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=5,
+        )
+        # Returns font path if found, empty if not
+        return bool(result.stdout.strip())
+    except Exception as exc:
+        logger.debug("luaotfload-tool check fehlgeschlagen: %s", exc)
+        return False
+
+
+def _fonts_need_cache_update() -> bool:
+    """Check if any configured font is missing from font caches.
+
+    Returns:
+        True if font caches need updating, False if all fonts are cached
+    """
+    try:
+        font_config = get_font_config()
+
+        # Check critical fonts that must be in cache for PDF generation
+        critical_fonts = ["EMOJI", "CJK", "SERIF", "SANS", "MONO"]
+
+        for key in critical_fonts:
+            try:
+                font = font_config.get_font(key)
+                if not font:
+                    continue
+
+                # Check fontconfig cache
+                if not _check_fontconfig_has_font(font.name):
+                    logger.info(
+                        "🔍 Font '%s' nicht in fontconfig cache - Update erforderlich",
+                        font.name,
+                    )
+                    return True
+
+                # Check LuaTeX cache (critical for PDF generation)
+                if not _check_luaotfload_has_font(font.name):
+                    logger.info(
+                        "🔍 Font '%s' nicht in LuaTeX cache - Update erforderlich",
+                        font.name,
+                    )
+                    return True
+            except Exception as exc:
+                logger.debug("Fehler beim Prüfen von Font %s: %s", key, exc)
+                continue
+
+        logger.info("✓ Alle konfigurierten Fonts in Caches - Update nicht nötig")
+        return False
+    except Exception as exc:
+        logger.warning("Cache-Check fehlgeschlagen (%s) - führe Update durch", exc)
+        return True
 
 
 def _update_luaotfload_database() -> None:
@@ -868,10 +989,17 @@ def _select_emoji_font(prefer_color: bool) -> Tuple[Optional[str], bool]:
                 )
                 return emoji_config.name, needs_hb
 
-        message = f"❌ Emoji-Font '{emoji_font_name}' nicht gefunden – bitte Docker-Image aktualisieren oder Fonts installieren"
+        # DESIGN DECISION: No hardcoded fallbacks allowed!
+        # All fonts must be explicitly configured in fonts.yml to ensure:
+        # - License compliance (CC-BY, MIT, etc.)
+        # - Attribution requirements can be fulfilled
+        # - Reproducible builds across environments
+        # Using unconfigured system fonts would violate these principles.
+        message = f"❌ Emoji font '{emoji_font_name}' not found – please install configured fonts or update Docker image"
         logger.error(message)
         raise RuntimeError(
             f"Emoji font '{emoji_font_name}' is not available. "
+            "No hardcoded fallbacks allowed - all fonts must be configured in fonts.yml for license compliance. "
             "Run 'fc-list | grep -i emoji' inside the container and rebuild the Docker image if necessary."
         )
     except Exception as exc:
@@ -1822,7 +1950,17 @@ def prepare_publishing(
                 _remember_font_dir(target.parent)
                 _register_font(target)
 
+    # Configure OSFONTDIR BEFORE cache checking so fc-list can find fonts-storage/
     _configure_osfontdir([repo_font_dir])
+
+    # Refresh fontconfig cache to pick up fonts-storage/ contents
+    # This ensures fc-list can find newly downloaded fonts
+    if _which("fc-cache"):
+        logger.debug("🔄 Refreshing fontconfig cache for OSFONTDIR...")
+        cmd = ["fc-cache", "-f"]
+        if sys.platform != "win32":
+            cmd.append("-v")
+        _run(cmd, check=False)
 
     # latex-emoji.lua Filter
     lua_dir = _resolve_module_path("lua")
@@ -1835,22 +1973,34 @@ def prepare_publishing(
         except Exception as e:
             logger.warning("Konnte latex-emoji.lua nicht laden: %s", e)
 
-    # Clear LuaLaTeX font caches after font registration
-    # This ensures that LuaTeX picks up any font updates
-    logger.info("🔄 Clearing LuaLaTeX font caches...")
-    _clear_lualatex_caches()
-    _update_luaotfload_database()
+    # Smart font cache update: only if fonts are missing or were modified
+    # NOTE: This runs AFTER OSFONTDIR is configured and fc-cache refreshed,
+    # so fc-list can find fonts in fonts-storage/
+    if _fonts_need_cache_update():
+        logger.info("🔄 Font caches veraltet - aktualisiere...")
 
-    # Final font cache refresh after all font operations
-    if manifest_specs or removed_fonts or font_cache_refreshed:
-        logger.info("🔄 Final fontconfig cache refresh...")
-        if _which("fc-cache"):
-            # Note: -v (verbose) flag causes fc-cache to hang on Windows TeX Live
-            # Use -v only on non-Windows platforms
-            cmd = ["fc-cache", "-f"]
-            if sys.platform != "win32":
-                cmd.append("-v")
-            _run(cmd, check=False)
+        # Clear LuaLaTeX font caches after font registration
+        # This ensures that LuaTeX picks up any font updates
+        logger.info("🔄 Clearing LuaLaTeX font caches...")
+        _clear_lualatex_caches()
+        _update_luaotfload_database()
+
+        # Final font cache refresh after all font operations
+        if manifest_specs or removed_fonts or font_cache_refreshed:
+            logger.info("🔄 Final fontconfig cache refresh...")
+            if _which("fc-cache"):
+                # Note: -v (verbose) flag causes fc-cache to hang on Windows TeX Live
+                # Use -v only on non-Windows platforms
+                cmd = ["fc-cache", "-f"]
+                if sys.platform != "win32":
+                    cmd.append("-v")
+                _run(cmd, check=False)
+
+        logger.info("✓ Font-Cache-Update abgeschlossen")
+    else:
+        logger.info(
+            "✓ Font caches aktuell - überspringe Update (spart ~15-30 Sekunden)"
+        )
 
 
 # --------------------------- PDF Build (C) --------------------------------- #

@@ -23,5 +23,18 @@
 10. **Dokumentationspflicht**: Ergänze neue Funktionen mit kurzen, prägnanten Markdown-Notizen in `docs/` oder passenden Unterordnern; lege bei erkannten Lücken neue Seiten an.
 11. **Release- und PR-Hinweise**: Beschreibe im Commit/PR klar, was und warum geändert wurde. Vermeide Sammel-Commits; dokumentiere Tests und bekannte Einschränkungen transparent.
 
-# Versionierung
-12. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...
+## Font Management & License Compliance
+12. **No Hardcoded Fonts**: All fonts MUST be explicitly configured in `gitbook_worker/defaults/fonts.yml`. This is a critical design decision to ensure:
+    - **License Compliance**: Every font's license (CC-BY, MIT, OFL, etc.) is tracked and documented
+    - **Attribution Requirements**: We can always generate proper attribution for all fonts used
+    - **Reproducible Builds**: Identical font configuration across local development, CI/CD, and Docker environments
+    - **No System Font Fallbacks**: Publisher will fail rather than use unconfigured system fonts
+13. **Font Configuration**: `fonts.yml` is the single source of truth. Each font entry must include:
+    - `name`: Official fontconfig family name (e.g., "Twitter Color Emoji")
+    - `license`: License identifier (e.g., "CC BY 4.0", "MIT", "OFL 1.1")
+    - `license_url`: URL to full license text
+    - `download_url` or `paths`: Where to obtain the font
+14. **Dynamic Docker Font Setup**: The `Dockerfile.dynamic` reads `fonts.yml` and installs only configured fonts. No fonts are hardcoded in the Dockerfile itself.
+
+## Versionierung
+15. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...

@@ -14,11 +14,36 @@ history:
 - **Zielsetzung:** Ein deterministischer, wiederholbarer Installer, der exakt die Schriften aus `fonts.yml → publish.yml` beschafft, lokal (oder im Container) persistiert, anschließend ein temporäres Laufzeit-`fonts.meta.yml` erzeugt und dieses nahtlos in den bestehenden Loader integriert. Das Konzept muss für lokale Entwickler:innen, CI-Läufe, Docker-Container und das geplante PyPI-Paket identisch funktionieren.
 
 ## Leitprinzipien
-1. **Single Source of Truth:** `gitbook_worker/defaults/fonts.yml` bleibt unverändert. Repository-spezifische oder benutzerdefinierte Anpassungen passieren ausschließlich via `publish.yml` bzw. optionalen CLI-Parametern.
-2. **Deterministische Reproduzierbarkeit:** Jeder Lauf produziert dieselbe Font-Struktur, sofern Version und URLs gleich bleiben. Hashes der Downloads sichern Integrität.
-3. **Plattformabstraktion:** Ein gemeinsames API, das Windows/macOS/Linux (nativ) und Docker-Container gleich behandelt.
-4. **Lokale Cache-Strategie:** Fonts landen in einem wohldefinierten Cache (`%LOCALAPPDATA%\gitbook-worker\fonts`, `~/Library/Application Support/gitbook-worker/fonts`, `~/.cache/gitbook-worker/fonts`). Container nutzen `/var/cache/gitbook-worker/fonts`.
-5. **Keine stillen Fallbacks:** Wenn ein Font weder lokal gefunden noch erfolgreich geladen werden kann, scheitert der Build mit klarer Fehlermeldung und Installationshinweis.
+
+### 1. Single Source of Truth
+`gitbook_worker/defaults/fonts.yml` bleibt unverändert. Repository-spezifische oder benutzerdefinierte Anpassungen passieren ausschließlich via `publish.yml` bzw. optionalen CLI-Parametern.
+
+### 2. Deterministische Reproduzierbarkeit
+Jeder Lauf produziert dieselbe Font-Struktur, sofern Version und URLs gleich bleiben. Hashes der Downloads sichern Integrität.
+
+### 3. Plattformabstraktion
+Ein gemeinsames API, das Windows/macOS/Linux (nativ) und Docker-Container gleich behandelt.
+
+### 4. Lokale Cache-Strategie
+Fonts landen in einem wohldefinierten Cache (`%LOCALAPPDATA%\gitbook-worker\fonts`, `~/Library/Application Support/gitbook-worker/fonts`, `~/.cache/gitbook-worker/fonts`). Container nutzen `/var/cache/gitbook-worker/fonts`.
+
+### 5. No Hardcoded Font Fallbacks (License Compliance)
+**CRITICAL DESIGN DECISION**: The publisher MUST NEVER use unconfigured system fonts as automatic fallbacks. All fonts must be explicitly configured in `fonts.yml` to ensure:
+
+- **License Compliance**: Every font's license (CC-BY, MIT, OFL, etc.) is tracked and documented
+- **Attribution Requirements**: We can always generate proper attribution for all fonts used in published documents
+- **Reproducible Builds**: Identical font configuration across local development, CI/CD, and Docker environments
+- **Legal Safety**: No risk of inadvertently using proprietary or restricted fonts
+
+If a configured font is not available, the build MUST fail with a clear error message and installation instructions. Silent fallbacks to system fonts (like "Noto Color Emoji", "Segoe UI Emoji", etc.) are explicitly forbidden.
+
+This principle applies to:
+- Publisher font selection (`publisher.py::_select_emoji_font`)
+- Docker image font installation (`Dockerfile.dynamic`)
+- Font configuration loader (`font_config.py`)
+- Smart font stack installer (`smart_font_stack.py`)
+
+The entire font management infrastructure exists to guarantee we can fulfill attribution obligations and license requirements for every font in every published document.
 
 ## Schichtenmodell der Font-Konfiguration
 1. **Base Layer:** `gitbook_worker/defaults/fonts.yml` (keine Änderungen im Repo).

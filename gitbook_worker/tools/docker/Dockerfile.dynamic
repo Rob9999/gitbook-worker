@@ -2,8 +2,22 @@
 # ERDA GitBook Worker - Dynamic Configuration Dockerfile
 # =============================================================================
 # 
-# This Dockerfile implements best practices for dynamic configuration:
-# - No hardcoded fonts in Dockerfile
+# DESIGN PRINCIPLE: Font License Compliance
+# ------------------------------------------
+# This Dockerfile enforces strict font configuration from fonts.yml to ensure
+# license compliance and attribution requirements. Key principles:
+#
+# - NO HARDCODED FONTS: All fonts configured via gitbook_worker/defaults/fonts.yml
+# - NO AUTOMATIC FALLBACKS: Build fails if configured fonts unavailable
+# - LICENSE TRACKING: Every font's license documented in fonts.yml
+# - ATTRIBUTION CAPABLE: Can always generate proper attribution for all fonts
+# - REPRODUCIBLE BUILDS: Identical font setup across all environments
+#
+# The setup_docker_environment.py script reads fonts.yml and installs only
+# configured fonts. This guarantees we never use unconfigured system fonts
+# that would violate license tracking and attribution requirements.
+#
+# Additional best practices:
 # - Configuration driven by gitbook_worker setup (fonts.yml, publish.yml)
 # - Automated integrity testing during build
 # - License compliance enforcement (AGENTS.md)
