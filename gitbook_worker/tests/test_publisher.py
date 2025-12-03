@@ -73,8 +73,8 @@ def test_select_emoji_font_raises_when_twemoji_missing(monkeypatch, caplog):
     with pytest.raises(RuntimeError) as excinfo:
         publisher._select_emoji_font(prefer_color=True)
 
-    assert "Twemoji" in str(excinfo.value)
-    assert any("Twemoji nicht gefunden" in message for message in caplog.messages)
+    assert "Twitter Color Emoji" in str(excinfo.value)
+    assert any("Twitter Color Emoji" in message for message in caplog.messages)
 
 
 def test_get_publish_list(monkeypatch, tmp_path):
@@ -574,8 +574,10 @@ def test_run_pandoc_metadata_mapping_override(monkeypatch, tmp_path):
     )
 
     cmd = captured["cmd"]
-    assert cmd.count("-M") == 2
+    # Expect 3 -M flags: color=true, bxcoloremoji=true, emojifont=Twitter Color Emoji
+    assert cmd.count("-M") == 3
     assert "color=true" in " ".join(cmd)
+    assert "bxcoloremoji=true" in " ".join(cmd)
     pairs = list(zip(cmd, cmd[1:]))
 
     # NOTE: As of commit 1a41f98, we force manual LaTeX fallback (supports_mainfont_fallback=False)
