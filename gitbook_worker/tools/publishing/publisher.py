@@ -506,7 +506,7 @@ def _check_fontconfig_has_font(font_name: str) -> bool:
     """Check if fontconfig cache knows about this font.
 
     Args:
-        font_name: Font family name (e.g., "Twitter Color Emoji")
+        font_name: Font family name (e.g., "Twemoji Mozilla")
 
     Returns:
         True if font is in fontconfig cache, False otherwise
@@ -530,7 +530,7 @@ def _check_luaotfload_has_font(font_name: str) -> bool:
     """Check if LuaTeX font database knows about this font.
 
     Args:
-        font_name: Font family name (e.g., "Twitter Color Emoji")
+        font_name: Font family name (e.g., "Twemoji Mozilla")
 
     Returns:
         True if font is in LuaTeX cache, False otherwise
@@ -999,7 +999,7 @@ def _select_emoji_font(prefer_color: bool) -> Tuple[Optional[str], bool]:
         if not emoji_font_name:
             raise RuntimeError("EMOJI font not configured in fonts.yml")
 
-        # Try fontconfig family name first (e.g., "Twitter Color Emoji")
+        # Try fontconfig family name first (e.g., "Twemoji Mozilla")
         logger.info("🔍 FONT-STACK: Prüfe Verfügbarkeit von '%s'", emoji_font_name)
         if _font_available(emoji_font_name):
             needs_hb = _needs_harfbuzz(emoji_font_name)
