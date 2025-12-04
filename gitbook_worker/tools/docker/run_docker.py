@@ -121,7 +121,7 @@ def build_docker_args(
         # Font-Check: Stelle sicher, dass die erforderlichen Fonts vorhanden sind
         # Note: fc-list escapes some characters (e.g., 'ERDA CC\-BY CJK'), so we use more flexible patterns
         font_guard = (
-            "fc-list | grep -Ei 'Twemoji|Twitter Color Emoji' || "
+            "fc-list | grep -Ei 'Twemoji' || "
             "{ echo 'ERROR: Twemoji font missing'; exit 45; }; "
             "fc-list | grep -Ei 'ERDA.*CC.*BY.*CJK' || "
             "{ echo 'ERROR: ERDA CC-BY CJK font missing'; exit 46; }; "

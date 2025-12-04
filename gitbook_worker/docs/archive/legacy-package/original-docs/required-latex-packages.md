@@ -10,7 +10,7 @@ This document lists **additional packages** required beyond `scheme-basic` for P
 - Tables (booktabs, longtable)
 - Code blocks (fancyvrb)
 - Hyperlinks (hyperref)
-- Emoji fonts (Twitter Color Emoji)
+- Emoji fonts (Twemoji Mozilla)
 
 ## Package List (Dockerfile.dynamic Line 102-119)
 

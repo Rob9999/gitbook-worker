@@ -1,4 +1,4 @@
-﻿# Docker Tools
+# Docker Tools
 
 This directory contains Docker-related tools for the GitBook Worker.
 

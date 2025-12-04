@@ -30,7 +30,7 @@
     - **Reproducible Builds**: Identical font configuration across local development, CI/CD, and Docker environments
     - **No System Font Fallbacks**: Publisher will fail rather than use unconfigured system fonts
 13. **Font Configuration**: `fonts.yml` is the single source of truth. Each font entry must include:
-    - `name`: Official fontconfig family name (e.g., "Twitter Color Emoji")
+    - `name`: Official fontconfig family name (e.g., "Twemoji Mozilla")
     - `license`: License identifier (e.g., "CC BY 4.0", "MIT", "OFL 1.1")
     - `license_url`: URL to full license text
     - `download_url` or `paths`: Where to obtain the font

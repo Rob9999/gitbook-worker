@@ -297,7 +297,7 @@ For dynamic generation to work, each font entry with `download_url` must include
 ```yaml
 fonts:
   EMOJI:
-    name: "Twitter Color Emoji"              # Required: fontconfig family name
+    name: "Twemoji Mozilla"              # Required: fontconfig family name
     version: "15.1.0"                         # Required: for state tracking
     download_url: "https://..."               # Required: source archive
     license: "CC BY 4.0"                      # Required: for license compliance

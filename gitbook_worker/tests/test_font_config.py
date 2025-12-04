@@ -59,7 +59,7 @@ fonts:
     license_url: "https://dejavu-fonts.github.io/License.html"
     paths: []
   EMOJI:
-    name: "Twitter Color Emoji"
+    name: "Twemoji Mozilla"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     paths: []
@@ -191,7 +191,7 @@ def test_get_default_fonts(sample_fonts_yml):
     assert defaults["serif"] == "DejaVu Serif"
     assert defaults["sans"] == "DejaVu Sans"
     assert defaults["mono"] == "DejaVu Sans Mono"
-    assert defaults["emoji"] == "Twitter Color Emoji"
+    assert defaults["emoji"] == "Twemoji Mozilla"
     assert defaults["cjk"] == "ERDA CC-BY CJK"
     assert defaults["indic"] == "ERDA CC-BY Indic"
     assert defaults["ethiopic"] == "ERDA CC-BY Ethiopic"
@@ -283,7 +283,7 @@ def test_match_font_key(sample_fonts_yml):
     assert loader.match_font_key("DejaVu Serif") == "SERIF"
     assert loader.match_font_key("DejaVu Sans") == "SANS"
     assert loader.match_font_key("DejaVu Sans Mono") == "MONO"
-    assert loader.match_font_key("Twitter Color Emoji") == "EMOJI"
+    assert loader.match_font_key("Twemoji Mozilla") == "EMOJI"
 
     # Case-insensitive partial match
     assert loader.match_font_key("erda cc-by cjk") == "CJK"

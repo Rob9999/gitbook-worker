@@ -92,18 +92,29 @@ class FontStorageBootstrapper:
                     f"Download for {spec.slug} fonts failed: {exc.reason if hasattr(exc, 'reason') else exc}"
                 ) from exc
 
-            extracted_root = self._extract_archive(archive_path)
-            for filename, expected_hash in spec.required_files.items():
-                source = self._find_in_archive(extracted_root, filename)
-                if not source:
-                    raise FontStorageError(
-                        f"Could not locate {filename} inside bundle {spec.slug}"
-                    )
-                destination = target_dir / filename
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(source, destination)
-                if expected_hash:
-                    self._assert_sha(destination, expected_hash)
+            # Handle direct font file downloads (e.g., single .ttf files)
+            if archive_path.suffix.lower() in {".ttf", ".otf"}:
+                # Direct font file - no extraction needed
+                for filename, expected_hash in spec.required_files.items():
+                    destination = target_dir / filename
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(archive_path, destination)
+                    if expected_hash:
+                        self._assert_sha(destination, expected_hash)
+            else:
+                # Archive - extract and copy files
+                extracted_root = self._extract_archive(archive_path)
+                for filename, expected_hash in spec.required_files.items():
+                    source = self._find_in_archive(extracted_root, filename)
+                    if not source:
+                        raise FontStorageError(
+                            f"Could not locate {filename} inside bundle {spec.slug}"
+                        )
+                    destination = target_dir / filename
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(source, destination)
+                    if expected_hash:
+                        self._assert_sha(destination, expected_hash)
 
             for source_name, target_name in spec.license_files.items():
                 source = self._find_in_archive(extracted_root, source_name)
@@ -174,13 +185,13 @@ _DEFAULT_FONT_BUNDLES: tuple[FontBundleSpec, ...] = (
         description="Baseline serif/sans/mono trio required for PDF output",
     ),
     FontBundleSpec(
-        slug="twitter-color-emoji",
-        version="15.1.0",
-        url="https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip",
+        slug="twemoji-colr",
+        version="0.7.0",
+        url="https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/TwemojiMozilla.ttf",
         required_files={
-            "TwitterColorEmoji-SVGinOT.ttf": None,  # Checksum validation will be added after first download
+            "TwemojiMozilla.ttf": None,  # Direct download - single TTF file (not zip)
         },
-        license_files={"LICENSE.md": "LICENSE.txt"},
-        description="Twitter Color Emoji font with SVG-in-OpenType color glyphs (CC BY 4.0)",
+        license_files={},  # LICENSE is embedded in font metadata
+        description="Twemoji Mozilla COLR/CPAL color emoji font (CC BY 4.0) - LuaTeX compatible",
     ),
 )

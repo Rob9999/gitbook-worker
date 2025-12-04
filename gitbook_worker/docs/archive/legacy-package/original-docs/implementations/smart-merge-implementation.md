@@ -124,7 +124,7 @@ publish:
   - path: ./
     pdf_options:
       main_font: DejaVu Serif
-      mainfont_fallback: Twitter Color Emoji:mode=harf; [.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf]:mode=harf
+      mainfont_fallback: Twemoji Mozilla:mode=harf; [.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf]:mode=harf
 ```
 
 **Ablauf:**

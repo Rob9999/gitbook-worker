@@ -126,7 +126,7 @@ fonts:
       - ".github/gitbook_worker/tools/publishing/fonts/truetype/erdafont/erda-ccby-cjk.ttf"
   
   EMOJI:
-    name: "Twitter Color Emoji"
+    name: "Twemoji Mozilla"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: "https://github.com/mozilla/twemoji-colr"

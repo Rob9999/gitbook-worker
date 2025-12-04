@@ -209,7 +209,7 @@ local function mainproc_Meta(meta)
     local headers = meta['header-includes']
     if headers == nil then
       headers = pandoc.MetaList({})
-    elseif pantype(headers) == 'MetaList' then
+    elseif pantype(headers) ~= 'MetaList' then
       abort("unexpected metavalue type: header-includes")
     end
     insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', src)})

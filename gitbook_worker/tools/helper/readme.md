@@ -1,12 +1,12 @@
-ï»¿# Helper Tools
+# Helper Tools
 
-Dieses Verzeichnis enthÃ¤lt Hilfs-Skripte fÃ¼r Entwicklung, Debugging und Wartung.
+Dieses Verzeichnis enthält Hilfs-Skripte für Entwicklung, Debugging und Wartung.
 
-## VerfÃ¼gbare Tools
+## Verfügbare Tools
 
-- **find_utf8_issue.py**: Scannt Markdown-Dateien nach ungÃ¼ltigen UTF-8-Sequenzen
+- **find_utf8_issue.py**: Scannt Markdown-Dateien nach ungültigen UTF-8-Sequenzen
 - **tools_import_test.py**: Testet Python-Modul-Importe
 
 ## Verwendung
 
-Diese Tools sind fÃ¼r Entwickler gedacht und werden nicht im regulÃ¤ren Build-Prozess verwendet.
+Diese Tools sind für Entwickler gedacht und werden nicht im regulären Build-Prozess verwendet.

@@ -77,7 +77,7 @@ history:
 2. **LICENSE File Generator**
    - Pro Font-Lizenz: Separate LICENSE-<IDENTIFIER> Datei
    - Beispiele:
-     * LICENSE-CC-BY-4.0 (Twitter Color Emoji, ERDA fonts)
+     * LICENSE-CC-BY-4.0 (Twemoji Mozilla, ERDA fonts)
      * LICENSE-BITSTREAM-VERA (DejaVu)
      * LICENSE-MIT (falls MIT-lizenzierte Fonts hinzukommen)
    - Inhalt: Vollständiger Lizenztext (entweder aus license_url fetchen oder aus lokalem Template)
@@ -577,7 +577,7 @@ ls de/publish/LICENSE-CC-BY-4.0
 ls de/publish/LICENSE-BITSTREAM-VERA
 
 # Check content
-grep "Twitter Color Emoji" de/publish/ATTRIBUTION.md
+grep "Twemoji Mozilla" de/publish/ATTRIBUTION.md
 grep "DejaVu" de/publish/ATTRIBUTION.md
 ```
 

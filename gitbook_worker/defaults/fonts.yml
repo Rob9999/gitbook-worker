@@ -55,15 +55,14 @@ fonts:
     version: "1.0.0"
 
   EMOJI:
-    name: "Twitter Color Emoji"
-    paths:
-      - "fonts-storage/twitter-color-emoji/TwitterColorEmoji-SVGinOT.ttf"
+    name: "Twemoji Mozilla"
+    paths: []
     download_url: "https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: "https://github.com/13rac1/twemoji-color-font"
     version: "15.1.0"
-    fontconfig_name: "Twitter Color Emoji"
+    fontconfig_name: "Twemoji Mozilla"
     usage_note: "Automatically downloaded via FontStorageBootstrapper on first use. Fontconfig family name verified via fc-scan."
 
   MONO:

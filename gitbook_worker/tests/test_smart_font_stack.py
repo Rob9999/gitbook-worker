@@ -61,7 +61,7 @@ def test_prepare_runtime_font_loader_downloads_missing_font(tmp_path):
         repo_root / "fonts.yml",
         {
             "EMOJI": {
-                "name": "Twitter Color Emoji",
+                "name": "Twemoji Mozilla",
                 "paths": [],
                 "download_url": source_font.as_uri(),
                 "license": "CC BY 4.0",

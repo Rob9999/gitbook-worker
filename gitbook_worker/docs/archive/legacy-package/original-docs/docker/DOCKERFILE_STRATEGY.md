@@ -309,11 +309,11 @@ fonts:
       packages:
         - "fonts-dejavu"
     
-    - name: "Noto Color Emoji"
-      license: "SIL Open Font License 1.1"
+    - name: "Twemoji Mozilla"
+      license: "CC BY 4.0"
       install_method: "system"
       packages:
-        - "fonts-noto-color-emoji"
+        - "fonts-twitter-color-emoji"
 
   # Custom fonts (if any - empty by default)
   custom: {}

@@ -112,7 +112,7 @@ The entire font management infrastructure exists to guarantee we can fulfill att
   ```yaml
   fonts:
     EMOJI:
-      name: "Twitter Color Emoji"
+      name: "Twemoji Mozilla"
       download_url: "https://github.com/13rac1/twemoji-color-font/.../TwitterColorEmoji-SVGinOT.ttf"
       sha256: "<HEX>"
       version: "15.1.0"

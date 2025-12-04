@@ -340,7 +340,7 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
         fonts_conf = repo_root / "fonts-storage" / "fonts.conf"
         if fonts_conf.exists():
             os.environ["FONTCONFIG_FILE"] = str(fonts_conf.resolve())
-            logger.debug(f"✓ FONTCONFIG_FILE set to {fonts_conf}")
+            logger.info(f"✓ FONTCONFIG_FILE set to {fonts_conf.resolve()}")
 
     for directory in entries + _ADDITIONAL_FONT_DIRS:
         if not directory:
@@ -726,10 +726,17 @@ def _normalize_font_name(value: str) -> str:
 
 
 def _font_available(name: str) -> bool:
-    """Return ``True`` if fontconfig or local assets can resolve ``name``."""
+    """Return ``True`` if fontconfig or local assets can resolve ``name``.
+
+    Checks in order:
+    1. fontconfig (fc-list)
+    2. fonts.yml configured paths
+    3. legacy font directories
+    """
 
     normalized = _normalize_font_name(name)
 
+    # 1. Try fontconfig first
     fc_list = _which("fc-list")
     if fc_list:
         try:
@@ -747,6 +754,36 @@ def _font_available(name: str) -> bool:
                 for line in result.stdout.splitlines():
                     if normalized in _normalize_font_name(line):
                         return True
+
+    # 2. Fallback: Check fonts.yml configured paths
+    try:
+        from gitbook_worker.tools.publishing.font_storage import get_font_config
+
+        font_config = get_font_config()
+        # Try to find font entry by name
+        for font_key in ["EMOJI", "CJK", "SANS", "SERIF", "MONO"]:
+            try:
+                font_entry = font_config.get_font(font_key)
+                if font_entry and font_entry.name == name:
+                    # Check if any configured path exists
+                    for path_str in font_entry.paths:
+                        path = Path(path_str)
+                        if not path.is_absolute():
+                            # Resolve relative paths from repo root
+                            repo_root = _resolve_repo_root()
+                            path = repo_root / path
+                        if path.exists() and path.is_file():
+                            logger.debug(
+                                "✓ Font '%s' found in fonts.yml path: %s",
+                                name,
+                                path,
+                            )
+                            return True
+            except Exception:
+                # Ignore errors for individual font entries
+                continue
+    except Exception as exc:
+        logger.debug("fonts.yml fallback check failed: %s", exc)
 
     repo_root = _resolve_repo_root()
     font_dirs = [
@@ -1121,17 +1158,7 @@ def _build_font_header(
     sans_options = "[RawFeature={fallback=mainfont}]" if fallback_block else ""
     lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
     lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
-    lines.extend(
-        [
-            "\\newcommand*{\\panEmoji}[1]{%",
-            "  \\ifdefined\\EmojiOne",
-            "    {\\EmojiOne #1}%",
-            "  \\else",
-            "    {#1}%",
-            "  \\fi",
-            "}",
-        ]
-    )
+    # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
     if _DEFAULT_HEADER_PATH:
         header_path = Path(_DEFAULT_HEADER_PATH).as_posix()
         lines.append(f"\\input{{{header_path}}}")
@@ -1851,12 +1878,14 @@ def prepare_publishing(
             if font_dict:
                 manifest_fonts.append(font_dict)
 
-    repo_font_dir = _resolve_repo_root() / ".github" / "fonts"
+    repo_root = _resolve_repo_root()
+    repo_font_dir = repo_root / ".github" / "fonts"
 
     try:
         smart_fonts = prepare_runtime_font_loader(
             manifest_fonts=manifest_fonts or None,
             extra_search_paths=[repo_font_dir],
+            repo_root=repo_root,
         )
     except SmartFontError as exc:
         logger.error("❌ Smart Font Stack fehlgeschlagen: %s", exc)
@@ -1956,7 +1985,7 @@ def prepare_publishing(
     # Refresh fontconfig cache to pick up fonts-storage/ contents
     # This ensures fc-list can find newly downloaded fonts
     if _which("fc-cache"):
-        logger.debug("🔄 Refreshing fontconfig cache for OSFONTDIR...")
+        logger.info("🔄 Refreshing fontconfig cache for OSFONTDIR...")
         cmd = ["fc-cache", "-f"]
         if sys.platform != "win32":
             cmd.append("-v")
