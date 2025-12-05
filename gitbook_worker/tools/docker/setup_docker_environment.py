@@ -373,8 +373,11 @@ class DockerFontInstaller:
         archive_path.unlink(missing_ok=True)
         return installed
 
-    def install_all_fonts(self) -> int:
+    def install_all_fonts(self, skip_local: bool = False) -> int:
         """Install all configured fonts.
+
+        Args:
+            skip_local: If True, skip fonts with local paths (only install fonts with download_url)
 
         Returns:
             Number of fonts installed (system fonts not counted)
@@ -385,6 +388,8 @@ class DockerFontInstaller:
         logger.info("Config source: %s", self.config._config_path)
         logger.info("Config version: %s", self.config._version)
         logger.info("Total fonts configured: %d", len(self.config.get_all_font_keys()))
+        if skip_local:
+            logger.info("Mode: Skip fonts with local paths (volume mounts)")
         logger.info("")
 
         # Check license compliance first
@@ -399,6 +404,16 @@ class DockerFontInstaller:
             if not font:
                 logger.warning("Font key '%s' has no configuration, skipping", key)
                 skipped.append((key, "No configuration"))
+                continue
+
+            # Skip fonts with local paths if requested
+            if skip_local and font.paths:
+                logger.info(
+                    "Skipping %s (%s): Has local paths (will be mounted at runtime)",
+                    key,
+                    font.name,
+                )
+                skipped.append((key, f"{font.name} (local paths)"))
                 continue
 
             try:
@@ -761,13 +776,19 @@ def main() -> int:
         help="Enable verbose logging",
     )
 
+    parser.add_argument(
+        "--skip-local-fonts",
+        action="store_true",
+        help="Skip fonts with local paths (only install fonts with download_url). Used during image build when volume mounts are not available.",
+    )
+
     args = parser.parse_args()
 
     try:
         # Installation phase
         if args.mode in ("install", "both"):
             installer = DockerFontInstaller(args.config)
-            installer.install_all_fonts()
+            installer.install_all_fonts(skip_local=args.skip_local_fonts)
             installer.update_font_cache()
             installer.generate_manifest(args.manifest)
 

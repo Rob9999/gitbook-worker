@@ -56,14 +56,15 @@ fonts:
 
   EMOJI:
     name: "Twemoji Mozilla"
-    paths: []
-    download_url: "https://github.com/13rac1/twemoji-color-font/releases/download/v15.1.0/TwitterColorEmoji-SVGinOT-15.1.0.zip"
+    paths:
+      - "fonts-storage/twemoji-colr/TwemojiMozilla.ttf"
+    download_url: "https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/TwemojiMozilla.ttf"
     license: "CC BY 4.0"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
-    source_url: "https://github.com/13rac1/twemoji-color-font"
-    version: "15.1.0"
+    source_url: "https://github.com/mozilla/twemoji-colr"
+    version: "0.7.0"
     fontconfig_name: "Twemoji Mozilla"
-    usage_note: "Automatically downloaded via FontStorageBootstrapper on first use. Fontconfig family name verified via fc-scan."
+    usage_note: "COLR/CPAL color font with native LuaTeX support. Stored locally in fonts-storage/twemoji-colr/."
 
   MONO:
     name: "DejaVu Sans Mono"

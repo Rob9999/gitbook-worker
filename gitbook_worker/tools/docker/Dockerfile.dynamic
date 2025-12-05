@@ -201,27 +201,28 @@ RUN pip3 install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements
 RUN pip3 install --no-cache-dir pytest pytest-cov
 
 # --- Dynamic Font Configuration ---
-# This is the key difference: fonts are configured dynamically!
-# Copy necessary configuration files and tools for setup
-# Copy python package
+# Strategy: Install only system-level fonts during build
+# Volume-mounted fonts (.github/fonts/, fonts-storage/) are discovered via fontconfig at runtime
+# This allows fonts.yml changes without rebuilding the image
+
+# Copy python package for setup
 COPY gitbook_worker/ /tmp/gitbook_worker_setup/gitbook_worker/
-# Copy self-hosted font bundles required by fonts.yml (e.g., ERDA CC-BY CJK)
-COPY .github/fonts/ /tmp/gitbook_worker_setup/.github/fonts/
 
 # Set Python path for setup script to point to gitbook_worker
 ENV PYTHONPATH=/tmp/gitbook_worker_setup/gitbook_worker
 # Enable stdout-only logging for Docker build (no file logging)
 ENV GITBOOK_WORKER_LOG_STDOUT_ONLY=1
 
-# Run dynamic font installation and configuration
-# This reads fonts.yml, installs all configured fonts, and validates setup
+# Install fonts that have download_url (no local path dependencies)
+# Fonts with local paths will be mounted at runtime under /workspace/
 RUN cd /tmp/gitbook_worker_setup && \
     python3 -m gitbook_worker.tools.docker.setup_docker_environment \
     --mode install \
     --config /tmp/gitbook_worker_setup/gitbook_worker/defaults/fonts.yml \
     --manifest /tmp/docker_font_installation.json \
+    --skip-local-fonts \
     --verbose && \
-    echo "✓ Font installation completed"
+    echo "✓ Font installation completed (runtime fonts will be mounted)"
 
 # --- Environment Validation ---
 # Validate the Docker image setup against configuration
@@ -245,7 +246,7 @@ RUN mkdir -p /opt/gitbook_worker/reports && \
 RUN rm -rf /tmp/gitbook_worker_setup
 
 # --- Entrypoint Configuration ---
-# Create entrypoint script with proper environment setup
+# Create entrypoint script with proper environment setup and runtime font installation
 RUN echo '#!/bin/bash\n\
     export TEXMFHOME=$GITHUB_TOOLS/publishing/texmf\n\
     export LUA_PATH="$GITHUB_TOOLS/publishing/lua/?.lua;;"\n\
@@ -254,6 +255,26 @@ RUN echo '#!/bin/bash\n\
     # Fix Git safe.directory for GitHub Actions and Docker volumes\n\
     if [ -d "/workspace/.git" ]; then\n\
     git config --global --add safe.directory /workspace 2>/dev/null || true\n\
+    fi\n\
+    \n\
+    # Install volume-mounted fonts into system directories\n\
+    # This runs at container startup to register fonts from /workspace mounts\n\
+    FONT_INSTALLED=0\n\
+    if [ -d "/workspace/.github/fonts" ] && [ "$(ls -A /workspace/.github/fonts 2>/dev/null)" ]; then\n\
+    echo "📦 Installing ERDA CC-BY fonts from /workspace/.github/fonts..."\n\
+    mkdir -p /usr/share/fonts/truetype/erda-cjk\n\
+    cp -r /workspace/.github/fonts/* /usr/share/fonts/truetype/erda-cjk/ 2>/dev/null && FONT_INSTALLED=1\n\
+    fi\n\
+    if [ -d "/workspace/fonts-storage" ] && [ "$(ls -A /workspace/fonts-storage 2>/dev/null)" ]; then\n\
+    echo "📦 Installing fonts from /workspace/fonts-storage..."\n\
+    find /workspace/fonts-storage -name "*.ttf" -o -name "*.otf" | while read font; do\n\
+    cp "$font" /usr/share/fonts/truetype/ 2>/dev/null && FONT_INSTALLED=1\n\
+    done\n\
+    fi\n\
+    if [ $FONT_INSTALLED -eq 1 ]; then\n\
+    echo "🔄 Updating font cache..."\n\
+    fc-cache -fv /usr/share/fonts/truetype 2>&1 | grep -E "succeeded|fonts"\n\
+    echo "✓ Runtime fonts installed"\n\
     fi\n\
     \n\
     # Display build information\n\

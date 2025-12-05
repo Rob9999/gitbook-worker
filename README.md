@@ -1,10 +1,29 @@
 # GitBook Worker (v2.0.0)
 
+**Latest Release**: v2.0.0 (December 5, 2025) - [Release Notes](docs/releases/v2.0.0.md)
+
 GitBook Worker now ships the multi-language 2.0.0 release. The Python package still
 installs via `pip install -e .`, but the publishing pipeline is driven by
 `content.yaml`, which lists every language tree (e.g., `de/`, `en/`). The CLI picks a
 language via `--lang` and then runs the usual orchestration/publishing steps for that
 content root.
+
+## 🎉 What's New in v2.0.0
+
+**Critical Fix**: Color emoji rendering now works reliably using **Twemoji Mozilla v0.7.0** (COLR/CPAL format). Previous versions used Twitter Color Emoji (SVG-in-OpenType), which LuaTeX doesn't support for color rendering.
+
+**Docker Architecture**: Completely redesigned font management using volume mounts instead of static COPY commands. Fonts are now installed at container startup, enabling flexible configuration without image rebuilds.
+
+**License Compliance**: All fonts must be explicitly configured in `gitbook_worker/defaults/fonts.yml` with tracked licenses. No hardcoded fallbacks or system font auto-discovery.
+
+**Key Changes**:
+- ✅ Color emojis render correctly in PDF output (🎨 🌈 ✨)
+- ✅ Docker volume-mount architecture for fonts (no rebuilds needed)
+- ✅ Explicit font configuration enforcement via `fonts.yml`
+- ✅ Windows/Linux path compatibility for Docker Desktop
+- ⚠️ Breaking: Docker font management changed (see release notes)
+
+See [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md) for complete changelog and upgrade instructions.
 
 ## Quick start
 
@@ -120,3 +139,19 @@ must include `name`, `license`, `license_url`, and either `download_url` or `pat
   checkout while still pulling updates.
 - Repository-wide conventions live in the root `AGENTS.md`; there are no nested overrides.
 - Documentation placement: user docs in `docs/`, engineering docs in `gitbook_worker/docs/`.
+
+### Docker builds
+To run builds in an isolated Docker container (recommended for reproducible CI-like environment):
+
+```bash
+# Build image and run orchestrator inside container
+python -m gitbook_worker.tools.docker.run_docker orchestrator --profile default --use-dynamic --rebuild
+
+# Or use the convenience script
+./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
+```
+
+**Important**: The `workflow_orchestrator` CLI has a `--profile docker` option but this is just a
+profile name—it does NOT trigger Docker execution. To run inside Docker, use the `run_docker.py`
+module which builds the image, starts a container, mounts your workspace to `/workspace`, and
+executes the orchestrator inside.

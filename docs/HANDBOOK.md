@@ -56,6 +56,24 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - Prefer the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI and local runs—it keeps font and LaTeX packages aligned with the publishing defaults.
 - The static image (`gitbook_worker/tools/docker/Dockerfile`) remains available for air-gapped hosts; pass `--no-build` to wrapper scripts only when the desired image tag already exists.
 
+### Running builds in Docker
+**Local execution (NO Docker)**:
+```bash
+# Runs on your local machine (uses local TeX Live, Python, fonts)
+python -m gitbook_worker.tools.workflow_orchestrator run --lang de --profile local
+```
+
+**Docker execution (isolated container)**:
+```bash
+# Builds Docker image and runs orchestrator INSIDE container
+python -m gitbook_worker.tools.docker.run_docker orchestrator --profile default --use-dynamic --rebuild
+
+# Or with convenience script
+./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
+```
+
+**Key difference**: The `run_docker.py` module builds the Docker image, starts a container, mounts your workspace to `/workspace`, and executes `workflow_orchestrator` inside the container. The `workflow_orchestrator` has a `--profile docker` option but this is just a profile name—it does NOT trigger Docker execution.
+
 ## Migration pointers
 - Treat `gitbook_worker/docs/archive/legacy-package/` as historical background; copy only distilled details back into this handbook.
 - Prefer small, reviewable commits with a short rationale alongside notable behavior changes.

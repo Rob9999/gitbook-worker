@@ -50,6 +50,23 @@ if str(TOOLS_PATH) not in sys.path:
 from utils.docker_runner import main as docker_runner_main
 
 
+def _windows_path_to_docker(path: Path) -> str:
+    """Convert Windows path to Docker-compatible format.
+
+    Examples:
+        C:\\Users\\me\\repo -> /c/Users/me/repo
+        /c/Users/me/repo -> /c/Users/me/repo (already Unix-style)
+    """
+    path_str = str(path.resolve())
+    # Check if Windows path (has drive letter)
+    if len(path_str) > 1 and path_str[1] == ":":
+        drive = path_str[0].lower()
+        rest = path_str[2:].replace("\\", "/")
+        return f"/{drive}{rest}"
+    # Already Unix-style
+    return path_str.replace("\\", "/")
+
+
 def build_docker_args(
     command: str,
     profile: str = "local",
@@ -82,7 +99,40 @@ def build_docker_args(
         workdir,
         "--env",
         "PYTHONPATH=/workspace",
+        "--env",
+        "OSFONTDIR=/workspace/.github/fonts:/workspace/fonts-storage",
     ]
+
+    # Mount zusätzliche Verzeichnisse, die fonts.yml referenziert
+    # .github/fonts für ERDA CC-BY CJK
+    github_fonts = REPO_ROOT / ".github" / "fonts"
+    if github_fonts.exists():
+        github_fonts_docker = _windows_path_to_docker(github_fonts)
+        args.extend(
+            [
+                "--run-arg=-v",
+                f"--run-arg={github_fonts_docker}:/workspace/.github/fonts:ro",
+            ]
+        )
+
+    # fonts-storage für selbst-gehostete Font-Bundles (z.B. Twemoji Mozilla)
+    # Erstelle das Verzeichnis, falls es nicht existiert (z.B. auf frischem GitHub Checkout)
+    fonts_storage = REPO_ROOT / "fonts-storage"
+    if not fonts_storage.exists():
+        fonts_storage.mkdir(parents=True, exist_ok=True)
+        logger_note = (
+            f"✓ Created fonts-storage directory at {fonts_storage}\n"
+            "  Fonts will be downloaded automatically via FontStorageBootstrapper"
+        )
+        print(logger_note)
+
+    fonts_storage_docker = _windows_path_to_docker(fonts_storage)
+    args.extend(
+        [
+            "--run-arg=-v",
+            f"--run-arg={fonts_storage_docker}:/workspace/fonts-storage:ro",
+        ]
+    )
 
     if no_build:
         args.append("--no-build")
@@ -118,13 +168,15 @@ def build_docker_args(
             ]
         )
     elif command == "orchestrator":
-        # Font-Check: Stelle sicher, dass die erforderlichen Fonts vorhanden sind
-        # Note: fc-list escapes some characters (e.g., 'ERDA CC\-BY CJK'), so we use more flexible patterns
+        # Font-Check: Rebuild fontconfig cache for mounted volumes and check availability
+        # The mounted fonts in /workspace/.github/fonts and /workspace/fonts-storage
+        # need to be registered with fontconfig before use
         font_guard = (
-            "fc-list | grep -Ei 'Twemoji' || "
-            "{ echo 'ERROR: Twemoji font missing'; exit 45; }; "
-            "fc-list | grep -Ei 'ERDA.*CC.*BY.*CJK' || "
-            "{ echo 'ERROR: ERDA CC-BY CJK font missing'; exit 46; }; "
+            "fc-cache -f /workspace/.github/fonts /workspace/fonts-storage 2>/dev/null || true; "
+            "test -f /workspace/fonts-storage/twemoji-colr/TwemojiMozilla.ttf || "
+            "{ echo 'ERROR: Twemoji font file missing in /workspace/fonts-storage/twemoji-colr/'; exit 45; }; "
+            "test -f /workspace/.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf || "
+            "{ echo 'ERROR: ERDA CC-BY CJK font file missing in /workspace/.github/fonts/'; exit 46; }; "
         )
         orchestrator_cmd = (
             "python3 -m gitbook_worker.tools.workflow_orchestrator run "

@@ -1,4 +1,8 @@
 ---
+title: Startseite
+description: Übersicht für das neutrale Beispielbuch
+date: 2024-06-01
+version: 1.0
 geometry:
 - paperwidth=210mm
 - paperheight=297mm
@@ -19,8 +23,38 @@ header-includes:
 - \setlength\LTright{0pt}
 ---
 
-<a id="md-readme"></a>
-# content
+<a id="md-index"></a>
+
+# Willkommen zur neutralen Beispielbibliothek
+
+Diese Startseite liefert einen schnellen Überblick über das Beispielbuch, das als neutrale Vorlage für Tests, Layoutprüfungen und internationale Text-Snippets dient. Die Kapitel enthalten Tabellen, Bilder, interne und externe Links sowie strukturierte Anhänge.
+
+## Schnelleinstieg
+- [Vorwort](#md-preface)
+- [Kapitel 1 – Beobachtbare Muster](#md-chapters-chapter-01)
+- [Kapitel 2 – Vergleichstabellen](#md-chapters-chapter-02)
+- [Vorlagen für mehrsprachige Texte](#md-templates-multilingual-neutral-text)
+- [Appendix A – Datenquellen](#md-appendices-appendix-a)
+- [Emoji-Beispiele (Smileys & Personen)](#md-examples-emoji-smileys-and-people)
+- [Emoji-Beispiele (Natur & Essen)](#md-examples-emoji-nature-and-food)
+- [Emoji-Beispiele (Aktivitäten & Reisen)](#md-examples-emoji-activities-and-travel)
+- [Emoji-Beispiele (Objekte, Symbole & Flaggen)](#md-examples-emoji-objects-symbols-flags)
+- [Appendix – Emoji- & Schriftabdeckung](#md-appendices-emoji-font-coverage)
+- [Zitationen & weiterführende Quellen](#md-references)
+
+## Visuale Vorschau
+![Neutrale Formen](.gitbook/assets/neutral-grid.svg)
+
+Die Illustration zeigt abstrakte Formen ohne Bezug zu realen Personen oder markenrechtlich relevanten Themen. Sie kann beliebig oft wiederverwendet werden, um Bildkomponenten zu testen.
+
+## Externe neutrale Links
+- [United Nations Data](https://data.un.org/)
+- [Smithsonian Open Access](https://www.si.edu/openaccess)
+- [World Meteorological Organization](https://public.wmo.int/en)
+
+Alle Links führen zu allgemein zugänglichen, neutralen Informationen und eignen sich für rechtlich unkritische Testfälle.
+
+> Tipp: Nutze die Startseite als Template, indem du die hier gelisteten Sektionen kopierst und für deine eigene Dokumentation anpasst.
 
 
 \newpage
