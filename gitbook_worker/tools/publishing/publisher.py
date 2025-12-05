@@ -2103,11 +2103,14 @@ def _run_pandoc(
                 metadata_map[key] = [str(value)]
 
     variable_map: Dict[str, str] = dict(defaults["variables"])
+    user_supplied_mainfontfallback = False
     if variables:
         for key, value in variables.items():
             if value is None:
                 variable_map.pop(key, None)
             else:
+                if key == "mainfontfallback":
+                    user_supplied_mainfontfallback = True
                 variable_map[key] = str(value)
 
     fallback_override = variable_map.pop("mainfontfallback", None)
@@ -2181,7 +2184,11 @@ def _run_pandoc(
             cli_fallback_spec = normalized_override
         else:
             manual_fallback_spec = normalized_override
-        if fallback_font_name:
+        if fallback_font_name and user_supplied_mainfontfallback:
+            logger.info(
+                "🎯 FONT-STACK: mainfontfallback override controls emoji font: %s",
+                fallback_font_name,
+            )
             emoji_font = fallback_font_name
     elif emoji_font:
         fallback_spec = _normalize_fallback_spec(

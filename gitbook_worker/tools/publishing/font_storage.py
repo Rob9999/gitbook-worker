@@ -187,7 +187,7 @@ _DEFAULT_FONT_BUNDLES: tuple[FontBundleSpec, ...] = (
     FontBundleSpec(
         slug="twemoji-colr",
         version="0.7.0",
-        url="https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/TwemojiMozilla.ttf",
+        url="https://github.com/mozilla/twemoji-colr/releases/download/v0.7.0/Twemoji.Mozilla.ttf",
         required_files={
             "TwemojiMozilla.ttf": None,  # Direct download - single TTF file (not zip)
         },

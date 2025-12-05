@@ -147,6 +147,11 @@ def test_prepare_publishing_uses_manifest_fonts(monkeypatch, tmp_path):
         encoding="utf-8",
     )
 
+    erda_dir = tmp_path / ".github" / "fonts" / "erda-ccby-cjk" / "true-type"
+    erda_dir.mkdir(parents=True, exist_ok=True)
+    for stem in ("erda-ccby-cjk", "erda-ccby-indic", "erda-ccby-ethiopic"):
+        (erda_dir / f"{stem}.ttf").write_bytes(b"dummy")
+
     monkeypatch.setattr(publisher.Path, "home", lambda: home_dir)
     monkeypatch.setattr(publisher, "_resolve_repo_root", lambda: tmp_path)
     monkeypatch.setattr(publisher, "_which", lambda name: None)

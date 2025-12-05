@@ -44,6 +44,33 @@ local function pantype(v)
   return (t == 'table') and v.t or t
 end
 
+--- Normalizes header-includes metadata to a MetaList of MetaBlocks.
+-- Pandoc 3.6 started surfacing header-includes as MetaBlocks when
+-- directives inject LaTeX snippets, so we need to gracefully handle
+-- both the legacy MetaList form and the new single-value variants.
+local function normalized_headers(value)
+  if value == nil then
+    return pandoc.MetaList({})
+  end
+  local vtype = pantype(value)
+  log('header-includes metadata type: %s', vtype)
+  if vtype == 'MetaList' then
+    return value
+  elseif vtype == 'List' then
+    return pandoc.MetaList(value)
+  elseif vtype == 'MetaBlocks' then
+    return pandoc.MetaList({value})
+  elseif vtype == 'MetaInlines' or vtype == 'MetaString' then
+    local text = utils.stringify(value)
+    local block = pandoc.MetaBlocks({pandoc.RawBlock('latex', text)})
+    return pandoc.MetaList({block})
+  elseif type(value) == 'table' and value[1] ~= nil then
+    -- Fall back to wrapping plain Lua tables (Pandoc < 3.4 behavior)
+    return pandoc.MetaList(value)
+  end
+  abort("unexpected metavalue type: header-includes")
+end
+
 --- Makes a comma-separated value string.
 -- @return A string.
 local function clist(...)
@@ -103,16 +130,14 @@ local function get_header()
   if not bxcoloremoji or not next(ucs_used) then
     return nil
   end
-  return ([[
-\usepackage[%s]{bxcoloremoji}
-\newcommand*{\panEmoji}{\coloremoji}
-]]):format(clist(emojifont, unpack(emojifontoptions)))
+  return ([[\usepackage[%s]{bxcoloremoji}]])
+    :format(clist(emojifont, unpack(emojifontoptions)))
 end
 
 --- Gets the source to go into the head of body.
 -- @return LaTeX source string
 local function get_prologue()
-  if bxcoloremoji or not next(ucs_used) then
+  if not next(ucs_used) then
     return nil
   end
   local fname = emojifont or default_emojifont
@@ -122,26 +147,34 @@ local function get_prologue()
     ucs[i] = ('"%X'):format(ucs[i])
   end
   local dcrsrc = concat(ucs, ',\n')
-  return ([[
-\makeatletter
+  local manual_block = ([[
 \ifnum0\ifdefined\directlua\directlua{
     if ("\luaescapestring{\luatexbanner}"):match("LuaHBTeX") then tex.write("1") end
-    }\fi>\z@ %% LuaHBTeX is ok
-  \setfontface\p@emoji@font{%s}[%s]
+  }\fi>0 %% LuaHBTeX is ok
+  \setfontface\panEmojiFont{%s}[%s]
 \else
-  \@latex@error{You must install a new TeX system (TeX Live 2020)\MessageBreak
+  \PackageError{latex-emoji}{You must install a new TeX system (TeX Live 2020)\MessageBreak
     and then use 'lualatex' engine to print emoji}
    {The compilation will be aborted.}
-  \let\p@emoji@font\relax
+  \let\panEmojiFont\relax
 \fi
 \ifdefined\ltjdefcharrange
 \ltjdefcharrange{208}{
 %s}
 \ltjsetparameter{jacharrange={-208}}
 \fi
-\newcommand*{\panEmoji}[1]{{\p@emoji@font#1}}
-\makeatother
+\newcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
 ]]):format(fname, fopts, dcrsrc)
+  if bxcoloremoji then
+    return ([[
+\ifcsname coloremoji\endcsname
+  \providecommand*{\panEmoji}[1]{\coloremoji{#1}}
+\else
+%s
+\fi
+]]):format(manual_block)
+  end
+  return manual_block
 end
 
 --- For debug.
@@ -190,37 +223,27 @@ local function mainproc_Span(span)
   if span.classes:includes('emoji', 1) then
     text_count = text_count + 1
     local str = utils.stringify(span.content)
-    for p, uc in utf8.codes(str) do
+    for _, uc in utf8.codes(str) do
       if not ucs_used[uc] and uc >= 0x100 then
         log("emoji character: U+%04X", uc)
         ucs_used[uc] = true
       end
     end
     insert(span.content, 1, pandoc.RawInline('latex', [[\panEmoji{]]))
-    insert(span.content, pandoc.RawInline('latex', [[}]]))
+    insert(span.content, pandoc.RawInline('latex', '}'))
     return span.content
-  end
-end
-
---- For Meta elements.
-local function mainproc_Meta(meta)
-  local src = get_header()
-  if src then
-    local headers = meta['header-includes']
-    if headers == nil then
-      headers = pandoc.MetaList({})
-    elseif pantype(headers) ~= 'MetaList' then
-      abort("unexpected metavalue type: header-includes")
-    end
-    insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', src)})
-    meta['header-includes'] = headers
-    log("header successfully appended")
-    return meta
   end
 end
 
 --- For the whole document.
 local function mainproc_Pandoc(doc)
+  local header_src = get_header()
+  if header_src then
+    local headers = normalized_headers(doc.meta['header-includes'])
+    insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', header_src)})
+    doc.meta['header-includes'] = headers
+    log("header successfully appended")
+  end
   log("number of emoji spans: %s", text_count)
   local src = get_prologue()
   if src then
@@ -238,7 +261,6 @@ if FORMAT == 'latex' then
     };
     {-- phase 'mainproc'
       Span = mainproc_Span;
-      Meta = mainproc_Meta;
       Pandoc = mainproc_Pandoc;
     };
   }

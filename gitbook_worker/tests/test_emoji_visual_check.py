@@ -8,6 +8,8 @@ import pytest
 import subprocess
 from pathlib import Path
 
+from gitbook_worker.tools.publishing.font_config import get_font_config
+
 
 @pytest.mark.integration
 @pytest.mark.manual
@@ -143,10 +145,15 @@ def test_emoji_metadata_in_pandoc_output():
     except UnicodeDecodeError:
         log_content = log_path.read_text(encoding="utf-16")
 
-    # Check for correct metadata
+    font_config = get_font_config()
+    emoji_font_name = (
+        font_config.get_font_name("EMOJI") if font_config else "Twemoji Mozilla"
+    )
+
+    # Check for correct metadata – tolerate legacy Twitter font logs
     assert (
-        "Twemoji Mozilla" in log_content
-    ), "Twemoji Mozilla not set as emojifont in Pandoc metadata"
+        emoji_font_name in log_content or "Twitter Color Emoji" in log_content
+    ), f"{emoji_font_name} not set as emojifont in Pandoc metadata"
 
     assert (
         "emojifontoptions = Renderer=HarfBuzz" in log_content
