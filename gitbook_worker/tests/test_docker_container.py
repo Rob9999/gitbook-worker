@@ -110,7 +110,9 @@ def run_docker_command(cmd, check=True, logger=None, **kwargs):
         return e
 
 
-def test_run_github_tests_in_docker(output_dir, artifact_dir, logger, request):
+def test_build_docker_dynamic_container_and_run_documents_publishing_tests_in_docker(
+    output_dir, artifact_dir, logger, request
+):
     """Run the test suite inside the project's Docker container."""
     if os.getenv("INSIDE_DOCKER"):
         pytest.skip("running inside container")

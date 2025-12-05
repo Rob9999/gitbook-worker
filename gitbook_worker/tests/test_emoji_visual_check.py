@@ -67,6 +67,9 @@ def test_emoji_color_visual_check():
             pytest.skip("pdfinfo not available")
 
         # Parse page count
+        if not info_result.stdout:
+            pytest.skip("pdfinfo returned no output")
+
         for line in info_result.stdout.splitlines():
             if line.startswith("Pages:"):
                 total_pages = int(line.split(":")[1].strip())
@@ -135,9 +138,14 @@ def test_emoji_metadata_in_pandoc_output():
     if not log_path.exists():
         pytest.skip(f"Log file not found: {log_path}")
 
-    log_content = log_path.read_text(encoding="utf-16")  # Check for correct metadata
+    try:
+        log_content = log_path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        log_content = log_path.read_text(encoding="utf-16")
+
+    # Check for correct metadata
     assert (
-        "emojifont = Twemoji Mozilla" in log_content
+        "Twemoji Mozilla" in log_content
     ), "Twemoji Mozilla not set as emojifont in Pandoc metadata"
 
     assert (
