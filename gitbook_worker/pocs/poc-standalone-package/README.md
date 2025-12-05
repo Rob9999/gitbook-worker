@@ -1,4 +1,4 @@
-# Proof of Concept: erda-workflow-tools Package
+# Proof of Concept: erda-workflow-tools Package (OLD)
 
 This directory contains a minimal proof-of-concept for the standalone `erda-workflow-tools` package structure.
 
