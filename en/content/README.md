@@ -1,4 +1,6 @@
-# English Content Placeholder
+# content
 
-Translate chapters from `../de/content/` into this directory. Once a chapter is ready,
-update `SUMMARY.md` so the publisher picks it up.
+This folder contains the British English version of the neutral sample book. Use [index.md](index.md) as the starting point.
+
+If you add or rename pages, update [SUMMARY.md](SUMMARY.md) accordingly.
+

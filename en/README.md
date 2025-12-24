@@ -1,11 +1,9 @@
-# English Edition (WIP)
+# English Edition
 
-This directory hosts the upcoming English translation of the ERDA GitBook. It mirrors the
-`de/` structure (content, book.json, publish artifacts) but intentionally ships only with
-scaffolding for now:
+This folder contains the British English version of the ERDA book structure.
 
-- `content/` contains placeholder files so contributors can add translated chapters.
-- `book.json` and `publish.yml` will be copied from `de/` once the first chapters land.
-- CI keeps `build: false` for `en` until the translation is ready for smoke PDFs.
+- Content lives in `content/` (start at `content/index.md`).
+- Navigation is defined by `content/SUMMARY.md`.
+- Build configuration is in `publish.yml`.
 
-See `docs/multilingual-content-guide.md` for instructions on adding a new language tree.
+See `docs/multilingual-content-guide.md` for instructions on maintaining language trees.

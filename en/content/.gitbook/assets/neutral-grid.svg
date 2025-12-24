@@ -1,0 +1,12 @@
+<svg width="320" height="180" viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral Grid Illustration</title>
+  <desc id="desc">A calm grid of shapes that does not depict any sensitive imagery.</desc>
+  <rect width="320" height="180" fill="#f5f5f5"/>
+  <g stroke="#8c8c8c" stroke-width="1" fill="none">
+    <path d="M40 20 H280"/><path d="M40 60 H280"/><path d="M40 100 H280"/><path d="M40 140 H280"/>
+    <path d="M40 20 V140"/><path d="M90 20 V140"/><path d="M140 20 V140"/><path d="M190 20 V140"/><path d="M240 20 V140"/><path d="M290 20 V140"/>
+  </g>
+  <circle cx="160" cy="80" r="28" fill="#d7e3f4" stroke="#5a6e8c" stroke-width="2"/>
+  <rect x="70" y="110" width="60" height="30" fill="#e6f2d9" stroke="#5f7a4b"/>
+  <rect x="190" y="110" width="60" height="30" fill="#f9e4d0" stroke="#a76a3d"/>
+</svg>

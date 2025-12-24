@@ -1,0 +1,16 @@
+/*
+ * Emoji Inline Styles
+ * License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+ */
+.emoji {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.17em;
+  display: inline-block;
+}
+
+.emoji img,
+.emoji svg {
+  width: 1em;
+  height: 1em;
+}

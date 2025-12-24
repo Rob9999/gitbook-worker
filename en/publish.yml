@@ -1,16 +1,67 @@
 version: 0.1.0
 profiles:
   default:
+    description: Default profile for the full orchestrator pipeline.
     steps:
-      - publisher
+    - check_if_to_publish
+    - ensure_readme
+    - update_citation
+    - converter
+    - engineering-document-formatter
+    - publisher
+    docker:
+      use_registry: true
+      image: ghcr.io/${repo}/publisher
+      cache: true
+  local:
+    description: Local run without registry access.
+    steps:
+    - converter
+    - publisher
+    docker:
+      use_registry: false
+  publisher:
+    description: Runs only the publisher step.
+    steps:
+    - publisher
+    docker:
+      use_registry: true
+      image: ghcr.io/${repo}/publisher
+      cache: true
+meta:
+  publish_on:
+  - push
+  - workflow_dispatch
+  artifacts:
+    keep_days: 7
+project:
+  name: The ERDA Book
+  authors:
+  - ERDA Team
+  license: CC BY-SA 4.0
 publish:
-  - path: ./
-    out_format: pdf
-    out_dir: ./publish
-    out: placeholder.pdf
-    source_type: folder
-    source_format: markdown
-    use_summary: true
-    use_book_json: true
-    keep_combined: false
-    build: false  # enable once translation content exists
+- path: ./
+  out_format: pdf
+  out_dir: ./publish
+  out: the-erda-book.pdf
+  source_type: folder
+  source_format: markdown
+  use_summary: true
+  use_book_json: true
+  summary_mode: gitbook
+  summary_appendices_last: true
+  keep_combined: true
+  build: true
+  reset_build_flag: false
+  pdf_options:
+    emoji_color: true
+    emoji_bxcoloremoji: false
+    main_font: DejaVu Serif
+    sans_font: DejaVu Sans
+    mono_font: DejaVu Sans Mono
+    mainfont_fallback: Twemoji Mozilla:mode=harf; ERDA CC-BY CJK:mode=harf
+    abort_if_missing_glyph: false
+  assets:
+  - path: content/.gitbook/assets
+    type: images
+    copy_to_output: true

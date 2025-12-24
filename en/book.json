@@ -1,6 +1,11 @@
 {
+    "title": "The ERDA Book",
+    "author": "ERDA Team",
+    "language": "en",
+    "description": "A neutral sample book for testing, layout checks, and localisation workflows.",
     "root": "content/",
     "structure": {
-        "summary": "content/SUMMARY.md"
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
     }
 }
