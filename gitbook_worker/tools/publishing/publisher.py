@@ -1367,9 +1367,14 @@ def _build_font_header(
 
     # Detect unresolved glyphs after fallback and optionally abort; skip when
     # lua fallback is disabled (e.g., on Windows) to avoid TeX header churn.
-    if enable_lua_fallback:
+    detector_env = os.getenv("ERDA_ENABLE_MISSING_GLYPH_DETECTOR", "0").lower()
+    detector_requested = detector_env not in {"0", "false", "no", "off"}
+    enable_missing_detector = enable_lua_fallback and detector_requested
+
+    if enable_missing_detector:
         abort_flag = "true" if abort_if_missing_glyph else "false"
         lines.append(
+            "\\AtBeginDocument{"
             "\\directlua{"
             f"texio.write_nl('term and log', '*** GBW: Missing glyph detector initialized (abort={abort_flag})');"
             "gbw_missing_glyphs = gbw_missing_glyphs or {};"
@@ -1438,6 +1443,11 @@ def _build_font_header(
             "  texio.write_nl('term and log', 'gbw missing glyph detector: luatexbase unavailable; skipping');"
             "end;"
             "}"
+            "}"
+        )
+    elif not detector_requested:
+        logger.info(
+            "ℹ️ FONT-STACK: Missing-glyph detector deaktiviert (set ERDA_ENABLE_MISSING_GLYPH_DETECTOR=1 to enable)"
         )
     else:
         logger.info(
