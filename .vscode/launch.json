@@ -27,6 +27,31 @@
             "envFile": "${workspaceFolder}/.env"
         },
         {
+            "name": "Orchestrator (local, en)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.workflow_orchestrator",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                "run",
+                "--root",
+                "${workspaceFolder}",
+                "--content-config",
+                "content.yaml",
+                "--lang",
+                "en",
+                "--profile",
+                "local"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
             "name": "Fonts: Sync (de manifest)",
             "type": "debugpy",
             "request": "launch",

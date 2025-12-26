@@ -37,6 +37,13 @@
     - `license_url`: URL to full license text
     - `download_url` or `paths`: Where to obtain the font
 16. **Dynamic Docker Font Setup**: The `Dockerfile.dynamic` reads `fonts.yml` and installs only configured fonts. No fonts are hardcoded in the Dockerfile itself.
+17. **LuaTeX Cache Guard**: If fallback fonts are configured but not in the LuaTeX cache, publishing will now abort early. See [gitbook_worker/docs/attentions/lua-font-cache.md](gitbook_worker/docs/attentions/lua-font-cache.md) for recovery steps (install fonts, then run `luaotfload-tool --update --force`).
 
 ## Versionierung
-17. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...
+18. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...
+
+## Exit Codes & Diagnose
+19. Führe eine dokumentierte Exit-Code-Tabelle mit Klartext-Fehlermeldung und Healing-Steps in [gitbook_worker/docs/attentions/exit-codes.md](gitbook_worker/docs/attentions/exit-codes.md); halte sie bei jedem neuen Exit-Grund aktuell.
+20. CLI-Tools müssen die Exit-Code-Tabelle über `--help exit-codes` (oder gleichwertig) ausgeben, damit Nutzer sie ohne Doku-Aufruf sehen.
+21. Jeder eindeutige Exit-Grund erhält einen eigenen Exit-Code und eine menschenlesbare Fehlermeldung; Codes bleiben stabil, Deprecations müssen kenntlich gemacht werden.
+22. Für Fehler, die in Entwicklung/Test auftreten und nicht dauerhaft behebbar sind, definiere trotzdem einen Exit-Code plus dokumentierte Workarounds/Healing.

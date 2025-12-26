@@ -12,6 +12,7 @@ version: 1.0
 3. Internationale Open-Data-Repositorien wie [UN Data](https://data.un.org/) oder [World Bank Open Data](https://data.worldbank.org/).
 
 ## A.2 Tabellenlayout
+<a id="tabellenlayout"></a>
 | Spalte | Datentyp | Beschreibung |
 |--------|----------|--------------|
 | `timestamp` | ISO-8601 | Zeitstempel der Messung |

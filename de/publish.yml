@@ -34,9 +34,11 @@ meta:
   - workflow_dispatch
   artifacts:
     keep_days: 7
-fonts:
-- name: ERDA CC-BY CJK
-  path: .github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf
+project:
+  name: Das ERDA Buch
+  authors:
+  - ERDA Team
+  license: CC BY-SA 4.0
 publish:
 - path: ./
   out_format: pdf
@@ -58,6 +60,7 @@ publish:
     sans_font: DejaVu Sans
     mono_font: DejaVu Sans Mono
     mainfont_fallback: Twemoji Mozilla:mode=harf; ERDA CC-BY CJK:mode=harf
+    abort_if_missing_glyph: false
   assets:
   - path: content/.gitbook/assets
     type: images

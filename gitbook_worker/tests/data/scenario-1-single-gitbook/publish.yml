@@ -1,7 +1,4 @@
 version: 0.1.0
-fonts:
-  - name: ERDA CC-BY CJK
-    path: ../../../../../../.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf
 publish:
   - path: ./
     out_format: pdf

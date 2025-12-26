@@ -302,6 +302,47 @@ def test_convert_file_emits_emoji_report(tmp_path, monkeypatch):
     assert "Emoticons" in content
 
 
+def test_build_pdf_forwards_project_metadata(tmp_path, monkeypatch):
+    md_file = tmp_path / "doc.md"
+    md_file.write_text("# Demo", encoding="utf-8")
+
+    monkeypatch.setattr(
+        publisher,
+        "process",
+        lambda path, paper_format="a4": Path(path).read_text(encoding="utf-8"),
+    )
+    monkeypatch.setattr(publisher, "normalize_md", lambda text: text)
+    monkeypatch.setattr(
+        publisher, "add_geometry_package", lambda text, paper_format="a4": text
+    )
+    monkeypatch.setattr(publisher, "_emit_emoji_report", lambda *_, **__: None)
+
+    captured: dict[str, dict] = {}
+
+    def fake_run_pandoc(md_path, pdf_out, metadata=None, **kwargs):
+        captured["metadata"] = metadata or {}
+
+    monkeypatch.setattr(publisher, "_run_pandoc", fake_run_pandoc)
+
+    publisher.build_pdf(
+        path=str(md_file),
+        out="doc.pdf",
+        typ="file",
+        publish_dir=str(tmp_path / "out"),
+        project_metadata=publisher.ProjectMetadata(
+            name="Demo Project",
+            authors=("Alice",),
+            license="CC BY 4.0",
+            policy="fail",
+            warnings=(),
+        ),
+    )
+
+    assert captured["metadata"]["rights"] == ["CC BY 4.0"]
+    assert captured["metadata"]["author"] == ["Alice"]
+    assert captured["metadata"]["title"] == ["Demo"]
+
+
 def test_build_pdf_reads_uppercase_summary(tmp_path, monkeypatch):
     folder = tmp_path / "book"
     folder.mkdir()

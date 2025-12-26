@@ -23,6 +23,7 @@ Diese Startseite liefert einen schnellen Überblick über das Beispielbuch, das 
 - [Zitationen & weiterführende Quellen](./references.md)
 
 ## Visuale Vorschau
+<a id="visuale-vorschau"></a>
 ![Neutrale Formen](.gitbook/assets/neutral-grid.svg)
 
 Die Illustration zeigt abstrakte Formen ohne Bezug zu realen Personen oder markenrechtlich relevanten Themen. Sie kann beliebig oft wiederverwendet werden, um Bildkomponenten zu testen.

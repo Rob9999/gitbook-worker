@@ -33,9 +33,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import contextlib
 import json
 import os
 import pathlib
+import platform
 import re
 import shlex
 import shutil
@@ -219,6 +221,33 @@ _DEFAULT_METADATA: Dict[str, List[str]] = {
 }
 
 
+class ProjectMetadataError(RuntimeError):
+    """Raised when required project metadata is missing."""
+
+
+@dataclass(frozen=True)
+class ProjectMetadata:
+    """Container for project-level metadata used across builds."""
+
+    name: str
+    authors: tuple[str, ...]
+    license: str | None
+    policy: str
+    warnings: tuple[str, ...] = ()
+
+    def as_pandoc_metadata(
+        self, *, title_override: Optional[str] = None
+    ) -> Dict[str, Sequence[str] | str]:
+        metadata: Dict[str, Sequence[str] | str] = {}
+        if title_override:
+            metadata["title"] = [title_override]
+        if self.authors:
+            metadata["author"] = list(self.authors)
+        if self.license:
+            metadata["rights"] = [self.license]
+        return metadata
+
+
 def _get_default_variables() -> Dict[str, str]:
     """Get default Pandoc variables with font names from configuration.
 
@@ -323,7 +352,8 @@ def _user_font_directories() -> List[Path]:
 def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> None:
     """Ensure OSFONTDIR contains repo/local font directories for LuaLaTeX.
 
-    Also sets FONTCONFIG_FILE on Windows to enable fontconfig to find fonts-storage/.
+    On Windows a temporary ``fonts.conf`` is generated so fontconfig picks up
+    repo fonts (including those declared only in ``fonts.yml`` like ERDA CJK).
     """
 
     new_dirs: List[str] = []
@@ -333,14 +363,6 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
     entries.append(repo_root / "fonts-storage")
     if additional_dirs:
         entries.extend(additional_dirs)
-
-    # On Windows, fontconfig needs explicit configuration to find custom font directories
-    # Set FONTCONFIG_FILE to point to fonts-storage/fonts.conf
-    if sys.platform == "win32":
-        fonts_conf = repo_root / "fonts-storage" / "fonts.conf"
-        if fonts_conf.exists():
-            os.environ["FONTCONFIG_FILE"] = str(fonts_conf.resolve())
-            logger.info(f"✓ FONTCONFIG_FILE set to {fonts_conf.resolve()}")
 
     for directory in entries + _ADDITIONAL_FONT_DIRS:
         if not directory:
@@ -367,6 +389,86 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
 
     os.environ["OSFONTDIR"] = separator.join(merged)
     logger.info("ℹ OSFONTDIR aktualisiert (%d Pfade)", len(merged))
+    logger.debug("OSFONTDIR Inhalte: %s", os.environ["OSFONTDIR"])
+
+    # On Windows, generate a dynamic fontconfig file that mirrors OSFONTDIR
+    # so fc-list/luaotfload can discover fonts stored in the repo (e.g., ERDA CJK).
+    if sys.platform == "win32":
+        try:
+            cache_dir = Path.home() / ".cache" / "erda-publisher" / "fontconfig"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            conf_path = cache_dir / "fonts.conf"
+
+            dir_entries = []
+            for path_str in merged:
+                escaped = (
+                    path_str.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+                )
+                dir_entries.append(f"  <dir>{escaped}</dir>")
+
+            conf_contents = "\n".join(
+                [
+                    '<?xml version="1.0"?>',
+                    '<!DOCTYPE fontconfig SYSTEM "fonts.dtd">',
+                    "<fontconfig>",
+                    *dir_entries,
+                    "  <rescan><int>30</int></rescan>",
+                    "</fontconfig>",
+                    "",
+                ]
+            )
+
+            conf_path.write_text(conf_contents, encoding="utf-8")
+            os.environ["FONTCONFIG_FILE"] = str(conf_path)
+            logger.info("✓ FONTCONFIG_FILE set to %s (dynamic)", conf_path)
+        except Exception as exc:
+            logger.warning(
+                "⚠ Konnte dynamische FONTCONFIG_FILE nicht schreiben: %s", exc
+            )
+            fallback_conf = repo_root / "fonts-storage" / "fonts.conf"
+            if fallback_conf.exists():
+                os.environ["FONTCONFIG_FILE"] = str(fallback_conf.resolve())
+                logger.info("✓ FONTCONFIG_FILE fallback to %s", fallback_conf)
+
+
+def _configure_texmf_cache(manifest_path: Optional[Path]) -> None:
+    """Place TeX/luaotfload caches in a repo-local directory (optionally per language).
+
+    This keeps font caches reproducible and avoids polluting global user caches.
+    """
+
+    repo_root = _resolve_repo_root()
+    lang_hint = None
+    if manifest_path:
+        try:
+            lang_hint = manifest_path.parent.name
+        except Exception:
+            lang_hint = None
+
+    cache_root = repo_root / ".texmf-cache"
+    if lang_hint:
+        cache_root = cache_root / lang_hint
+
+    texmf_var = cache_root / "texmf-var"
+    texmf_config = cache_root / "texmf-config"
+    luatex_cache = texmf_var / "luatex-cache"
+
+    for path in (texmf_var, texmf_config, luatex_cache):
+        path.mkdir(parents=True, exist_ok=True)
+
+    # Keep TeX/luaotfload caches local for reproducibility (TEXMFVAR is the
+    # canonical base; TEXMFCACHE/LUAOTFLOAD_CACHE are used by luaotfload).
+    os.environ["TEXMFVAR"] = str(texmf_var)
+    os.environ["TEXMFCONFIG"] = str(texmf_config)
+    os.environ["TEXMFCACHE"] = str(luatex_cache)
+    os.environ["LUAOTFLOAD_CACHE"] = str(luatex_cache)
+
+    logger.info("ℹ TEXMFVAR gesetzt: %s", texmf_var)
+    logger.info("ℹ TEXMFCONFIG gesetzt: %s", texmf_config)
+    logger.info("ℹ TEXMFCACHE gesetzt: %s", luatex_cache)
+    logger.info("ℹ LUAOTFLOAD_CACHE gesetzt: %s", luatex_cache)
 
 
 def _resolve_repo_root() -> Path:
@@ -401,20 +503,31 @@ def _as_bool(value: Any, default: bool = False) -> bool:
 def _run(
     cmd: List[str],
     check: bool = True,
-    capture: bool = False,
     env: Optional[Dict[str, str]] = None,
+    **kwargs: Any,
 ) -> subprocess.CompletedProcess:
-    kwargs: Dict[str, Any] = {
+    run_kwargs: Dict[str, Any] = {
         "text": True,
         "encoding": "utf-8",
         "errors": "replace",  # Replace problematic bytes instead of crashing
         "stdout": subprocess.PIPE,
         "stderr": subprocess.PIPE,
     }
+
     if env:
-        kwargs["env"] = {**os.environ, **env}
+        run_kwargs["env"] = {**os.environ, **env}
+
+    # Allow callers to override defaults (e.g. timeout, capture_output)
+    if "capture_output" in kwargs:
+        # capture_output=True conflicts with explicit stdout/stderr pipes
+        if kwargs.get("capture_output"):
+            run_kwargs.pop("stdout", None)
+            run_kwargs.pop("stderr", None)
+        # Merge after the cleanup so caller-provided pipes win if set
+    run_kwargs.update(kwargs)
+
     logger.info("→ %s", " ".join(cmd))
-    cp = subprocess.run(cmd, **kwargs)
+    cp = subprocess.run(cmd, **run_kwargs)
     if cp.stdout:
         logger.info(cp.stdout)
     if cp.stderr:
@@ -760,8 +873,8 @@ def _font_available(name: str) -> bool:
         from gitbook_worker.tools.publishing.font_storage import get_font_config
 
         font_config = get_font_config()
-        # Try to find font entry by name
-        for font_key in ["EMOJI", "CJK", "SANS", "SERIF", "MONO"]:
+        # Try to find font entry by name - iterate ALL configured fonts
+        for font_key in font_config.fonts.keys():
             try:
                 font_entry = font_config.get_font(font_key)
                 if font_entry and font_entry.name == name:
@@ -863,6 +976,14 @@ def _require_bxcoloremoji() -> str:
 
 def _decide_bxcoloremoji(options: EmojiOptions) -> bool:
     """Decide whether latex-emoji should activate the bxcoloremoji package."""
+
+    # Allow operators to force-disable bxcoloremoji in troublesome environments
+    # (e.g. minimal TeX installs) without changing code. Default remains auto-on
+    # when the package is available so tests and full builds keep color emoji.
+    env_disable = _as_bool(os.environ.get("ERDA_BXCOLOREMOJI_DISABLE"), False)
+    if env_disable and options.bxcoloremoji is None:
+        logger.info("ℹ bxcoloremoji disabled via ERDA_BXCOLOREMOJI_DISABLE env var.")
+        return False
 
     if options.bxcoloremoji is True:
         path = _require_bxcoloremoji()
@@ -1074,6 +1195,11 @@ def _normalize_fallback_spec(
         base = entry.split(":", 1)[0].strip()
         if not base:
             continue
+        if not (_check_luaotfload_has_font(base) or _font_available(base)):
+            logger.info(
+                "🔍 FONT-STACK: Fallback-Font nicht verfügbar (wird im Lua-Filter herausgefiltert): %s",
+                base,
+            )
         normalized = _normalize_font_name(base)
         if normalized in seen:
             continue
@@ -1113,6 +1239,7 @@ def _build_font_header(
     include_mainfont: bool,
     needs_harfbuzz: bool,
     manual_fallback_spec: Optional[str],
+    abort_if_missing_glyph: bool,
 ) -> str:
     """Render a Pandoc header snippet configuring fonts and fallbacks."""
 
@@ -1125,43 +1252,210 @@ def _build_font_header(
     logger.info("📄 FONT-STACK:   manual_fallback_spec = %s", manual_fallback_spec)
     logger.info("📄 FONT-STACK:   include_mainfont = %s", include_mainfont)
 
-    lines = ["\\usepackage{fontspec}"]
+    lines = ["\\newcommand{\\fallbackfeature}{}"]
+
+    available_fallbacks: List[str] = []
+    missing_fallbacks: List[str] = []
+    lua_cache_misses: List[str] = []
+    if manual_fallback_spec:
+        for chunk in re.split(r"[;,]", manual_fallback_spec):
+            entry = chunk.strip()
+            if not entry:
+                continue
+            base = entry.split(":", 1)[0].strip()
+            if not base:
+                continue
+
+            # Only treat a fallback as usable when luaotfload already knows it.
+            # This prevents us from emitting TeX headers that later fail at
+            # runtime when fonts are merely present on disk but not registered
+            # in LuaTeX caches (the current Windows issue).
+            if _check_luaotfload_has_font(base):
+                available_fallbacks.append(entry)
+                continue
+
+            if _font_available(base):
+                lua_cache_misses.append(base)
+            else:
+                missing_fallbacks.append(base)
+
+    if manual_fallback_spec and missing_fallbacks:
+        logger.warning(
+            "⚠️ FONT-STACK: Fallback-Fonts fehlen und werden übersprungen: %s",
+            "; ".join(sorted(set(missing_fallbacks))),
+        )
+
+    if manual_fallback_spec and not available_fallbacks:
+        cause_parts: List[str] = []
+        if lua_cache_misses:
+            cause_parts.append(
+                "LuaTeX cache fehlt: "
+                + "; ".join(sorted(set(lua_cache_misses)))
+                + " (luaotfload-tool --update --force)"
+            )
+        if missing_fallbacks:
+            cause_parts.append(
+                "nicht gefunden: " + "; ".join(sorted(set(missing_fallbacks)))
+            )
+
+        msg = "Keine der konfigurierten Fallback-Fonts ist verfügbar" + (
+            ": " + "; ".join(cause_parts) if cause_parts else ""
+        )
+        logger.error("❌ FONT-STACK: %s", msg)
+        raise RuntimeError(msg)
+
     fallback_block = (
-        _lua_fallback_block(manual_fallback_spec) if manual_fallback_spec else None
+        _lua_fallback_block(";".join(available_fallbacks))
+        if available_fallbacks
+        else None
     )
 
+    lua_fallback_flag = os.getenv("ERDA_ENABLE_LUA_FALLBACK", "1").lower()
+    enable_lua_fallback = bool(fallback_block) and lua_fallback_flag not in {
+        "0",
+        "false",
+        "no",
+        "off",
+    }
+
+    if enable_lua_fallback and platform.system().lower() == "windows":
+        # Historically disabled due to luaotfload issues; we now enable by default to
+        # meet the cross-platform requirement (Win/macOS/Linux/Docker). Users can still
+        # opt-out via ERDA_ENABLE_LUA_FALLBACK=0/off.
+        logger.info(
+            "⚠️ FONT-STACK: Lua fallback auf Windows aktiv (deaktivieren mit ERDA_ENABLE_LUA_FALLBACK=0)"
+        )
+
+    if enable_lua_fallback and fallback_block:
+        lines.append(
+            "\\directlua{"
+            f"local fonts={fallback_block}; "
+            "local filtered={}; "
+            "local function gbw_nonempty_table(t) return type(t) == 'table' and next(t) ~= nil end; "
+            "for _, name in ipairs(fonts) do "
+            "  local base = tostring(name):match('^([^:]+)') or name; "
+            "  local ok1, info = pcall(function() return luaotfload.aux.provides_font(base) end); "
+            "  if ok1 and type(info) == 'table' and info.filename then "
+            "    table.insert(filtered, base); "
+            "  else "
+            "    texio.write_nl('log', 'luaotfload fallback skipped missing font: '..tostring(base)); "
+            "  end; "
+            "end; "
+            "gbw_fallback_stack = filtered; "
+            "texio.write_nl('log', 'luaotfload fallback filtered='..table.concat(filtered, '; ')); "
+            "if not gbw_nonempty_table(filtered) then "
+            "  texio.write_nl('log', 'luaotfload fallback list empty; skipping add_fallback'); "
+            "else "
+            '  local ok2, err = pcall(function() luaotfload.add_fallback("mainfont", filtered) end); '
+            "  if not ok2 then "
+            "    texio.write_nl('log', 'luaotfload.add_fallback skipped: '..tostring(err)); "
+            "  else "
+            '    local fb = luaotfload and luaotfload.fallbacks and luaotfload.fallbacks["mainfont"]; '
+            "    if gbw_nonempty_table(fb) then "
+            "      if token and token.set_macro then token.set_macro('fallbackfeature', 'RawFeature={fallback=mainfont}', true); else texio.write_nl('log', 'gbw: token.set_macro unavailable; cannot set fallbackfeature'); end; "
+            "    else "
+            "      texio.write_nl('log', 'luaotfload.add_fallback produced empty data; skipping fallbackfeature'); "
+            "    end; "
+            "  end; "
+            "end"
+            "}"
+        )
+    elif fallback_block:
+        logger.info(
+            "⚠️ FONT-STACK: Lua fallback deaktiviert (set ERDA_ENABLE_LUA_FALLBACK=0 to disable explicitly)"
+        )
+
+    # Detect unresolved glyphs after fallback and optionally abort; skip when
+    # lua fallback is disabled (e.g., on Windows) to avoid TeX header churn.
+    if enable_lua_fallback:
+        abort_flag = "true" if abort_if_missing_glyph else "false"
+        lines.append(
+            "\\directlua{"
+            f"texio.write_nl('term and log', '*** GBW: Missing glyph detector initialized (abort={abort_flag})');"
+            "gbw_missing_glyphs = gbw_missing_glyphs or {};"
+            "local function gbw_font_name(fid)"
+            "  local f = font.getfont(fid);"
+            "  if not f then return tostring(fid) end;"
+            "  return f.fullname or f.psname or f.name or tostring(fid);"
+            "end;"
+            "local function gbw_note_missing(fid, cp)"
+            "  local entry = gbw_missing_glyphs[cp];"
+            "  if not entry then entry = {fonts={}}; gbw_missing_glyphs[cp]=entry end;"
+            "  entry.fonts[gbw_font_name(fid)] = true;"
+            "  texio.write_nl('term and log', '*** GBW: Noted missing glyph U+'..string.format('%04X', cp)..' in font '..gbw_font_name(fid));"
+            "end;"
+            "local function gbw_check(head)"
+            "  for n in node.traverse_id(node.id('glyph'), head) do"
+            "    local fid = n.font; local cp = n.char;"
+            "    if fid and cp then"
+            "      local ok, has = pcall(font.has_glyph, fid, cp);"
+            "      if (not ok) or (not has) then gbw_note_missing(fid, cp) end;"
+            "    end"
+            "  end;"
+            "  return head;"
+            "end;"
+            "local function gbw_report()"
+            "  texio.write_nl('term and log', '*** GBW: gbw_report() called');"
+            "  if not gbw_missing_glyphs then texio.write_nl('term and log', '*** GBW: gbw_missing_glyphs is nil'); return end;"
+            "  local keys = {}; for cp,_ in pairs(gbw_missing_glyphs) do keys[#keys+1]=cp end;"
+            "  table.sort(keys);"
+            "  texio.write_nl('term and log', '*** GBW: Found '..#keys..' missing glyph codepoints');"
+            "  if #keys==0 then return end;"
+            "  texio.write_nl('log', 'gbw missing glyph report ('..#keys..' codepoints)');"
+            "  local fb = gbw_fallback_stack;"
+            "  if type(fb) == 'table' and next(fb) ~= nil then "
+            "    local okc, fb_str = pcall(function() return table.concat(fb, '; ') end);"
+            "    if okc and fb_str then texio.write_nl('log', '  fallback stack: '..fb_str) end;"
+            "  end;"
+            "  local summary_lines = {};"
+            "  for _,cp in ipairs(keys) do"
+            "    local entry = gbw_missing_glyphs[cp];"
+            "    local fonts = {}; for name,_ in pairs(entry.fonts or {}) do fonts[#fonts+1]=name end; table.sort(fonts);"
+            "    local char_repr = ''; local ok,ch = pcall(function() return unicode.utf8.char(cp) end);"
+            "    if ok and ch then char_repr = ' \\\"'..ch..'\\\"' end;"
+            "    local line = string.format('  U+%04X%s missing in fonts: %s', cp, char_repr, table.concat(fonts, ', '));"
+            "    texio.write_nl('log', line); summary_lines[#summary_lines+1]=line;"
+            "  end;"
+            f"  if {abort_flag} then"
+            "    texio.write_nl('term and log', '*** GBW: Aborting due to missing glyphs');"
+            "    io.stderr:write('\\\\n=== GBW MISSING GLYPH ERROR ===\\\\n');"
+            "    io.stderr:write('Found '..#keys..' codepoints with missing glyphs after fallback\\\\n');"
+            "    if type(fb) == 'table' and next(fb) ~= nil then io.stderr:write('Fallback stack: '..table.concat(fb, '; ')..'\\\\n') end;"
+            "    for _,l in ipairs(summary_lines) do io.stderr:write(l..'\\\\n') end;"
+            "    io.stderr:write('=================================\\\\n');"
+            "    io.stderr:flush();"
+            "    tex.error('Missing glyphs after fallback', table.concat(summary_lines, '\\\\n'));"
+            "  end;"
+            "end;"
+            "local lb = luatexbase or require('luatexbase');"
+            "if lb and lb.add_to_callback then"
+            "  texio.write_nl('term and log', '*** GBW: Registering callbacks');"
+            "  lb.add_to_callback('hpack_filter', gbw_check, 'gbw-missing-glyphs-h');"
+            "  lb.add_to_callback('pre_linebreak_filter', gbw_check, 'gbw-missing-glyphs-v');"
+            "  lb.add_to_callback('finish_pdffile', gbw_report, 'gbw-missing-glyphs-report');"
+            "  texio.write_nl('term and log', '*** GBW: Callbacks registered successfully');"
+            "else"
+            "  texio.write_nl('term and log', 'gbw missing glyph detector: luatexbase unavailable; skipping');"
+            "end;"
+            "}"
+        )
+    else:
+        logger.info(
+            "ℹ️ FONT-STACK: Missing-glyph detector übersprungen (lua fallback disabled)"
+        )
+
     if emoji_font:
-        options: List[str] = []
-        if needs_harfbuzz:
-            options.append("Renderer=Harfbuzz")
-        option_block = f"[{','.join(options)}]" if options else ""
-        lines.append(f"\\IfFontExistsTF{{{emoji_font}}}{{")
-        lines.append(f"  \\newfontfamily\\EmojiOne{option_block}{{{emoji_font}}}")
-        if fallback_block:
-            lines.append(
-                f'  \\directlua{{luaotfload.add_fallback("mainfont", {fallback_block})}}'
-            )
-        lines.append("}{}")
+        # Emoji font is configured via Pandoc metadata and handled by the
+        # latex-emoji filter; we intentionally avoid injecting a fontspec
+        # definition here to sidestep engine-specific command availability.
+        pass
 
     if include_mainfont:
-        if fallback_block and emoji_font:
-            lines.append(f"\\IfFontExistsTF{{{emoji_font}}}{{")
-            lines.append(
-                f"  \\setmainfont[RawFeature={{fallback=mainfont}}]{{{main_font}}}"
-            )
-            lines.append("}{")
-            lines.append(f"  \\setmainfont{{{main_font}}}")
-            lines.append("}")
-        else:
-            lines.append(f"\\setmainfont{{{main_font}}}")
+        lines.append(f"\\setmainfont[\\fallbackfeature]{{{main_font}}}")
 
-    sans_options = "[RawFeature={fallback=mainfont}]" if fallback_block else ""
-    lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
-    lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
+    lines.append(f"\\setsansfont[\\fallbackfeature]{{{sans_font}}}")
+    lines.append(f"\\setmonofont[\\fallbackfeature]{{{mono_font}}}")
     # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
-    if _DEFAULT_HEADER_PATH:
-        header_path = Path(_DEFAULT_HEADER_PATH).as_posix()
-        lines.append(f"\\input{{{header_path}}}")
     return "\n".join(lines) + "\n"
 
 
@@ -1426,6 +1720,147 @@ def _save_yaml(path: str, data: Dict[str, Any]) -> None:
         yaml.safe_dump(serialisable, f, sort_keys=False, allow_unicode=True)
 
 
+def _coerce_str(value: Any) -> str | None:
+    if isinstance(value, str):
+        text = value.strip()
+        return text or None
+    return None
+
+
+def _coerce_policy(value: Any) -> str:
+    if isinstance(value, str):
+        text = value.strip().lower()
+        if text in {"warn", "warning"}:
+            return "warn"
+        if text == "fail":
+            return "fail"
+    return "fail"
+
+
+def _author_label(value: Any) -> str | None:
+    if isinstance(value, Mapping):
+        name = _coerce_str(value.get("name") or value.get("full_name"))
+        if not name:
+            return None
+        org = _coerce_str(value.get("org") or value.get("organization"))
+        email = _coerce_str(value.get("email"))
+        if org:
+            return f"{name} ({org})"
+        if email:
+            return f"{name} <{email}>"
+        return name
+    return _coerce_str(value)
+
+
+def _extract_authors(value: Any) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if isinstance(value, (str, bytes)):
+        label = _coerce_str(value)
+        return (label,) if label else ()
+    if isinstance(value, Mapping):
+        label = _author_label(value)
+        return (label,) if label else ()
+    if isinstance(value, Sequence):
+        authors: list[str] = []
+        for entry in value:
+            label = _author_label(entry)
+            if label:
+                authors.append(label)
+        return tuple(authors)
+    return ()
+
+
+def _load_book_json(
+    manifest_dir: Path,
+) -> tuple[str | None, tuple[str, ...], str | None]:
+    book_path = manifest_dir / "book.json"
+    if not book_path.exists():
+        return None, (), None
+    try:
+        data = json.loads(book_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # pragma: no cover - best effort fallback
+        logger.debug("book.json konnte nicht gelesen werden: %s", exc)
+        return None, (), None
+    title = _coerce_str(data.get("title"))
+    authors = _extract_authors(data.get("author"))
+    license_value = _coerce_str(data.get("license"))
+    return title, authors, license_value
+
+
+def _resolve_repo_hint(
+    manifest_path: Path, repository: str | None
+) -> tuple[str, str | None]:
+    repo_root = detect_repo_root(manifest_path.parent)
+    repo_name = repo_root.name or "repository"
+    repo_owner: str | None = None
+    slug = repository or os.getenv("GITHUB_REPOSITORY")
+    if slug and isinstance(slug, str) and "/" in slug:
+        repo_owner = slug.split("/", 1)[0] or None
+    return repo_name, repo_owner
+
+
+def _resolve_project_metadata(
+    manifest_path: Path,
+    *,
+    manifest_data: Dict[str, Any] | None = None,
+    repository: str | None = None,
+) -> ProjectMetadata:
+    data = manifest_data or _load_yaml(str(manifest_path))
+    project_cfg = (
+        data.get("project") if isinstance(data.get("project"), Mapping) else {}
+    )
+    policy = _coerce_policy(
+        project_cfg.get("attribution_policy") if project_cfg else None
+    )
+    repo_name, repo_owner = _resolve_repo_hint(manifest_path, repository)
+    book_title, book_authors, book_license = _load_book_json(manifest_path.parent)
+
+    warnings: list[str] = []
+
+    name = _coerce_str(project_cfg.get("name")) if project_cfg else None
+    if not name:
+        name = book_title
+    if not name:
+        name = f"<MISSING project.name | using repo '{repo_name}'>"
+        warnings.append(
+            "project.name fehlt – verwende Repository-Namen als Platzhalter."
+        )
+
+    authors = _extract_authors(project_cfg.get("authors") if project_cfg else None)
+    if not authors and book_authors:
+        authors = book_authors
+    if not authors:
+        placeholder = "<MISSING project.authors"
+        if repo_owner:
+            placeholder += f" | using repo owner '{repo_owner}'"
+        placeholder += ">"
+        authors = (placeholder,)
+        warnings.append(
+            "project.authors fehlt – verwende Repository-Eigentümer als Platzhalter."
+        )
+
+    license_value = _coerce_str(project_cfg.get("license")) if project_cfg else None
+    if not license_value:
+        license_value = book_license
+    if not license_value:
+        msg = (
+            "project.license fehlt – bitte in publish.yml unter project.license setzen."
+        )
+        if policy == "fail":
+            raise ProjectMetadataError(msg)
+        license_value = "<MISSING project.license>"
+        warnings.append(msg + " attribution_policy=warn")
+
+    return ProjectMetadata(
+        name=name,
+        authors=tuple(authors),
+        license=license_value,
+        policy=policy,
+        warnings=tuple(warnings),
+    )
+
+
 def _dedupe_preserve_order(values: Iterable[str]) -> List[str]:
     seen: set[str] = set()
     result: List[str] = []
@@ -1534,6 +1969,9 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
 
     parsed: Dict[str, Any] = {}
 
+    # Abort flag defaults to True unless explicitly disabled
+    parsed["abort_if_missing_glyph"] = True
+
     if "emoji_color" in raw:
         parsed["emoji_color"] = _as_bool(raw.get("emoji_color"))
 
@@ -1553,6 +1991,9 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
         fallback_str = str(fallback_value).strip()
         if fallback_str:
             parsed["mainfont_fallback"] = fallback_str
+
+    if "abort_if_missing_glyph" in raw:
+        parsed["abort_if_missing_glyph"] = _as_bool(raw.get("abort_if_missing_glyph"))
 
     return parsed
 
@@ -1706,6 +2147,9 @@ def prepare_publishing(
     """
     prepareYAML()  # B.1
 
+    manifest_path_obj = Path(manifest_path).resolve() if manifest_path else None
+    _configure_texmf_cache(manifest_path_obj)
+
     # Pandoc vorhanden?
     have_pandoc = _which("pandoc") is not None
     have_lualatex = _which("lualatex") is not None
@@ -1746,6 +2190,8 @@ def prepare_publishing(
     manifest_specs: List[FontSpec] = []
     manifest_dir: Optional[Path] = None
 
+    # Fonts are configured centrally in defaults/fonts.yml, BUT we still need to parse
+    # manifest font paths to add them to OSFONTDIR and make them discoverable
     if manifest_path:
         manifest_candidate = Path(manifest_path)
         if not manifest_candidate.exists():
@@ -1769,6 +2215,11 @@ def prepare_publishing(
                 manifest_specs = _parse_font_specs(
                     manifest_data.get("fonts"), manifest_dir
                 )
+                if manifest_specs:
+                    logger.info(
+                        "✓ %d Font-Pfade aus Manifest gelesen (werden zu OSFONTDIR hinzugefügt)",
+                        len(manifest_specs),
+                    )
 
     # OpenMoji removed per AGENTS.md (license compliance - only Twemoji CC BY 4.0 allowed)
     font_cache_refreshed = False
@@ -1790,12 +2241,8 @@ def prepare_publishing(
         _maybe_refresh_font_cache()
 
     def _register_font(font_path: Union[Path, str]) -> None:
-        """Register a font file in the user font directory with hash-based update detection.
+        """Register a font file in OS-specific user font directories with hash checks."""
 
-        This function copies fonts to ~/.local/share/fonts and detects when an existing
-        font needs to be updated by comparing SHA256 hashes. This ensures that font
-        updates are properly recognized and cached.
-        """
         if not font_path:
             return
         try:
@@ -1803,44 +2250,41 @@ def prepare_publishing(
             if not path_obj.exists():
                 return
 
-            user_font_dir = Path.home() / ".local" / "share" / "fonts"
-            user_font_dir.mkdir(parents=True, exist_ok=True)
-            target = user_font_dir / path_obj.name
+            for user_font_dir in _user_font_directories():
+                user_font_dir.mkdir(parents=True, exist_ok=True)
+                target = user_font_dir / path_obj.name
 
-            # Check if font needs update (hash-based comparison)
-            needs_update = True
-            if target.exists():
-                try:
-                    source_hash = hashlib.sha256(path_obj.read_bytes()).hexdigest()
-                    target_hash = hashlib.sha256(target.read_bytes()).hexdigest()
-                    needs_update = source_hash != target_hash
-
-                    if not needs_update:
-                        logger.debug("ℹ Font bereits aktuell: %s", target.name)
-                except Exception as hash_exc:
-                    logger.warning(
-                        "⚠ Hash-Vergleich fehlgeschlagen für %s: %s",
-                        target.name,
-                        hash_exc,
-                    )
-                    # Bei Fehler: Update zur Sicherheit durchführen
-                    needs_update = True
-
-            if needs_update:
+                needs_update = True
                 if target.exists():
-                    target.unlink()  # Remove old version first
-                    logger.info("✓ Alte Font-Version entfernt: %s", target.name)
+                    try:
+                        source_hash = hashlib.sha256(path_obj.read_bytes()).hexdigest()
+                        target_hash = hashlib.sha256(target.read_bytes()).hexdigest()
+                        needs_update = source_hash != target_hash
 
-                shutil.copy2(path_obj, target)
-                logger.info("✓ Font aktualisiert: %s", target.name)
+                        if not needs_update:
+                            logger.debug("ℹ Font bereits aktuell: %s", target)
+                    except Exception as hash_exc:
+                        logger.warning(
+                            "⚠ Hash-Vergleich fehlgeschlagen für %s: %s",
+                            target,
+                            hash_exc,
+                        )
+                        needs_update = True
 
-                # Force cache refresh after font update
-                nonlocal font_cache_refreshed
-                font_cache_refreshed = False
-                _maybe_refresh_font_cache()
+                if needs_update:
+                    if target.exists():
+                        target.unlink()
+                        logger.info("✓ Alte Font-Version entfernt: %s", target)
 
-            _remember_font_dir(path_obj.parent)
-            _remember_font_dir(user_font_dir)
+                    shutil.copy2(path_obj, target)
+                    logger.info("✓ Font aktualisiert: %s → %s", path_obj, target)
+
+                    nonlocal font_cache_refreshed
+                    font_cache_refreshed = False
+                    _maybe_refresh_font_cache()
+
+                _remember_font_dir(path_obj.parent)
+                _remember_font_dir(user_font_dir)
 
         except Exception as exc:  # pragma: no cover - best effort only
             logger.warning("Konnte Font %s nicht registrieren: %s", font_path, exc)
@@ -1916,6 +2360,19 @@ def prepare_publishing(
             resolved_font.name,
             ", ".join(path.as_posix() for path in resolved_font.paths),
         )
+        for path in resolved_font.paths:
+            _remember_font_dir(path.parent)
+
+    force_font_cache_update = _as_bool(
+        os.environ.get("ERDA_FORCE_FONT_CACHE_UPDATE"), False
+    )
+    if smart_fonts.downloads:
+        force_font_cache_update = True
+    if sys.platform == "win32":
+        force_font_cache_update = True
+
+    if force_font_cache_update:
+        logger.info("ℹ Erzwinge Font-Cache-Update (Plattform/Downloads/Flag).")
 
     # Register CJK font from merged configuration
     erda_font_locations = font_config.get_font_paths("CJK")
@@ -2005,8 +2462,14 @@ def prepare_publishing(
     # Smart font cache update: only if fonts are missing or were modified
     # NOTE: This runs AFTER OSFONTDIR is configured and fc-cache refreshed,
     # so fc-list can find fonts in fonts-storage/
-    if _fonts_need_cache_update():
-        logger.info("🔄 Font caches veraltet - aktualisiere...")
+    needs_cache_update = _fonts_need_cache_update()
+    cache_update_required = force_font_cache_update or needs_cache_update
+
+    if cache_update_required:
+        if force_font_cache_update and not needs_cache_update:
+            logger.info("🔄 Font-Cache-Update erzwungen (Zuverlässigkeit).")
+        else:
+            logger.info("🔄 Font caches veraltet - aktualisiere...")
 
         # Clear LuaLaTeX font caches after font registration
         # This ensures that LuaTeX picks up any font updates
@@ -2065,6 +2528,7 @@ def _run_pandoc(
     extra_args: Optional[Sequence[str]] = None,
     toc_depth: Optional[int] = None,
     emoji_options: Optional[EmojiOptions] = None,
+    abort_if_missing_glyph: bool = True,
 ) -> None:
     _ensure_dir(os.path.dirname(pdf_out))
 
@@ -2231,7 +2695,14 @@ def _run_pandoc(
 
     header_override = header_path
 
-    with tempfile.TemporaryDirectory() as temp_dir:
+    keep_latex_temp = os.getenv("ERDA_KEEP_LATEX_TEMP", "0").lower() in _TRUE_VALUES
+    temp_ctx = (
+        contextlib.nullcontext(tempfile.mkdtemp(prefix="gbw-latex-"))
+        if keep_latex_temp
+        else tempfile.TemporaryDirectory()
+    )
+
+    with temp_ctx as temp_dir:
         header_file = Path(temp_dir) / "pandoc-fonts.tex"
         font_header_content = _build_font_header(
             main_font=main_font,
@@ -2241,45 +2712,21 @@ def _run_pandoc(
             include_mainfont=not supports_mainfont_fallback,
             needs_harfbuzz=needs_harfbuzz,
             manual_fallback_spec=manual_fallback_spec,
+            abort_if_missing_glyph=abort_if_missing_glyph,
         )
         header_file.write_text(font_header_content, encoding="utf-8")
+        logger.info(
+            "📄 FONT-STACK: pandoc-fonts.tex @ %s\n%s", header_file, font_header_content
+        )
 
-        # If a title was provided, inject a small LaTeX header that sets the
-        # document title using a LaTeX-safe, escaped value. This avoids issues
-        # where Pandoc templates copy unescaped headings into the LaTeX
-        # 	itle{} which can break with characters like '&'. We add the
-        # title header before the font header so it takes effect in the preamble.
-        # When a title header is injected we MUST avoid also passing the title
-        # to Pandoc via variables or metadata (both can cause the template to
-        # re-insert an unescaped title). If a header is used, we therefore
-        # remove any title metadata and skip adding a -V title=... argument.
+        # If a title was provided, prefer passing it via Pandoc metadata so the
+        # standard template handles \maketitle once. Injecting our own title
+        # header previously duplicated the title block (and an extra
+        # \AtBeginDocument{\maketitle}), which could break the preamble.
+        # Pandoc escapes titles for LaTeX, so we can safely rely on metadata.
         title_header_path = None
-        try:
-            if title:
-                title_header_path = Path(temp_dir) / "pandoc-title.tex"
-                # escape for LaTeX and also provide a plain fallback for
-                # bookmarks using \texorpdfstring{<latex>}{<plain>}
-                safe_title = _escape_latex(str(title))
-                # plain fallback: remove backslashes and braces to avoid
-                # accidental TeX in the second argument
-                import re as _re
-
-                plain_title = _re.sub(r"[\\{}]", "", str(title))
-                # Note: \AtBeginDocument{\maketitle} is required when using manual font fallback
-                # because Pandoc's template doesn't auto-trigger \maketitle without title metadata
-                title_header_path.write_text(
-                    f"\\title{{\\texorpdfstring{{{safe_title}}}{{{plain_title}}}}}\\author{{}}\\date{{}}\\AtBeginDocument{{\\maketitle}}\n",
-                    encoding="utf-8",
-                )
-                # Ensure Pandoc doesn't also inject the title via metadata
-                # (some templates prefer metadata->\title). Remove any title
-                # key from the metadata_map so the header file is authoritative.
-                try:
-                    metadata_map.pop("title", None)
-                except Exception:
-                    pass
-        except Exception:
-            title_header_path = None
+        if title:
+            metadata_map["title"] = [str(title)]
 
         header_args = _combine_header_paths(
             header_defaults,
@@ -2342,9 +2789,134 @@ def _run_pandoc(
             # an ampersand or other special chars.
             safe_title = _escape_latex(str(title))
             cmd.extend(["-V", f"title={safe_title}"])
+
+        # Add --verbose for better error diagnostics
+        cmd.append("--verbose")
+
         cmd.extend(additional_args)
 
-        _run(cmd)
+        tex_source = Path(temp_dir) / Path(pdf_out).with_suffix(".tex").name
+        logger.info("ℹ LaTeX debug output target: %s", tex_source)
+
+        if keep_latex_temp:
+            # Keep LaTeX aux/log/input files in the same temp dir we copy for debugging
+            cmd.extend(["--pdf-engine-opt", f"-output-directory={temp_dir}"])
+
+            # Emit a standalone LaTeX file for easier debugging without relying on --keep-tex
+            tex_cmd: List[str] = ["pandoc", md_path, "-o", str(tex_source)]
+            if from_format:
+                tex_cmd.extend(["-f", from_format])
+            # Force LaTeX output so we always keep a readable .tex file
+            tex_cmd.extend(["-t", "latex"])
+            if resource_path_arg:
+                tex_cmd.extend(["--resource-path", resource_path_arg])
+            for header in header_args:
+                tex_cmd.extend(["-H", header])
+            for filter_path in filters:
+                tex_cmd.extend(["--lua-filter", filter_path])
+            for key, values in metadata_map.items():
+                for value in values:
+                    tex_cmd.extend(["-M", f"{key}={value}"])
+            for key, value in variable_map.items():
+                if title_header_path and key == "title":
+                    continue
+                tex_cmd.extend(["--variable", f"{key}={value}"])
+            if add_toc:
+                tex_cmd.append("--toc")
+                if toc_depth is not None:
+                    tex_cmd.extend(["--toc-depth", str(toc_depth)])
+            if title and not title_header_path:
+                safe_title = _escape_latex(str(title))
+                tex_cmd.extend(["-V", f"title={safe_title}"])
+            tex_cmd.append("--verbose")
+            tex_cmd.extend(additional_args)
+            logger.info(
+                "🧩 Keeping LaTeX source via dedicated pandoc -t latex run: %s",
+                tex_cmd,
+            )
+            _run(tex_cmd)
+
+        try:
+            _run(cmd)
+        except subprocess.CalledProcessError:
+            # LuaLaTeX writes errors to .log file in CWD (output directory), not temp_dir!
+            # Find and log it before proceeding with error
+            pdf_path = Path(pdf_out)
+            log_file = pdf_path.with_suffix(".log")
+
+            if log_file.exists():
+                try:
+                    log_content = log_file.read_text(encoding="utf-8", errors="replace")
+                    # Extract last ~150 lines where the actual error is
+                    log_lines = log_content.splitlines()
+                    if len(log_lines) > 150:
+                        excerpt = "\n".join(log_lines[-150:])
+                    else:
+                        excerpt = log_content
+                    logger.error(
+                        "=== TeX LOG FILE (%s) ===\n%s\n=== END TeX LOG ===",
+                        log_file.name,
+                        excerpt,
+                    )
+                except Exception as log_exc:
+                    logger.warning(
+                        "Could not read TeX log file %s: %s", log_file, log_exc
+                    )
+            else:
+                # Fallback: search temp_dir (shouldn't happen but defensive)
+                pdf_name = pdf_path.stem
+                log_candidates = list(Path(temp_dir).glob(f"**/{pdf_name}.log"))
+                if not log_candidates:
+                    log_candidates = list(Path(temp_dir).glob("**/*.log"))
+
+                if log_candidates:
+                    try:
+                        log_content = log_candidates[0].read_text(
+                            encoding="utf-8", errors="replace"
+                        )
+                        log_lines = log_content.splitlines()
+                        excerpt = (
+                            "\n".join(log_lines[-150:])
+                            if len(log_lines) > 150
+                            else log_content
+                        )
+                        logger.error(
+                            "=== TeX LOG FILE (%s) ===\n%s\n=== END TeX LOG ===",
+                            log_candidates[0].name,
+                            excerpt,
+                        )
+                    except Exception as log_exc:
+                        logger.warning(
+                            "Could not read TeX log file %s: %s",
+                            log_candidates[0],
+                            log_exc,
+                        )
+                else:
+                    logger.warning(
+                        "No TeX log file found (checked %s and %s)", log_file, temp_dir
+                    )
+            raise
+        finally:
+            if keep_latex_temp:
+                try:
+                    debug_root = Path(pdf_out).parent / "_latex-debug"
+                    debug_root.mkdir(parents=True, exist_ok=True)
+                    target = debug_root / Path(temp_dir).name
+                    shutil.copytree(temp_dir, target, dirs_exist_ok=True)
+                    if tex_source.exists():
+                        dest_tex = target / tex_source.name
+                        shutil.copy2(tex_source, dest_tex)
+                        logger.info(
+                            "🧩 Copied LaTeX source for debugging: %s", dest_tex
+                        )
+                    logger.info(
+                        "🧩 Kept LaTeX temp dir for debugging (ERDA_KEEP_LATEX_TEMP=1): %s",
+                        target,
+                    )
+                except Exception as copy_exc:
+                    logger.warning(
+                        "Konnte LaTeX Temp-Verzeichnis nicht sichern: %s", copy_exc
+                    )
 
 
 def _extract_md_paths_from_summary(summary_path: Path, root_dir: Path) -> List[str]:
@@ -2435,6 +3007,8 @@ def convert_a_file(
     resource_paths: Optional[List[str]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
+    metadata: Optional[Dict[str, Sequence[str] | str]] = None,
+    abort_if_missing_glyph: bool = True,
 ) -> None:
     logger.info(
         "========================================================================"
@@ -2481,6 +3055,10 @@ def convert_a_file(
         except Exception:
             pass
 
+        metadata_map = dict(metadata) if metadata else {}
+        if title and "title" not in metadata_map:
+            metadata_map["title"] = [title]
+
         _run_pandoc(
             tmp_md,
             pdf_out,
@@ -2489,6 +3067,8 @@ def convert_a_file(
             resource_paths=_resource_paths_for_source(md_file, resource_paths),
             emoji_options=options,
             variables=variables,
+            metadata=metadata_map or None,
+            abort_if_missing_glyph=abort_if_missing_glyph,
         )
     finally:
         try:
@@ -2527,6 +3107,8 @@ def convert_a_folder(
     resource_paths: Optional[List[str]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
+    metadata: Optional[Dict[str, Sequence[str] | str]] = None,
+    abort_if_missing_glyph: bool = True,
 ) -> None:
 
     logger.info(
@@ -2591,6 +3173,10 @@ def convert_a_folder(
             # Allow GitBook-style asset folders below the content root.
             resolved_resource_paths.append(str(summary_layout.root_dir))
 
+        metadata_map = dict(metadata) if metadata else {}
+        if title and "title" not in metadata_map:
+            metadata_map["title"] = [title]
+
         _run_pandoc(
             tmp_md,
             pdf_out,
@@ -2601,6 +3187,8 @@ def convert_a_folder(
             ),
             emoji_options=options,
             variables=variables,
+            metadata=metadata_map or None,
+            abort_if_missing_glyph=abort_if_missing_glyph,
         )
     finally:
         try:
@@ -2639,6 +3227,8 @@ def build_pdf(
     resource_paths: Optional[List[str]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
+    project_metadata: Optional[ProjectMetadata] = None,
+    abort_if_missing_glyph: bool = True,
 ) -> Tuple[bool, Optional[str]]:
     """
     Baut ein PDF gemäß Typ ('file'/'folder').
@@ -2648,6 +3238,8 @@ def build_pdf(
     _ensure_dir(str(publish_path))
     pdf_out = publish_path / out
     path_obj = Path(path).resolve()
+
+    base_metadata = project_metadata.as_pandoc_metadata() if project_metadata else None
 
     logger.info("✔ Building %s from %s (type=%s)", pdf_out, path_obj, typ)
 
@@ -2675,6 +3267,8 @@ def build_pdf(
                 resource_paths=resource_paths,
                 emoji_options=emoji_options,
                 variables=variables,
+                metadata=base_metadata,
+                abort_if_missing_glyph=abort_if_missing_glyph,
             )
         elif _typ == "folder":
             summary_layout: Optional[SummaryContext] = None
@@ -2713,6 +3307,8 @@ def build_pdf(
                 resource_paths=resource_paths,
                 emoji_options=emoji_options,
                 variables=variables,
+                metadata=base_metadata,
+                abort_if_missing_glyph=abort_if_missing_glyph,
             )
         else:
             logger.warning("⚠ Unbekannter type='%s' – übersprungen.", typ)
@@ -2880,6 +3476,17 @@ def main() -> None:
     os.environ.update(env_payload)
     manifest = str(language_ctx.require_manifest())
 
+    try:
+        project_metadata = _resolve_project_metadata(
+            Path(manifest), repository=os.getenv("GITHUB_REPOSITORY")
+        )
+    except ProjectMetadataError as exc:
+        logger.error("Projekt-Metadaten ungültig: %s", exc)
+        sys.exit(3)
+
+    for warn in project_metadata.warnings:
+        logger.warning(warn)
+
     if args.only_prepare:
         # B.1 + B
         prepare_publishing(no_apt=args.no_apt, manifest_path=manifest)
@@ -2963,6 +3570,7 @@ def main() -> None:
         variable_overrides = (
             _build_variable_overrides(pdf_options) if pdf_options else {}
         )
+        abort_missing_glyph = pdf_options.get("abort_if_missing_glyph", True)
         color_override = pdf_options.get("emoji_color") if pdf_options else None
         bx_override = pdf_options.get("emoji_bxcoloremoji") if pdf_options else None
         if "emoji_color" in pdf_options or "emoji_bxcoloremoji" in pdf_options:
@@ -2999,6 +3607,8 @@ def main() -> None:
             resource_paths=resolved_resource_paths,
             emoji_options=entry_emoji_options,
             variables=variable_overrides or None,
+            project_metadata=project_metadata,
+            abort_if_missing_glyph=bool(abort_missing_glyph),
         )
         if ok:
             built.append(str((publish_dir_path / out).resolve()))

@@ -25,6 +25,7 @@ from typing import Iterable, Mapping, MutableMapping, Sequence
 import yaml
 
 from gitbook_worker.tools.logging_config import get_logger
+from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.publishing.frontmatter_config import FrontMatterConfigLoader
 from gitbook_worker.tools.publishing.readme_config import ReadmeConfigLoader
 from gitbook_worker.tools.utils import git as git_utils
@@ -1156,6 +1157,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the ERDA workflow orchestrator",
     )
+    add_exit_code_help(parser)
     subparsers = parser.add_subparsers(dest="command")
 
     run_parser = subparsers.add_parser("run", help="Orchestrator ausführen")
@@ -1202,6 +1204,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
 
 def main(argv: Iterable[str] | None = None) -> None:
     args = parse_args(argv)
+    handle_exit_code_help(args)
     if args.command == "validate":
         ok, errors = validate_manifest(
             root=args.root,
@@ -1233,3 +1236,7 @@ __all__ = [
     "run",
     "main",
 ]
+
+
+if __name__ == "__main__":
+    main()

@@ -1,6 +1,11 @@
 # Local environment variables
 .env
 
+# lua / latex
+.texmf-cache/
+_latex-debug/
+latex-debug/
+
 # temps
 tmp/
 node_modules/

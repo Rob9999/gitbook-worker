@@ -100,9 +100,13 @@ class _SmartFontStack:
     ) -> None:
         self._repo_root = _detect_repo_root(repo_root)
         self._cache_dir = _determine_cache_dir(cache_dir)
+        logger.info("ℹ Font-Cache-Verzeichnis: %s", self._cache_dir)
         self._maybe_bootstrap_font_storage()
         self._manifest_fonts = list(manifest_fonts or [])
         self._search_paths = self._build_search_paths(extra_search_paths)
+        logger.debug(
+            "Font-Suchpfade: %s", ", ".join(str(p) for p in self._search_paths)
+        )
         self._work_dir = Path(tempfile.mkdtemp(prefix="gitbook-worker-fonts-"))
         self._cleaned = False
         atexit.register(self._cleanup)

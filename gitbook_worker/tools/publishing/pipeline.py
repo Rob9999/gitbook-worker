@@ -45,6 +45,7 @@ from gitbook_worker.tools.utils.language_context import (
     resolve_language_context,
 )
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
+from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.utils.smart_manifest import detect_repo_root
 
 LOGGER = get_logger(__name__)
@@ -247,6 +248,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Run the ERDA selective publishing pipeline",
     )
+    add_exit_code_help(parser)
     parser.add_argument(
         "--root",
         type=Path,
@@ -314,6 +316,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         help="Print the commands without executing them",
     )
     namespace = parser.parse_args(list(argv) if argv is not None else None)
+    handle_exit_code_help(namespace)
     if namespace.root is None:
         namespace.root = detect_repo_root(Path.cwd())
     else:
