@@ -1,1 +1,1 @@
-# releases
+# Release notes

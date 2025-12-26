@@ -2,8 +2,8 @@
 
 - Going multi-lingual: the orchestrator now ships with comprehensive emoji/font coverage so German and future locales publish clean PDFs end-to-end.
 - Repaired the Twemoji font-sync pipeline by pointing defaults/fonts.yml and font_storage to a working release asset and updating publisher fallback logic.
-- Hardened latex-emoji.lua so header metadata is normalized, bxcoloremoji is injected safely, and Twemoji spans render consistently across local and Docker orchestrations.
-- Expanded regression coverage in test_emoji_color_regression.py, test_emoji_visual_check.py, and publisher tests so combined markdown artifacts and logs always capture emojifont/bxcoloremoji settings.
+- Hardened latex-emoji.lua so header metadata is normalised, bxcoloremoji is injected safely, and Twemoji spans render consistently across local and Docker orchestrations.
+- Expanded regression coverage in test_emoji_color_regression.py, test_emoji_visual_check.py, and publisher tests so combined markdown artefacts and logs always capture emojifont/bxcoloremoji settings.
 - Documented the outstanding LaTeX/font warnings plus added PoC scaffolding under gitbook_worker/pocs to guide future packaging experiments.
 
 All orchestrator pipelines (local + Docker rebuild) now complete successfully and the full pytest suite passes, restoring release confidence for downstream teams.

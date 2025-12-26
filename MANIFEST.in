@@ -1,1 +1,2 @@
+include README.md LICENSE LICENSE-CODE LICENSE-FONTS
 recursive-include gitbook_worker *.yml *.yaml *.json *.lua *.ttf *.otf *.sty *.tex *.js *.ps1 *.sh *.md *.svg *.csv *.png
