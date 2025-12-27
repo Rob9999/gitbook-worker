@@ -437,6 +437,11 @@ def _configure_texmf_cache(manifest_path: Optional[Path]) -> None:
     """Place TeX/luaotfload caches in a repo-local directory (optionally per language).
 
     This keeps font caches reproducible and avoids polluting global user caches.
+
+    NOTE: LUAOTFLOAD_CACHE is intentionally NOT set to repo-local directory because
+    luaotfload-tool --update does not respect this variable and updates the system
+    cache instead. This causes a mismatch where CLI tools see fonts but LuaTeX runtime
+    cannot find them. We only set TEXMFVAR/TEXMFCONFIG for TeX itself.
     """
 
     repo_root = _resolve_repo_root()
@@ -453,22 +458,22 @@ def _configure_texmf_cache(manifest_path: Optional[Path]) -> None:
 
     texmf_var = cache_root / "texmf-var"
     texmf_config = cache_root / "texmf-config"
-    luatex_cache = texmf_var / "luatex-cache"
 
-    for path in (texmf_var, texmf_config, luatex_cache):
+    for path in (texmf_var, texmf_config):
         path.mkdir(parents=True, exist_ok=True)
 
     # Keep TeX/luaotfload caches local for reproducibility (TEXMFVAR is the
-    # canonical base; TEXMFCACHE/LUAOTFLOAD_CACHE are used by luaotfload).
+    # canonical base; TEXMFCACHE is used by TeX but NOT for luaotfload font database).
     os.environ["TEXMFVAR"] = str(texmf_var)
     os.environ["TEXMFCONFIG"] = str(texmf_config)
-    os.environ["TEXMFCACHE"] = str(luatex_cache)
-    os.environ["LUAOTFLOAD_CACHE"] = str(luatex_cache)
+    # TEXMFCACHE removed - luaotfload needs system cache to find fonts
+    # os.environ["TEXMFCACHE"] = str(texmf_var / "luatex-cache")
+    # LUAOTFLOAD_CACHE removed - let luaotfload use system cache so CLI and runtime agree
 
     logger.info("ℹ TEXMFVAR gesetzt: %s", texmf_var)
     logger.info("ℹ TEXMFCONFIG gesetzt: %s", texmf_config)
-    logger.info("ℹ TEXMFCACHE gesetzt: %s", luatex_cache)
-    logger.info("ℹ LUAOTFLOAD_CACHE gesetzt: %s", luatex_cache)
+    logger.info("ℹ TEXMFCACHE: using system default (not overridden)")
+    logger.info("ℹ LUAOTFLOAD_CACHE: using system default (not overridden)")
 
 
 def _resolve_repo_root() -> Path:
@@ -1170,11 +1175,16 @@ def _lua_escape_string(value: str) -> str:
 
 
 def _lua_fallback_block(spec: str) -> Optional[str]:
+    """Generate Lua table literal for luaotfload.add_fallback() with full fontspec strings."""
     entries = [chunk.strip() for chunk in re.split(r"[;,]", spec) if chunk.strip()]
     if not entries:
         return None
-    parts = [f'"{_lua_escape_string(entry)}"' for entry in entries]
-    return "{" + ", ".join(parts) + "}"
+    # Build table literal with full fontspec strings (including features like :mode=harf)
+    escaped_entries = [
+        entry.replace("\\", "\\\\").replace('"', '\\"') for entry in entries
+    ]
+    # Return as Lua table literal: {"Font1:features", "Font2:features", ...}
+    return "{" + ", ".join(f'"{e}"' for e in escaped_entries) + "}"
 
 
 def _normalize_fallback_spec(
@@ -1240,6 +1250,7 @@ def _build_font_header(
     needs_harfbuzz: bool,
     manual_fallback_spec: Optional[str],
     abort_if_missing_glyph: bool,
+    temp_dir: str,
 ) -> str:
     """Render a Pandoc header snippet configuring fonts and fallbacks."""
 
@@ -1254,6 +1265,7 @@ def _build_font_header(
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
 
+    # Step 1: Collect available fallbacks
     available_fallbacks: List[str] = []
     missing_fallbacks: List[str] = []
     lua_cache_misses: List[str] = []
@@ -1326,41 +1338,37 @@ def _build_font_header(
             "⚠️ FONT-STACK: Lua fallback auf Windows aktiv (deaktivieren mit ERDA_ENABLE_LUA_FALLBACK=0)"
         )
 
+    # Store lua_fallback_code for insertion AFTER font setup
+    lua_fallback_code: Optional[str] = None
     if enable_lua_fallback and fallback_block:
-        lines.append(
-            "\\directlua{"
+        logger.info(f"DEBUG: fallback_block (table literal) = {repr(fallback_block)}")
+        # Build inline Lua code to be executed AFTER fonts are loaded
+        # CRITICAL: Must run in \AtBeginDocument{} to ensure fonts are fully loaded!
+        # NOTE: luaotfload.fallbacks table doesn't exist - add_fallback() registers internally!
+        lua_fallback_code = (
+            "\\AtBeginDocument{\\directlua{"
             f"local fonts={fallback_block}; "
-            "local filtered={}; "
             "local function gbw_nonempty_table(t) return type(t) == 'table' and next(t) ~= nil end; "
-            "for _, name in ipairs(fonts) do "
-            "  local base = tostring(name):match('^([^:]+)') or name; "
-            "  local ok1, info = pcall(function() return luaotfload.aux.provides_font(base) end); "
-            "  if ok1 and type(info) == 'table' and info.filename then "
-            "    table.insert(filtered, base); "
-            "  else "
-            "    texio.write_nl('log', 'luaotfload fallback skipped missing font: '..tostring(base)); "
-            "  end; "
-            "end; "
-            "gbw_fallback_stack = filtered; "
-            "texio.write_nl('log', 'luaotfload fallback filtered='..table.concat(filtered, '; ')); "
-            "if not gbw_nonempty_table(filtered) then "
+            "if not gbw_nonempty_table(fonts) then "
             "  texio.write_nl('log', 'luaotfload fallback list empty; skipping add_fallback'); "
             "else "
-            '  local ok2, err = pcall(function() luaotfload.add_fallback("mainfont", filtered) end); '
-            "  if not ok2 then "
-            "    texio.write_nl('log', 'luaotfload.add_fallback skipped: '..tostring(err)); "
+            '  local ok, err = pcall(function() luaotfload.add_fallback("mainfont", fonts) end); '
+            "  if not ok then "
+            "    texio.write_nl('log', 'luaotfload.add_fallback error: '..tostring(err)); "
             "  else "
-            '    local fb = luaotfload and luaotfload.fallbacks and luaotfload.fallbacks["mainfont"]; '
-            "    if gbw_nonempty_table(fb) then "
-            "      if token and token.set_macro then token.set_macro('fallbackfeature', 'RawFeature={fallback=mainfont}', true); else texio.write_nl('log', 'gbw: token.set_macro unavailable; cannot set fallbackfeature'); end; "
+            "    texio.write_nl('log', 'luaotfload.add_fallback called successfully'); "
+            "    if token and token.set_macro then "
+            "      token.set_macro('fallbackfeature', 'RawFeature={fallback=mainfont}', true); "
+            "      texio.write_nl('log', 'fallbackfeature macro set to RawFeature={fallback=mainfont}'); "
             "    else "
-            "      texio.write_nl('log', 'luaotfload.add_fallback produced empty data; skipping fallbackfeature'); "
+            "      texio.write_nl('log', 'gbw: token.set_macro unavailable; cannot set fallbackfeature'); "
             "    end; "
             "  end; "
-            "end"
-            "}"
+            "end; "
+            "}}"
         )
-    elif fallback_block:
+    
+    if not enable_lua_fallback and fallback_block:
         logger.info(
             "⚠️ FONT-STACK: Lua fallback deaktiviert (set ERDA_ENABLE_LUA_FALLBACK=0 to disable explicitly)"
         )
@@ -1465,6 +1473,11 @@ def _build_font_header(
 
     lines.append(f"\\setsansfont[\\fallbackfeature]{{{sans_font}}}")
     lines.append(f"\\setmonofont[\\fallbackfeature]{{{mono_font}}}")
+    
+    # CRITICAL: Execute Lua AFTER fonts are loaded (setmainfont must happen first!)
+    if lua_fallback_code:
+        lines.append(lua_fallback_code)
+    
     # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
     return "\n".join(lines) + "\n"
 
@@ -2723,6 +2736,7 @@ def _run_pandoc(
             needs_harfbuzz=needs_harfbuzz,
             manual_fallback_spec=manual_fallback_spec,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            temp_dir=temp_dir,
         )
         header_file.write_text(font_header_content, encoding="utf-8")
         logger.info(
