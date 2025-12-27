@@ -1342,31 +1342,9 @@ def _build_font_header(
     lua_fallback_code: Optional[str] = None
     if enable_lua_fallback and fallback_block:
         logger.info(f"DEBUG: fallback_block (table literal) = {repr(fallback_block)}")
-        # Build inline Lua code to be executed AFTER fonts are loaded
-        # CRITICAL: Must run in \AtBeginDocument{} to ensure fonts are fully loaded!
-        # NOTE: luaotfload.fallbacks table doesn't exist - add_fallback() registers internally!
-        lua_fallback_code = (
-            "\\AtBeginDocument{\\directlua{"
-            f"local fonts={fallback_block}; "
-            "local function gbw_nonempty_table(t) return type(t) == 'table' and next(t) ~= nil end; "
-            "if not gbw_nonempty_table(fonts) then "
-            "  texio.write_nl('log', 'luaotfload fallback list empty; skipping add_fallback'); "
-            "else "
-            '  local ok, err = pcall(function() luaotfload.add_fallback("mainfont", fonts) end); '
-            "  if not ok then "
-            "    texio.write_nl('log', 'luaotfload.add_fallback error: '..tostring(err)); "
-            "  else "
-            "    texio.write_nl('log', 'luaotfload.add_fallback called successfully'); "
-            "    if token and token.set_macro then "
-            "      token.set_macro('fallbackfeature', 'RawFeature={fallback=mainfont}', true); "
-            "      texio.write_nl('log', 'fallbackfeature macro set to RawFeature={fallback=mainfont}'); "
-            "    else "
-            "      texio.write_nl('log', 'gbw: token.set_macro unavailable; cannot set fallbackfeature'); "
-            "    end; "
-            "  end; "
-            "end; "
-            "}}"
-        )
+        # Build inline Lua code WITHOUT \AtBeginDocument wrapper!
+        # CRITICAL: Matching working commit 28a21cf5 (Nov 29) - simple direct call
+        lua_fallback_code = f"\\directlua{{luaotfload.add_fallback('mainfont', {fallback_block})}}"
     
     if not enable_lua_fallback and fallback_block:
         logger.info(
@@ -1468,15 +1446,19 @@ def _build_font_header(
         # definition here to sidestep engine-specific command availability.
         pass
 
-    if include_mainfont:
-        lines.append(f"\\setmainfont[\\fallbackfeature]{{{main_font}}}")
-
-    lines.append(f"\\setsansfont[\\fallbackfeature]{{{sans_font}}}")
-    lines.append(f"\\setmonofont[\\fallbackfeature]{{{mono_font}}}")
-    
-    # CRITICAL: Execute Lua AFTER fonts are loaded (setmainfont must happen first!)
+    # CRITICAL: Execute Lua fallback BEFORE font definitions so \fallbackfeature macro exists!
+    # (API must register before fonts load, macro must exist for \setmainfont[...])
     if lua_fallback_code:
         lines.append(lua_fallback_code)
+    
+    # Build font option strings (fallback feature inline or empty)
+    fallback_opts = "[RawFeature={fallback=mainfont}]" if (enable_lua_fallback and fallback_block) else ""
+    
+    if include_mainfont:
+        lines.append(f"\\setmainfont{fallback_opts}{{{main_font}}}")
+
+    lines.append(f"\\setsansfont{fallback_opts}{{{sans_font}}}")
+    lines.append(f"\\setmonofont{fallback_opts}{{{mono_font}}}")
     
     # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
     return "\n".join(lines) + "\n"
