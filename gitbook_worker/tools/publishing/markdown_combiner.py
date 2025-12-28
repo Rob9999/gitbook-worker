@@ -13,7 +13,9 @@ from typing import List
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing import preprocess_md
-from gitbook_worker.tools.publishing.geometry_package_injector import add_geometry_package
+from gitbook_worker.tools.publishing.geometry_package_injector import (
+    add_geometry_package,
+)
 
 logger = get_logger(__name__)
 
@@ -67,11 +69,20 @@ def combine_markdown(files: List[str], paper_format: str = "a4") -> str:
 
     Each file is processed by :mod:`preprocess_md` before normalisation.
     Missing files are skipped with a warning.
+
+    SVG image references are automatically converted to PDF references for
+    LaTeX compatibility (assumes SVG→PDF conversion happens during asset copying).
     """
     parts: List[str] = []
     for p in files:
         try:
             processed = preprocess_md.process(p, paper_format=paper_format)
+            # Convert SVG references to PDF for LaTeX compatibility
+            processed = re.sub(
+                r"(!\[[^\]]*\]\([^)]*\.gitbook/assets/[^)]+)\.svg\)",
+                r"\1.pdf)",
+                processed,
+            )
             parts.append(normalize_md(processed))
         except Exception as e:  # pragma: no cover - best effort
             logger.warning("Konnte %s nicht lesen: %s", p, e)

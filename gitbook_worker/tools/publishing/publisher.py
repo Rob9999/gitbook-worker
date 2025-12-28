@@ -1485,6 +1485,9 @@ def _build_font_header(
     lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
     lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
 
+    # Note: SVG files are converted to PDF during asset copying (asset_copy.py)
+    # No LaTeX svg package needed since we now use Python-based conversion
+
     # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
     return "\n".join(lines) + "\n"
 
@@ -1975,7 +1978,8 @@ def _prepare_asset_artifacts(path: Path) -> None:
 
 
 def _resource_paths_for_source(
-    md_path: str, resource_paths: Optional[Iterable[str]] = None
+    md_path: str,
+    resource_paths: Optional[Iterable[str]] = None,
 ) -> List[str]:
     """Resolve stable Pandoc resource paths for images and assets.
 
@@ -2044,12 +2048,12 @@ def _build_variable_overrides(pdf_options: Mapping[str, Any]) -> Dict[str, str]:
 
 
 def _resolve_asset_paths(
-    assets: Iterable[Any], manifest_dir: Path, entry_path: Path
-) -> List[str]:
-    resolved: List[str] = []
+    assets: List[Dict[str, Any]], manifest_dir: Path, entry_path: Path
+) -> List[Dict[str, Any]]:
+    resolved: List[Dict[str, Any]] = assets.copy()
     entry_base = entry_path if entry_path.is_dir() else entry_path.parent
 
-    for asset in assets:
+    for asset in resolved:
         if isinstance(asset, dict):
             path_value = asset.get("path")
         else:
@@ -2063,27 +2067,27 @@ def _resolve_asset_paths(
         if candidate.is_absolute():
             if candidate.exists():
                 _prepare_asset_artifacts(candidate)
-            resolved.append(str(candidate))
+            asset["path"] = str(candidate)
             continue
 
         # Prefer manifest-relative resolution, fall back to the entry folder.
         manifest_candidate = (manifest_dir / candidate).resolve()
         if manifest_candidate.exists():
             _prepare_asset_artifacts(manifest_candidate)
-            resolved.append(str(manifest_candidate))
+            asset["path"] = str(manifest_candidate)
             continue
 
         entry_candidate = (entry_base / candidate).resolve()
         if entry_candidate.exists():
             _prepare_asset_artifacts(entry_candidate)
-            resolved.append(str(entry_candidate))
+            asset["path"] = str(entry_candidate)
             continue
 
         # As a last resort keep the manifest-relative absolute path even if it
         # does not exist yet (e.g. generated later in the pipeline).
-        resolved.append(str(manifest_candidate))
+        asset["path"] = str(manifest_candidate)
 
-    return _dedupe_preserve_order(resolved)
+    return resolved
 
 
 # --------------------------- Public API (A) -------------------------------- #
@@ -2571,11 +2575,17 @@ def _run_pandoc(
 
     defaults = _get_pandoc_defaults()
 
-    resource_path_values = _build_resource_paths(resource_paths)
-    resource_path_arg = (
-        os.pathsep.join(resource_path_values) if resource_path_values else None
-    )
-    logger.info("🔍 PANDOC-RUN: resource_path_arg für Pandoc: %s", resource_path_arg)
+    if resource_paths:
+        resource_path_values = _build_resource_paths(resource_paths)
+        resource_path_arg = (
+            os.pathsep.join(resource_path_values) if resource_path_values else None
+        )
+        logger.info(
+            "🔍 PANDOC-RUN: resource_path_arg für Pandoc: %s", resource_path_arg
+        )
+    else:
+        resource_path_arg = None
+        logger.info("🔍 PANDOC-RUN: Keine resource_paths für Pandoc angegeben.")
 
     filters = (
         list(lua_filters) if lua_filters is not None else list(defaults["lua_filters"])
@@ -2868,8 +2878,8 @@ def _run_pandoc(
 
         # ALWAYS set output directory to temp so LaTeX finds SVG conversions
         cmd.extend(["--pdf-engine-opt", f"-output-directory={temp_dir}"])
-        # ALWAYS enable shell-escape for SVG conversion via Inkscape
-        # cmd.extend(["--pdf-engine-opt", "-shell-escape"])
+        # ALWAYS enable shell-escape for SVG conversion via Inkscape (NOTE: use = syntax!)
+        cmd.append("--pdf-engine-opt=-shell-escape")
 
         # save current env tempdir setting
         original_tmpdir = os.environ.get("TMPDIR")
@@ -3096,7 +3106,7 @@ def convert_a_file(
     keep_converted_markdown: bool = False,
     publish_dir: str = "publish",
     paper_format: str = "a4",
-    resource_paths: Optional[List[str]] = None,
+    assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
@@ -3114,8 +3124,8 @@ def convert_a_file(
     logger.info("Keep Converted Markdown : %s", keep_converted_markdown)
     logger.info("Publish Dir             : %s", publish_dir)
     logger.info("Paper Format            : %s", paper_format)
-    if resource_paths:
-        logger.info("Pandoc resource paths   : %s", resource_paths)
+    if assets:
+        logger.info("Assets to copy          : %s", assets)
 
     # preprocess for wide content (tables, images), will change page geometry
     processed = process(md_file, paper_format=paper_format)
@@ -3162,12 +3172,21 @@ def convert_a_file(
         if title and "title" not in metadata_map:
             metadata_map["title"] = [title]
 
+        resource_paths = _resource_paths_for_source(
+            md_file,
+            [
+                asset.get("path")
+                for asset in assets or []
+                if asset.get("path") is not None and asset.get("copy_to_output") is True
+            ],
+        )
+
         _run_pandoc(
             tmp_md,
             pdf_out,
             add_toc=False,  # Single files typically don't need TOC
             title=title,
-            resource_paths=_resource_paths_for_source(md_file, resource_paths),
+            resource_paths=resource_paths,
             emoji_options=options,
             variables=variables,
             metadata=metadata_map or None,
@@ -3207,7 +3226,6 @@ def convert_a_folder(
     publish_dir: str = "publish",
     paper_format: str = "a4",
     summary_layout: Optional[SummaryContext] = None,
-    resource_paths: Optional[List[str]] = None,
     assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
@@ -3227,8 +3245,12 @@ def convert_a_folder(
     logger.info("Keep Converted Markdown : %s", keep_converted_markdown)
     logger.info("Publish Dir             : %s", publish_dir)
     logger.info("Paper Format            : %s", paper_format)
-    if resource_paths:
-        logger.info("Pandoc resource paths   : %s", resource_paths)
+    logger.info("Use Summary             : %s", use_summary)
+    if summary_layout:
+        logger.info("Summary Layout Root Dir : %s", summary_layout.root_dir)
+        logger.info("Summary Layout Summary  : %s", summary_layout.summary_path)
+    if assets:
+        logger.info("Assets to copy          : %d", len(assets))
 
     md_files = _collect_folder_md(
         folder, use_summary=use_summary, summary_layout=summary_layout
@@ -3309,8 +3331,6 @@ def convert_a_folder(
             logger.info("ℹ Kein Buch-Titel")
         options = emoji_options or EmojiOptions()
         _emit_emoji_report(tmp_md, Path(pdf_out), options)
-        if resource_paths:
-            resolved_resource_paths.extend(resource_paths)
         if summary_layout:
             # Allow GitBook-style asset folders below the content root.
             resolved_resource_paths.append(str(summary_layout.root_dir))
@@ -3373,7 +3393,6 @@ def build_pdf(
     summary_order_manifest: Optional[Path] = None,
     summary_manual_marker: Optional[str] = DEFAULT_MANUAL_MARKER,
     summary_appendices_last: bool = False,
-    resource_paths: Optional[List[str]] = None,
     assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
@@ -3414,7 +3433,7 @@ def build_pdf(
                 keep_converted_markdown=True,
                 publish_dir=str(publish_path),
                 paper_format=paper_format,
-                resource_paths=resource_paths,
+                assets=assets,
                 emoji_options=emoji_options,
                 variables=variables,
                 metadata=base_metadata,
@@ -3454,7 +3473,6 @@ def build_pdf(
                 publish_dir=str(publish_path),
                 paper_format=paper_format,
                 summary_layout=summary_layout,
-                resource_paths=resource_paths,
                 assets=assets,
                 emoji_options=emoji_options,
                 variables=variables,
@@ -3713,16 +3731,18 @@ def main() -> None:
             summary_manual_marker = str(summary_manual_marker_value)
 
         assets_for_entry = entry.get("assets") or []
-        resolved_resource_paths = _resolve_asset_paths(
+        resolved_assets_for_entry = _resolve_asset_paths(
             assets_for_entry, manifest_dir, path
         )
+        logger.info("ℹ Assets für Eintrag aufgelöst: %s", resolved_assets_for_entry)
 
         # Resolve asset paths for copy_to_output assets
         assets_to_copy = [
             asset
-            for asset in assets_for_entry
+            for asset in resolved_assets_for_entry
             if isinstance(asset, dict) and asset.get("copy_to_output")
         ]
+        logger.info("ℹ Zu kopierende Assets: %s", assets_to_copy)
 
         pdf_options = entry.get("pdf_options") or {}
         variable_overrides = (
@@ -3762,7 +3782,6 @@ def main() -> None:
             summary_order_manifest=summary_manifest_path,
             summary_manual_marker=summary_manual_marker,
             summary_appendices_last=_as_bool(entry.get("summary_appendices_last")),
-            resource_paths=resolved_resource_paths,
             assets=assets_to_copy if assets_to_copy else None,
             emoji_options=entry_emoji_options,
             variables=variable_overrides or None,
