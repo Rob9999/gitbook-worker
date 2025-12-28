@@ -9,8 +9,11 @@ local function resolve_image(img)
     -- Normalize any relative reference that eventually targets .gitbook/assets
     -- so Pandoc can pick it up from the copied asset directory.
     if not src:match("^https?://") and not src:match("^/") then
-        local normalized = src:match("%.gitbook/assets/.*")
+        -- Match .gitbook/assets with optional ../ prefix
+        local normalized = src:match("%.%.*/%.gitbook/assets/.*") or src:match("%.gitbook/assets/.*")
         if normalized then
+            -- Strip any leading ../ or ./ to get clean .gitbook/assets/... path
+            normalized = normalized:gsub("^%.%./+", ""):gsub("^%./+", "")
             if has_pdf_assets and normalized:match("%.svg$") then
                 img.src = normalized:gsub("%.svg$", ".pdf")
             else

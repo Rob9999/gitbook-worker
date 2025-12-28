@@ -39,6 +39,27 @@ def test_font_available_uses_repo_fonts(monkeypatch, tmp_path):
     assert publisher._font_available("ERDA CC-BY CJK")
 
 
+def test_check_fontconfig_uses_unescaped_format(monkeypatch):
+    """fc-list should emit unescaped names via --format to keep ERDA names intact."""
+
+    calls: list[list[str]] = []
+
+    class DummyResult:
+        stdout = "ERDA CC-BY CJK\n"
+        stderr = ""
+        returncode = 0
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        return DummyResult()
+
+    monkeypatch.setattr(publisher, "_which", lambda name: "fc-list")
+    monkeypatch.setattr(publisher, "_run", fake_run)
+
+    assert publisher._check_fontconfig_has_font("ERDA CC-BY CJK")
+    assert any("--format" in cmd and "%{family}\n" in cmd for cmd in calls)
+
+
 def test_resource_paths_prioritise_source_dir(tmp_path):
     md_file = tmp_path / "docs" / "chapter" / "test.md"
     md_file.parent.mkdir(parents=True)

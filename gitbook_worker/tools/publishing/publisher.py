@@ -69,6 +69,7 @@ except (ImportError, OSError):  # pragma: no cover - optional dependency
     renderPDF = None
 
 from gitbook_worker.tools.logging_config import get_logger
+from gitbook_worker.tools.utils.asset_copy import copy_assets_to_temp
 from gitbook_worker.tools.utils.language_context import (
     build_language_env,
     resolve_language_context,
@@ -531,7 +532,7 @@ def _run(
         # Merge after the cleanup so caller-provided pipes win if set
     run_kwargs.update(kwargs)
 
-    logger.info("→ %s", " ".join(cmd))
+    logger.info("Run Command → %s", " ".join(cmd))
     cp = subprocess.run(cmd, **run_kwargs)
     if cp.stdout:
         logger.info(cp.stdout)
@@ -636,9 +637,16 @@ def _check_fontconfig_has_font(font_name: str) -> bool:
 
     try:
         result = _run(
-            [fc_list, ":", "family"], capture_output=True, text=True, check=False
+            [fc_list, ":", "family", "--format", "%{family}\n"],
+            capture_output=True,
+            text=True,
+            check=False,
         )
-        return font_name.lower() in result.stdout.lower()
+        target = _normalize_font_name(font_name)
+        for line in (result.stdout or "").splitlines():
+            if target in _normalize_font_name(line):
+                return True
+        return False
     except Exception as exc:
         logger.debug("fc-list check fehlgeschlagen: %s", exc)
         return False
@@ -680,6 +688,7 @@ def _fonts_need_cache_update() -> bool:
         True if font caches need updating, False if all fonts are cached
     """
     try:
+        logger.info("ℹ Prüfe Schriftarten in Font-Caches...")
         font_config = get_font_config()
 
         # Check critical fonts that must be in cache for PDF generation
@@ -1344,8 +1353,10 @@ def _build_font_header(
         logger.info(f"DEBUG: fallback_block (table literal) = {repr(fallback_block)}")
         # Build inline Lua code WITHOUT \AtBeginDocument wrapper!
         # CRITICAL: Matching working commit 28a21cf5 (Nov 29) - simple direct call
-        lua_fallback_code = f"\\directlua{{luaotfload.add_fallback('mainfont', {fallback_block})}}"
-    
+        lua_fallback_code = (
+            f"\\directlua{{luaotfload.add_fallback('mainfont', {fallback_block})}}"
+        )
+
     if not enable_lua_fallback and fallback_block:
         logger.info(
             "⚠️ FONT-STACK: Lua fallback deaktiviert (set ERDA_ENABLE_LUA_FALLBACK=0 to disable explicitly)"
@@ -1440,26 +1451,40 @@ def _build_font_header(
             "ℹ️ FONT-STACK: Missing-glyph detector übersprungen (lua fallback disabled)"
         )
 
+    # CRITICAL: Replicate 2bc9e27 working pattern - Lua INSIDE \IfFontExistsTF conditional!
     if emoji_font:
-        # Emoji font is configured via Pandoc metadata and handled by the
-        # latex-emoji filter; we intentionally avoid injecting a fontspec
-        # definition here to sidestep engine-specific command availability.
-        pass
+        options: List[str] = []
+        if needs_harfbuzz:
+            options.append("Renderer=Harfbuzz")
+        option_block = f"[{','.join(options)}]" if options else ""
 
-    # CRITICAL: Execute Lua fallback BEFORE font definitions so \fallbackfeature macro exists!
-    # (API must register before fonts load, macro must exist for \setmainfont[...])
-    if lua_fallback_code:
-        lines.append(lua_fallback_code)
-    
-    # Build font option strings (fallback feature inline or empty)
-    fallback_opts = "[RawFeature={fallback=mainfont}]" if (enable_lua_fallback and fallback_block) else ""
-    
+        lines.append(f"\\IfFontExistsTF{{{emoji_font}}}{{")
+        lines.append(f"  \\newfontfamily\\EmojiOne{option_block}{{{emoji_font}}}")
+
+        # Register fallback INSIDE the conditional (critical for execution context!)
+        if lua_fallback_code:
+            lines.append(f"  {lua_fallback_code}")
+
+        lines.append("}{}")
+
+    # Font definitions with inline RawFeature (NO macro!)
     if include_mainfont:
-        lines.append(f"\\setmainfont{fallback_opts}{{{main_font}}}")
+        if fallback_block and emoji_font:
+            lines.append(f"\\IfFontExistsTF{{{emoji_font}}}{{")
+            lines.append(
+                f"  \\setmainfont[RawFeature={{fallback=mainfont}}]{{{main_font}}}"
+            )
+            lines.append("}{")
+            lines.append(f"  \\setmainfont{{{main_font}}}")
+            lines.append("}")
+        else:
+            lines.append(f"\\setmainfont{{{main_font}}}")
 
-    lines.append(f"\\setsansfont{fallback_opts}{{{sans_font}}}")
-    lines.append(f"\\setmonofont{fallback_opts}{{{mono_font}}}")
-    
+    # Sans/Mono with conditional fallback
+    sans_options = "[RawFeature={fallback=mainfont}]" if fallback_block else ""
+    lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
+    lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
+
     # Note: \panEmoji is now defined by latex-emoji.lua filter, not here
     return "\n".join(lines) + "\n"
 
@@ -1881,7 +1906,7 @@ def _dedupe_preserve_order(values: Iterable[str]) -> List[str]:
 
 
 def _build_resource_paths(additional: Optional[Iterable[str]] = None) -> List[str]:
-    defaults = [".", "assets", ".gitbook/assets"]
+    defaults = [".", "assets", ".gitbook/assets", "content/.gitbook/assets"]
     if additional:
         defaults.extend(additional)
     return _dedupe_preserve_order(defaults)
@@ -2396,12 +2421,17 @@ def prepare_publishing(
 
     # Register additional fonts from repo .github/fonts directory
     if repo_font_dir.exists():
+        logger.info("✓ Repository-Schriftverzeichnis gefunden: %s", repo_font_dir)
         for pattern in ("*.ttf", "*.otf"):
             for font_path in repo_font_dir.rglob(pattern):
+                logger.info("✓ Registriere Repository-Font: %s", font_path)
                 _register_font(str(font_path))
         _remember_font_dir(repo_font_dir)
+        logger.info("✓ Repository-Font-Verzeichnis hinzugefügt: %s", repo_font_dir)
 
     # Register legacy manifest fonts (for backward compatibility)
+    # TODO: Remove in future major version
+    # Downloading fonts shall be only done into the fonts-storage/ managed by Smart Font Stack
     if manifest_specs:
         cache_dir = Path.home() / ".cache" / "erda-publisher" / "fonts"
         for spec in manifest_specs:
@@ -2442,6 +2472,7 @@ def prepare_publishing(
                 _register_font(target)
 
     # Configure OSFONTDIR BEFORE cache checking so fc-list can find fonts-storage/
+    logger.info("✓ Konfiguriere OSFONTDIR für Font-Verzeichnisse...")
     _configure_osfontdir([repo_font_dir])
 
     # Refresh fontconfig cache to pick up fonts-storage/ contents
@@ -2458,6 +2489,7 @@ def prepare_publishing(
     lua_path = os.path.join(lua_dir, "latex-emoji.lua")
     if not os.path.exists(lua_path):
         try:
+            logger.info("↓ Lade latex-emoji.lua Pandoc Lua-Filter...")
             _ensure_dir(lua_dir)
             url = "https://gist.githubusercontent.com/zr-tex8r/a5410ad20ab291c390884b960c900537/raw/latex-emoji.lua"
             _download(url, lua_path)
@@ -2543,17 +2575,19 @@ def _run_pandoc(
     resource_path_arg = (
         os.pathsep.join(resource_path_values) if resource_path_values else None
     )
+    logger.info("🔍 PANDOC-RUN: resource_path_arg für Pandoc: %s", resource_path_arg)
 
     filters = (
         list(lua_filters) if lua_filters is not None else list(defaults["lua_filters"])
     )
+    logger.info("🔍 PANDOC-RUN: Lua-Filters für Pandoc: %s", filters)
 
     metadata_map: Dict[str, List[str]] = {
         key: list(values) for key, values in defaults["metadata"].items()
     }
-    logger.info("🔍 FONT-STACK: Initial metadata_map from defaults: %s", metadata_map)
+    logger.info("🔍 PANDOC-RUN: Initial metadata_map from defaults: %s", metadata_map)
     if metadata:
-        logger.info("🔍 FONT-STACK: Caller-provided metadata parameter: %s", metadata)
+        logger.info("🔍 PANDOC-RUN: Caller-provided metadata parameter: %s", metadata)
         for key, value in metadata.items():
             if isinstance(value, Mapping):
                 try:
@@ -2570,8 +2604,10 @@ def _run_pandoc(
                 metadata_map[key] = [str(v) for v in value]
             else:
                 metadata_map[key] = [str(value)]
+        logger.info("🔍 PANDOC-RUN: Merged metadata_map: %s", metadata_map)
 
     variable_map: Dict[str, str] = dict(defaults["variables"])
+    logger.info("🔍 PANDOC-RUN: Initial variable_map from defaults: %s", variable_map)
     user_supplied_mainfontfallback = False
     if variables:
         for key, value in variables.items():
@@ -2581,6 +2617,11 @@ def _run_pandoc(
                 if key == "mainfontfallback":
                     user_supplied_mainfontfallback = True
                 variable_map[key] = str(value)
+        logger.info("🔍 PANDOC-RUN: Merged variable_map: %s", variable_map)
+        logger.info(
+            "🔍 PANDOC-RUN: user_supplied_mainfontfallback: %s",
+            user_supplied_mainfontfallback,
+        )
 
     fallback_override = variable_map.pop("mainfontfallback", None)
     logger.info(
@@ -2630,16 +2671,22 @@ def _run_pandoc(
     # For testing: force manual Lua fallback path (use LaTeX header) instead of
     # relying on Pandoc's CLI `mainfontfallback` handling. Set to False to
     # reproduce manual fallback behaviour quickly.
+    # To Be Approved ->
     # Font fallback mode decision:
     # Force manual LaTeX fallback (False) instead of Pandoc CLI fallback (True)
     # Reason: Pandoc 3.6+ CLI -V mainfontfallback=... is broken (fonts don't load)
     # Manual fallback uses \directlua{luaotfload.add_fallback(...)} which works reliably
+    # <- To Be Approved
     supports_mainfont_fallback = (
         False  # bool(pandoc_version and pandoc_version >= (3, 1, 12))
     )
     cli_fallback_spec: Optional[str] = None
     manual_fallback_spec: Optional[str] = None
     if fallback_override:
+        logger.info(
+            "🎯 FONT-STACK: Verarbeite mainfontfallback Override: %s",
+            fallback_override,
+        )
         fallback_font_name = fallback_override.split(":", 1)[0].strip() or None
         override_needs_harfbuzz = _needs_harfbuzz(fallback_override)
         if override_needs_harfbuzz:
@@ -2649,10 +2696,18 @@ def _run_pandoc(
             primary_font=fallback_font_name or emoji_font,
             needs_harfbuzz=needs_harfbuzz,
         )
+        logger.info(
+            "🎯 FONT-STACK: normalisierte mainfontfallback Override: %s",
+            normalized_override,
+        )
+
         if supports_mainfont_fallback:
             cli_fallback_spec = normalized_override
+            logger.info("🎯 FONT-STACK: mainfontfallback via cli fallback spec")
         else:
             manual_fallback_spec = normalized_override
+            logger.info("🎯 FONT-STACK: mainfontfallback via manuellen Fallback Header")
+
         if fallback_font_name and user_supplied_mainfontfallback:
             logger.info(
                 "🎯 FONT-STACK: mainfontfallback override controls emoji font: %s",
@@ -2665,10 +2720,16 @@ def _run_pandoc(
             primary_font=emoji_font,
             needs_harfbuzz=needs_harfbuzz,
         )
+        logger.info(
+            "🎯 FONT-STACK: generiere mainfontfallback aus emoji_font: %s",
+            fallback_spec,
+        )
         if supports_mainfont_fallback:
             cli_fallback_spec = fallback_spec
+            logger.info("🎯 FONT-STACK: mainfontfallback via cli fallback spec")
         else:
             manual_fallback_spec = fallback_spec
+            logger.info("🎯 FONT-STACK: mainfontfallback via manuellen Fallback Header")
 
     if emoji_font:
         logger.info(
@@ -2701,14 +2762,13 @@ def _run_pandoc(
     header_override = header_path
 
     keep_latex_temp = os.getenv("ERDA_KEEP_LATEX_TEMP", "0").lower() in _TRUE_VALUES
-    temp_ctx = (
-        contextlib.nullcontext(tempfile.mkdtemp(prefix="gbw-latex-"))
-        if keep_latex_temp
-        else tempfile.TemporaryDirectory()
-    )
-
-    with temp_ctx as temp_dir:
-        header_file = Path(temp_dir) / "pandoc-fonts.tex"
+    temp_ctx = Path(tempfile.mkdtemp(prefix="gbw-latex-"))
+    with temp_ctx as temp_dir_raw:
+        logger.info(
+            "ℹ Verwende temporäres Verzeichnis für Pandoc/LaTeX: %s", temp_dir_raw
+        )
+        temp_dir = Path(temp_dir_raw).resolve()
+        header_file = temp_dir / "pandoc-fonts.tex"
         font_header_content = _build_font_header(
             main_font=main_font,
             sans_font=sans_font,
@@ -2759,7 +2819,8 @@ def _run_pandoc(
         for filter_path in filters:
             cmd.extend(["--lua-filter", filter_path])
         logger.info(
-            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere -M Argumente aus metadata_map"
+            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere -M Argumente aus metadata_map: %s",
+            metadata_map,
         )
         for key, values in metadata_map.items():
             for value in values:
@@ -2773,7 +2834,8 @@ def _run_pandoc(
                     )
                 cmd.extend(["-M", f"{key}={value}"])
         logger.info(
-            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere --variable Argumente"
+            "🚀 FONT-STACK ABNEHMER [Pandoc CLI]: Konstruiere --variable Argumente aus variable_map: %s",
+            variable_map,
         )
         for key, value in variable_map.items():
             # If we injected a title header, avoid passing a title variable
@@ -2804,9 +2866,12 @@ def _run_pandoc(
         tex_source = Path(temp_dir) / Path(pdf_out).with_suffix(".tex").name
         logger.info("ℹ LaTeX debug output target: %s", tex_source)
 
+        # ALWAYS set output directory to temp so LaTeX finds SVG conversions
+        cmd.extend(["--pdf-engine-opt", f"-output-directory={temp_dir}"])
+        # ALWAYS enable shell-escape for SVG conversion via Inkscape
+        # cmd.extend(["--pdf-engine-opt", "-shell-escape"])
+
         if keep_latex_temp:
-            # Keep LaTeX aux/log/input files in the same temp dir we copy for debugging
-            cmd.extend(["--pdf-engine-opt", f"-output-directory={temp_dir}"])
 
             # Emit a standalone LaTeX file for easier debugging without relying on --keep-tex
             tex_cmd: List[str] = ["pandoc", md_path, "-o", str(tex_source)]
@@ -2843,6 +2908,7 @@ def _run_pandoc(
             _run(tex_cmd)
 
         try:
+            logger.info("🚀 Führe Pandoc aus: %s", cmd)
             _run(cmd)
         except subprocess.CalledProcessError:
             # LuaLaTeX writes errors to .log file in CWD (output directory), not temp_dir!
@@ -2923,6 +2989,12 @@ def _run_pandoc(
                     logger.warning(
                         "Konnte LaTeX Temp-Verzeichnis nicht sichern: %s", copy_exc
                     )
+    if not keep_latex_temp:
+        try:
+            shutil.rmtree(temp_ctx, ignore_errors=True)
+            logger.info("🧹 Gelöscht LaTeX Temp-Verzeichnis: %s", temp_dir)
+        except Exception as tex_exc:
+            logger.warning("Konnte LaTeX Temp-Verzeichnis nicht löschen: %s", tex_exc)
 
 
 def _extract_md_paths_from_summary(summary_path: Path, root_dir: Path) -> List[str]:
@@ -3042,8 +3114,19 @@ def convert_a_file(
         normalized,
         paper_format=paper_format,
     )
+    # Get temp dir for converted markdown
+    tempfile.tempdir = Path(publish_dir) / "temp" if publish_dir else None
+    # Ensure temp dir exists
+    if tempfile.tempdir:
+        _ensure_dir(tempfile.tempdir)
+    logger.info("ℹ Using temp dir: %s", tempfile.tempdir)
     with tempfile.NamedTemporaryFile(
-        "w", suffix=".md", delete=False, encoding="utf-8", newline="\n"
+        "w",
+        suffix=".md",
+        delete=False,
+        encoding="utf-8",
+        newline="\n",
+        dir=tempfile.tempdir,
     ) as tmp:
         tmp.write(content)
         tmp_md = tmp.name
@@ -3111,6 +3194,7 @@ def convert_a_folder(
     paper_format: str = "a4",
     summary_layout: Optional[SummaryContext] = None,
     resource_paths: Optional[List[str]] = None,
+    assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
@@ -3159,11 +3243,50 @@ def convert_a_folder(
     except Exception:
         # best-effort only
         pass
+    # 🔧 FIX: Strip ../ from .gitbook/assets/ image paths BEFORE Pandoc processing
+    import re
+
+    logger.info("🔍 DEBUG combined length BEFORE fix: %d", len(combined))
+    logger.info("🔍 DEBUG contains ../.gitbook pattern: %s", "../.gitbook" in combined)
+    combined = re.sub(r"\(\.\.\/\.gitbook\/assets\/", r"(.gitbook/assets/", combined)
+    logger.info("🔍 DEBUG combined length AFTER fix: %d", len(combined))
+
+    # Prepare resource paths
+    resolved_resource_paths: List[str] = []
+
+    # Get temp dir for combined md
+    tempfile.tempdir = Path(publish_dir) / "temp" if publish_dir else None
+    # Ensure temp dir exists
+    if tempfile.tempdir:
+        _ensure_dir(tempfile.tempdir)
+    logger.info("ℹ Using temp dir: %s", tempfile.tempdir)
+
+    # Write combined md to temp file
     with tempfile.NamedTemporaryFile(
-        "w", suffix=".md", delete=False, encoding="utf-8", newline="\n"
+        "w",
+        suffix=".md",
+        delete=False,
+        encoding="utf-8",
+        newline="\n",
+        dir=tempfile.tempdir,
     ) as tmp:
         tmp.write(combined)
         tmp_md = tmp.name
+
+    logger.info("🔍 DEBUG REACHED asset copying section, tmp_md=%s", tmp_md)
+
+    # Copy assets marked with copy_to_output=true to temp directory
+    # Pandoc resolves images relative to the markdown file (temp directory)
+    import shutil
+
+    if assets:
+        copy_assets_to_temp(
+            Path(tmp_md),
+            Path(folder),
+            assets,
+            resolved_resource_paths=resolved_resource_paths,
+        )
+
     try:
         title = _get_book_title(folder)
         if title:
@@ -3172,7 +3295,6 @@ def convert_a_folder(
             logger.info("ℹ Kein Buch-Titel")
         options = emoji_options or EmojiOptions()
         _emit_emoji_report(tmp_md, Path(pdf_out), options)
-        resolved_resource_paths: List[str] = []
         if resource_paths:
             resolved_resource_paths.extend(resource_paths)
         if summary_layout:
@@ -3183,14 +3305,21 @@ def convert_a_folder(
         if title and "title" not in metadata_map:
             metadata_map["title"] = [title]
 
+        # Add publish directory (parent of temp MD) to resource paths
+        # This ensures Pandoc can find images relative to the working dir
+        temp_parent = Path(tmp_md).resolve().parent
+        final_paths = [str(temp_parent)]
+        if resolved_resource_paths:
+            final_paths.extend(resolved_resource_paths)
+        # Add standard defaults from _build_resource_paths
+        final_paths.extend(_build_resource_paths([]))
+
         _run_pandoc(
             tmp_md,
             pdf_out,
             add_toc=True,
             title=title,
-            resource_paths=_resource_paths_for_source(
-                folder, resolved_resource_paths or None
-            ),
+            resource_paths=final_paths,
             emoji_options=options,
             variables=variables,
             metadata=metadata_map or None,
@@ -3231,6 +3360,7 @@ def build_pdf(
     summary_manual_marker: Optional[str] = DEFAULT_MANUAL_MARKER,
     summary_appendices_last: bool = False,
     resource_paths: Optional[List[str]] = None,
+    assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
     project_metadata: Optional[ProjectMetadata] = None,
@@ -3311,6 +3441,7 @@ def build_pdf(
                 paper_format=paper_format,
                 summary_layout=summary_layout,
                 resource_paths=resource_paths,
+                assets=assets,
                 emoji_options=emoji_options,
                 variables=variables,
                 metadata=base_metadata,
@@ -3572,6 +3703,13 @@ def main() -> None:
             assets_for_entry, manifest_dir, path
         )
 
+        # Resolve asset paths for copy_to_output assets
+        assets_to_copy = [
+            asset
+            for asset in assets_for_entry
+            if isinstance(asset, dict) and asset.get("copy_to_output")
+        ]
+
         pdf_options = entry.get("pdf_options") or {}
         variable_overrides = (
             _build_variable_overrides(pdf_options) if pdf_options else {}
@@ -3611,6 +3749,7 @@ def main() -> None:
             summary_manual_marker=summary_manual_marker,
             summary_appendices_last=_as_bool(entry.get("summary_appendices_last")),
             resource_paths=resolved_resource_paths,
+            assets=assets_to_copy if assets_to_copy else None,
             emoji_options=entry_emoji_options,
             variables=variable_overrides or None,
             project_metadata=project_metadata,

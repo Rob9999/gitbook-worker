@@ -22,8 +22,13 @@ from typing import Iterable, List
 
 from gitbook_worker.tools.logging_config import get_logger
 
+from gitbook_worker.tools.utils.image_info import get_image_width
 
-from gitbook_worker.tools.publishing.paper_info import PaperInfo, get_valid_paper_measurements
+
+from gitbook_worker.tools.publishing.paper_info import (
+    PaperInfo,
+    get_valid_paper_measurements,
+)
 
 
 _FIGURE_START = re.compile(r"<figure\b", re.IGNORECASE)
@@ -38,11 +43,6 @@ _FIGCAPTION = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 _HTML_TAG = re.compile(r"<[^>]+>")
-
-try:
-    from PIL import Image  # type: ignore
-except Exception:  # pragma: no cover - Pillow optional
-    Image = None  # type: ignore
 
 logger = get_logger(__name__)
 
@@ -82,7 +82,7 @@ def _convert_figure_block(block: str) -> List[str]:
     safe_alt_text = alt_text.replace("[", r"\[").replace("]", r"\]")
     attrs = ""
     if alt and alt_text != alt:
-        safe_alt = alt.replace("\"", r"\"")
+        safe_alt = alt.replace('"', r"\"")
         attrs = f'{{fig-alt="{safe_alt}"}}'
 
     markdown_line = f"![{safe_alt_text}]({src}){attrs}\n"
@@ -247,7 +247,11 @@ def _rewrite_link_target(target: str, *, base_dir: Path) -> str | None:
 
     candidate = Path(path_part.replace("\\", os.sep))
     try:
-        resolved = (base_dir / candidate).resolve() if not candidate.is_absolute() else candidate.resolve()
+        resolved = (
+            (base_dir / candidate).resolve()
+            if not candidate.is_absolute()
+            else candidate.resolve()
+        )
     except OSError:
         resolved = (base_dir / candidate).absolute()
 
@@ -357,7 +361,9 @@ def paper_for_columns(
 
     for candidate in _paper_candidates(base_info):
         width, height = candidate.size_mm
-        if width >= min_width_mm and (required_height == 0 or height >= required_height):
+        if width >= min_width_mm and (
+            required_height == 0 or height >= required_height
+        ):
             return candidate
 
     logger.warning(
@@ -383,6 +389,7 @@ def paper_for_width(px: int, *, base_paper: PaperInfo | None = None) -> PaperInf
         base_info.norm_name,
     )
     return base_info
+
 
 def _escape_ampersands(value: str) -> str:
     return re.sub(r"(?<!\\)&", r"\\&", value)
@@ -545,14 +552,8 @@ def process(path: str, paper_format: str = "a4") -> str:
         if m:
             img = m.group(1).split()[0]
             abs_img = os.path.join(base_dir, img)
-            width = 0
-            if Image and os.path.exists(abs_img):
-                try:
-                    with Image.open(abs_img) as im:
-                        width = im.width
-                except Exception:  # pragma: no cover - best effort
-                    logger.warning("Could not open image %s to get size.", abs_img)
-                    width = 0
+
+            width = get_image_width(Path(abs_img))
             paper_info = paper_for_width(width, base_paper=current_paper_info)
             if paper_info != current_paper_info:
                 out.extend(

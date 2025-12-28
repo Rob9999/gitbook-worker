@@ -8,6 +8,7 @@ latex-debug/
 
 # temps
 tmp/
+temp/
 node_modules/
 
 # Python caches

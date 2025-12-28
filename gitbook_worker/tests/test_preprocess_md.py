@@ -54,7 +54,9 @@ def test_html_figure_block_converted(tmp_path):
 
     assert "<figure" not in out
     assert ".gitbook/assets/example.png" in out
-    assert "![Beispiel Caption](.gitbook/assets/example.png){fig-alt=\"Sample Alt\"}" in out
+    assert (
+        '![Beispiel Caption](.gitbook/assets/example.png){fig-alt="Sample Alt"}' in out
+    )
 
 
 def test_table_wrapped_portrait(artifact_dir):
@@ -67,6 +69,27 @@ def test_table_wrapped_landscape_enabled(artifact_dir):
     md = _wide_table(artifact_dir, cols=11)
     out = preprocess_md.process(str(md), paper_format="a4")
     assert_geometry(out, expected_w=297, expected_h=210)
+
+
+def test_svg_skips_size_probe(monkeypatch, tmp_path):
+    svg = tmp_path / "img.svg"
+    svg.write_text("<svg width='10' height='10'></svg>", encoding="utf-8")
+
+    md = tmp_path / "note.md"
+    md.write_text(f"![Alt]({svg.name})\n", encoding="utf-8")
+
+    calls: list[Path] = []
+
+    def fake_get_image_width(path: Path) -> int:
+        calls.append(path)
+        return 0
+
+    monkeypatch.setattr(preprocess_md, "get_image_width", fake_get_image_width)
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    assert "img.svg" in out
+    assert calls and calls[0].name == "img.svg"
 
 
 # Robustes Pattern mit benannten Gruppen, toleriert Whitespace/optional "mm"

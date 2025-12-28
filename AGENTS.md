@@ -42,8 +42,15 @@
 ## Versionierung
 18. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...
 
+
 ## Exit Codes & Diagnose
 19. Führe eine dokumentierte Exit-Code-Tabelle mit Klartext-Fehlermeldung und Healing-Steps in [gitbook_worker/docs/attentions/exit-codes.md](gitbook_worker/docs/attentions/exit-codes.md); halte sie bei jedem neuen Exit-Grund aktuell.
 20. CLI-Tools müssen die Exit-Code-Tabelle über `--help exit-codes` (oder gleichwertig) ausgeben, damit Nutzer sie ohne Doku-Aufruf sehen.
 21. Jeder eindeutige Exit-Grund erhält einen eigenen Exit-Code und eine menschenlesbare Fehlermeldung; Codes bleiben stabil, Deprecations müssen kenntlich gemacht werden.
 22. Für Fehler, die in Entwicklung/Test auftreten und nicht dauerhaft behebbar sind, definiere trotzdem einen Exit-Code plus dokumentierte Workarounds/Healing.
+
+## Problemlösungsphilosophie
+23. **Schritt-für-Schritt-Ansatz**: Der wichtigste Ansatz um ein Ziel zu erreichen ist, Schritt für Schritt, Schicht um Schicht, nie aufgeben, dennoch prüfen ob die Umgebung - zwar nicht den Kern des Hauptauftrages (das Hauptziel) dennoch einige Randparameter - Anpassung am Vorgehen erfordert. Und klar: das Hauptziel soll und muss Pro Leben sein.
+
+## Fixe
+24. Keine Dirty Fixe!!!
