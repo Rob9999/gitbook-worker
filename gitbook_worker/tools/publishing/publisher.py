@@ -2871,6 +2871,15 @@ def _run_pandoc(
         # ALWAYS enable shell-escape for SVG conversion via Inkscape
         # cmd.extend(["--pdf-engine-opt", "-shell-escape"])
 
+        # save current env tempdir setting
+        original_tmpdir = os.environ.get("TMPDIR")
+        logger.info("ℹ Original TMPDIR: %s", original_tmpdir)
+        # set a env variable to keep latex temp for debugging
+        os.environ["TMPDIR"] = temp_dir.as_posix()
+        os.environ["TMP"] = temp_dir.as_posix()
+        os.environ["TEMP"] = temp_dir.as_posix()
+        logger.info("ℹ Set TMPDIR for Pandoc/LaTeX run: %s", os.environ["TMPDIR"])
+
         if keep_latex_temp:
 
             # Emit a standalone LaTeX file for easier debugging without relying on --keep-tex
@@ -2995,6 +3004,11 @@ def _run_pandoc(
             logger.info("🧹 Gelöscht LaTeX Temp-Verzeichnis: %s", temp_dir)
         except Exception as tex_exc:
             logger.warning("Konnte LaTeX Temp-Verzeichnis nicht löschen: %s", tex_exc)
+
+    # restore original TMPDIR setting
+    if original_tmpdir and os.environ.get("TMPDIR") != original_tmpdir:
+        logger.info("ℹ Restoring original TMPDIR: %s", original_tmpdir)
+        os.environ.update({"TMPDIR": original_tmpdir})
 
 
 def _extract_md_paths_from_summary(summary_path: Path, root_dir: Path) -> List[str]:
