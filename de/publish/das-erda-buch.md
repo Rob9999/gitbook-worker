@@ -171,13 +171,13 @@ Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden kön
 Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
 
 ## 2.3 Referenz auf Abbildungen
-![Rasterdarstellung der Messpunkte](../.gitbook/assets/neutral-grid.svg)
+![Rasterdarstellung der Messpunkte](.gitbook/assets/neutral-grid.pdf)
 
 Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
 
 Zur Überprüfung einer eingebetteten HTML-Inlay-Variante kann zusätzlich die folgende Figur verwendet werden:
 
-![ERDA logo](../.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+![ERDA logo](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
 
 [^2]: Vgl. die referenzierten offenen Kataloge in [Zitationen & weiterführende Quellen](#md-references).
 

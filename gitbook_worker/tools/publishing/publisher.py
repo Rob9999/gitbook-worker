@@ -2065,21 +2065,20 @@ def _resolve_asset_paths(
         candidate = Path(str(path_value))
 
         if candidate.is_absolute():
-            if candidate.exists():
-                _prepare_asset_artifacts(candidate)
+            # Note: SVG→PDF conversion now happens in asset_copy.py to avoid content dir pollution
             asset["path"] = str(candidate)
             continue
 
         # Prefer manifest-relative resolution, fall back to the entry folder.
         manifest_candidate = (manifest_dir / candidate).resolve()
         if manifest_candidate.exists():
-            _prepare_asset_artifacts(manifest_candidate)
+            # Note: SVG→PDF conversion now happens in asset_copy.py to avoid content dir pollution
             asset["path"] = str(manifest_candidate)
             continue
 
         entry_candidate = (entry_base / candidate).resolve()
         if entry_candidate.exists():
-            _prepare_asset_artifacts(entry_candidate)
+            # Note: SVG→PDF conversion now happens in asset_copy.py to avoid content dir pollution
             asset["path"] = str(entry_candidate)
             continue
 

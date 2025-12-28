@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{fontspec}
+
+\setmainfont{DejaVu Serif}
+
+\directlua{
+  local fonts = {"Twemoji Mozilla:mode=harf", "ERDA CC-BY CJK:mode=harf", "DejaVu Sans:mode=harf"}
+  luaotfload.add_fallback("mainfont", fonts)
+  texio.write_nl('log', 'Fallback registered (no way to validate)')
+}
+
+\setmainfont[RawFeature={fallback=mainfont}]{DejaVu Serif}
+
+\begin{document}
+Testing multilingual text:
+
+CJK: 日本語 正體字 简体字 한국어
+
+Emoji: 🃏 ⬛ ⬜ 🌍
+
+Arabic: سجل العالم
+
+\end{document}
