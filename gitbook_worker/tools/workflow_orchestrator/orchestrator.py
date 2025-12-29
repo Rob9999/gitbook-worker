@@ -139,14 +139,19 @@ class RuntimeContext:
         legacy_worker_dir = github_dir / "gitbook_worker"
         worker_tools_dir = package_dir / "tools"
         legacy_tools_dir = legacy_worker_dir / "tools"
+        package_install_root = Path(__file__).resolve().parents[2]
+        package_install_tools = package_install_root / "tools"
+
         if worker_tools_dir.exists():
             self.tools_dir = worker_tools_dir
         elif legacy_tools_dir.exists():
             self.tools_dir = legacy_tools_dir
+        elif package_install_tools.exists():
+            self.tools_dir = package_install_tools
         else:
-            # Fallback to the new layout so relative paths remain stable even
-            # when the directory is initialised later during the run.
-            self.tools_dir = worker_tools_dir
+            # Fallback to the package install path so relative paths remain
+            # stable even if tools are provisioned later during the run.
+            self.tools_dir = package_install_tools
         python_paths = [str(self.root), str(package_dir)]
         if legacy_worker_dir.exists():
             python_paths.append(str(legacy_worker_dir))
@@ -154,6 +159,8 @@ class RuntimeContext:
             python_paths.append(str(legacy_tools_dir))
         if worker_tools_dir.exists():
             python_paths.append(str(worker_tools_dir))
+        if package_install_tools.exists():
+            python_paths.append(str(package_install_tools))
         if github_dir.exists():
             python_paths.append(str(github_dir))
         # Ensure the selected tools directory is always part of PYTHONPATH,
@@ -471,8 +478,8 @@ def _detect_repo_visibility(explicit: str) -> str:
     return "public"
 
 
-def _resolve_paths(root: Path, manifest: Path | None) -> tuple[Path, Path]:
-    repo_root = detect_repo_root(root.resolve())
+def _resolve_paths(root: Path | None, manifest: Path | None) -> tuple[Path, Path]:
+    repo_root = root.resolve() if root is not None else detect_repo_root(Path.cwd())
     try:
         manifest_path = resolve_manifest(
             explicit=manifest,
@@ -497,7 +504,9 @@ def _split_publisher_args(values: Iterable[str] | None) -> tuple[str, ...]:
 
 
 def build_config(args: argparse.Namespace) -> OrchestratorConfig:
-    root = detect_repo_root(args.root.resolve())
+    root = (
+        args.root.resolve() if args.root is not None else detect_repo_root(Path.cwd())
+    )
     repository = args.repository or os.getenv("GITHUB_REPOSITORY")
     repository_template = repository.lower() if repository else ""
     variables = {
@@ -591,6 +600,17 @@ def run(config: OrchestratorConfig) -> None:
             "step": step,
             "started": started.isoformat(),
         }
+        if ctx.config.dry_run:
+            LOGGER.info("Dry-run aktiviert – Schritt '%s' wird übersprungen", step)
+            entry.update(
+                {
+                    "status": "skipped",
+                    "duration_s": 0.0,
+                }
+            )
+            analytics.append(entry)
+            continue
+
         try:
             handler(ctx)
         except Exception as exc:
@@ -618,7 +638,7 @@ def run(config: OrchestratorConfig) -> None:
 
 def validate_manifest(
     *,
-    root: Path,
+    root: Path | None,
     manifest: Path | None,
     profile: str,
     all_profiles: bool,
@@ -856,8 +876,9 @@ def _step_update_citation(ctx: RuntimeContext) -> None:
 def _step_ai_reference_check(ctx: RuntimeContext) -> None:
     script = ctx.tools_dir / "quality" / "ai_references.py"
     if not script.exists():
-        LOGGER.warning("ai_references.py nicht gefunden – Schritt wird übersprungen")
-        return
+        raise FileNotFoundError(
+            f"ai_references.py nicht gefunden unter {script}; bitte Tools-Verzeichnis prüfen"
+        )
     report = ctx.root / ".github" / "reports" / "ai_reference_report.json"
     cmd = [
         ctx.python,
@@ -877,8 +898,9 @@ def _step_converter(ctx: RuntimeContext) -> None:
     dump_script = ctx.tools_dir / "publishing" / "dump_publish.py"
     convert_script = ctx.tools_dir / "converter" / "convert_assets.py"
     if not dump_script.exists() or not convert_script.exists():
-        LOGGER.warning("Konverter-Skripte nicht gefunden – Schritt wird übersprungen")
-        return
+        raise FileNotFoundError(
+            "Konverter-Skripte nicht gefunden – bitte gitbook_worker/tools bereitstellen"
+        )
     ctx.run_command(
         [
             ctx.python,
@@ -1072,8 +1094,9 @@ def _step_engineering_docs(ctx: RuntimeContext) -> None:
 def _step_publisher(ctx: RuntimeContext) -> None:
     pipeline = ctx.tools_dir / "publishing" / "pipeline.py"
     if not pipeline.exists():
-        LOGGER.warning("pipeline.py nicht gefunden – Schritt wird übersprungen")
-        return
+        raise FileNotFoundError(
+            f"pipeline.py nicht gefunden unter {pipeline}; bitte Tools-Verzeichnis bereitstellen"
+        )
 
     try:
         ctx.ensure_fonts()
@@ -1088,6 +1111,8 @@ def _step_publisher(ctx: RuntimeContext) -> None:
         "--manifest",
         str(ctx.config.manifest),
     ]
+    if ctx.config.dry_run:
+        cmd.append("--dry-run")
     if ctx.config.commit:
         cmd.extend(["--commit", ctx.config.commit])
     if ctx.config.base:
@@ -1119,7 +1144,7 @@ STEP_HANDLERS = {
 
 
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
+    parser.add_argument("--root", type=Path, help="Repository root")
     parser.add_argument(
         "--manifest",
         type=Path,

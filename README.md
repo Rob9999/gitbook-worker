@@ -1,14 +1,20 @@
-# GitBook Worker (v2.0.0)
+# GitBook Worker (v2.0.1)
 
-**Latest Release**: v2.0.0 (December 5, 2025) - [Release Notes](docs/releases/v2.0.0.md)
+**Latest Release**: v2.0.1 (December 29, 2025) - [Release Notes](docs/releases/v2.0.1.md)
 
-GitBook Worker now ships the multi-language 2.0.0 release. The Python package still
-installs via `pip install -e .`, but the publishing pipeline is driven by
-`content.yaml`, which lists every language tree (e.g., `de/`, `en/`). The CLI picks a
-language via `--lang` and then runs the usual orchestration/publishing steps for that
-content root.
+GitBook Worker ships the multi-language 2.x line. The Python package installs via
+`pip install -e .`, and the publishing pipeline is driven by `content.yaml`, which lists
+every language tree (e.g., `de/`, `en/`). The CLI picks a language via `--lang` and runs
+the orchestration/publishing steps for that content root.
 
-## 🎉 What's New in v2.0.0
+## 🎉 What's New in v2.0.1 (hotfix)
+
+- Honors explicit `--root` everywhere and falls back to packaged tools when repo tools are absent (pip installs work end-to-end).
+- Fail-fast if required scripts are missing; dry-run now skips execution and is forwarded to `pipeline.py`.
+- Manifest preflight enforces `project.license` before any destructive action.
+- Release notes updated with pip-only usage steps and font cache guidance.
+
+## 🔙 Highlights from v2.0.0
 
 **Critical Fix**: Color emoji rendering now works reliably using **Twemoji Mozilla v0.7.0** (COLR/CPAL format). Previous versions used Twitter Color Emoji (SVG-in-OpenType), which LuaTeX doesn't support for color rendering.
 
@@ -23,7 +29,7 @@ content root.
 - ✅ Windows/Linux path compatibility for Docker Desktop
 - ⚠️ Breaking: Docker font management changed (see release notes)
 
-See [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md) for complete changelog and upgrade instructions.
+See [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
 
 ## Quick start
 
@@ -130,7 +136,7 @@ must include `name`, `license`, `license_url`, and either `download_url` or `pat
 ## Development
 
 - Add dependencies to `setup.cfg` and keep `__version__` in `gitbook_worker/__init__.py` in sync
-  with the packaged release (currently 2.0.0).
+  with the packaged release (currently 2.0.1).
 - Run tests locally with `pytest -q` from the repository root; language-specific fixtures live
   under `de/` so CI can mount each tree independently.
 - Preferred entrypoints: `python -m gitbook_worker.tools.workflow_orchestrator ...` or the

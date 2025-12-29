@@ -39,6 +39,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping, MutableMapping, Sequence
 
+import yaml
+
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.utils.language_context import (
     build_language_env,
@@ -114,8 +116,28 @@ def _run_command(
     return result
 
 
+def _load_manifest_data(manifest: Path) -> dict:
+    try:
+        data = yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    except Exception as exc:  # pragma: no cover - unlikely in unit tests
+        raise CommandError(f"Konnte Manifest nicht lesen: {manifest}") from exc
+    return data or {}
+
+
+def _validate_manifest_preconditions(manifest: Path) -> None:
+    data = _load_manifest_data(manifest)
+    project = data.get("project") if isinstance(data, dict) else None
+    license_value = None
+    if isinstance(project, Mapping):
+        license_value = project.get("license")
+    if not license_value or not str(license_value).strip():
+        raise CommandError(
+            "project.license fehlt im Manifest – bitte in publish.yml unter project.license setzen"
+        )
+
+
 def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
-    repo_root = detect_repo_root(args.root)
+    repo_root = args.root or detect_repo_root(Path.cwd())
     language_ctx = resolve_language_context(
         repo_root=repo_root,
         language=args.language,
@@ -127,6 +149,7 @@ def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
         fetch_remote=True,
     )
     manifest = language_ctx.require_manifest()
+    _validate_manifest_preconditions(manifest)
     language_env = build_language_env(language_ctx)
     publisher_args = tuple(args.publisher_args or ())
     return PipelineOptions(
@@ -323,7 +346,7 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
     if namespace.root is None:
         namespace.root = detect_repo_root(Path.cwd())
     else:
-        namespace.root = detect_repo_root(namespace.root.resolve())
+        namespace.root = namespace.root.resolve()
     namespace.publisher_args = _split_publisher_args(namespace.publisher_args)
     return namespace
 

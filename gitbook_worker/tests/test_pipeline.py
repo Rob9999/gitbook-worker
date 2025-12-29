@@ -10,7 +10,15 @@ from gitbook_worker.tools.publishing import pipeline
 @pytest.fixture()
 def publish_manifest(tmp_path: Path) -> Path:
     manifest = tmp_path / "publish.yml"
-    manifest.write_text("publish: []\n", encoding="utf-8")
+    manifest.write_text(
+        """
+publish:
+    - name: default
+project:
+    license: CC BY-SA 4.0
+""",
+        encoding="utf-8",
+    )
     return manifest
 
 
@@ -23,6 +31,14 @@ def test_resolve_options_defaults(
     assert options.root == publish_manifest.parent.resolve()
     assert options.manifest == publish_manifest.resolve()
     assert options.language_id == "default"
+
+
+def test_preflight_requires_project_license(tmp_path: Path) -> None:
+    manifest = tmp_path / "publish.yml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    args = pipeline.parse_args(["--root", str(tmp_path), "--manifest", str(manifest)])
+    with pytest.raises(pipeline.CommandError):
+        pipeline._resolve_options(args)
 
 
 def test_run_pipeline_executes_all_steps(

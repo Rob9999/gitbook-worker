@@ -14,6 +14,8 @@ from gitbook_worker.tools.workflow_orchestrator.orchestrator import (
     DockerSettings,
     build_config,
     parse_args,
+    _step_publisher,
+    RuntimeContext,
 )
 from gitbook_worker.tools.utils.smart_content import ContentEntry
 
@@ -213,3 +215,43 @@ def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
     assert root_cff.exists()
     root_content = root_cff.read_text(encoding="utf-8")
     assert content == root_content
+
+
+def test_step_publisher_missing_pipeline_fails(tmp_path: Path) -> None:
+    repo = tmp_path
+    manifest = repo / "publish.yml"
+    manifest.write_text(
+        """
+publish: []
+project:
+  license: MIT
+""",
+        encoding="utf-8",
+    )
+    profile = OrchestratorProfile(
+        name="test",
+        steps=("publisher",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    entry = ContentEntry(id="default", uri="./", type="local")
+    config = OrchestratorConfig(
+        root=repo,
+        manifest=manifest,
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=repo,
+        profile=profile,
+        repo_visibility="public",
+        repository="example/repo",
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+    )
+    ctx = RuntimeContext(config)
+    ctx.tools_dir = repo / "tools"
+    ctx.tools_dir.mkdir(parents=True, exist_ok=True)
+    with pytest.raises(FileNotFoundError):
+        _step_publisher(ctx)
