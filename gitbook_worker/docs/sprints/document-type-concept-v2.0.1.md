@@ -7,6 +7,9 @@ history:
   - version: 2.0.1-alpha
     date: 2025-12-29
     changes: Initial concept for document type classification
+  - version: 2.0.1-alpha+doc-catalog
+    date: 2025-12-29
+    changes: Added missing doc types (abbreviations, symbols, equations, listings, dedication, translator, legal, errata, changelog), part/subchapter handling, locale-aware section titles, per-doc ordering
 ---
 
 # Document Type Concept for SUMMARY.md Generation
@@ -26,6 +29,28 @@ Aktuell wird SUMMARY.md ohne Berücksichtigung der semantischen Rolle eines Doku
 ## Document Types
 
 ### 1. Core Structure Types
+
+#### `part` - Buchteil / Part
+**Zweck**: Mehrteilige Werke strukturieren (Teil I, II, ...)
+
+**Position**: Vor den zugehörigen Kapiteln
+
+**Properties**:
+```yaml
+---
+doc_type: part
+part_number: 1        # numerisch oder römisch
+title: "Teil I – Grundlagen"
+order: 90             # optionale Feinsortierung
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+## Teil I – Grundlagen
+
+* [Kapitel 1 – ...](chapters/ch-01.md)
+```
 
 #### `cover` - Cover Page / Startseite
 **Zweck**: Buch-Cover mit Titel, Autor, Grafik, ggf. Video (Zukunft)
@@ -52,6 +77,25 @@ authors:
 [Cover](index.md)
 ```
 
+#### `dedication` - Widmung
+**Zweck**: Widmung am Buchanfang
+
+**Position**: Nach Cover, vor Preface
+
+**Properties**:
+```yaml
+---
+doc_type: dedication
+title: "Für unsere Leserinnen"
+order: 30
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Widmung](dedication.md)
+```
+
 #### `preface` - Vorwort / Prolog
 **Zweck**: Einleitende Texte vor dem Hauptteil
 
@@ -70,6 +114,7 @@ doc_type: preface
 variant: foreword  # optional
 title: "Vorwort"
 author: "Dr. Jane Doe"  # optional, bei foreword
+order: 40               # optionale Reihenfolge innerhalb der Preface-Gruppe
 ---
 ```
 
@@ -79,6 +124,25 @@ author: "Dr. Jane Doe"  # optional, bei foreword
 
 * [Vorwort](preface.md)
 * [Geleitwort](foreword.md)
+```
+
+#### `translators-note` - Hinweis der Übersetzenden
+**Zweck**: Sprachspezifische Hinweise, Terminologie-Erklärungen
+
+**Position**: Nach Preface/Foreword oder vor den Kapiteln
+
+**Properties**:
+```yaml
+---
+doc_type: translators-note
+title: "Hinweis der Übersetzenden"
+order: 50
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Hinweis der Übersetzenden](translators-note.md)
 ```
 
 #### `chapter` - Hauptkapitel
@@ -92,6 +156,8 @@ author: "Dr. Jane Doe"  # optional, bei foreword
 doc_type: chapter
 chapter_number: 1
 title: "Beobachtbare Muster"
+parent_chapter: 1       # optional für Unterkapitel 1.1, 1.2
+order: 110              # optionale Feinsortierung
 chapter_appendices:  # optional
   - chapters/chapter-01-appendix-a.md
   - chapters/chapter-01-appendix-b.md
@@ -239,6 +305,90 @@ numbering_style: "decimal"  # decimal (1.1, 1.2), roman, alpha
 - Abb. 3.1: Blockschaltbild System ................................... 28
 ```
 
+#### `list-of-abbreviations` - Abkürzungsverzeichnis
+**Zweck**: Abkürzungen, Akronyme und Bedeutungen
+
+**Position**: Typisch nach Abbildungsverzeichnis
+
+**Properties**:
+```yaml
+---
+doc_type: list-of-abbreviations
+title: "Abkürzungsverzeichnis"
+auto_generate: true
+include_symbols: false
+order: 140
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Abkürzungsverzeichnis](list-of-abbreviations.md)
+```
+
+#### `list-of-symbols` - Symbolverzeichnis
+**Zweck**: Mathematische/technische Symbole
+
+**Position**: Nach Abkürzungen oder direkt nach Verzeichnissen
+
+**Properties**:
+```yaml
+---
+doc_type: list-of-symbols
+title: "Symbolverzeichnis"
+auto_generate: true
+order: 150
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Symbolverzeichnis](list-of-symbols.md)
+```
+
+#### `list-of-equations` - Gleichungsverzeichnis
+**Zweck**: Auflistung nummerierter Gleichungen
+
+**Position**: Optional nach Symbolverzeichnis
+
+**Properties**:
+```yaml
+---
+doc_type: list-of-equations
+title: "Gleichungsverzeichnis"
+auto_generate: true
+numbering_style: decimal
+order: 160
+---
+```
+
+#### `list-of-algorithms` - Algorithmusverzeichnis
+**Zweck**: Nummerierte Algorithmen / Pseudocode
+
+**Properties**:
+```yaml
+---
+doc_type: list-of-algorithms
+title: "Algorithmusverzeichnis"
+auto_generate: true
+order: 170
+---
+```
+
+#### `list-of-listings` - Code-Listing-Verzeichnis
+**Zweck**: Nummerierte Codebeispiele / Listings
+
+**Properties**:
+```yaml
+---
+doc_type: list-of-listings
+title: "Listing-Verzeichnis"
+auto_generate: true
+include_languages: [py, js, ts, tex]
+order: 180
+---
+```
+
 ---
 
 ### 3. Back Matter Types (nach Hauptinhalt)
@@ -262,6 +412,21 @@ alphabetical: true  # auto-sort entries
 ## Referenzen
 
 * [Glossar](glossary.md)
+```
+
+#### `legal-notice` - Rechtliche Hinweise / Safety / Privacy
+**Zweck**: Rechtliche Anforderungen, Sicherheitshinweise, Datenschutz
+
+**Position**: Vor Bibliography oder im Referenzen-Block
+
+**Properties**:
+```yaml
+---
+doc_type: legal-notice
+title: "Rechtliche Hinweise"
+scope: [safety, privacy, compliance]
+order: 410
+---
 ```
 
 #### `bibliography` - Literaturverzeichnis / Zitationen
@@ -417,6 +582,46 @@ https://creativecommons.org/licenses/by-sa/4.0/
 Gesetzt und gedruckt in Deutschland.
 ```
 
+#### `errata` - Errata / Fehlerkorrekturen
+**Zweck**: Fehlerliste nach Veröffentlichung
+
+**Position**: Am Ende des Back Matter, vor Colophon
+
+**Properties**:
+```yaml
+---
+doc_type: errata
+title: "Errata"
+version_scope: "v2.0.1"
+order: 480
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Errata](errata.md)
+```
+
+#### `release-notes` / `changelog` - Versionshinweise
+**Zweck**: Änderungen zwischen Releases
+
+**Position**: Neben oder vor Errata
+
+**Properties**:
+```yaml
+---
+doc_type: release-notes
+title: "Release Notes"
+version: "2.0.1"
+order: 470
+---
+```
+
+**SUMMARY.md Output**:
+```markdown
+* [Release Notes](releases/v2.0.1.md)
+```
+
 ---
 
 ### 4. Meta Document Types
@@ -465,6 +670,7 @@ doc_type: example
 category: "emoji-test"  # emoji-test, layout-demo, test-content
 title: "Emoji-Beispiele – Smileys"
 show_in_summary: true  # default: false
+order: 900
 ---
 ```
 
@@ -500,45 +706,84 @@ publish:
     # Reihenfolge der Sections in SUMMARY.md
     section_order:
       - cover
+      - dedication
       - preface
+      - translators-note
       - list-of-tables
       - list-of-figures
+      - list-of-abbreviations
+      - list-of-symbols
+      - list-of-equations
+      - list-of-algorithms
+      - list-of-listings
       - chapters
       - epilog
       - appendices
+      - legal-notice
       - glossary
       - bibliography
       - index
       - attributions
+      - errata
+      - release-notes
       - colophon
     
     # Überschriften für Sections
     section_titles:
       preface: "Vorwort"
+      dedication: "Widmung"
+      translators-note: "Hinweis der Übersetzenden"
       list-of-tables: "Tabellenverzeichnis"
       list-of-figures: "Abbildungsverzeichnis"
+      list-of-abbreviations: "Abkürzungsverzeichnis"
+      list-of-symbols: "Symbolverzeichnis"
+      list-of-equations: "Gleichungsverzeichnis"
+      list-of-algorithms: "Algorithmusverzeichnis"
+      list-of-listings: "Listing-Verzeichnis"
       chapters: "Teil I: Hauptinhalt"
       epilog: "Abschluss"
       appendices: "Anhänge"
+      legal-notice: "Rechtliche Hinweise"
       glossary: "Referenzen"
       bibliography: "Literatur"
       index: "Register"
       attributions: "Danksagungen"
+      errata: "Errata"
+      release-notes: "Release Notes"
       colophon: "Impressum"
+
+    # Sprach-/Profil-spezifische Überschriften
+    section_titles_by_locale:
+      en:
+        dedication: "Dedication"
+        translators-note: "Translator's Note"
+        legal-notice: "Legal Notices"
+        list-of-abbreviations: "List of Abbreviations"
+        list-of-symbols: "List of Symbols"
+        list-of-equations: "List of Equations"
+        list-of-algorithms: "List of Algorithms"
+        list-of-listings: "List of Listings"
     
     # Welche Types zeigen?
     show_in_summary:
       template: false
       placeholder: false
       example: true  # kann per doc überschrieben werden
+      release-notes: true
+      errata: true
+      legal-notice: true
     
     # Auto-Nummerierung
     auto_number_chapters: true
     auto_number_appendices: true  # A, B, C, ...
+    auto_number_parts: true       # Part I, II, ...
     
     # Chapter-Appendix Handling
     chapter_appendix_indent: true  # als Unterpunkt unter Chapter
     chapter_appendix_prefix: "Appendix {chapter}.{id}"
+
+    # Per-Document Weighting (falls mehrere Preface/Notes/Legal)
+    default_order_weight: 100
 ```
 
 ---
@@ -549,7 +794,7 @@ publish:
 1. **Frontmatter Parser Enhancement**: `gitbook_worker/tools/content/frontmatter_parser.py`
    - Add `doc_type` field parsing
    - Add validation for known doc_types
-   - Add `chapter_appendices`, `chapter_ref`, `appendix_id` fields
+  - Add `chapter_appendices`, `chapter_ref`, `appendix_id`, `part_number`, `parent_chapter`, `order` fields
 
 2. **Document Type Registry**: `gitbook_worker/tools/content/document_types.py`
    ```python
@@ -559,24 +804,35 @@ publish:
        COVER = "cover"
        PREFACE = "preface"
        CHAPTER = "chapter"
+       PART = "part"
        EPILOG = "epilog"
        APPENDIX = "appendix"
        CHAPTER_APPENDIX = "chapter-appendix"
        LIST_OF_TABLES = "list-of-tables"
        LIST_OF_FIGURES = "list-of-figures"
+       LIST_OF_ABBREVIATIONS = "list-of-abbreviations"
+       LIST_OF_SYMBOLS = "list-of-symbols"
+       LIST_OF_EQUATIONS = "list-of-equations"
+       LIST_OF_ALGORITHMS = "list-of-algorithms"
+       LIST_OF_LISTINGS = "list-of-listings"
        GLOSSARY = "glossary"
+       LEGAL_NOTICE = "legal-notice"
        BIBLIOGRAPHY = "bibliography"
        INDEX = "index"
        ATTRIBUTIONS = "attributions"
+       ERRATA = "errata"
+       RELEASE_NOTES = "release-notes"
        COLOPHON = "colophon"
        PLACEHOLDER = "placeholder"
        TEMPLATE = "template"
        EXAMPLE = "example"
+       DEDICATION = "dedication"
+       TRANSLATORS_NOTE = "translators-note"
    ```
 
 3. **Config Schema Update**: `gitbook_worker/defaults/publish_schema.yml`
    - Add `use_document_types` flag
-   - Add `document_type_config` schema
+  - Add `document_type_config` schema inkl. `section_titles_by_locale`, new doc_types, `default_order_weight`
 
 ### Phase 2: SUMMARY.md Generator
 1. **Collector**: `gitbook_worker/tools/content/document_collector.py`
@@ -590,7 +846,9 @@ publish:
    - Apply `section_order`
    - Generate sections with titles
    - Handle `chapter_appendices` linking
-   - Apply `show_in_summary` filters
+  - Apply `show_in_summary` filters
+  - Apply per-doc `order` to stabilisieren (preface-Varianten, mehrere Legal Notices)
+  - Support `part` grouping und nested chapters (`parent_chapter`)
 
 3. **Backward Compatibility**:
    - If `use_document_types: false` → use old SUMMARY.md logic
@@ -601,7 +859,11 @@ publish:
    - `chapter_appendix` must have valid `chapter_ref`
    - `appendix_id` must be unique
    - `chapter_number` must be sequential
-   - `cover` can only exist once
+  - `part_number` must be sequential (if used)
+  - `order` must be numeric if provided
+  - `cover` can only exist once
+  - Only one `legal-notice` per scope unless `order` disambiguates
+  - Only one `release-notes` pro Version
 
 2. **Tests**:
    - `test_document_type_parser.py`

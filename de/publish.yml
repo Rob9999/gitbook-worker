@@ -61,45 +61,83 @@ publish:
     # Section order in SUMMARY.md
     section_order:
       - cover
+      - dedication
       - preface
+      - translators-note
       - list-of-tables
       - list-of-figures
+      - list-of-abbreviations
+      - list-of-symbols
+      - list-of-equations
+      - list-of-algorithms
+      - list-of-listings
       - chapters
       - epilog
       - appendices
+      - legal-notice
       - glossary
       - bibliography
       - index
       - attributions
+      - errata
+      - release-notes
       - colophon
     
     # Section titles for SUMMARY.md
     section_titles:
+      dedication: "Widmung"
       preface: "Vorwort"
+      translators-note: "Hinweis der Übersetzenden"
       list-of-tables: "Tabellenverzeichnis"
       list-of-figures: "Abbildungsverzeichnis"
+      list-of-abbreviations: "Abkürzungsverzeichnis"
+      list-of-symbols: "Symbolverzeichnis"
+      list-of-equations: "Gleichungsverzeichnis"
+      list-of-algorithms: "Algorithmusverzeichnis"
+      list-of-listings: "Listing-Verzeichnis"
       chapters: "Hauptinhalt"
       epilog: "Abschluss"
       appendices: "Anhänge"
+      legal-notice: "Rechtliche Hinweise"
       glossary: "Glossar"
       bibliography: "Literatur"
       index: "Register"
       attributions: "Danksagungen"
+      errata: "Errata"
+      release-notes: "Release Notes"
       colophon: "Impressum"
+
+    section_titles_by_locale:
+      en:
+        dedication: "Dedication"
+        translators-note: "Translator's Note"
+        legal-notice: "Legal Notices"
+        list-of-abbreviations: "List of Abbreviations"
+        list-of-symbols: "List of Symbols"
+        list-of-equations: "List of Equations"
+        list-of-algorithms: "List of Algorithms"
+        list-of-listings: "List of Listings"
     
     # Show in SUMMARY.md?
     show_in_summary:
       template: false
       placeholder: false
       example: true
+      release-notes: true
+      errata: true
+      legal-notice: true
     
     # Auto-numbering
     auto_number_chapters: true
     auto_number_appendices: true  # A, B, C, ...
+    auto_number_parts: true       # Teil I, II, ...
     
     # Chapter-appendix handling
     chapter_appendix_indent: true
-    chapter_appendix_prefix: "Appendix {chapter}.{id}"
+    chapter_appendix_prefix: "Anhang {chapter}.{id}"
+
+    # Per-doc fallback weight
+    default_order_weight: 100
   
   pdf_options:
     emoji_color: true
