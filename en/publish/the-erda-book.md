@@ -176,13 +176,13 @@ The following tables show how neutral datasets can be structured. All values are
 The tables can be exported as CSV or revisited in [Appendix A](#table-layout). Always link internal sections using relative paths so the book works offline.
 
 ## 2.3 Reference to figures
-![Grid representation of measurement points](../.gitbook/assets/neutral-grid.svg)
+![Grid representation of measurement points](.gitbook/assets/neutral-grid.pdf)
 
 The figure illustrates how measurement zones can be shown schematically without naming real locations.
 
 To verify an embedded HTML inlay variant, the following figure can additionally be used:
 
-![ERDA logo](../.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+![ERDA logo](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
 
 [^2]: Cf. the referenced open catalogues in [Citations & further reading](#md-references).
 
