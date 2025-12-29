@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import textwrap
 
 from gitbook_worker.tools.publishing.gitbook_style import (
     ensure_clean_summary,
@@ -234,39 +235,42 @@ doc_type: list-of-abbreviations
     )
 
     manifest_path = base / "publish.yml"
-        manifest_path.write_text(
-                """publish:
-    - language: en
-        use_document_types: true
-        document_type_config:
-            section_order:
-                - cover
-                - dedication
-                - translators-note
-                - chapters
-                - appendices
-                - list-of-abbreviations
-            section_titles:
-                cover: Frontmatter
-                dedication: Dedication
-                translators-note: Translator's Note
-                chapters: Chapters
-                appendices: Appendices
-                list-of-abbreviations: Abbreviations
-            section_titles_by_locale:
-                en:
-                    chapters: Chapters EN
-            show_in_summary:
-                placeholder: false
-            auto_number_chapters: true
-            auto_number_appendices: true
-            auto_number_parts: false
-            chapter_appendix_indent: true
-            chapter_appendix_prefix: "Appendix {chapter}.{id}"
-            default_order_weight: 100
-""",
-                encoding="utf-8",
-        )
+    manifest_path.write_text(
+        textwrap.dedent(
+            """\
+            publish:
+              - language: en
+                use_document_types: true
+                document_type_config:
+                  section_order:
+                    - cover
+                    - dedication
+                    - translators-note
+                    - chapters
+                    - appendices
+                    - list-of-abbreviations
+                  section_titles:
+                    cover: Frontmatter
+                    dedication: Dedication
+                    translators-note: Translator's Note
+                    chapters: Chapters
+                    appendices: Appendices
+                    list-of-abbreviations: Abbreviations
+                  section_titles_by_locale:
+                    en:
+                      chapters: Chapters EN
+                  show_in_summary:
+                    placeholder: false
+                  auto_number_chapters: true
+                  auto_number_appendices: true
+                  auto_number_parts: false
+                  chapter_appendix_indent: true
+                  chapter_appendix_prefix: "Appendix {chapter}.{id}"
+                  default_order_weight: 100
+            """
+        ),
+        encoding="utf-8",
+    )
 
     summary_path = get_summary_layout(base).summary_path
 
@@ -283,7 +287,13 @@ doc_type: list-of-abbreviations
         "## Frontmatter",
         "",
         "* [Root](README.md)",
+        "",
+        "## Dedication",
+        "",
         "* [Dedication](dedication.md)",
+        "",
+        "## Translator's Note",
+        "",
         "* [Translator's Note](translators-note.md)",
         "",
         "## Chapters EN",
