@@ -1,6 +1,6 @@
 # Summary
 
-* [content](README.md)
+* [Willkommen zur neutralen Beispielbibliothek](index.md)
 * [appendices](appendices/README.md)
   * [Appendix A – Datenquellen und Tabellenlayout](appendices/appendix-a.md)
   * [Appendix – Emoji- & Schriftabdeckung](appendices/emoji-font-coverage.md)
