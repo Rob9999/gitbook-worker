@@ -183,6 +183,9 @@ def _run_gitbook_steps(options: PipelineOptions) -> None:
         summary_args = ["summary", "--root", str(options.root)]
         if not options.gitbook_use_git:
             summary_args.append("--no-git")
+        summary_args.extend(["--document-manifest", str(options.manifest)])
+        if options.language_id:
+            summary_args.extend(["--locale", options.language_id])
         # If the manifest requests appendices to be moved to the end, forward
         # the flag to the gitbook summary command so the initial SUMMARY
         # regeneration (run by the pipeline) uses the same option the

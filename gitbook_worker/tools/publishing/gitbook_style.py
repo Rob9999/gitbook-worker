@@ -296,6 +296,8 @@ def _resolve_manifest_path(
         return None
     if manifest.is_absolute():
         return manifest
+    if manifest.exists():
+        return manifest.resolve()
     candidate = (context.root_dir / manifest).resolve()
     return candidate
 
@@ -433,6 +435,8 @@ def ensure_clean_summary(
     run_git: bool = True,
     summary_mode: Optional[str] = None,
     summary_order_manifest: Optional[Path] = None,
+    document_manifest: Optional[Path] = None,
+    locale: Optional[str] = None,
     manual_marker: Optional[str] = DEFAULT_MANUAL_MARKER,
     summary_appendices_last: bool = False,
 ) -> bool:
@@ -443,6 +447,7 @@ def ensure_clean_summary(
     context = get_summary_layout(base_dir)
 
     manifest_path = _resolve_manifest_path(summary_order_manifest, context)
+    document_manifest_path = _resolve_manifest_path(document_manifest, context)
     manifest_order: Optional[Dict[str, int]] = None
     if manifest_path is not None:
         manifest_order = _load_manifest_order(manifest_path)
@@ -455,6 +460,9 @@ def ensure_clean_summary(
         logger.warning(
             "summary_mode 'manifest' gewählt, aber keine Manifest-Datei angegeben"
         )
+
+    if document_manifest_path:
+        logger.info("document manifest resolved to %s", document_manifest_path)
 
     # Get mode from module-level map
     mode = SUMMARY_MODE_MAP.get(
@@ -511,12 +519,18 @@ def ensure_clean_summary(
 
     # Generate new summary content using the tree-based generator
     try:
-        new_lines = summary_generator.generate_summary(
+        new_lines = summary_generator.generate_doc_type_summary(
             root_dir=context.root_dir,
-            mode=mode,
-            submode=submode,
-            manual_order=manifest_order,
+            manifest_path=document_manifest_path,
+            locale=locale,
         )
+        if new_lines is None:
+            new_lines = summary_generator.generate_summary(
+                root_dir=context.root_dir,
+                mode=mode,
+                submode=submode,
+                manual_order=manifest_order,
+            )
         new_content = "\n".join(new_lines).rstrip() + "\n"
     except Exception as e:
         logger.error(f"Failed to generate summary: {e}")
@@ -574,6 +588,16 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         help="Optionale Manifest-Datei (YAML/JSON) mit expliziter Kapitelreihenfolge",
     )
     summary_parser.add_argument(
+        "--document-manifest",
+        type=Path,
+        help="Publish-Manifest (z.B. publish.yml) mit Document-Type-Konfiguration",
+    )
+    summary_parser.add_argument(
+        "--locale",
+        type=str,
+        help="Locale/Lang-Code für lokalisierte Abschnittstitel",
+    )
+    summary_parser.add_argument(
         "--summary-manual-marker",
         default=DEFAULT_MANUAL_MARKER,
         help="Marker, der eine manuell gepflegte SUMMARY kennzeichnet (leer = aus)",
@@ -605,6 +629,8 @@ def main(argv: list[str] | None = None) -> int:
             run_git=not args.no_git,
             summary_mode=args.summary_mode,
             summary_order_manifest=args.summary_order_manifest,
+            document_manifest=args.document_manifest,
+            locale=args.locale,
             manual_marker=args.summary_manual_marker,
             summary_appendices_last=getattr(args, "summary_appendices_last", False),
         )

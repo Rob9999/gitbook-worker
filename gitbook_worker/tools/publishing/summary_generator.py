@@ -10,6 +10,15 @@ from itertools import chain
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import yaml
+
+from gitbook_worker.tools.publishing.document_types import (
+    DocumentTypeConfig,
+    build_doc_type_summary,
+    collect_documents,
+    load_document_type_config,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -207,16 +216,28 @@ class SummaryTree:
                 appendices = [n for n in nodes if n.is_appendix]
 
                 def appendix_key(node: SummaryNode) -> tuple[int, str, str]:
-                    match = re.search(r"(Anhang|Appendix)\s+([A-Z])", node.title, re.IGNORECASE)
+                    match = re.search(
+                        r"(Anhang|Appendix)\s+([A-Z])", node.title, re.IGNORECASE
+                    )
                     if match:
                         return (0, match.group(2).upper(), node.title.lower())
-                    return (1, node.title.lower(), node.path.as_posix() if node.path else "")
+                    return (
+                        1,
+                        node.title.lower(),
+                        node.path.as_posix() if node.path else "",
+                    )
 
                 regular_sorted = sorted(regular, key=self._natural_sort_key)
 
-                def appendix_sort_key(node: SummaryNode) -> tuple[int, Optional[int], tuple[int, str, str]]:
+                def appendix_sort_key(
+                    node: SummaryNode,
+                ) -> tuple[int, Optional[int], tuple[int, str, str]]:
                     manifest_index = self._manifest_index(node)
-                    return (0 if manifest_index is not None else 1, manifest_index or 0, appendix_key(node))
+                    return (
+                        0 if manifest_index is not None else 1,
+                        manifest_index or 0,
+                        appendix_key(node),
+                    )
 
                 appendices_sorted = sorted(appendices, key=appendix_sort_key)
                 regular_sorted = self._apply_manifest_order(regular_sorted)
@@ -435,6 +456,43 @@ def generate_summary(
         manual_order=manual_order,
     )
     return tree.to_lines()
+
+
+def _load_manifest(manifest_path: Path) -> Optional[dict]:
+    try:
+        return yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    except Exception as exc:  # pragma: no cover - best effort
+        logger.debug("Failed to load manifest %s: %s", manifest_path, exc)
+        return None
+
+
+def generate_doc_type_summary(
+    root_dir: Path,
+    manifest_path: Optional[Path],
+    *,
+    locale: Optional[str] = None,
+) -> Optional[List[str]]:
+    """Generate a summary using document type metadata when enabled.
+
+    Returns ``None`` when the manifest is missing or ``use_document_types``
+    is not enabled, so callers can fall back to legacy behaviour.
+    """
+
+    if not manifest_path or not manifest_path.exists():
+        return None
+
+    raw_manifest = _load_manifest(manifest_path)
+    if not raw_manifest:
+        return None
+
+    doc_type_config: Optional[DocumentTypeConfig] = load_document_type_config(
+        raw_manifest
+    )
+    if not doc_type_config:
+        return None
+
+    records = collect_documents(root_dir)
+    return build_doc_type_summary(records, doc_type_config, locale=locale)
 
 
 # Manual marker constant

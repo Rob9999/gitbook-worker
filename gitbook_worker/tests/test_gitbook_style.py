@@ -119,9 +119,14 @@ def test_gitbook_mode_uses_natural_sorting(tmp_path):
 
     content = summary_path.read_text(encoding="utf-8").splitlines()
     assert content[2] == "* [Start](README.md)"
-    assert content[3] == "* [2.3 Kapitel](2.3-post-demokratische-zivilisation/README.md)"
+    assert (
+        content[3] == "* [2.3 Kapitel](2.3-post-demokratische-zivilisation/README.md)"
+    )
     # Child entry should stay beneath its parent and maintain indentation
-    assert content[4] == "  * [2.3.1 Dystopie](2.3-post-demokratische-zivilisation/2.3.1-dystopie.md)"
+    assert (
+        content[4]
+        == "  * [2.3.1 Dystopie](2.3-post-demokratische-zivilisation/2.3.1-dystopie.md)"
+    )
     # Natural sorting keeps 2.4 before 2.10
     assert content[5] == "* [2.4 Schluss](2.4-schluss.md)"
     assert content[6] == "* [2.10 Anhang](2.10-anhang.md)"
@@ -149,3 +154,150 @@ def test_manifest_reorders_entries(tmp_path):
     assert lines[2] == "* [Root](README.md)"
     assert lines[3] == "* [Beta](beta.md)"
     assert lines[4] == "* [Alpha](alpha.md)"
+
+
+def test_doc_type_summary_with_manifest(tmp_path):
+    base = tmp_path / "book"
+    base.mkdir()
+
+    (base / "README.md").write_text(
+        """---
+title: Root
+doc_type: cover
+order: 1
+---
+
+# Root
+""",
+        encoding="utf-8",
+    )
+    (base / "dedication.md").write_text(
+        """---
+title: Dedication
+doc_type: dedication
+order: 2
+---
+
+Content
+""",
+        encoding="utf-8",
+    )
+    (base / "translators-note.md").write_text(
+        """---
+title: Translator's Note
+doc_type: translators-note
+order: 3
+---
+
+Content
+""",
+        encoding="utf-8",
+    )
+
+    chapters = base / "chapters"
+    chapters.mkdir()
+    (chapters / "intro.md").write_text(
+        """---
+title: Intro
+doc_type: chapter
+chapter_number: 1
+---
+
+# Intro
+""",
+        encoding="utf-8",
+    )
+
+    appendices = base / "appendices"
+    appendices.mkdir()
+    (appendices / "appendix-a.md").write_text(
+        """---
+title: Extras
+doc_type: appendix
+appendix_id: A
+---
+
+# Appendix A
+""",
+        encoding="utf-8",
+    )
+
+    (base / "list-of-abbreviations.md").write_text(
+        """---
+title: List of Abbreviations
+doc_type: list-of-abbreviations
+---
+
+- API
+""",
+        encoding="utf-8",
+    )
+
+    manifest_path = base / "publish.yml"
+        manifest_path.write_text(
+                """publish:
+    - language: en
+        use_document_types: true
+        document_type_config:
+            section_order:
+                - cover
+                - dedication
+                - translators-note
+                - chapters
+                - appendices
+                - list-of-abbreviations
+            section_titles:
+                cover: Frontmatter
+                dedication: Dedication
+                translators-note: Translator's Note
+                chapters: Chapters
+                appendices: Appendices
+                list-of-abbreviations: Abbreviations
+            section_titles_by_locale:
+                en:
+                    chapters: Chapters EN
+            show_in_summary:
+                placeholder: false
+            auto_number_chapters: true
+            auto_number_appendices: true
+            auto_number_parts: false
+            chapter_appendix_indent: true
+            chapter_appendix_prefix: "Appendix {chapter}.{id}"
+            default_order_weight: 100
+""",
+                encoding="utf-8",
+        )
+
+    summary_path = get_summary_layout(base).summary_path
+
+    ensure_clean_summary(
+        base,
+        run_git=False,
+        document_manifest=manifest_path,
+        locale="en",
+    )
+
+    expected_lines = [
+        "# Summary",
+        "",
+        "## Frontmatter",
+        "",
+        "* [Root](README.md)",
+        "* [Dedication](dedication.md)",
+        "* [Translator's Note](translators-note.md)",
+        "",
+        "## Chapters EN",
+        "",
+        "* [Chapter 1 – Intro](chapters/intro.md)",
+        "",
+        "## Appendices",
+        "",
+        "* [Appendix A – Extras](appendices/appendix-a.md)",
+        "",
+        "## Abbreviations",
+        "",
+        "* [List of Abbreviations](list-of-abbreviations.md)",
+        "",
+    ]
+
+    assert summary_path.read_text(encoding="utf-8") == "\n".join(expected_lines)
