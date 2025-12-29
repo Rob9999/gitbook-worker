@@ -8,11 +8,12 @@ _BASE_ARGS = dict(
     main_font="Serif",
     sans_font="Sans",
     mono_font="Mono",
-    emoji_font=None,
+    emoji_font="TwemojiMozilla",  # Must be set for lua_fallback_code to be included
     include_mainfont=True,
     needs_harfbuzz=False,
     manual_fallback_spec="FooFallback;BarFallback",
     abort_if_missing_glyph=False,
+    temp_dir="/tmp/test-font-cache",
 )
 
 

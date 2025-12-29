@@ -16,6 +16,22 @@ def run(cmd, check=True, **kwargs):
     return subprocess.run(cmd, capture_output=True, text=True, **kwargs)
 
 
+def docker_available() -> bool:
+    """Check if Docker is available and running."""
+    if not shutil.which("docker"):
+        return False
+    try:
+        result = subprocess.run(
+            ["docker", "info"],
+            check=False,
+            capture_output=True,
+            timeout=5,
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
 def build_test_image():
     """Build the Docker test image (shared across tests)."""
     print("Building Docker image for test...")
@@ -93,7 +109,7 @@ def run_ensure_readme_in_container(container_name):
     return res
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="docker not installed")
+@pytest.mark.skipif(not docker_available(), reason="Docker Desktop not running")
 def test_orchestrator_ensure_readme_no_deletions(tmp_path, logger=None):
     """Test that ensure_readme does not delete any existing files.
 
@@ -130,7 +146,7 @@ def test_orchestrator_ensure_readme_no_deletions(tmp_path, logger=None):
         run(["docker", "rm", "-f", container], check=False)
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="docker not installed")
+@pytest.mark.skipif(not docker_available(), reason="Docker Desktop not running")
 def test_orchestrator_ensure_readme_preserves_markdown_files(tmp_path, logger=None):
     """Test that ensure_readme preserves all .md files (not just README.md).
 
@@ -182,7 +198,7 @@ def test_orchestrator_ensure_readme_preserves_markdown_files(tmp_path, logger=No
         run(["docker", "rm", "-f", container], check=False)
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="docker not installed")
+@pytest.mark.skipif(not docker_available(), reason="Docker Desktop not running")
 def test_orchestrator_ensure_readme_only_creates_missing(tmp_path, logger=None):
     """Test that ensure_readme only creates READMEs in directories without any README variant.
 
@@ -240,7 +256,7 @@ def test_orchestrator_ensure_readme_only_creates_missing(tmp_path, logger=None):
         run(["docker", "rm", "-f", container], check=False)
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="docker not installed")
+@pytest.mark.skipif(not docker_available(), reason="Docker Desktop not running")
 def test_orchestrator_ensure_readme_respects_publish_yml(tmp_path, logger=None):
     """Test that ensure_readme respects publish.yml configuration.
 

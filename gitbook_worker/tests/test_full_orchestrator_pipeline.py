@@ -19,7 +19,23 @@ def run(cmd, check=True, **kwargs):
     return subprocess.run(cmd, capture_output=True, text=True, check=check, **kwargs)
 
 
-@pytest.mark.skipif(shutil.which("docker") is None, reason="docker not installed")
+def docker_available() -> bool:
+    """Check if Docker is available and running."""
+    if not shutil.which("docker"):
+        return False
+    try:
+        result = subprocess.run(
+            ["docker", "info"],
+            check=False,
+            capture_output=True,
+            timeout=5,
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
+@pytest.mark.skipif(not docker_available(), reason="Docker Desktop not running")
 @pytest.mark.slow
 def test_full_orchestrator_pipeline_no_deletions():
     """Run the FULL orchestrator pipeline and verify no content files are deleted.

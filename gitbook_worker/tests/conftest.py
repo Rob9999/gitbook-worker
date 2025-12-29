@@ -47,6 +47,39 @@ for _pkg in ["pyyaml", "tabulate", "emoji", "beautifulsoup4"]:
     _ensure(_pkg)
 
 
+@pytest.fixture(scope="session", autouse=True)
+def initialize_luaotfload_cache() -> None:
+    """
+    Ensure luaotfload font database is initialized before any tests run.
+
+    This fixture runs once per test session and updates the LuaTeX font cache.
+    If luaotfload-tool is not available, tests requiring it will be skipped.
+
+    Note: This fixture is autouse=True, so it runs automatically for all tests.
+    Individual tests can still skip if fonts are missing.
+    """
+    try:
+        result = subprocess.run(
+            ["luaotfload-tool", "--update", "--force"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if result.returncode != 0:
+            # Don't fail the entire test run, just log warning
+            # Tests that need fonts will handle missing cache individually
+            logging.getLogger("conftest").warning(
+                f"Font cache initialization failed: {result.stderr}"
+            )
+    except FileNotFoundError:
+        logging.getLogger("conftest").warning(
+            "luaotfload-tool not available in test environment"
+        )
+    except subprocess.TimeoutExpired:
+        logging.getLogger("conftest").warning("Font cache initialization timed out")
+
+
 @pytest.fixture
 def logger(request: pytest.FixtureRequest) -> Iterator[logging.Logger]:
     """Provide a test-specific logger that writes to GH_TEST_LOGS_DIR."""

@@ -81,6 +81,8 @@ def test_font_header_includes_manual_fallback_block():
         include_mainfont=True,
         needs_harfbuzz=True,
         manual_fallback_spec="Fallback:mode=harf",
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
     )
 
     assert "luaotfload.add_fallback" in header
