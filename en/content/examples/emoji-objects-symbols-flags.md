@@ -2,8 +2,9 @@
 title: Emoji examples – Objects, symbols & flags
 description: Reference lists for tools, technology, symbols and flags with full emoji coverage.
 date: 2024-06-05
-version: 1.0
-history:
+version: 1.0doc_type: example
+category: "emoji-test"
+show_in_summary: truehistory:
   - version: 1.0
     date: 2024-06-05
     changes: Newly created page for objects, symbols and flags.

@@ -2,6 +2,8 @@
 title: Kapitel 2 – Vergleichstabellen
 date: 2024-06-01
 version: 1.0
+doc_type: chapter
+chapter_number: 2
 ---
 
 # Kapitel 2 – Vergleichstabellen

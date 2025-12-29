@@ -2,6 +2,9 @@
 title: Appendix A – Datenquellen und Tabellenlayout
 date: 2024-06-01
 version: 1.0
+doc_type: appendix
+appendix_id: "A"
+category: "technical"
 ---
 
 # Appendix A – Datenquellen und Tabellenlayout

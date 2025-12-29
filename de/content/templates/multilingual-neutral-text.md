@@ -2,6 +2,8 @@
 title: Vorlage für mehrsprachige neutrale Texte
 date: 2024-06-02
 version: 1.1
+doc_type: template
+show_in_summary: false
 ---
 
 # Vorlage für mehrsprachige neutrale Texte

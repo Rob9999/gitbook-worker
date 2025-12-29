@@ -3,6 +3,9 @@ title: Emoji-Beispiele – Smileys & Personen
 description: Übersicht über klassische Gesichts- und Personen-Emojis zur Testabdeckung.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05

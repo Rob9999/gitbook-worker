@@ -2,8 +2,9 @@
 title: Emoji examples – Activities & travel
 description: Common sport, leisure and transport emojis for functional and rendering tests.
 date: 2024-06-05
-version: 1.0
-history:
+version: 1.0doc_type: example
+category: "emoji-test"
+show_in_summary: truehistory:
   - version: 1.0
     date: 2024-06-05
     changes: Initial version for activity and transport groups.

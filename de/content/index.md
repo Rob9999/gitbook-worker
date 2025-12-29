@@ -3,6 +3,9 @@ title: Startseite
 description: Übersicht für das neutrale Beispielbuch
 date: 2024-06-01
 version: 1.0
+doc_type: cover
+authors:
+  - ERDA Team
 ---
 
 # Willkommen zur neutralen Beispielbibliothek

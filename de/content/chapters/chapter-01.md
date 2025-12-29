@@ -2,6 +2,8 @@
 title: Kapitel 1 – Beobachtbare Muster
 date: 2024-06-01
 version: 1.0
+doc_type: chapter
+chapter_number: 1
 ---
 
 # Kapitel 1 – Beobachtbare Muster

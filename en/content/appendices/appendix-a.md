@@ -1,8 +1,9 @@
 ---
 title: Appendix A – Data sources and table layout
 date: 2024-06-01
-version: 1.0
----
+version: 1.0doc_type: appendix
+appendix_id: "A"
+category: "technical"---
 
 # Appendix A – Data sources and table layout
 

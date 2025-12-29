@@ -1,8 +1,8 @@
 ---
 title: Template for multilingual neutral text
 date: 2024-06-02
-version: 1.1
----
+version: 1.1doc_type: template
+show_in_summary: false---
 
 # Template for multilingual neutral text
 

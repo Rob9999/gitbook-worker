@@ -2,6 +2,8 @@
 title: Zitationen & weiterführende Quellen
 date: 2024-06-01
 version: 1.0
+doc_type: bibliography
+citation_style: "APA"
 ---
 
 # Zitationen & weiterführende Quellen

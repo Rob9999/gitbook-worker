@@ -2,8 +2,9 @@
 title: Appendix – Emoji & font coverage
 description: Evidence of suitable fonts for all scripts and coloured emojis used in the sample content.
 date: 2024-06-05
-version: 1.0
-history:
+version: 1.0doc_type: appendix
+appendix_id: "B"
+category: "technical"history:
   - version: 1.0
     date: 2024-06-05
     changes: Initial version with font matrix and testing notes.

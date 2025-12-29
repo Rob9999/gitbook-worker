@@ -3,6 +3,9 @@ title: Emoji-Beispiele – Aktivitäten & Reisen
 description: Häufige Sport-, Freizeit- und Transport-Emojis für Funktions- und Renderingtests.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05

@@ -3,6 +3,9 @@ title: Appendix – Emoji- & Schriftabdeckung
 description: Nachweis geeigneter Fonts für alle Schriftzeichen und farbigen Emojis im Beispielinhalt.
 date: 2024-06-05
 version: 1.0
+doc_type: appendix
+appendix_id: "B"
+category: "technical"
 history:
   - version: 1.0
     date: 2024-06-05

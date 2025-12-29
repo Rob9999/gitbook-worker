@@ -53,6 +53,54 @@ publish:
   keep_combined: true
   build: true
   reset_build_flag: false
+  
+  # Document Type System (v2.0.1+)
+  use_document_types: true
+  
+  document_type_config:
+    # Section order in SUMMARY.md
+    section_order:
+      - cover
+      - preface
+      - list-of-tables
+      - list-of-figures
+      - chapters
+      - epilog
+      - appendices
+      - glossary
+      - bibliography
+      - index
+      - attributions
+      - colophon
+    
+    # Section titles for SUMMARY.md
+    section_titles:
+      preface: "Vorwort"
+      list-of-tables: "Tabellenverzeichnis"
+      list-of-figures: "Abbildungsverzeichnis"
+      chapters: "Hauptinhalt"
+      epilog: "Abschluss"
+      appendices: "Anhänge"
+      glossary: "Glossar"
+      bibliography: "Literatur"
+      index: "Register"
+      attributions: "Danksagungen"
+      colophon: "Impressum"
+    
+    # Show in SUMMARY.md?
+    show_in_summary:
+      template: false
+      placeholder: false
+      example: true
+    
+    # Auto-numbering
+    auto_number_chapters: true
+    auto_number_appendices: true  # A, B, C, ...
+    
+    # Chapter-appendix handling
+    chapter_appendix_indent: true
+    chapter_appendix_prefix: "Appendix {chapter}.{id}"
+  
   pdf_options:
     emoji_color: true
     emoji_bxcoloremoji: false
