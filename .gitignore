@@ -1,6 +1,8 @@
 # Local environment variables
 .env
 
+.venv-smoke/
+
 # lua / latex
 .texmf-cache/
 _latex-debug/
