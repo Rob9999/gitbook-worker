@@ -6,33 +6,42 @@ history:
   - "init: 2025-12-31"
 ---
 
-# Kundenguide: Installation & Start des GitBook Worker
+# Customer Guide: Installation & Getting Started with the GitBook Worker
 
-Ziel: Sicherstellen, dass immer unsere gelieferte Version des `gitbook_worker` genutzt wird – auch wenn auf derselben Maschine alte Projekte mit eigenen `tools/`-Modulen liegen.
+**Purpose:**  
+Ensure that the provided version of the `gitbook_worker` is always used – even if older projects with their own local `tools/` modules exist on the same machine.  
 
-## 1) Saubere Python-Umgebung (pro Projekt)
-1. In das Projektverzeichnis wechseln (z. B. `C:\RAMProjects\ERDA`).
-2. Virtuelle Umgebung anlegen und aktivieren (Windows PowerShell):
+## 1) Clean Python environment (per project)
+
+1. Change into the project directory (for example: `C:\Path\To\Project`).
+2. Create and activate a virtual environment (Windows PowerShell):
    ```powershell
    py -3.11 -m venv .venv
    .\.venv\Scripts\activate
    ```
-3. Alte Pakete entfernen, falls vorhanden:
+
+3. Remove legacy packages if present:
+
    ```powershell
    pip uninstall -y gitbook-worker tools
    ```
-4. Unsere Version installieren:
-   - Mit Wheel (empfohlen):
+4. Install the provided version:
+
+   * Using a wheel file (recommended):
+
      ```powershell
-     pip install --no-deps --force-reinstall dist/gitbook_worker-2.0.4.post1-py3-none-any.whl
+     pip install --no-deps --force-reinstall dist/gitbook_worker-<version>-py3-none-any.whl
      ```
-   - Oder direkt aus dem gelieferten Repo:
+   * Or directly from the delivered repository:
+
      ```powershell
      pip install --no-deps --force-reinstall .
      ```
 
-## 2) Prüfen, was wirklich importiert wird
-Nach der Installation kontrollieren, dass keine fremden `tools`-Module gezogen werden:
+## 2) Verify what is actually imported
+
+After installation, verify that no foreign `tools` modules are being imported:
+
 ```powershell
 python - <<'PY'
 import gitbook_worker, tools
@@ -40,33 +49,47 @@ print("gitbook_worker:", gitbook_worker.__file__)
 print("tools shim     :", tools.__file__)
 PY
 ```
-Die Pfade müssen in das aktivierte `.venv` zeigen (z. B. `...\.venv\Lib\site-packages\gitbook_worker\...`).
 
-## 3) Orchestrator starten
-Beispiel für die deutsche Ausgabe mit lokalem Profil (zieht `de/publish.yml` aus `content.yaml` automatisch):
+All reported paths must point into the active `.venv` (for example:
+`...\ .venv\Lib\site-packages\gitbook_worker\...`).
+
+## 3) Start the orchestrator
+
+Example for a language-specific run using a local profile (the corresponding `publish.yml` is resolved automatically from `content.yaml`):
+
 ```powershell
-python -m gitbook_worker.tools.workflow_orchestrator run --root C:\RAMProjects\ERDA --profile local --lang de
+python -m gitbook_worker.tools.workflow_orchestrator run --root <PROJECT_ROOT> --profile local --lang <lang>
 ```
-Typische Varianten:
-- Nur Converter/PDF-Pipeline: `--step converter` oder `--step publisher`
-- Dry-Run: `--dry-run` (führt keine externen Schritte aus)
-- Anderes Manifest explizit: `--manifest de/publish.yml` (überschreibt die automatische Auflösung aus `content.yaml`)
 
-## 4) Docker-Run (optional, wenn Docker Desktop verfügbar)
+Common variants:
+
+* Run only converter / PDF pipeline: `--step converter` or `--step publisher`
+* Dry run (no external steps executed): `--dry-run`
+* Explicitly specify a manifest: `--manifest <lang>/publish.yml` (overrides automatic resolution from `content.yaml`)
+
+## 4) Docker run (optional, if Docker Desktop is available)
+
 ```powershell
-python -m gitbook_worker.tools.docker.run_docker orchestrator --profile local --use-dynamic --lang de --root C:\RAMProjects\ERDA
+python -m gitbook_worker.tools.docker.run_docker orchestrator --profile local --use-dynamic --lang <lang> --root <PROJECT_ROOT>
 ```
-Hinweise:
-- Fonts werden zur Laufzeit über Volume-Mounts injiziert; `fonts-storage/` und `.github/fonts/` müssen vorhanden sein.
-- Auf Windows erfolgt die Pfad-Umsetzung automatisch (Docker Desktop).
 
-## 5) Häufige Stolpersteine
-- **Falsches Modul "tools"**: Immer das `.venv` aktivieren und ggf. `pip uninstall tools` ausführen.
-- **Kein Manifest gefunden**: `--manifest` relativ zum Repo-Root angeben (z. B. `de/publish.yml`) oder Flag weglassen, dann greift `content.yaml`.
-- **LuaTeX/Fonts fehlen**: Sicherstellen, dass `luaotfload-tool --update --force` einmalig gelaufen ist (wird im Test-Fixture getan, kann aber lokal nötig sein).
+Notes:
 
-## 6) Schnell-Checkliste für Support
-- `.venv` aktiv? (`where python` zeigt auf Projekt-`.venv`)
-- `gitbook_worker.__version__` = 2.0.4.post1?
-- `tools.__file__` verweist auf `.venv\Lib\site-packages\gitbook_worker\tools\__init__.py`?
-- Orchestrator-Log zeigt `manifest=...\de\publish.yml` und `tools_dir=...site-packages\gitbook_worker\tools`?
+* Fonts are injected at runtime via volume mounts; `fonts-storage/` and `.github/fonts/` must exist.
+* On Windows, path translation is handled automatically by Docker Desktop.
+
+## 5) Common pitfalls
+
+* **Wrong `tools` module:** Always activate the `.venv` and, if necessary, run `pip uninstall tools`.
+* **Manifest not found:** Provide `--manifest` relative to the repository root (e.g. `<lang>/publish.yml`), or omit the flag to fall back to `content.yaml`.
+* **Missing LuaTeX / fonts:** Ensure `luaotfload-tool --update --force` has been run at least once (handled in test fixtures, but may be required locally).
+
+## 6) Quick support checklist
+
+* `.venv` active? (`where python` points to the project `.venv`)
+* `gitbook_worker.__version__` matches the delivered release?
+* `tools.__file__` points to
+  `.venv\Lib\site-packages\gitbook_worker\tools\__init__.py`?
+* Orchestrator log shows
+  `manifest=...\<lang>\publish.yml` and
+  `tools_dir=...site-packages\gitbook_worker\tools`?
