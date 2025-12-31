@@ -49,6 +49,10 @@ from gitbook_worker.tools.utils.language_context import (
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.utils.smart_manifest import detect_repo_root
+from gitbook_worker.tools.validators.frontmatter_checker import (
+    FRONTMATTER_EXIT_CODE,
+    check_frontmatter_tree,
+)
 
 LOGGER = get_logger(__name__)
 
@@ -69,6 +73,7 @@ class PipelineOptions:
     run_gitbook_summary: bool
     run_publisher: bool
     gitbook_use_git: bool
+    run_frontmatter_check: bool
     publisher_args: tuple[str, ...]
     dry_run: bool
     language_id: str
@@ -163,6 +168,7 @@ def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
         run_gitbook_summary=not args.no_gitbook_summary,
         run_publisher=not args.no_publish,
         gitbook_use_git=not args.gitbook_no_git,
+        run_frontmatter_check=not args.skip_frontmatter_check,
         publisher_args=publisher_args,
         dry_run=args.dry_run,
         language_id=language_ctx.language_id,
@@ -252,6 +258,20 @@ def run_pipeline(options: PipelineOptions) -> None:
         LOGGER.info("Dry-Run aktiviert – Befehle werden nicht ausgeführt.")
         return
 
+    if options.run_frontmatter_check:
+        fm_issues = check_frontmatter_tree(options.root)
+        if fm_issues:
+            for issue in fm_issues:
+                LOGGER.error(
+                    "Frontmatter-Fehler: %s (Zeile %s): %s",
+                    issue.path,
+                    issue.line,
+                    issue.message,
+                )
+                if issue.snippet:
+                    LOGGER.error("Snippet:\n%s", issue.snippet)
+            raise SystemExit(FRONTMATTER_EXIT_CODE)
+
     if options.run_set_flag:
         _run_set_publish_flag(options)
 
@@ -330,6 +350,11 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--no-publish",
         action="store_true",
         help="Skip the PDF publisher",
+    )
+    parser.add_argument(
+        "--skip-frontmatter-check",
+        action="store_true",
+        help="Überspringt die Frontmatter-Syntaxprüfung (nicht empfohlen)",
     )
     parser.add_argument(
         "--publisher-args",

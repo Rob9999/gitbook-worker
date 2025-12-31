@@ -83,6 +83,13 @@ _EXIT_CODES: tuple[ExitCodeInfo, ...] = (
         healing="Flags/Transitions prüfen; ungültige Kombinationen vermeiden.",
         trigger="Übergebene Zielwerte verletzen interne Konsistenz",
     ),
+    ExitCodeInfo(
+        code=42,
+        component="pipeline|publisher",
+        summary="Frontmatter ungültig",
+        healing="YAML-Frontmatter der betroffenen Markdown-Datei korrigieren (Zeile aus Meldung).",
+        trigger="Frontmatter-Checker meldet YAML-Parsing-Fehler",
+    ),
 )
 
 

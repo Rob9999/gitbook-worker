@@ -1,8 +1,4 @@
 ---
-title: Startseite
-description: Übersicht für das neutrale Beispielbuch
-date: 2024-06-01
-version: 1.0
 geometry:
 - paperwidth=210mm
 - paperheight=297mm
@@ -23,45 +19,82 @@ header-includes:
 - \setlength\LTright{0pt}
 ---
 
-<a id="md-index"></a>
-
-# Willkommen zur neutralen Beispielbibliothek
-
-Diese Startseite liefert einen schnellen Überblick über das Beispielbuch, das als neutrale Vorlage für Tests, Layoutprüfungen und internationale Text-Snippets dient. Die Kapitel enthalten Tabellen, Bilder, interne und externe Links sowie strukturierte Anhänge.
-
-## Schnelleinstieg
-- [Vorwort](#md-preface)
-- [Kapitel 1 – Beobachtbare Muster](#md-chapters-chapter-01)
-- [Kapitel 2 – Vergleichstabellen](#md-chapters-chapter-02)
-- [Vorlagen für mehrsprachige Texte](#md-templates-multilingual-neutral-text)
-- [Appendix A – Datenquellen](#md-appendices-appendix-a)
-- [Emoji-Beispiele (Smileys & Personen)](#md-examples-emoji-smileys-and-people)
-- [Emoji-Beispiele (Natur & Essen)](#md-examples-emoji-nature-and-food)
-- [Emoji-Beispiele (Aktivitäten & Reisen)](#md-examples-emoji-activities-and-travel)
-- [Emoji-Beispiele (Objekte, Symbole & Flaggen)](#md-examples-emoji-objects-symbols-flags)
-- [Appendix – Emoji- & Schriftabdeckung](#md-appendices-emoji-font-coverage)
-- [Zitationen & weiterführende Quellen](#md-references)
-
-## Visuale Vorschau
-<a id="visuale-vorschau"></a>
-![Neutrale Formen](.gitbook/assets/neutral-grid.pdf)
-
-Die Illustration zeigt abstrakte Formen ohne Bezug zu realen Personen oder markenrechtlich relevanten Themen. Sie kann beliebig oft wiederverwendet werden, um Bildkomponenten zu testen.
-
-## Externe neutrale Links
-- [United Nations Data](https://data.un.org/)
-- [Smithsonian Open Access](https://www.si.edu/openaccess)
-- [World Meteorological Organization](https://public.wmo.int/en)
-
-Alle Links führen zu allgemein zugänglichen, neutralen Informationen und eignen sich für rechtlich unkritische Testfälle.
-
-> Tipp: Nutze die Startseite als Template, indem du die hier gelisteten Sektionen kopierst und für deine eigene Dokumentation anpasst.
+<a id="md-readme"></a>
+# content
 
 
 \newpage
 
+---
+title: Abbildungsverzeichnis
+date: 2025-12-29
+version: 1.0
+doc_type: list-of-figures
+auto_generate: true
+include_formats: [png, jpg, svg, pdf]
+numbering_style: "decimal"
+---
+<a id="md-list-of-figures"></a>
+
+# Abbildungsverzeichnis
+
+> **Hinweis**: Dieses Abbildungsverzeichnis wird in zukünftigen Versionen automatisch aus allen eingebetteten Bildern generiert.
+
+## Kapitel-Abbildungen
+
+- Abb. 1.1: Versuchsaufbau Übersicht ........................... (Kap. 1)
+- Abb. 1.2: Messkurve Temperaturverlauf ........................ (Kap. 1)
+- Abb. 2.1: Diagramm Vergleichsanalyse ......................... (Kap. 2)
+
+## Appendix-Abbildungen
+
+- Abb. A.1: Schematischer Aufbau Datenkatalog .................. (App. A)
+- Abb. B.1: Font Coverage Matrix ............................... (App. B)
+
+## Emoji-Beispiele
+
+- Abb. E.1: Smileys & Personen Übersicht ....................... (Beisp.)
+- Abb. E.2: Natur & Essen Emoji-Palette ........................ (Beisp.)
+- Abb. E.3: Aktivitäten & Reisen Kategorien .................... (Beisp.)
+- Abb. E.4: Objekte, Symbole & Flaggen ......................... (Beisp.)
+
+---
+
+**Automatische Generierung (v2.0.1+)**:
+- Alle Bilder mit Alt-Text oder Captions werden erfasst
+- Nummerierung erfolgt nach Kapitel-Zugehörigkeit
+- Format-Erkennung: PNG, JPG, SVG, PDF
+- Seitenzahlen werden aus dem generierten PDF extrahiert
+
+
+\newpage
+
+---
+title: Anhänge
+date: 2024-06-01
+version: 1.0
+---
 <a id="md-appendices-readme"></a>
-# appendices
+
+# Anhänge
+
+Dieser Ordner enthält ergänzende Materialien und Referenzdokumente zum Hauptinhalt des ERDA-Buchs.
+
+## Inhalt
+
+- **[Appendix A – Datenquellen und Tabellenlayout](#md-appendices-appendix-a)**: Detaillierte Übersicht über verwendete Datenquellen, Tabellenformate und Referenzen zu öffentlichen Datenkatalogen.
+- **[Emoji Font Coverage](#md-appendices-emoji-font-coverage)**: Technische Dokumentation zur Emoji-Abdeckung der verwendeten Schriftarten.
+
+## Zweck
+
+Die Anhänge bieten:
+- Nachschlagewerte für Datenstrukturen und Formate
+- Technische Referenzen für Font-Rendering und Emoji-Support
+- Quellenverweise für Datensätze und externe Ressourcen
+
+---
+
+*Dieser Ordner wird kontinuierlich erweitert. Änderungen werden im Versionsverlauf dokumentiert.*
 
 
 \newpage
@@ -70,6 +103,9 @@ Alle Links führen zu allgemein zugänglichen, neutralen Informationen und eigne
 title: Appendix A – Datenquellen und Tabellenlayout
 date: 2024-06-01
 version: 1.0
+doc_type: appendix
+appendix_id: "A"
+category: "technical"
 ---
 <a id="md-appendices-appendix-a"></a>
 
@@ -103,6 +139,9 @@ title: Appendix – Emoji- & Schriftabdeckung
 description: Nachweis geeigneter Fonts für alle Schriftzeichen und farbigen Emojis im Beispielinhalt.
 date: 2024-06-05
 version: 1.0
+doc_type: appendix
+appendix_id: "B"
+category: "technical"
 history:
   - version: 1.0
     date: 2024-06-05
@@ -137,90 +176,52 @@ Diese Übersicht fasst die Fonts zusammen, die sämtliche Schriftsysteme der Bei
 
 \newpage
 
-<a id="md-chapters-readme"></a>
-# chapters
-
-
-\newpage
-
 ---
-title: Kapitel 1 – Beobachtbare Muster
-date: 2024-06-01
+title: Beispiele
+date: 2024-06-05
 version: 1.0
 ---
-<a id="md-chapters-chapter-01"></a>
-
-# Kapitel 1 – Beobachtbare Muster
-
-Dieses Kapitel stellt eine neutrale Beschreibung strukturierter Beobachtungen vor. Alle Beispiele basieren auf generischen Messpunkten, die sich leicht in neue Kontexte übertragen lassen.
-
-## 1.1 Methodische Schritte
-1. **Rahmen definieren:** Bestimme den Zweck der Beobachtung (z. B. Temperatur, Nutzungsverhalten oder Prozessdauer).
-2. **Messpunkte wählen:** Lege neutrale Parameter fest, die keine personenbezogenen Daten enthalten.
-3. **Dokumentation sichern:** Halte Messergebnisse tabellarisch fest und verweise auf die Quelle, z. B. öffentliche Datenkataloge.[^1]
-
-## 1.2 Beispielbeschreibung
-- *Messgebiet:* Ein fiktives Versuchsareal mit moderatem Klima.
-- *Messgeräte:* Standardisierte Sensoren mit Kalibrierzertifikat.
-- *Auswertung:* Durchschnittswerte über einen Vier-Wochen-Zeitraum.
-
-Die resultierenden Daten werden weiter unten im Buch, insbesondere in [Kapitel 2](#md-chapters-chapter-02), in Tabellenform dargestellt. Detaildaten sind außerdem in [Appendix A](#md-appendices-appendix-a) abgelegt.
-
-## 1.3 Querverweise
-| Abschnitt | Zweck | Link |
-|-----------|-------|------|
-| Vorwort | Kontext und Zielsetzung | [Zur Einleitung](#md-preface) |
-| Bildvorlage | Grafische Darstellung | [Startseite](#visuale-vorschau) |
-| Textvorlagen | Mehrsprachige Snippets | [Templates](#md-templates-multilingual-neutral-text) |
-
-[^1]: Siehe [Zitationen & Quellen](#md-references).
-
-
-\newpage
-
----
-title: Kapitel 2 – Vergleichstabellen
-date: 2024-06-01
-version: 1.0
----
-<a id="md-chapters-chapter-02"></a>
-
-# Kapitel 2 – Vergleichstabellen
-
-Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden können. Alle Werte sind illustrative Mittelwerte und lassen sich problemlos durch reale Messreihen ersetzen.
-
-## 2.1 Übersichtstabelle
-| Messpunkt | Woche 1 | Woche 2 | Woche 3 | Woche 4 |
-|-----------|---------|---------|---------|---------|
-| Temperaturmittel (°C) | 18.2 | 18.5 | 18.4 | 18.3 |
-| Luftfeuchte (%) | 52 | 53 | 51 | 52 |
-| Lichtstunden | 14 | 14 | 13 | 13 |
-
-## 2.2 Format-Beispiel für Verhältnisse
-| Kategorie | Anteil am Gesamtvolumen | Notiz |
-|-----------|------------------------|-------|
-| Messwerte mit direktem Sensorbezug | 40 % | Sensoren nach ISO 17025 kalibriert |
-| Berechnete Richtwerte | 35 % | Ableitung über gleitende Mittelwerte |
-| Kontextdaten | 25 % | Stammen aus öffentlichen Katalogen[^2] |
-
-Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
-
-## 2.3 Referenz auf Abbildungen
-![Rasterdarstellung der Messpunkte](.gitbook/assets/neutral-grid.pdf)
-
-Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
-
-Zur Überprüfung einer eingebetteten HTML-Inlay-Variante kann zusätzlich die folgende Figur verwendet werden:
-
-![ERDA logo](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
-
-[^2]: Vgl. die referenzierten offenen Kataloge in [Zitationen & weiterführende Quellen](#md-references).
-
-
-\newpage
-
 <a id="md-examples-readme"></a>
-# examples
+
+# Beispiele
+
+Dieser Ordner sammelt umfassende Emoji-Beispiele zur Validierung der Farbdarstellung und Font-Abdeckung in generierten PDFs.
+
+## Emoji-Kategorien
+
+Die Beispiele sind nach Unicode-Kategorien organisiert:
+
+- **[Smileys & Personen](#md-examples-emoji-smileys-and-people)**: Gesichtsausdrücke, Gesten, Berufsrollen und Hautfarb-Varianten (U+1F600–U+1F64F, U+1F466–U+1F9D1)
+  
+- **[Natur & Essen](#md-examples-emoji-nature-and-food)**: Tiere, Pflanzen, Wettersymbole und Lebensmittel (U+1F330–U+1F37F, U+1F400–U+1F4FF)
+  
+- **[Aktivitäten & Reisen](#md-examples-emoji-activities-and-travel)**: Sport, Hobbys, Verkehrsmittel und Orte (U+1F680–U+1F6FF, U+1F3A0–U+1F3FF)
+  
+- **[Objekte, Symbole & Flaggen](#md-examples-emoji-objects-symbols-flags)**: Alltags-Objekte, technische Symbole, Zeichen und internationale Flaggen (U+1F4A0–U+1F4FF, U+1F500–U+1F5FF, U+1F1E6–U+1F1FF)
+
+## Testabdeckung
+
+Diese Beispiele validieren:
+- ✅ **Farbdarstellung**: Twemoji Mozilla COLR/CPAL Format
+- ✅ **Unicode-Vollständigkeit**: Alle gängigen Emoji-Ranges
+- ✅ **Modifikatoren**: Hautfarben, Geschlechts-Varianten, ZWJ-Sequenzen
+- ✅ **Layout-Stabilität**: Emoji in Fließtext, Tabellen und Listen
+
+## Verwendung
+
+**Zweck**: 
+- Automatisierte Rendering-Tests für PDF-Generierung
+- Visuelle Qualitätskontrolle für Emoji-Farben
+- Referenzdokumentation für Font-Stack-Konfiguration
+
+**Technische Details**:
+- Font: Twemoji Mozilla v0.7.0 (COLR/CPAL)
+- Format: LuaTeX + Pandoc Lua-Filter
+- Fallback: DejaVu Sans für nicht-Emoji-Zeichen
+
+---
+
+*Letzte Aktualisierung: Version 1.0 (2024-06-05) – Vollständige Emoji 13.1 Abdeckung*
 
 
 \newpage
@@ -230,6 +231,9 @@ title: Emoji-Beispiele – Aktivitäten & Reisen
 description: Häufige Sport-, Freizeit- und Transport-Emojis für Funktions- und Renderingtests.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -285,6 +289,9 @@ title: Emoji-Beispiele – Natur & Essen
 description: Sammlung gängiger Natur-, Tier- und Lebensmittel-Emojis für Layouttests.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -340,6 +347,9 @@ title: Emoji-Beispiele – Objekte, Symbole & Flaggen
 description: Referenzlisten für Werkzeuge, Technologie, Symbole und Flaggen mit vollständiger Emoji-Abdeckung.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -395,6 +405,9 @@ title: Emoji-Beispiele – Smileys & Personen
 description: Übersicht über klassische Gesichts- und Personen-Emojis zur Testabdeckung.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -446,7 +459,139 @@ Diese Seite gruppiert häufig genutzte Emoji-Sets nach Emotionen, Gesten und Rol
 
 \newpage
 
+---
+title: Danksagungen & Zuschreibungen
+date: 2025-12-29
+version: 1.0
+doc_type: attributions
+include_font_licenses: true
+include_contributors: true
+categories:
+  - fonts
+  - libraries
+  - contributors
+---
+<a id="md-attributions"></a>
+
+# Danksagungen & Zuschreibungen
+
+Dieses Buch wurde mit Unterstützung vieler Open-Source-Projekte und Beitragender erstellt. Wir danken allen, die ihre Arbeit der Gemeinschaft zur Verfügung stellen.
+
+---
+
+## Verwendete Schriften
+
+### Twemoji Mozilla (v0.7.0)
+**Lizenz**: CC BY 4.0  
+**Copyright**: © Mozilla Foundation  
+**Quelle**: https://github.com/mozilla/twemoji-colr  
+**Verwendung**: Farbige Emoji-Darstellung (COLR/CPAL Format)
+
+### DejaVu Fonts (v2.37)
+**Lizenz**: Bitstream Vera License (permissive, GPL-compatible)  
+**Copyright**: © DejaVu Fonts Team  
+**Quelle**: https://dejavu-fonts.github.io/  
+**Verwendung**: 
+- DejaVu Serif (Fließtext)
+- DejaVu Sans (Überschriften, UI-Elemente)
+- DejaVu Sans Mono (Code-Blöcke)
+
+### ERDA CC-BY CJK Font (v1.0)
+**Lizenz**: CC BY 4.0  
+**Copyright**: © ERDA Team  
+**Verwendung**: Mehrsprachige Abdeckung (Latin, Cyrillic, Greek, CJK, Devanagari, Ethiopic)
+
+---
+
+## Software & Bibliotheken
+
+### LuaTeX (v1.18.0)
+**Lizenz**: GPLv2+  
+**Copyright**: © LuaTeX Development Team  
+**Verwendung**: PDF-Satz-Engine mit COLR-Font-Support
+
+### Pandoc (v3.6)
+**Lizenz**: GPLv2+  
+**Copyright**: © John MacFarlane  
+**Verwendung**: Markdown → LaTeX Konvertierung
+
+### Python (v3.12)
+**Lizenz**: PSF License  
+**Copyright**: © Python Software Foundation  
+**Verwendung**: Build-Automatisierung, Font-Management, Workflow-Orchestrierung
+
+### GitBook Worker (v2.0.1)
+**Lizenz**: MIT  
+**Copyright**: © ERDA Team  
+**Verwendung**: Multilinguales Publishing-System
+
+---
+
+## Beitragende
+
+### Projektteam
+- **ERDA Team** – Konzeption, Entwicklung, Dokumentation
+- **GitHub Copilot** – Architektur-Support, Code-Review, Dokumentations-Assistenz
+
+### Fachredaktion
+- Neutrale Inhalte: ERDA Content Team
+- Emoji-Testsammlungen: ERDA Quality Assurance
+- Mehrsprachige Vorlagen: ERDA Localization Team
+
+### Technische Illustrationen
+- Font-Coverage-Matrix: Automatisch generiert
+- Emoji-Übersichten: Unicode Consortium Data
+
+---
+
+## Datenquellen
+
+Die neutralen Beispieldaten stammen aus öffentlich zugänglichen Quellen:
+
+1. **United Nations Data Portal** – https://data.un.org/
+2. **World Bank Open Data** – https://data.worldbank.org/
+3. **World Meteorological Organization** – https://public.wmo.int/
+4. **Smithsonian Open Access** – https://www.si.edu/openaccess
+
+---
+
+## Community & Standards
+
+Besonderer Dank an:
+- **Unicode Consortium** – Emoji-Standard und -Dokumentation
+- **GitHub** – Hosting und Collaboration-Tools
+- **Open Source Community** – Für die unzähligen Bibliotheken und Tools
+
+---
+
+**Stand**: Dezember 2025  
+**Version**: 1.0  
+**Aktualisierungen**: Dieses Dokument wird bei jeder Release aktualisiert
+
+
+\newpage
+
+---
+title: Widmung
+doc_type: dedication
+order: 5
+---
+<a id="md-dedication"></a>
+
+Wir widmen dieses Buch allen Mitwirkenden, die Wissen teilen.
+
+
+\newpage
+
+---
+title: Inhaltshinweis
+date: 2024-06-01
+version: 1.0
+doc_type: placeholder
+show_in_summary: false
+---
 <a id="md-placeholder"></a>
+
 # Inhaltshinweis
 
 Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bilddateien und Vorlagen. Verwende [content/index.md](#md-index) als Startpunkt.
@@ -454,8 +599,377 @@ Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bildd
 
 \newpage
 
+---
+title: Kapitel
+date: 2024-06-01
+version: 1.0
+---
+<a id="md-chapters-readme"></a>
+
+# Kapitel
+
+Dieser Ordner enthält die Hauptkapitel des ERDA-Buchs mit strukturierten Inhalten, Beispielen und Demonstrationsmaterial.
+
+## Verfügbare Kapitel
+
+- **[Kapitel 1 – Beobachtbare Muster](#md-chapters-chapter-01)**: Einführung in methodische Beobachtungen und strukturierte Datenerfassung. Zeigt neutrale Beschreibungen von Messverfahren und Dokumentationstechniken.
+  
+- **[Kapitel 2 – Tabellen und Datenstrukturen](#md-chapters-chapter-02)**: Übersicht über Tabellenlayouts, Formatierungen und Darstellungsformen für strukturierte Daten.
+
+## Aufbau der Kapitel
+
+Jedes Kapitel folgt einer konsistenten Struktur:
+- **Einleitung**: Kontext und Zielsetzung
+- **Methodische Schritte**: Systematische Vorgehensweise
+- **Beispiele**: Konkrete Anwendungsfälle mit neutralen Datensätzen
+- **Querverweise**: Links zu Anhängen und ergänzenden Materialien
+
+## Verwendung
+
+Die Kapitel dienen als:
+- Testmaterial für PDF-Generierung und Layout-Validierung
+- Referenz für Markdown-zu-PDF-Konvertierung
+- Demonstrationsinhalte für mehrsprachige Dokumentation
+
+---
+
+*Alle Kapitel verwenden neutrale Daten ohne personenbezogene Informationen.*
+
+
+\newpage
+
+---
+title: Kapitel 1 – Beobachtbare Muster
+date: 2024-06-01
+version: 1.0
+doc_type: chapter
+chapter_number: 1
+---
+<a id="md-chapters-chapter-01"></a>
+
+# Kapitel 1 – Beobachtbare Muster
+
+Dieses Kapitel stellt eine neutrale Beschreibung strukturierter Beobachtungen vor. Alle Beispiele basieren auf generischen Messpunkten, die sich leicht in neue Kontexte übertragen lassen.
+
+## 1.1 Methodische Schritte
+1. **Rahmen definieren:** Bestimme den Zweck der Beobachtung (z. B. Temperatur, Nutzungsverhalten oder Prozessdauer).
+2. **Messpunkte wählen:** Lege neutrale Parameter fest, die keine personenbezogenen Daten enthalten.
+3. **Dokumentation sichern:** Halte Messergebnisse tabellarisch fest und verweise auf die Quelle, z. B. öffentliche Datenkataloge.[^1]
+
+## 1.2 Beispielbeschreibung
+- *Messgebiet:* Ein fiktives Versuchsareal mit moderatem Klima.
+- *Messgeräte:* Standardisierte Sensoren mit Kalibrierzertifikat.
+- *Auswertung:* Durchschnittswerte über einen Vier-Wochen-Zeitraum.
+
+Die resultierenden Daten werden weiter unten im Buch, insbesondere in [Kapitel 2](#md-chapters-chapter-02), in Tabellenform dargestellt. Detaildaten sind außerdem in [Appendix A](#md-appendices-appendix-a) abgelegt.
+
+## 1.3 Querverweise
+| Abschnitt | Zweck | Link |
+|-----------|-------|------|
+| Vorwort | Kontext und Zielsetzung | [Zur Einleitung](#md-preface) |
+| Bildvorlage | Grafische Darstellung | [Startseite](#visuale-vorschau) |
+| Textvorlagen | Mehrsprachige Snippets | [Templates](#md-templates-multilingual-neutral-text) |
+
+[^1]: Siehe [Zitationen & Quellen](#md-references).
+
+
+\newpage
+
+---
+title: Kapitel 2 – Vergleichstabellen
+date: 2024-06-01
+version: 1.0
+doc_type: chapter
+chapter_number: 2
+---
+<a id="md-chapters-chapter-02"></a>
+
+# Kapitel 2 – Vergleichstabellen
+
+Die folgenden Tabellen zeigen, wie neutrale Datensätze strukturiert werden können. Alle Werte sind illustrative Mittelwerte und lassen sich problemlos durch reale Messreihen ersetzen.
+
+## 2.1 Übersichtstabelle
+| Messpunkt | Woche 1 | Woche 2 | Woche 3 | Woche 4 |
+|-----------|---------|---------|---------|---------|
+| Temperaturmittel (°C) | 18.2 | 18.5 | 18.4 | 18.3 |
+| Luftfeuchte (%) | 52 | 53 | 51 | 52 |
+| Lichtstunden | 14 | 14 | 13 | 13 |
+
+## 2.2 Format-Beispiel für Verhältnisse
+| Kategorie | Anteil am Gesamtvolumen | Notiz |
+|-----------|------------------------|-------|
+| Messwerte mit direktem Sensorbezug | 40 % | Sensoren nach ISO 17025 kalibriert |
+| Berechnete Richtwerte | 35 % | Ableitung über gleitende Mittelwerte |
+| Kontextdaten | 25 % | Stammen aus öffentlichen Katalogen[^2] |
+
+Die Tabellen können als CSV exportiert oder in [Appendix A](#tabellenlayout) erneut eingesehen werden. Verlinke interne Abschnitte immer mit relativen Pfaden, damit das Buch offline funktioniert.
+
+## 2.3 Referenz auf Abbildungen
+![Rasterdarstellung der Messpunkte](.gitbook/assets/neutral-grid.pdf)
+
+Die Abbildung verdeutlicht, wie Messzonen schematisch gezeigt werden können, ohne reale Orte zu benennen.
+
+Zur Überprüfung einer eingebetteten HTML-Inlay-Variante kann zusätzlich die folgende Figur verwendet werden:
+
+![ERDA logo](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+
+[^2]: Vgl. die referenzierten offenen Kataloge in [Zitationen & weiterführende Quellen](#md-references).
+
+
+\newpage
+
+---
+title: Kolophon
+date: 2025-12-29
+version: 1.0
+doc_type: colophon
+position: "back"
+include_technical_details: true
+---
+<a id="md-colophon"></a>
+
+# Kolophon
+
+**Das ERDA Buch – Mehrsprachige Publishing Platform**
+
+Ein neutrales Beispielbuch für Tests, Layout-Demos und Lokalisierungs-Workflows.
+
+---
+
+## Publikationsangaben
+
+**Titel**: Das ERDA Buch  
+**Untertitel**: Neutrale Beispielbibliothek für mehrsprachige Publishing-Tests  
+**Ausgabe**: 1. Auflage, Dezember 2025
+
+**Herausgeber**: ERDA Team  
+**Kontakt**: https://github.com/Rob9999/gitbook-worker
+
+**ISBN**: –  
+**eISBN (PDF)**: –
+
+---
+
+## Lizenz
+
+**Textlizenz**: CC BY-SA 4.0  
+Creative Commons Attribution-ShareAlike 4.0 International  
+https://creativecommons.org/licenses/by-sa/4.0/
+
+**Bedeutung**:
+- ✓ Vervielfältigung und Weitergabe erlaubt
+- ✓ Bearbeitung und kommerzielle Nutzung erlaubt
+- ⚠ Namensnennung erforderlich
+- ⚠ Weitergabe nur unter gleicher Lizenz
+
+**Code-Lizenz**: MIT License  
+https://opensource.org/licenses/MIT
+
+---
+
+## Technische Details
+
+### Satz und Typografie
+
+**Satz-Engine**: LuaTeX 1.18.0 (TeX Live 2024)  
+**Konvertierung**: Pandoc 3.6  
+**Build-System**: GitBook Worker 2.0.1 (Python 3.12)
+
+**Schriftarten**:
+- **Fließtext**: DejaVu Serif 2.37 (10pt)
+- **Überschriften**: DejaVu Sans 2.37 (14-24pt)
+- **Code**: DejaVu Sans Mono 2.37 (9pt)
+- **Emojis**: Twemoji Mozilla 0.7.0 (COLR/CPAL)
+- **Mehrsprachig**: ERDA CC-BY CJK 1.0 (7000+ Glyphen)
+
+### Dokument-Eigenschaften
+
+**Seitengröße**: A4 (210 × 297 mm)  
+**Seitenränder**: 2.5cm (oben/unten), 2cm (links/rechts)  
+**Zeilenhöhe**: 1.4 (Fließtext)  
+**Spalten**: Einspaltig
+
+**PDF-Version**: PDF/A-1b (Archivierung)  
+**Farbmodell**: RGB (Screen-optimiert)  
+**Schrift-Einbettung**: Vollständig (100%)
+
+### Automatisierung
+
+**Workflow-Orchestrator**: GitBook Worker Orchestrator  
+**Font-Management**: FontStorageBootstrapper (Dynamic Loading)  
+**Content-Konvertierung**: Markdown → LaTeX → PDF  
+**Emoji-Verarbeitung**: Unicode 15.1 mit COLR-Rendering
+
+**Git-Repository**: https://github.com/Rob9999/gitbook-worker  
+**Release-Tag**: v2.0.1  
+**Build-Datum**: {{ BUILD_DATE }}
+
+---
+
+## Druckangaben
+
+**Druck**: –  
+**Papier**: –  
+**Bindung**: –
+
+**Hinweis**: Diese digitale Version ist für Screen-Verwendung optimiert. Eine Druckversion mit CMYK-Farbraum und hoher Auflösung kann separat generiert werden.
+
+---
+
+## Version und Historie
+
+**Version 1.0** (Dezember 2025)
+- Erste vollständige Ausgabe
+- Document-Type-System implementiert
+- Automatische Verzeichnisgenerierung
+- Mehrsprachige Unterstützung (DE, EN)
+
+Vollständige Changelog:  
+https://github.com/Rob9999/gitbook-worker/releases
+
+---
+
+## Kontakt und Feedback
+
+**Issues**: https://github.com/Rob9999/gitbook-worker/issues  
+**Diskussionen**: https://github.com/Rob9999/gitbook-worker/discussions  
+**Beiträge**: Pull Requests willkommen!
+
+---
+
+Gesetzt mit LuaTeX und Pandoc • Entwickelt in Deutschland • Dezember 2025
+
+
+\newpage
+
+---
+title: Abkürzungsverzeichnis
+doc_type: list-of-abbreviations
+order: 7
+---
+<a id="md-list-of-abbreviations"></a>
+
+- API – Application Programming Interface
+- CLI – Command Line Interface
+
+
+\newpage
+
+---
+title: Tabellenverzeichnis
+date: 2025-12-29
+version: 1.0
+doc_type: list-of-tables
+auto_generate: true
+include_chapter_tables: true
+numbering_style: "decimal"
+---
+<a id="md-list-of-tables"></a>
+
+# Tabellenverzeichnis
+
+> **Hinweis**: Dieses Tabellenverzeichnis wird in zukünftigen Versionen automatisch aus allen Kapitel- und Appendix-Tabellen generiert.
+
+## Kapitel-Tabellen
+
+- Tabelle 1.1: Messreihen Versuchsaufbau ..................... (Kap. 1)
+- Tabelle 2.1: Vergleichswerte Layout A vs. B ................. (Kap. 2)
+- Tabelle 2.2: Statistische Auswertung ........................ (Kap. 2)
+
+## Appendix-Tabellen
+
+- Tabelle A.1: Öffentliche Klimadatenkataloge ................. (App. A)
+- Tabelle A.2: Tabellenformate Übersicht ...................... (App. A)
+- Tabelle B.1: Font-Matrix für Schriftzeichen ................. (App. B)
+- Tabelle B.2: Emoji-Abdeckung nach Kategorien ................ (App. B)
+
+---
+
+**Automatische Generierung (v2.0.1+)**:
+- Alle Tabellen mit Captions werden automatisch erfasst
+- Nummerierung erfolgt nach Kapitel-Zugehörigkeit
+- Seitenzahlen werden aus dem generierten PDF extrahiert
+
+
+\newpage
+
+---
+title: Hinweis der Übersetzung
+doc_type: translators-note
+order: 6
+---
+<a id="md-translators-note"></a>
+
+Diese Ausgabe basiert auf der englischen Fassung und wurde mit größter Sorgfalt übertragen.
+
+
+\newpage
+
+---
+title: Vorlagen
+date: 2024-06-02
+version: 1.1
+---
 <a id="md-templates-readme"></a>
-# templates
+
+# Vorlagen
+
+Dieser Ordner enthält wiederverwendbare Textvorlagen für mehrsprachige, neutrale Dokumentation.
+
+## Verfügbare Vorlagen
+
+### [Mehrsprachige Neutrale Texte](#md-templates-multilingual-neutral-text)
+
+Eine strukturierte Vorlage für internationale Dokumentation mit:
+- **Neutraler Formulierung**: Keine kultur-, marken- oder personenspezifischen Begriffe
+- **Mehrsprachigkeit**: Beispieltexte in 10+ Hauptsprachen (DE, EN, FR, ES, ZH, JA, AR, HI, RU, PT)
+- **Konsistenter Aufbau**: Kontextbeschreibung → Sprachspezifische Absätze → Tabellen
+
+**Verwendungszwecke**:
+- Template für globale Dokumentationsprojekte
+- Testmaterial für Unicode-Abdeckung und Font-Rendering
+- Demonstrationsobjekt für mehrsprachige PDF-Generierung
+
+## Struktur der Vorlagen
+
+Jede Vorlage folgt diesem Schema:
+
+```markdown
+---
+title: Vorlagentitel
+date: YYYY-MM-DD
+version: X.Y
+---
+
+# Kontext
+Kurze Beschreibung des Szenarios.
+
+## Sprache (ISO-Code)
+Neutraler Absatz ohne kulturspezifische Referenzen.
+```
+
+## Best Practices
+
+**Bei Verwendung der Vorlagen**:
+- ✅ Verwende kurze, prägnante Sätze
+- ✅ Vermeide idiomatische Ausdrücke
+- ✅ Nutze ISO-Sprachcodes (de-DE, en-US, fr-FR, etc.)
+- ✅ Dokumentiere Anpassungen im Versionsverlauf
+- ❌ Keine personenbezogenen Daten
+- ❌ Keine Markennamen ohne Notwendigkeit
+- ❌ Keine kulturspezifischen Metaphern
+
+## Erweiterung
+
+Neue Vorlagen sollten:
+1. YAML-Frontmatter mit `title`, `date`, `version` haben
+2. Mindestens 3 Sprachen abdecken (DE, EN, +1)
+3. Im Versionsverlauf dokumentiert sein
+4. Neutrale, wiederverwendbare Textbausteine enthalten
+
+---
+
+*Dieser Ordner wird bei Bedarf erweitert. Vorschläge für neue Vorlagen sind willkommen.*
 
 
 \newpage
@@ -464,6 +978,8 @@ Der Content-Ordner enthält jetzt vollständige Beispielkapitel, Anhänge, Bildd
 title: Vorlage für mehrsprachige neutrale Texte
 date: 2024-06-02
 version: 1.1
+doc_type: template
+show_in_summary: false
 ---
 <a id="md-templates-multilingual-neutral-text"></a>
 
@@ -618,6 +1134,7 @@ Diese Auflistung kann beliebig erweitert werden. Ergänze bei Bedarf Hinweise zu
 title: Vorwort
 date: 2024-06-01
 version: 1.0
+doc_type: preface
 ---
 <a id="md-preface"></a>
 
@@ -638,6 +1155,8 @@ Weiterführende Hinweise finden sich in [Kapitel 1](#md-chapters-chapter-01), w�
 title: Zitationen & weiterführende Quellen
 date: 2024-06-01
 version: 1.0
+doc_type: bibliography
+citation_style: "APA"
 ---
 <a id="md-references"></a>
 

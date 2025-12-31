@@ -24,6 +24,8 @@ from typing import Iterable, Mapping, MutableMapping, Sequence
 
 import yaml
 
+from gitbook_worker import __version__ as PACKAGE_VERSION
+from gitbook_worker import gh_paths
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.publishing.frontmatter_config import FrontMatterConfigLoader
@@ -39,6 +41,71 @@ from gitbook_worker.tools.utils.smart_content import ContentEntry
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
 
 LOGGER = get_logger(__name__)
+TOOL_NAME = "gitbook-worker"
+LICENSE_SHORT = "MIT (see LICENSE)"
+COPYRIGHT = "Copyright (c) 2025 Robert Alexander Massinger"
+
+
+def _command_line() -> str:
+    """Return the current command line as a shell-quoted string."""
+    return " ".join(shlex.quote(part) for part in sys.argv)
+
+
+def _print_start_banner(silent: bool) -> None:
+    """Emit a concise startup banner to stdout unless silenced."""
+    if silent:
+        return
+    lines = [
+        f"{TOOL_NAME} v{PACKAGE_VERSION}",
+        COPYRIGHT,
+        f"License: {LICENSE_SHORT}",
+    ]
+    print("\n".join(lines))
+
+
+def _log_start_context(args: argparse.Namespace) -> None:
+    """Log startup context (command line and key paths) for workflow.log."""
+    LOGGER.info(
+        "startup | tool=%s version=%s license=%s cwd=%s",
+        TOOL_NAME,
+        PACKAGE_VERSION,
+        LICENSE_SHORT,
+        os.getcwd(),
+    )
+    LOGGER.info("startup | cmd=%s", _command_line())
+    LOGGER.info(
+        "startup | paths repo_root=%s tools=%s docker=%s logs=%s github=%s",
+        gh_paths.REPO_ROOT,
+        gh_paths.GH_TOOLS_DIR,
+        gh_paths.GH_DOCKER_DIR,
+        gh_paths.GH_LOGS_DIR,
+        gh_paths.GITHUB_DIR,
+    )
+
+
+def _log_run_configuration(config: OrchestratorConfig) -> None:
+    """Log derived runtime configuration for traceability."""
+    LOGGER.info(
+        "config | root=%s manifest=%s profile=%s language=%s dry_run=%s",
+        config.root,
+        config.manifest,
+        config.profile.name,
+        config.language_id,
+        config.dry_run,
+    )
+    LOGGER.info(
+        "config | repo_visibility=%s repository=%s commit=%s base=%s reset_others=%s",
+        config.repo_visibility,
+        config.repository,
+        config.commit,
+        config.base,
+        config.reset_others,
+    )
+    if config.steps_override:
+        LOGGER.info("config | steps_override=%s", ",".join(config.steps_override))
+    if config.publisher_args:
+        LOGGER.info("config | publisher_args=%s", ",".join(config.publisher_args))
+
 
 _DEFAULT_STEPS = (
     "check_if_to_publish",
@@ -1176,6 +1243,13 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         dest="language",
         help="Sprach-ID aus content.yaml (Standard: content.yaml.default)",
     )
+    parser.add_argument(
+        "--silent",
+        "--quiet",
+        dest="silent",
+        action="store_true",
+        help="Unterdrückt das Startup-Banner auf stdout (Logs bleiben aktiv)",
+    )
 
 
 def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
@@ -1230,6 +1304,9 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
 def main(argv: Iterable[str] | None = None) -> None:
     args = parse_args(argv)
     handle_exit_code_help(args)
+
+    _print_start_banner(getattr(args, "silent", False))
+    _log_start_context(args)
     if args.command == "validate":
         ok, errors = validate_manifest(
             root=args.root,
@@ -1238,6 +1315,13 @@ def main(argv: Iterable[str] | None = None) -> None:
             all_profiles=args.all_profiles,
             repo_visibility=args.repo_visibility,
             repository=args.repository,
+        )
+        LOGGER.info(
+            "validate | root=%s manifest=%s profile=%s all_profiles=%s",
+            args.root,
+            args.manifest,
+            args.profile,
+            args.all_profiles,
         )
         for err in errors:
             LOGGER.error(err)
@@ -1248,6 +1332,7 @@ def main(argv: Iterable[str] | None = None) -> None:
         return
 
     config = build_config(args)
+    _log_run_configuration(config)
     run(config)
 
 
