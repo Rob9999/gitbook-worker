@@ -1,10 +1,11 @@
----
 title: Home
 description: Overview for the neutral sample book
 date: 2024-06-01
-version: 1.0doc_type: cover
+version: 1.0
+doc_type: cover
 authors:
-  - ERDA Team---
+  - ERDA Team
+---
 
 # Welcome to the neutral sample library
 
