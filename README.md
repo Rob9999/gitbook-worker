@@ -1,18 +1,19 @@
-# GitBook Worker (v2.0.1)
+# GitBook Worker (v2.0.4)
 
-**Latest Release**: v2.0.1 (December 29, 2025) - [Release Notes](docs/releases/v2.0.1.md)
+**Latest Release**: v2.0.4 (December 31, 2025) - [Release Notes](docs/releases/v2.0.4.md)
 
 GitBook Worker ships the multi-language 2.x line. The Python package installs via
 `pip install -e .`, and the publishing pipeline is driven by `content.yaml`, which lists
 every language tree (e.g., `de/`, `en/`). The CLI picks a language via `--lang` and runs
 the orchestration/publishing steps for that content root.
 
-## 🎉 What's New in v2.0.1 (hotfix)
+> Kundenguide (Installation & Start): siehe [docs/customer-installation.md](docs/customer-installation.md).
 
-- Honors explicit `--root` everywhere and falls back to packaged tools when repo tools are absent (pip installs work end-to-end).
-- Fail-fast if required scripts are missing; dry-run now skips execution and is forwarded to `pipeline.py`.
-- Manifest preflight enforces `project.license` before any destructive action.
-- Release notes updated with pip-only usage steps and font cache guidance.
+## 🎉 What's New in v2.0.4 (hotfix)
+
+- Converter is launched via fully qualified module path to avoid collisions with user/local `tools` modules in neighboring projects.
+- Added customer installation guide covering clean venv setup, uninstall of stale `tools`, and verified orchestrator commands.
+- Release tag: `release-v.2.0.4-hotfix`; packaging version: 2.0.4.post1.
 
 ## 🔙 Highlights from v2.0.0
 
@@ -29,7 +30,7 @@ the orchestration/publishing steps for that content root.
 - ✅ Windows/Linux path compatibility for Docker Desktop
 - ⚠️ Breaking: Docker font management changed (see release notes)
 
-See [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
+See [docs/releases/v2.0.4.md](docs/releases/v2.0.4.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
 
 ## Quick start
 
