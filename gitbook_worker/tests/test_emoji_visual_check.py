@@ -13,7 +13,7 @@ from gitbook_worker.tools.publishing.font_config import get_font_config
 
 @pytest.mark.integration
 @pytest.mark.manual
-def test_emoji_color_visual_check():
+def test_emoji_color_visual_check(artifact_dir: Path):
     """Extract emoji pages from PDF for manual visual inspection.
 
     This test:
@@ -23,7 +23,7 @@ def test_emoji_color_visual_check():
     4. Provides clear PASS/FAIL criteria for manual check
 
     MANUAL CHECK REQUIRED:
-    - Open de/publish/emoji-test-page-*.png
+    - Open gitbook_worker/tests/tmp/artifacts/test_emoji_color_visual_check/emoji-test-page-*.png
     - Verify emojis are COLORFUL (not black-and-white)
     - If still B&W despite correct config, this indicates a LuaTeX rendering issue
     """
@@ -52,9 +52,8 @@ def test_emoji_color_visual_check():
     except FileNotFoundError:
         pytest.skip("pdffonts not available - cannot verify font embedding")
 
-    # Step 3: Extract emoji-heavy pages (examples are usually at end)
-    output_dir = Path("de/publish")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    # Step 3: Extract emoji-heavy pages into the test artifacts directory
+    output_dir = artifact_dir
 
     # Extract last 5 pages (likely to contain emoji examples)
     try:
