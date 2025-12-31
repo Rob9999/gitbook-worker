@@ -83,7 +83,7 @@ Notes:
 * **Wrong `tools` module:** Always activate the `.venv` and, if necessary, run `pip uninstall tools`.
 * **Manifest not found:** Provide `--manifest` relative to the repository root (e.g. `<lang>/publish.yml`), or omit the flag to fall back to `content.yaml`.
 * **Missing LuaTeX / fonts:** Ensure `luaotfload-tool --update --force` has been run at least once (handled in test fixtures, but may be required locally).
-* **`project.license` fehlt im Manifest:** In `<lang>/publish.yml` unter `project.license` eine Lizenz setzen (z. B. `CC-BY-SA-4.0`), sonst bricht der Publisher mit `project.license fehlt` ab.
+* **`project.license` missing in the manifest:** Set a license under `project.license` in `<lang>/publish.yml` (e.g., `CC-BY-SA-4.0`), otherwise the publisher fails with `project.license fehlt`.
 
 ## 6) Quick support checklist
 
