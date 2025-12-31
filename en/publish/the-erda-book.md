@@ -20,95 +20,101 @@ header-includes:
 ---
 
 <a id="md-readme"></a>
-# content
+# Start page
 
-This folder contains the British English version of the neutral sample book. Use [index.md](#md-index) as the starting point.
+This is your quick navigation:
 
-If you add or rename pages, update [SUMMARY.md](#md-summary) accordingly.
+- [Cover & overview](#md-index)
+- [Preface](#md-preface) and [Content note](#md-placeholder)
+- [Chapter 1 – Observable patterns](#md-chapters-chapter-01)
+- [Chapter 2 – Comparative tables](#md-chapters-chapter-02)
+- [Emoji example collections](#md-examples-readme)
+- [Appendices & references](#md-appendices-readme)
+- [Lists of tables, figures, abbreviations](#md-list-of-tables)
 
+> Tip: Use this page as a hub when you want to jump directly to chapters or examples.
 
-
-\newpage
-
-<a id="md-appendices-readme"></a>
-# appendices
 
 
 \newpage
 
 ---
-title: Appendix A – Data sources and table layout
+title: Home
+description: Overview for the neutral sample book
 date: 2024-06-01
 version: 1.0
+doc_type: cover
+authors:
+  - ERDA Team
 ---
-<a id="md-appendices-appendix-a"></a>
+<a id="md-index"></a>
 
-# Appendix A – Data sources and table layout
+# Welcome to the neutral sample library
 
-## A.1 Data sources
-1. Public climate data catalogues from regional weather services.
-2. Neutral example values from internal sandbox systems.
-3. International open-data repositories such as [UN Data](https://data.un.org/) or [World Bank Open Data](https://data.worldbank.org/).
+This landing page provides a quick overview of the sample book, intended as a neutral template for tests, layout checks and international text snippets. The chapters include tables, images, internal and external links, as well as structured appendices.
 
-## A.2 Table layout
-<a id="table-layout"></a>
-| Column | Data type | Description |
-|--------|----------|-------------|
-| `timestamp` | ISO-8601 | Timestamp of the measurement |
-| `metric` | String | Measurement (temperature, humidity, etc.) |
-| `value` | Decimal number | Measured value |
-| `unit` | String | Associated unit |
-| `notes` | Free text | Context or notes |
+## Quick start
+- [Preface](#md-preface)
+- [Chapter 1 – Observable patterns](#md-chapters-chapter-01)
+- [Chapter 2 – Comparative tables](#md-chapters-chapter-02)
+- [Templates for multilingual text](#md-templates-multilingual-neutral-text)
+- [Appendix A – Data sources](#md-appendices-appendix-a)
+- [Emoji examples (Smileys & people)](#md-examples-emoji-smileys-and-people)
+- [Emoji examples (Nature & food)](#md-examples-emoji-nature-and-food)
+- [Emoji examples (Activities & travel)](#md-examples-emoji-activities-and-travel)
+- [Emoji examples (Objects, symbols & flags)](#md-examples-emoji-objects-symbols-flags)
+- [Appendix – Emoji & font coverage](#md-appendices-emoji-font-coverage)
+- [Citations & further reading](#md-references)
 
-## A.3 Reuse
-- The table can be imported directly into dataframes.
-- Use relative links such as [Chapter 2](#md-chapters-chapter-02) for cross-references.
-- Graphics can be found in the [`content/.github/assets`](../images/) directory.
+## Visual preview
+<a id="visual-preview"></a>
+![Neutral shapes](.gitbook/assets/neutral-grid.pdf)
+
+The illustration shows abstract shapes with no reference to real people or trademark-relevant themes. It can be reused as often as needed to test image components.
+
+## External neutral links
+- [United Nations Data](https://data.un.org/)
+- [Smithsonian Open Access](https://www.si.edu/openaccess)
+- [World Meteorological Organization](https://public.wmo.int/en)
+
+All links point to publicly accessible, neutral information and are suitable for legally low-risk test cases.
+
+> Tip: Use this landing page as a template by copying the sections listed here and adapting them for your own documentation.
 
 
 \newpage
 
 ---
-title: Appendix – Emoji & font coverage
-description: Evidence of suitable fonts for all scripts and coloured emojis used in the sample content.
-date: 2024-06-05
+title: Dedication
+doc_type: dedication
+order: 5
+---
+<a id="md-dedication"></a>
+
+# Dedication
+
+We dedicate this book to everyone who shares knowledge generously.
+
+
+\newpage
+
+---
+title: Preface
+date: 2024-06-01
 version: 1.0
-history:
-  - version: 1.0
-    date: 2024-06-05
-    changes: Initial version with font matrix and testing notes.
+doc_type: preface
 ---
-<a id="md-appendices-emoji-font-coverage"></a>
+<a id="md-preface"></a>
 
-# Appendix – Emoji & font coverage
+# Preface
 
-This overview summarises the fonts that cover all writing systems used in the sample texts as well as all emoji sets. All fonts meet the licensing requirements from `AGENTS.md` and the `LICENSE-FONTS` file.
+This preface explains the purpose and structure of the sample book. All content is deliberately phrased in a neutral way so it can be used for usability tests, layout demos and localisation workflows.
 
-## Font matrix
+- **Audience:** teams who want to test text, image or table components without using real customer data.
+- **Structure:** each section contains at least one element commonly found in book production – for example figures, cross-references, citations or tables.
+- **International scope:** the included template for multilingual text covers common major languages and can be extended.
 
-| Category | Font | Licence | Source | Coverage |
-| --- | --- | --- | --- | --- |
-| Serif/Sans/Mono | DejaVu Serif · DejaVu Sans · DejaVu Sans Mono (v2.37) | Bitstream Vera License + public-domain additions | `gitbook_worker/defaults/fonts.yml` · `publish/ATTRIBUTION.md` | Latin, Greek, Cyrillic, plus technical symbols for tables and code |
-| CJK \& additional BMP glyphs | ERDA CC-BY CJK | CC BY 4.0 **or** MIT | `.github/fonts/erda-ccby-cjk` · `LICENSE-FONTS` | Chinese, Japanese, Korean, plus additional Unicode blocks from the multilingual templates |
-| Coloured emojis | Twemoji Color Font v15.1.0 | CC BY 4.0 | https://github.com/13rac1/twemoji-color-font/releases/tag/v15.1.0 · `publish/ATTRIBUTION.md` | All emoji categories including skin tones, ZWJ sequences and flags |
-
-## Practical use
-
-1. **Text sections** – The DejaVu family serves as the standard for body text (`SERIF`), UI elements (`SANS`) and code (`MONO`). This covers all European languages in `content/templates/multilingual-neutral-text.md`.
-2. **CJK** – As soon as chapters or example pages use characters such as 日, 学 or 정보, the build system should embed the ERDA-CC-BY-CJK file from `.github/fonts/erda-ccby-cjk/true-type/`. This happens automatically via the `CJK` section in `gitbook_worker/defaults/fonts.yml`.
-3. **Emoji colour** – The new emoji example pages use the Twemoji colour font. `gitbook_worker/defaults/fonts.yml` references the download URL so CI builds can fetch the TTF automatically.
-
-## Testing notes
-
-- Run `pytest -k emoji` to ensure the font scanning does not report unknown fonts.
-- Check PDF exports with at least one page from each emoji category (smileys, nature, activities, objects) to test Twemoji alongside CJK text.
-- Document any new fonts in `publish/ATTRIBUTION.md` and `LICENSE-FONTS` if additional writing systems are added.
-
-
-\newpage
-
-<a id="md-chapters-readme"></a>
-# chapters
+Further guidance can be found in [Chapter 1](#md-chapters-chapter-01), while [Chapter 2](#md-chapters-chapter-02) provides concrete table layouts.
 
 
 \newpage
@@ -117,6 +123,8 @@ This overview summarises the fonts that cover all writing systems used in the sa
 title: Chapter 1 – Observable patterns
 date: 2024-06-01
 version: 1.0
+doc_type: chapter
+chapter_number: 1
 ---
 <a id="md-chapters-chapter-01"></a>
 
@@ -152,6 +160,8 @@ The resulting data is presented later in the book – in particular in [Chapter 
 title: Chapter 2 – Comparative tables
 date: 2024-06-01
 version: 1.0
+doc_type: chapter
+chapter_number: 2
 ---
 <a id="md-chapters-chapter-02"></a>
 
@@ -190,34 +200,15 @@ To verify an embedded HTML inlay variant, the following figure can additionally 
 \newpage
 
 ---
-title: Citations & further reading
-date: 2024-06-01
-version: 1.0
+doc_type: epilog
+title: Epilogue
+version: 1.0.0
 ---
-<a id="md-references"></a>
+<a id="md-epilogue"></a>
 
-# Citations & further reading
+# Epilogue
 
-1. **United Nations Data Portal.** Accessed on 1 June 2024. https://data.un.org/
-2. **World Bank Open Data.** Accessed on 1 June 2024. https://data.worldbank.org/
-3. **World Meteorological Organization – Public Resources.** Accessed on 1 June 2024. https://public.wmo.int/en
-4. **Smithsonian Open Access.** Accessed on 1 June 2024. https://www.si.edu/openaccess
-
-References within the book use numbered footnotes to point consistently to this list.
-
-
-\newpage
-
-<a id="md-placeholder"></a>
-# Content note
-
-The content folder now contains complete sample chapters, appendices, images and templates. Use [content/index.md](#md-index) as your starting point.
-
-
-\newpage
-
-<a id="md-examples-readme"></a>
-# examples
+Placeholder for the epilogue / afterword.
 
 
 \newpage
@@ -227,6 +218,9 @@ title: Emoji examples – Activities & travel
 description: Common sport, leisure and transport emojis for functional and rendering tests.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -282,6 +276,9 @@ title: Emoji examples – Nature & food
 description: Collection of common nature, animal and food emojis for layout tests.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -337,6 +334,9 @@ title: Emoji examples – Objects, symbols & flags
 description: Reference lists for tools, technology, symbols and flags with full emoji coverage.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -392,6 +392,9 @@ title: Emoji examples – Smileys & people
 description: Overview of classic face and person emojis for test coverage.
 date: 2024-06-05
 version: 1.0
+doc_type: example
+category: "emoji-test"
+show_in_summary: true
 history:
   - version: 1.0
     date: 2024-06-05
@@ -444,27 +447,52 @@ This page groups commonly used emoji sets by emotions, gestures and role profile
 \newpage
 
 ---
-title: Preface
-date: 2024-06-01
+title: Examples
+date: 2024-06-05
 version: 1.0
+doc_type: example
 ---
-<a id="md-preface"></a>
+<a id="md-examples-readme"></a>
 
-# Preface
+# Examples
 
-This preface explains the purpose and structure of the sample book. All content is deliberately phrased in a neutral way so it can be used for usability tests, layout demos and localisation workflows.
+This folder collects comprehensive emoji examples to validate color rendering and font coverage in generated PDFs.
 
-- **Audience:** teams who want to test text, image or table components without using real customer data.
-- **Structure:** each section contains at least one element commonly found in book production – for example figures, cross-references, citations or tables.
-- **International scope:** the included template for multilingual text covers common major languages and can be extended.
+## Emoji Categories
 
-Further guidance can be found in [Chapter 1](#md-chapters-chapter-01), while [Chapter 2](#md-chapters-chapter-02) provides concrete table layouts.
+Examples are organized by Unicode categories:
 
+- **[Smileys & People](#md-examples-emoji-smileys-and-people)**: Facial expressions, gestures, professional roles, and skin tone variants (U+1F600–U+1F64F, U+1F466–U+1F9D1)
+  
+- **[Nature & Food](#md-examples-emoji-nature-and-food)**: Animals, plants, weather symbols, and food items (U+1F330–U+1F37F, U+1F400–U+1F4FF)
+  
+- **[Activities & Travel](#md-examples-emoji-activities-and-travel)**: Sports, hobbies, transportation, and places (U+1F680–U+1F6FF, U+1F3A0–U+1F3FF)
+  
+- **[Objects, Symbols & Flags](#md-examples-emoji-objects-symbols-flags)**: Everyday objects, technical symbols, signs, and international flags (U+1F4A0–U+1F4FF, U+1F500–U+1F5FF, U+1F1E6–U+1F1FF)
 
-\newpage
+## Test Coverage
 
-<a id="md-templates-readme"></a>
-# templates
+These examples validate:
+- ✅ **Color rendering**: Twemoji Mozilla COLR/CPAL format
+- ✅ **Unicode completeness**: All common emoji ranges
+- ✅ **Modifiers**: Skin tones, gender variants, ZWJ sequences
+- ✅ **Layout stability**: Emoji in flowing text, tables, and lists
+
+## Usage
+
+**Purpose**: 
+- Automated rendering tests for PDF generation
+- Visual quality control for emoji colors
+- Reference documentation for font stack configuration
+
+**Technical Details**:
+- Font: Twemoji Mozilla v0.7.0 (COLR/CPAL)
+- Format: LuaTeX + Pandoc Lua filters
+- Fallback: DejaVu Sans for non-emoji characters
+
+---
+
+*Last updated: Version 1.0 (2024-06-05) – Full Emoji 13.1 coverage*
 
 
 \newpage
@@ -473,6 +501,8 @@ Further guidance can be found in [Chapter 1](#md-chapters-chapter-01), while [Ch
 title: Template for multilingual neutral text
 date: 2024-06-02
 version: 1.1
+doc_type: template
+show_in_summary: false
 ---
 <a id="md-templates-multilingual-neutral-text"></a>
 
@@ -619,3 +649,586 @@ Komanda sabit göstəricilərlə sakit bir gün qeydə aldı və bu da həftəli
 Топ тұрақты көрсеткіштер сақталған тыныш күнді сипаттап, апталық салыстыруды жеңілдететінін айтты.
 
 This list can be extended as needed. Add notes on writing systems or reading direction where relevant (for example for Arabic or Hebrew).
+
+
+\newpage
+
+---
+title: Templates
+date: 2024-06-02
+version: 1.1
+doc_type: template
+---
+<a id="md-templates-readme"></a>
+
+# Templates
+
+This folder contains reusable text templates for multilingual, neutral documentation.
+
+## Available Templates
+
+### [Multilingual Neutral Text](#md-templates-multilingual-neutral-text)
+
+A structured template for international documentation featuring:
+- **Neutral phrasing**: No culture-, brand-, or person-specific terms
+- **Multilingualism**: Example texts in 10+ major languages (DE, EN, FR, ES, ZH, JA, AR, HI, RU, PT)
+- **Consistent structure**: Context description → Language-specific paragraphs → Tables
+
+**Use Cases**:
+- Template for global documentation projects
+- Test material for Unicode coverage and font rendering
+- Demonstration object for multilingual PDF generation
+
+## Template Structure
+
+Each template follows this schema:
+
+```markdown
+---
+title: Template Title
+date: YYYY-MM-DD
+version: X.Y
+---
+
+# Context
+Brief description of the scenario.
+
+## Language (ISO Code)
+Neutral paragraph without culture-specific references.
+```
+
+## Best Practices
+
+**When using templates**:
+- ✅ Use short, concise sentences
+- ✅ Avoid idiomatic expressions
+- ✅ Use ISO language codes (de-DE, en-US, fr-FR, etc.)
+- ✅ Document modifications in version history
+- ❌ No personally identifiable information
+- ❌ No brand names without necessity
+- ❌ No culture-specific metaphors
+
+## Extension
+
+New templates should:
+1. Have YAML front matter with `title`, `date`, `version`
+2. Cover at least 3 languages (DE, EN, +1)
+3. Be documented in version history
+4. Contain neutral, reusable text blocks
+
+---
+
+*This folder is expanded as needed. Suggestions for new templates are welcome.*
+
+
+\newpage
+
+---
+title: Translator's Note
+doc_type: translators-note
+order: 6
+---
+<a id="md-translators-note"></a>
+
+# Translator's Note
+
+This edition is based on the German version and was translated with the utmost care.
+
+
+\newpage
+
+---
+title: List of Tables
+date: 2025-12-29
+version: 1.0
+doc_type: list-of-tables
+auto_generate: true
+include_chapter_tables: true
+numbering_style: "decimal"
+---
+<a id="md-list-of-tables"></a>
+
+# List of Tables
+
+> **Note**: This list of tables will be automatically generated from all chapter and appendix tables in future versions.
+
+## Chapter Tables
+
+- Table 1.1: Measurement Series Experimental Setup ............. (Ch. 1)
+- Table 2.1: Comparison Values Layout A vs. B ................. (Ch. 2)
+- Table 2.2: Statistical Evaluation ........................... (Ch. 2)
+
+## Appendix Tables
+
+- Table A.1: Public Climate Data Catalogs ..................... (App. A)
+- Table A.2: Table Formats Overview ........................... (App. A)
+- Table B.1: Font Matrix for Characters ....................... (App. B)
+- Table B.2: Emoji Coverage by Category ....................... (App. B)
+
+---
+
+**Automatic Generation (v2.0.1+)**:
+- All tables with captions will be automatically captured
+- Numbering follows chapter affiliation
+- Page numbers extracted from generated PDF
+
+
+\newpage
+
+---
+title: List of Figures
+date: 2025-12-29
+version: 1.0
+doc_type: list-of-figures
+auto_generate: true
+include_formats: [png, jpg, svg, pdf]
+numbering_style: "decimal"
+---
+<a id="md-list-of-figures"></a>
+
+# List of Figures
+
+> **Note**: This list of figures will be automatically generated from all embedded images in future versions.
+
+## Chapter Figures
+
+- Fig. 1.1: Experimental Setup Overview ........................ (Ch. 1)
+- Fig. 1.2: Measurement Curve Temperature Profile .............. (Ch. 1)
+- Fig. 2.1: Diagram Comparative Analysis ....................... (Ch. 2)
+
+## Appendix Figures
+
+- Fig. A.1: Schematic Structure Data Catalog ................... (App. A)
+- Fig. B.1: Font Coverage Matrix ............................... (App. B)
+
+## Emoji Examples
+
+- Fig. E.1: Smileys & People Overview .......................... (Ex.)
+- Fig. E.2: Nature & Food Emoji Palette ........................ (Ex.)
+- Fig. E.3: Activities & Travel Categories ..................... (Ex.)
+- Fig. E.4: Objects, Symbols & Flags ........................... (Ex.)
+
+---
+
+**Automatic Generation (v2.0.1+)**:
+- All images with alt-text or captions will be captured
+- Numbering follows chapter affiliation
+- Format detection: PNG, JPG, SVG, PDF
+- Page numbers extracted from generated PDF
+
+
+\newpage
+
+---
+title: List of Abbreviations
+doc_type: list-of-abbreviations
+order: 7
+---
+<a id="md-list-of-abbreviations"></a>
+
+- API – Application Programming Interface
+- CLI – Command Line Interface
+
+
+\newpage
+
+---
+title: Appendix A – Data sources and table layout
+date: 2024-06-01
+version: 1.0
+doc_type: appendix
+appendix_id: "A"
+category: "technical"
+---
+<a id="md-appendices-appendix-a"></a>
+
+# Appendix A – Data sources and table layout
+
+## A.1 Data sources
+1. Public climate data catalogues from regional weather services.
+2. Neutral example values from internal sandbox systems.
+3. International open-data repositories such as [UN Data](https://data.un.org/) or [World Bank Open Data](https://data.worldbank.org/).
+
+## A.2 Table layout
+<a id="table-layout"></a>
+| Column | Data type | Description |
+|--------|----------|-------------|
+| `timestamp` | ISO-8601 | Timestamp of the measurement |
+| `metric` | String | Measurement (temperature, humidity, etc.) |
+| `value` | Decimal number | Measured value |
+| `unit` | String | Associated unit |
+| `notes` | Free text | Context or notes |
+
+## A.3 Reuse
+- The table can be imported directly into dataframes.
+- Use relative links such as [Chapter 2](#md-chapters-chapter-02) for cross-references.
+- Graphics can be found in the [`content/.github/assets`](../images/) directory.
+
+
+\newpage
+
+---
+title: Appendix – Emoji & font coverage
+description: Evidence of suitable fonts for all scripts and coloured emojis used in the sample content.
+date: 2024-06-05
+version: 1.0
+doc_type: appendix
+appendix_id: "B"
+category: "technical"
+history:
+  - version: 1.0
+    date: 2024-06-05
+    changes: Initial version with font matrix and testing notes.
+---
+<a id="md-appendices-emoji-font-coverage"></a>
+
+# Appendix – Emoji & font coverage
+
+This overview summarises the fonts that cover all writing systems used in the sample texts as well as all emoji sets. All fonts meet the licensing requirements from `AGENTS.md` and the `LICENSE-FONTS` file.
+
+## Font matrix
+
+| Category | Font | Licence | Source | Coverage |
+| --- | --- | --- | --- | --- |
+| Serif/Sans/Mono | DejaVu Serif · DejaVu Sans · DejaVu Sans Mono (v2.37) | Bitstream Vera License + public-domain additions | `gitbook_worker/defaults/fonts.yml` · `publish/ATTRIBUTION.md` | Latin, Greek, Cyrillic, plus technical symbols for tables and code |
+| CJK \& additional BMP glyphs | ERDA CC-BY CJK | CC BY 4.0 **or** MIT | `.github/fonts/erda-ccby-cjk` · `LICENSE-FONTS` | Chinese, Japanese, Korean, plus additional Unicode blocks from the multilingual templates |
+| Coloured emojis | Twemoji Color Font v15.1.0 | CC BY 4.0 | https://github.com/13rac1/twemoji-color-font/releases/tag/v15.1.0 · `publish/ATTRIBUTION.md` | All emoji categories including skin tones, ZWJ sequences and flags |
+
+## Practical use
+
+1. **Text sections** – The DejaVu family serves as the standard for body text (`SERIF`), UI elements (`SANS`) and code (`MONO`). This covers all European languages in `content/templates/multilingual-neutral-text.md`.
+2. **CJK** – As soon as chapters or example pages use characters such as 日, 学 or 정보, the build system should embed the ERDA-CC-BY-CJK file from `.github/fonts/erda-ccby-cjk/true-type/`. This happens automatically via the `CJK` section in `gitbook_worker/defaults/fonts.yml`.
+3. **Emoji colour** – The new emoji example pages use the Twemoji colour font. `gitbook_worker/defaults/fonts.yml` references the download URL so CI builds can fetch the TTF automatically.
+
+## Testing notes
+
+- Run `pytest -k emoji` to ensure the font scanning does not report unknown fonts.
+- Check PDF exports with at least one page from each emoji category (smileys, nature, activities, objects) to test Twemoji alongside CJK text.
+- Document any new fonts in `publish/ATTRIBUTION.md` and `LICENSE-FONTS` if additional writing systems are added.
+
+
+\newpage
+
+---
+doc_type: legal-notice
+title: Legal Notice
+version: 1.0.0
+---
+<a id="md-legal-notice"></a>
+
+# Legal Notice
+
+Placeholder for imprint and legal notes.
+
+
+\newpage
+
+---
+doc_type: glossary
+title: Glossary
+version: 1.0.0
+---
+<a id="md-glossary"></a>
+
+# Glossary
+
+Placeholder for terms and definitions.
+
+
+\newpage
+
+---
+title: Citations & further reading
+date: 2024-06-01
+version: 1.0
+doc_type: bibliography
+citation_style: "APA"
+---
+<a id="md-references"></a>
+
+# Citations & further reading
+
+1. **United Nations Data Portal.** Accessed on 1 June 2024. https://data.un.org/
+2. **World Bank Open Data.** Accessed on 1 June 2024. https://data.worldbank.org/
+3. **World Meteorological Organization – Public Resources.** Accessed on 1 June 2024. https://public.wmo.int/en
+4. **Smithsonian Open Access.** Accessed on 1 June 2024. https://www.si.edu/openaccess
+
+References within the book use numbered footnotes to point consistently to this list.
+
+
+\newpage
+
+---
+doc_type: index
+title: Index
+version: 1.0.0
+---
+<a id="md-book-index"></a>
+
+# Index
+
+Placeholder for the index.
+
+
+\newpage
+
+---
+title: Acknowledgments & Attributions
+date: 2025-12-29
+version: 1.0
+doc_type: attributions
+include_font_licenses: true
+include_contributors: true
+categories:
+  - fonts
+  - libraries
+  - contributors
+---
+<a id="md-attributions"></a>
+
+# Acknowledgments & Attributions
+
+This book was created with the support of many open-source projects and contributors. We thank everyone who makes their work available to the community.
+
+---
+
+## Fonts Used
+
+### Twemoji Mozilla (v0.7.0)
+**License**: CC BY 4.0  
+**Copyright**: © Mozilla Foundation  
+**Source**: https://github.com/mozilla/twemoji-colr  
+**Usage**: Color emoji rendering (COLR/CPAL format)
+
+### DejaVu Fonts (v2.37)
+**License**: Bitstream Vera License (permissive, GPL-compatible)  
+**Copyright**: © DejaVu Fonts Team  
+**Source**: https://dejavu-fonts.github.io/  
+**Usage**: 
+- DejaVu Serif (body text)
+- DejaVu Sans (headings, UI elements)
+- DejaVu Sans Mono (code blocks)
+
+### ERDA CC-BY CJK Font (v1.0)
+**License**: CC BY 4.0  
+**Copyright**: © ERDA Team  
+**Usage**: Multilingual coverage (Latin, Cyrillic, Greek, CJK, Devanagari, Ethiopic)
+
+---
+
+## Software & Libraries
+
+### LuaTeX (v1.18.0)
+**License**: GPLv2+  
+**Copyright**: © LuaTeX Development Team  
+**Usage**: PDF typesetting engine with COLR font support
+
+### Pandoc (v3.6)
+**License**: GPLv2+  
+**Copyright**: © John MacFarlane  
+**Usage**: Markdown → LaTeX conversion
+
+### Python (v3.12)
+**License**: PSF License  
+**Copyright**: © Python Software Foundation  
+**Usage**: Build automation, font management, workflow orchestration
+
+### GitBook Worker (v2.0.1)
+**License**: MIT  
+**Copyright**: © ERDA Team  
+**Usage**: Multilingual publishing system
+
+---
+
+## Contributors
+
+### Project Team
+- **ERDA Team** – Concept, development, documentation
+- **GitHub Copilot** – Architecture support, code review, documentation assistance
+
+### Editorial
+- Neutral content: ERDA Content Team
+- Emoji test collections: ERDA Quality Assurance
+- Multilingual templates: ERDA Localization Team
+
+### Technical Illustrations
+- Font coverage matrix: Automatically generated
+- Emoji overviews: Unicode Consortium data
+
+---
+
+## Data Sources
+
+The neutral sample data comes from publicly accessible sources:
+
+1. **United Nations Data Portal** – https://data.un.org/
+2. **World Bank Open Data** – https://data.worldbank.org/
+3. **World Meteorological Organization** – https://public.wmo.int/
+4. **Smithsonian Open Access** – https://www.si.edu/openaccess
+
+---
+
+## Community & Standards
+
+Special thanks to:
+- **Unicode Consortium** – Emoji standard and documentation
+- **GitHub** – Hosting and collaboration tools
+- **Open Source Community** – For the countless libraries and tools
+
+---
+
+**Status**: December 2025  
+**Version**: 1.0  
+**Updates**: This document is updated with each release
+
+
+\newpage
+
+---
+doc_type: errata
+title: Errata
+version: 1.0.0
+---
+<a id="md-errata"></a>
+
+# Errata
+
+Placeholder for known issues and corrections.
+
+
+\newpage
+
+---
+doc_type: release-notes
+title: Release Notes
+version: 1.0.0
+---
+<a id="md-release-notes"></a>
+
+# Release Notes
+
+Placeholder for release notes.
+
+
+\newpage
+
+---
+title: Colophon
+date: 2025-12-29
+version: 1.0
+doc_type: colophon
+position: "back"
+include_technical_details: true
+---
+<a id="md-colophon"></a>
+
+# Colophon
+
+**The ERDA Book – Multilingual Publishing Platform**
+
+A neutral example book for tests, layout demos, and localization workflows.
+
+---
+
+## Publication Details
+
+**Title**: The ERDA Book  
+**Subtitle**: Neutral Example Library for Multilingual Publishing Tests  
+**Edition**: 1st Edition, December 2025
+
+**Publisher**: ERDA Team  
+**Contact**: https://github.com/Rob9999/gitbook-worker
+
+**ISBN**: –  
+**eISBN (PDF)**: –
+
+---
+
+## License
+
+**Text License**: CC BY-SA 4.0  
+Creative Commons Attribution-ShareAlike 4.0 International  
+https://creativecommons.org/licenses/by-sa/4.0/
+
+**Meaning**:
+- ✓ Reproduction and distribution permitted
+- ✓ Adaptation and commercial use permitted
+- ⚠ Attribution required
+- ⚠ Distribution only under same license
+
+**Code License**: MIT License  
+https://opensource.org/licenses/MIT
+
+---
+
+## Technical Details
+
+### Typesetting and Typography
+
+**Typesetting Engine**: LuaTeX 1.18.0 (TeX Live 2024)  
+**Conversion**: Pandoc 3.6  
+**Build System**: GitBook Worker 2.0.1 (Python 3.12)
+
+**Fonts**:
+- **Body Text**: DejaVu Serif 2.37 (10pt)
+- **Headings**: DejaVu Sans 2.37 (14-24pt)
+- **Code**: DejaVu Sans Mono 2.37 (9pt)
+- **Emojis**: Twemoji Mozilla 0.7.0 (COLR/CPAL)
+- **Multilingual**: ERDA CC-BY CJK 1.0 (7000+ glyphs)
+
+### Document Properties
+
+**Page Size**: A4 (210 × 297 mm)  
+**Margins**: 2.5cm (top/bottom), 2cm (left/right)  
+**Line Height**: 1.4 (body text)  
+**Columns**: Single column
+
+**PDF Version**: PDF/A-1b (archiving)  
+**Color Model**: RGB (screen-optimized)  
+**Font Embedding**: Full (100%)
+
+### Automation
+
+**Workflow Orchestrator**: GitBook Worker Orchestrator  
+**Font Management**: FontStorageBootstrapper (dynamic loading)  
+**Content Conversion**: Markdown → LaTeX → PDF  
+**Emoji Processing**: Unicode 15.1 with COLR rendering
+
+**Git Repository**: https://github.com/Rob9999/gitbook-worker  
+**Release Tag**: v2.0.1  
+**Build Date**: {{ BUILD_DATE }}
+
+---
+
+## Print Details
+
+**Printing**: –  
+**Paper**: –  
+**Binding**: –
+
+**Note**: This digital version is optimized for screen use. A print version with CMYK color space and high resolution can be generated separately.
+
+---
+
+## Version and History
+
+**Version 1.0** (December 2025)
+- First complete edition
+- Document-type system implemented
+- Automatic index generation
+- Multilingual support (DE, EN)
+
+Full changelog:  
+https://github.com/Rob9999/gitbook-worker/releases
+
+---
+
+## Contact and Feedback
+
+**Issues**: https://github.com/Rob9999/gitbook-worker/issues  
+**Discussions**: https://github.com/Rob9999/gitbook-worker/discussions  
+**Contributions**: Pull requests welcome!
+
+---
+
+Typeset with LuaTeX and Pandoc • Developed in Germany • December 2025

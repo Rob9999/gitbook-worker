@@ -1,8 +1,10 @@
 ---
 title: Citations & further reading
 date: 2024-06-01
-version: 1.0doc_type: bibliography
-citation_style: "APA"---
+version: 1.0
+doc_type: bibliography
+citation_style: "APA"
+---
 
 # Citations & further reading
 

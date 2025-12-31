@@ -4,4 +4,6 @@ doc_type: translators-note
 order: 6
 ---
 
-Diese Ausgabe basiert auf der englischen Fassung und wurde mit größter Sorgfalt übertragen.
+# Hinweis der Übersetzung
+
+Diese Ausgabe basiert auf der deutschen Fassung und wurde mit größter Sorgfalt übertragen.

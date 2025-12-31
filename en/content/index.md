@@ -1,3 +1,4 @@
+---
 title: Home
 description: Overview for the neutral sample book
 date: 2024-06-01

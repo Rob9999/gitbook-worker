@@ -361,8 +361,9 @@ def build_doc_type_summary(
     by_type: Dict[str, List[DocumentRecord]] = {}
     for record in records:
         # honor show_in_summary opt-outs per doc_type
-        if record.doc_type in config.show_in_summary and not config.show_in_summary.get(
-            record.doc_type, True
+        if (
+            record.doc_type in config.show_in_summary
+            and not config.show_in_summary.get(record.doc_type, True)
         ):
             continue
         by_type.setdefault(record.doc_type, []).append(record)

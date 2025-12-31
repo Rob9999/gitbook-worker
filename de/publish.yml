@@ -61,6 +61,8 @@ publish:
     - preface
     - chapters
     - epilog
+    - example
+    - template
     - translators-note
     - list-of-tables
     - list-of-figures
@@ -110,13 +112,6 @@ publish:
         list-of-equations: List of Equations
         list-of-algorithms: List of Algorithms
         list-of-listings: List of Listings
-    show_in_summary:
-      template: false
-      placeholder: false
-      example: true
-      release-notes: true
-      errata: true
-      legal-notice: true
     auto_number_chapters: true
     auto_number_appendices: true
     auto_number_parts: true

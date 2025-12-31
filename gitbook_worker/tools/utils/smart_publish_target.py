@@ -52,6 +52,8 @@ class PublishTarget:
         summary_order_manifest: Path to summary order manifest
         summary_manual_marker: Marker for manual entries in summary
         summary_appendices_last: Whether to place appendices last
+        use_document_types: Enable doc_type-driven summary generation
+        document_manifest: Manifest path to read doc_type config from
         reset_build_flag: Whether to reset build flag after build
         build: Current build flag status
         book_config: Resolved BookConfig (if use_book_json=True)
@@ -74,6 +76,8 @@ class PublishTarget:
     summary_order_manifest: Optional[Path]
     summary_manual_marker: Optional[str]
     summary_appendices_last: bool
+    use_document_types: bool
+    document_manifest: Optional[Path]
     reset_build_flag: bool
     build: bool
     book_config: Optional[BookConfig]
@@ -208,6 +212,7 @@ def _resolve_target(
     index: int,
     entry: Dict[str, Any],
     manifest_dir: Path,
+    manifest_path: Path,
 ) -> Optional[PublishTarget]:
     """Resolve a single publish target from manifest entry.
 
@@ -257,6 +262,7 @@ def _resolve_target(
     keep_combined = _as_bool(entry.get("keep_combined"))
     summary_appendices_last = _as_bool(entry.get("summary_appendices_last"))
     reset_build_flag = _as_bool(entry.get("reset_build_flag"))
+    use_document_types = _as_bool(entry.get("use_document_types"))
     build = _as_bool(entry.get("build"), default=False)
 
     summary_mode = entry.get("summary_mode")
@@ -275,6 +281,8 @@ def _resolve_target(
     # Parse assets and PDF options
     assets = _parse_assets(entry.get("assets"))
     pdf_options = _parse_pdf_options(entry.get("pdf_options"))
+
+    document_manifest = manifest_path if use_document_types else None
 
     # Discover book.json configuration if requested
     book_config: Optional[BookConfig] = None
@@ -304,6 +312,8 @@ def _resolve_target(
         summary_order_manifest=summary_order_manifest,
         summary_manual_marker=summary_manual_marker,
         summary_appendices_last=summary_appendices_last,
+        use_document_types=use_document_types,
+        document_manifest=document_manifest,
         reset_build_flag=reset_build_flag,
         build=build,
         book_config=book_config,
@@ -370,7 +380,7 @@ def load_publish_targets(
             logger.warning("Publish entry %d is not a dictionary", index)
             continue
 
-        target = _resolve_target(index, entry, manifest_dir)
+        target = _resolve_target(index, entry, manifest_dir, manifest_path_obj)
         if target is None:
             continue
 

@@ -1,8 +1,10 @@
 ---
 title: Chapter 1 – Observable patterns
 date: 2024-06-01
-version: 1.0doc_type: chapter
-chapter_number: 1---
+version: 1.0
+doc_type: chapter
+chapter_number: 1
+---
 
 # Chapter 1 – Observable patterns
 

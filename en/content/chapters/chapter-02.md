@@ -1,8 +1,10 @@
 ---
 title: Chapter 2 – Comparative tables
 date: 2024-06-01
-version: 1.0doc_type: chapter
-chapter_number: 2---
+version: 1.0
+doc_type: chapter
+chapter_number: 2
+---
 
 # Chapter 2 – Comparative tables
 

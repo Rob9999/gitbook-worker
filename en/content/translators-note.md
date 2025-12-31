@@ -4,4 +4,6 @@ doc_type: translators-note
 order: 6
 ---
 
-This edition adapts the source text with care for clarity and consistency.
+# Translator's Note
+
+This edition is based on the German version and was translated with the utmost care.

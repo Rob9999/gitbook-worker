@@ -2114,6 +2114,8 @@ def get_publish_list(manifest_path: Optional[str] = None) -> List[Dict[str, Any]
             continue
 
         out_dir = entry.get("out_dir")
+        use_document_types = _as_bool(entry.get("use_document_types"))
+
         result: Dict[str, Any] = {
             "path": str(path),
             "out": str(out),
@@ -2132,6 +2134,8 @@ def get_publish_list(manifest_path: Optional[str] = None) -> List[Dict[str, Any]
             "summary_order_manifest": entry.get("summary_order_manifest"),
             "summary_manual_marker": entry.get("summary_manual_marker"),
             "summary_appendices_last": entry.get("summary_appendices_last"),
+            "use_document_types": use_document_types,
+            "document_manifest": str(mpath) if use_document_types else None,
             "reset_build_flag": _as_bool(entry.get("reset_build_flag")),
         }
 
@@ -3392,6 +3396,10 @@ def build_pdf(
     summary_order_manifest: Optional[Path] = None,
     summary_manual_marker: Optional[str] = DEFAULT_MANUAL_MARKER,
     summary_appendices_last: bool = False,
+    document_manifest: Optional[Path] = None,
+    locale: Optional[str] = None,
+    validate_doc_types: bool = False,
+    fail_on_doc_type_issues: bool = False,
     assets: Optional[List[Dict[str, Any]]] = None,
     emoji_options: Optional[EmojiOptions] = None,
     variables: Optional[Dict[str, str]] = None,
@@ -3444,6 +3452,9 @@ def build_pdf(
                 use_book_json
                 or summary_mode is not None
                 or summary_order_manifest is not None
+                or document_manifest is not None
+                or validate_doc_types
+                or fail_on_doc_type_issues
                 or (
                     summary_manual_marker is not None
                     and summary_manual_marker != DEFAULT_MANUAL_MARKER
@@ -3459,6 +3470,10 @@ def build_pdf(
                         summary_order_manifest=summary_order_manifest,
                         manual_marker=summary_manual_marker,
                         summary_appendices_last=summary_appendices_last,
+                        document_manifest=document_manifest,
+                        locale=locale,
+                        validate_doc_types=validate_doc_types,
+                        fail_on_doc_type_issues=fail_on_doc_type_issues,
                     )
                 except Exception as exc:  # pragma: no cover - best effort logging
                     logger.warning(
@@ -3729,6 +3744,19 @@ def main() -> None:
         else:
             summary_manual_marker = str(summary_manual_marker_value)
 
+        use_document_types = bool(entry.get("use_document_types"))
+        document_manifest_value = entry.get("document_manifest")
+        document_manifest_path: Optional[Path]
+        if document_manifest_value:
+            candidate = Path(str(document_manifest_value))
+            document_manifest_path = (
+                candidate
+                if candidate.is_absolute()
+                else (manifest_dir / candidate).resolve()
+            )
+        else:
+            document_manifest_path = None
+
         assets_for_entry = entry.get("assets") or []
         resolved_assets_for_entry = _resolve_asset_paths(
             assets_for_entry, manifest_dir, path
@@ -3781,6 +3809,9 @@ def main() -> None:
             summary_order_manifest=summary_manifest_path,
             summary_manual_marker=summary_manual_marker,
             summary_appendices_last=_as_bool(entry.get("summary_appendices_last")),
+            document_manifest=document_manifest_path if use_document_types else None,
+            locale=(language_ctx.language_id if use_document_types else None),
+            validate_doc_types=use_document_types,
             assets=assets_to_copy if assets_to_copy else None,
             emoji_options=entry_emoji_options,
             variables=variable_overrides or None,

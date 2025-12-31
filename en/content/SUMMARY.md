@@ -3,7 +3,7 @@
 ## cover
 
 * [Start page](README.md)
-* [Welcome to the neutral sample library](index.md)
+* [Home](index.md)
 
 ## Dedication
 
@@ -21,6 +21,19 @@
 ## Epilogue
 
 * [Epilogue](epilogue.md)
+
+## example
+
+* [Emoji examples – Activities & travel](examples/emoji-activities-and-travel.md)
+* [Emoji examples – Nature & food](examples/emoji-nature-and-food.md)
+* [Emoji examples – Objects, symbols & flags](examples/emoji-objects-symbols-flags.md)
+* [Emoji examples – Smileys & people](examples/emoji-smileys-and-people.md)
+* [Examples](examples/README.md)
+
+## template
+
+* [Template for multilingual neutral text](templates/multilingual-neutral-text.md)
+* [Templates](templates/README.md)
 
 ## Translator's Note
 

@@ -21,6 +21,19 @@
 
 * [Abschluss](epilog.md)
 
+## example
+
+* [Beispiele](examples/README.md)
+* [Emoji-Beispiele – Aktivitäten & Reisen](examples/emoji-activities-and-travel.md)
+* [Emoji-Beispiele – Natur & Essen](examples/emoji-nature-and-food.md)
+* [Emoji-Beispiele – Objekte, Symbole & Flaggen](examples/emoji-objects-symbols-flags.md)
+* [Emoji-Beispiele – Smileys & Personen](examples/emoji-smileys-and-people.md)
+
+## template
+
+* [Vorlage für mehrsprachige neutrale Texte](templates/multilingual-neutral-text.md)
+* [Vorlagen](templates/README.md)
+
 ## Hinweis der Übersetzenden
 
 * [Hinweis der Übersetzung](translators-note.md)

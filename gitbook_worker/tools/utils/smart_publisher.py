@@ -228,6 +228,9 @@ class SmartPublisher:
                 summary_order_manifest=target.summary_order_manifest,
                 summary_manual_marker=target.summary_manual_marker,
                 summary_appendices_last=target.summary_appendices_last,
+                document_manifest=target.document_manifest,
+                locale=(target.book_config.language if target.book_config else None),
+                validate_doc_types=target.use_document_types,
                 resource_paths=None,  # TODO: Add asset paths
                 emoji_options=emoji_options,
                 variables=variables if variables else None,
