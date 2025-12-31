@@ -44,58 +44,72 @@ else:  # pragma: no cover - exercised outside repo checkouts
     GH_LOGS_DIR = Path(_EXTERNAL_GH_LOGS_DIR)
 
 
-def get_log_directory() -> Path:
+def get_log_directory(override: Path | None = None) -> Path:
     """Determine the log directory based on environment.
 
     Priority:
     1. DOCKER_LOG_DIR env var (for external Docker log volumes)
-    2. GH_LOGS_DIR (default: .github/logs/)
+    2. Explicit override provided by caller
+    3. GH_LOGS_DIR (default: package or repo logs/)
 
     Returns:
         Path: Absolute path to the log directory.
     """
     import os
 
-    # Check for external Docker log directory
     docker_log_dir = os.environ.get("DOCKER_LOG_DIR")
     if docker_log_dir:
         log_path = Path(docker_log_dir)
         log_path.mkdir(parents=True, exist_ok=True)
         return log_path
 
-    # Default: use .github/logs/
+    if override:
+        override.mkdir(parents=True, exist_ok=True)
+        return override
+
     return GH_LOGS_DIR
 
 
-def _configure_root_logger() -> None:
-    """Configure root logger with stdout/stderr handlers once."""
+def _configure_root_logger(
+    force: bool = False, log_dir_override: Path | None = None
+) -> None:
+    """Configure root logger with stdout/stderr handlers once.
+
+    Args:
+        force: Remove existing handlers and reconfigure even if already set.
+        log_dir_override: Optional log directory to prefer when configuring.
+    """
     import os
 
     root_logger = get_root_logger()
-    if root_logger.handlers:
+    if root_logger.handlers and not force:
         return
+
+    if force and root_logger.handlers:
+        for handler in list(root_logger.handlers):
+            root_logger.removeHandler(handler)
+            try:
+                handler.close()
+            except Exception:
+                pass
+
     root_logger.setLevel(logging.INFO)
     formatter = get_standard_logger_formatter()
 
-    # Check if stdout-only mode is requested (e.g., during Docker build)
     stdout_only = os.environ.get("GITBOOK_WORKER_LOG_STDOUT_ONLY", "0") == "1"
 
     if stdout_only:
-        # Docker build mode: only log to stdout
         print("[LOG] stdout (Docker build mode)")
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setLevel(logging.INFO)
         stdout_handler.setFormatter(formatter)
         root_logger.addHandler(stdout_handler)
     else:
-        # Normal mode: log to file
-        log_dir = get_log_directory()
+        log_dir = get_log_directory(log_dir_override)
         print(f"[LOG] {log_dir}")
         if log_dir:
-            log_path = Path(log_dir)
-            log_path.mkdir(parents=True, exist_ok=True)
             file_handler = logging.FileHandler(
-                log_path / "workflow.log", encoding="utf-8"
+                Path(log_dir) / "workflow.log", encoding="utf-8"
             )
             file_handler.setLevel(logging.INFO)
             file_handler.setFormatter(formatter)
@@ -146,6 +160,14 @@ def get_logger(name: Optional[str] = None) -> logging.Logger:
     """Return a module-specific logger with default configuration."""
     _configure_root_logger()
     return logging.getLogger(name)
+
+
+def reconfigure_root_logger(log_dir: Path) -> None:
+    """Force root logger to use the given log directory."""
+
+    global GH_LOGS_DIR
+    GH_LOGS_DIR = Path(log_dir)
+    _configure_root_logger(force=True, log_dir_override=GH_LOGS_DIR)
 
 
 @contextmanager

@@ -26,7 +26,11 @@ import yaml
 
 from gitbook_worker import __version__ as PACKAGE_VERSION
 from gitbook_worker import gh_paths
-from gitbook_worker.tools.logging_config import get_logger
+from gitbook_worker.tools.logging_config import (
+    get_log_directory,
+    get_logger,
+    reconfigure_root_logger,
+)
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.publishing.frontmatter_config import FrontMatterConfigLoader
 from gitbook_worker.tools.publishing.readme_config import ReadmeConfigLoader
@@ -63,7 +67,7 @@ def _print_start_banner(silent: bool) -> None:
     print("\n".join(lines))
 
 
-def _log_start_context(args: argparse.Namespace) -> None:
+def _log_start_context(args: argparse.Namespace, config: OrchestratorConfig) -> None:
     """Log startup context (command line and key paths) for workflow.log."""
     LOGGER.info(
         "startup | tool=%s version=%s license=%s cwd=%s",
@@ -74,12 +78,12 @@ def _log_start_context(args: argparse.Namespace) -> None:
     )
     LOGGER.info("startup | cmd=%s", _command_line())
     LOGGER.info(
-        "startup | paths repo_root=%s tools=%s docker=%s logs=%s github=%s",
+        "startup | paths runtime_root=%s manifest=%s logs=%s package_root=%s package_logs=%s",
+        config.root,
+        config.manifest,
+        get_log_directory(),
         gh_paths.REPO_ROOT,
-        gh_paths.GH_TOOLS_DIR,
-        gh_paths.GH_DOCKER_DIR,
         gh_paths.GH_LOGS_DIR,
-        gh_paths.GITHUB_DIR,
     )
 
 
@@ -1306,11 +1310,13 @@ def main(argv: Iterable[str] | None = None) -> None:
     handle_exit_code_help(args)
 
     _print_start_banner(getattr(args, "silent", False))
-    _log_start_context(args)
+    config = build_config(args)
+    reconfigure_root_logger(config.root / "logs")
+    _log_start_context(args, config)
     if args.command == "validate":
         ok, errors = validate_manifest(
-            root=args.root,
-            manifest=args.manifest,
+            root=config.root,
+            manifest=config.manifest,
             profile=args.profile,
             all_profiles=args.all_profiles,
             repo_visibility=args.repo_visibility,
@@ -1318,8 +1324,8 @@ def main(argv: Iterable[str] | None = None) -> None:
         )
         LOGGER.info(
             "validate | root=%s manifest=%s profile=%s all_profiles=%s",
-            args.root,
-            args.manifest,
+            config.root,
+            config.manifest,
             args.profile,
             args.all_profiles,
         )
@@ -1331,7 +1337,6 @@ def main(argv: Iterable[str] | None = None) -> None:
         LOGGER.info("Manifest-Validierung erfolgreich")
         return
 
-    config = build_config(args)
     _log_run_configuration(config)
     run(config)
 
