@@ -59,6 +59,8 @@ publish:
     - cover
     - dedication
     - preface
+    - chapters
+    - epilog
     - translators-note
     - list-of-tables
     - list-of-figures
@@ -67,8 +69,6 @@ publish:
     - list-of-equations
     - list-of-algorithms
     - list-of-listings
-    - chapters
-    - epilog
     - appendices
     - legal-notice
     - glossary

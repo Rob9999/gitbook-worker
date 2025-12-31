@@ -58,11 +58,13 @@ publish:
   use_document_types: true
   
   document_type_config:
-    # Section order in SUMMARY.md
+  # Section order in SUMMARY.md
     section_order:
       - cover
       - dedication
       - preface
+      - chapters
+      - epilog
       - translators-note
       - list-of-tables
       - list-of-figures
@@ -71,8 +73,6 @@ publish:
       - list-of-equations
       - list-of-algorithms
       - list-of-listings
-      - chapters
-      - epilog
       - appendices
       - legal-notice
       - glossary
@@ -82,6 +82,7 @@ publish:
       - errata
       - release-notes
       - colophon
+
     
     # Section titles for SUMMARY.md
     section_titles:
