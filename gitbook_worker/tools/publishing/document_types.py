@@ -135,6 +135,10 @@ def _infer_doc_type(path: Path) -> Optional[str]:
         return "preface"
     if parent == "chapters" or stem.startswith("chapter-"):
         return "chapter"
+    if parent in {"epilog", "epilogue", "nachwort"} or re.search(
+        r"\b(epilog|epilogue|nachwort)\b", stem
+    ):
+        return "epilog"
     if (
         parent == "appendices"
         or stem.startswith("appendix-")
