@@ -2,6 +2,7 @@
 title: Appendices
 date: 2024-06-01
 version: 1.0
+doc_type: placeholder
 ---
 
 # Appendices

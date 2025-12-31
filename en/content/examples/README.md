@@ -2,6 +2,7 @@
 title: Examples
 date: 2024-06-05
 version: 1.0
+doc_type: example
 ---
 
 # Examples

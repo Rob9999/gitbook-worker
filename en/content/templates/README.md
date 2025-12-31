@@ -2,6 +2,7 @@
 title: Templates
 date: 2024-06-02
 version: 1.1
+doc_type: template
 ---
 
 # Templates

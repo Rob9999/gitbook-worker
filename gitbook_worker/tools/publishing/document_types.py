@@ -127,14 +127,14 @@ def _parse_number_parts(value: object) -> Optional[List[int]]:
     return None
 
 
-def _infer_doc_type(path: Path) -> Optional[str]:
+def _infer_doc_type(path: Path, *, rel: Optional[Path] = None) -> Optional[str]:
+    """Infer doc_type from path; uses relative path (if provided) to limit cover scope."""
+
+    rel_path = rel or path
     name = path.name.lower()
     stem = path.stem.lower()
-    parent = path.parent.name.lower()
-    if name in {"index.md", "readme.md"}:
-        return "cover"
-    if stem == "preface" or "vorwort" in stem:
-        return "preface"
+    parent = rel_path.parent.name.lower()
+    parts = rel_path.parts
     if parent == "chapters" or stem.startswith("chapter-"):
         return "chapter"
     if parent in {"epilog", "epilogue", "nachwort"} or re.search(
@@ -147,6 +147,12 @@ def _infer_doc_type(path: Path) -> Optional[str]:
         or stem.startswith("anhang-")
     ):
         return "appendix"
+    if name in {"index.md", "readme.md"} and (
+        len(parts) <= 2 and (len(parts) == 1 or parts[0] == "content")
+    ):
+        return "cover"
+    if stem == "preface" or "vorwort" in stem:
+        return "preface"
     if stem in {"list-of-tables", "tabellenverzeichnis"}:
         return "list-of-tables"
     if stem in {"list-of-figures", "abbildungsverzeichnis"}:
@@ -244,8 +250,10 @@ def collect_documents_with_issues(
                 }
             )
 
+        rel_path = md_path.relative_to(root_dir)
+
         if not doc_type:
-            doc_type = _infer_doc_type(md_path)
+            doc_type = _infer_doc_type(md_path, rel=rel_path)
 
         if not doc_type:
             heading = _first_heading(body)
@@ -286,7 +294,7 @@ def collect_documents_with_issues(
             frontmatter.get("chapter_ref") if isinstance(frontmatter, dict) else None
         )
         record = DocumentRecord(
-            path=md_path.relative_to(root_dir),
+            path=rel_path,
             doc_type=doc_type,
             title=title,
             order=order,
@@ -322,6 +330,24 @@ def _format_appendix_title(record: DocumentRecord, index: int) -> str:
     ):
         return f"Appendix {appendix_id} – {base}"
     return base
+
+
+def _section_doc_type_keys(section: str) -> List[str]:
+    """Map manifest section keys to doc_type keys (handles common plurals/synonyms)."""
+
+    normalized = section.strip().lower()
+    synonym_map = {
+        "chapters": "chapter",
+        "appendices": "appendix",
+        "epilogue": "epilog",
+    }
+    if normalized in DOC_TYPES:
+        return [normalized]
+    if normalized in synonym_map:
+        return [synonym_map[normalized]]
+    if normalized.endswith("s") and normalized[:-1] in DOC_TYPES:
+        return [normalized[:-1]]
+    return [normalized]
 
 
 def build_doc_type_summary(
@@ -361,18 +387,18 @@ def build_doc_type_summary(
     locale_titles = config.section_titles_by_locale.get(locale or "", {})
 
     for section in config.section_order:
+        doc_type_keys = _section_doc_type_keys(section)
         docs: List[DocumentRecord] = []
+        for key in doc_type_keys:
+            docs.extend(by_type.get(key, []))
+
         if section == "chapters":
-            docs = sort_chapters(by_type.get("chapter", []))
+            docs = sort_chapters(docs)
         elif section == "appendices":
-            docs = sort_appendices(by_type.get("appendix", []))
+            docs = sort_appendices(docs)
         else:
-            primary = by_type.get(section.rstrip("s"), [])
-            secondary = (
-                by_type.get(section, []) if section.rstrip("s") != section else []
-            )
             docs = sorted(
-                primary + secondary,
+                docs,
                 key=lambda r: (
                     _weight(r, config.default_order_weight),
                     r.display_title.lower(),
@@ -470,9 +496,14 @@ def validate_doc_types(
         locale=locale,
     )
 
-    doc_types_present = {rec.doc_type for rec in records}
+    by_type: Dict[str, List[DocumentRecord]] = {}
+    for rec in records:
+        by_type.setdefault(rec.doc_type, []).append(rec)
+
     for section in config.section_order:
-        if section not in doc_types_present:
+        doc_type_keys = _section_doc_type_keys(section)
+        has_content = any(by_type.get(key) for key in doc_type_keys)
+        if not has_content:
             issues.append(
                 {
                     "path": None,

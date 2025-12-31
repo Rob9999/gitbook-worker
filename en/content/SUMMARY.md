@@ -1,32 +1,76 @@
 # Summary
 
+## cover
+
 * [Start page](README.md)
-* [Acknowledgments & Attributions](attributions.md)
-* [Appendices](appendices/README.md)
-  * [appendix a](appendices/appendix-a.md)
-  * [Appendix – Emoji & font coverage](appendices/emoji-font-coverage.md)
-* [Chapters](chapters/README.md)
-  * [chapter 01](chapters/chapter-01.md)
-  * [chapter 02](chapters/chapter-02.md)
-* [Colophon](colophon.md)
-* [Content note](placeholder.md)
-* [dedication](dedication.md)
-* [Epilogue](epilogue.md)
-* [Errata](errata.md)
-* [Examples](examples/README.md)
-  * [Emoji examples – Activities & travel](examples/emoji-activities-and-travel.md)
-  * [Emoji examples – Nature & food](examples/emoji-nature-and-food.md)
-  * [Emoji examples – Objects, symbols & flags](examples/emoji-objects-symbols-flags.md)
-  * [Emoji examples – Smileys & people](examples/emoji-smileys-and-people.md)
-* [Glossary](glossary.md)
-* [Index](book-index.md)
-* [Legal Notice](legal-notice.md)
-* [list of abbreviations](list-of-abbreviations.md)
-* [List of Figures](list-of-figures.md)
-* [List of Tables](list-of-tables.md)
+* [Welcome to the neutral sample library](index.md)
+
+## Dedication
+
+* [Dedication](dedication.md)
+
+## Preface
+
 * [Preface](preface.md)
-* [references](references.md)
+
+## Main Content
+
+* [Chapter 1 – Chapter 1 – Observable patterns](chapters/chapter-01.md)
+* [Chapter 2 – Chapter 2 – Comparative tables](chapters/chapter-02.md)
+
+## Epilogue
+
+* [Epilogue](epilogue.md)
+
+## Translator's Note
+
+* [Translator's Note](translators-note.md)
+
+## List of Tables
+
+* [List of Tables](list-of-tables.md)
+
+## List of Figures
+
+* [List of Figures](list-of-figures.md)
+
+## List of Abbreviations
+
+* [List of Abbreviations](list-of-abbreviations.md)
+
+## Appendices
+
+* [Appendix A – Data sources and table layout](appendices/appendix-a.md)
+* [Appendix – Emoji & font coverage](appendices/emoji-font-coverage.md)
+
+## Legal Notices
+
+* [Legal Notice](legal-notice.md)
+
+## Glossary
+
+* [Glossary](glossary.md)
+
+## References
+
+* [Citations & further reading](references.md)
+
+## Index
+
+* [Index](book-index.md)
+
+## Acknowledgments
+
+* [Acknowledgments & Attributions](attributions.md)
+
+## Errata
+
+* [Errata](errata.md)
+
+## Release Notes
+
 * [Release Notes](release-notes.md)
-* [Templates](templates/README.md)
-  * [multilingual neutral text](templates/multilingual-neutral-text.md)
-* [translators note](translators-note.md)
+
+## Colophon
+
+* [Colophon](colophon.md)

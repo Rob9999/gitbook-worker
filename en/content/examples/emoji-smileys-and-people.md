@@ -2,9 +2,11 @@
 title: Emoji examples – Smileys & people
 description: Overview of classic face and person emojis for test coverage.
 date: 2024-06-05
-version: 1.0doc_type: example
+version: 1.0
+doc_type: example
 category: "emoji-test"
-show_in_summary: truehistory:
+show_in_summary: true
+history:
   - version: 1.0
     date: 2024-06-05
     changes: First collection for faces, gestures and role profiles.
