@@ -360,6 +360,11 @@ def build_doc_type_summary(
 
     by_type: Dict[str, List[DocumentRecord]] = {}
     for record in records:
+        # honor show_in_summary opt-outs per doc_type
+        if record.doc_type in config.show_in_summary and not config.show_in_summary.get(
+            record.doc_type, True
+        ):
+            continue
         by_type.setdefault(record.doc_type, []).append(record)
 
     # helper sorters
@@ -384,6 +389,22 @@ def build_doc_type_summary(
             ),
         )
 
+    def sort_cover(items: List[DocumentRecord]) -> List[DocumentRecord]:
+        def cover_key(rec: DocumentRecord) -> tuple[int, int, str]:
+            name = rec.path.name.lower()
+            priority = 0
+            if name in {"readme.md", "readme"}:
+                priority = -2
+            elif name in {"index.md", "index"}:
+                priority = -1
+            return (
+                priority,
+                _weight(rec, config.default_order_weight),
+                rec.display_title.lower(),
+            )
+
+        return sorted(items, key=cover_key)
+
     locale_titles = config.section_titles_by_locale.get(locale or "", {})
 
     for section in config.section_order:
@@ -392,7 +413,9 @@ def build_doc_type_summary(
         for key in doc_type_keys:
             docs.extend(by_type.get(key, []))
 
-        if section == "chapters":
+        if section == "cover":
+            docs = sort_cover(docs)
+        elif section == "chapters":
             docs = sort_chapters(docs)
         elif section == "appendices":
             docs = sort_appendices(docs)

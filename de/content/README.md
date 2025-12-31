@@ -1,3 +1,8 @@
+---
+title: Startseite (Navigation)
+doc_type: placeholder
+---
+
 # Startseite
 
 Willkommen! Diese Seite fasst die wichtigsten Einstiege zusammen:
