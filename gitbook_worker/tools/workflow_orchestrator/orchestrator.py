@@ -980,14 +980,14 @@ def _step_converter(ctx: RuntimeContext) -> None:
             str(ctx.config.manifest),
         ]
     )
-    # Run the converter as a module (so relative imports inside it work).
-    # Pass the manifest path so the converter computes paths from the manifest
-    # parent directory rather than using hardcoded paths.
+    # Run the converter via fully qualified package path to avoid collisions with
+    # user-local "tools" modules in neighbouring projects (Python prepends CWD).
+    # Pass the manifest so paths are resolved from its parent directory.
     ctx.run_command(
         [
             ctx.python,
             "-m",
-            "tools.converter.convert_assets",
+            "gitbook_worker.tools.converter.convert_assets",
             "--manifest",
             str(ctx.config.manifest),
         ]
