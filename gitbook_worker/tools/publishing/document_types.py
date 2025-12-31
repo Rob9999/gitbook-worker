@@ -51,6 +51,8 @@ class DocumentTypeConfig:
     section_order: List[str]
     section_titles: Dict[str, str]
     section_titles_by_locale: Dict[str, Dict[str, str]]
+    title_to_doc_type: Dict[str, str]
+    title_to_doc_type_by_locale: Dict[str, Dict[str, str]]
     show_in_summary: Dict[str, bool]
     auto_number_chapters: bool
     auto_number_appendices: bool
@@ -177,6 +179,8 @@ def load_document_type_config(raw_manifest: dict) -> Optional[DocumentTypeConfig
         section_order=cfg.get("section_order", []),
         section_titles=cfg.get("section_titles", {}),
         section_titles_by_locale=cfg.get("section_titles_by_locale", {}),
+        title_to_doc_type=cfg.get("title_to_doc_type", {}),
+        title_to_doc_type_by_locale=cfg.get("title_to_doc_type_by_locale", {}),
         show_in_summary=cfg.get("show_in_summary", {}),
         auto_number_chapters=bool(cfg.get("auto_number_chapters", True)),
         auto_number_appendices=bool(cfg.get("auto_number_appendices", True)),
@@ -190,18 +194,75 @@ def load_document_type_config(raw_manifest: dict) -> Optional[DocumentTypeConfig
 
 
 def collect_documents(root_dir: Path) -> List[DocumentRecord]:
+    return collect_documents_with_issues(root_dir)[0]
+
+
+def _title_to_doc_type(
+    title: str,
+    config: Optional[DocumentTypeConfig],
+    *,
+    locale: Optional[str] = None,
+) -> Optional[str]:
+    if not config or not title:
+        return None
+
+    title_norm = title.strip().lower()
+    locale_map = (config.title_to_doc_type_by_locale or {}).get(locale or "", {})
+    if title_norm in {k.strip().lower(): v for k, v in locale_map.items()}:
+        return locale_map[title]
+
+    default_map = {
+        k.strip().lower(): v for k, v in (config.title_to_doc_type or {}).items()
+    }
+    return default_map.get(title_norm)
+
+
+def collect_documents_with_issues(
+    root_dir: Path,
+    config: Optional[DocumentTypeConfig] = None,
+    *,
+    locale: Optional[str] = None,
+) -> tuple[List[DocumentRecord], List[dict]]:
     records: List[DocumentRecord] = []
+    issues: List[dict] = []
+
     for md_path in root_dir.rglob("*.md"):
         if md_path.name.lower() in {"summary.md", "summary"}:
             continue
+
         frontmatter, body = _parse_frontmatter(md_path)
-        doc_type = (
+        raw_doc_type = (
             frontmatter.get("doc_type") if isinstance(frontmatter, dict) else None
         )
-        if doc_type not in DOC_TYPES:
-            doc_type = _infer_doc_type(md_path)
+        doc_type = raw_doc_type if raw_doc_type in DOC_TYPES else None
+        if raw_doc_type and not doc_type:
+            issues.append(
+                {
+                    "path": md_path,
+                    "reason": "invalid-doc-type",
+                    "message": f"Unbekannter doc_type '{raw_doc_type}'",
+                }
+            )
+
         if not doc_type:
+            doc_type = _infer_doc_type(md_path)
+
+        if not doc_type:
+            heading = _first_heading(body)
+            mapped = _title_to_doc_type(heading, config, locale=locale)
+            if mapped in DOC_TYPES:
+                doc_type = mapped
+
+        if not doc_type:
+            issues.append(
+                {
+                    "path": md_path,
+                    "reason": "missing-doc-type",
+                    "message": "Kein doc_type gefunden (Frontmatter oder Heuristik)",
+                }
+            )
             continue
+
         title = frontmatter.get("title") if isinstance(frontmatter, dict) else None
         if not title:
             title = _first_heading(body) or md_path.stem.replace("-", " ")
@@ -237,7 +298,8 @@ def collect_documents(root_dir: Path) -> List[DocumentRecord]:
             extra=frontmatter if isinstance(frontmatter, dict) else {},
         )
         records.append(record)
-    return records
+
+    return records, issues
 
 
 def _weight(record: DocumentRecord, default_weight: int) -> int:
@@ -391,3 +453,31 @@ def build_doc_type_summary(
         section_lines.pop()
     section_lines.append("")
     return section_lines
+
+
+def validate_doc_types(
+    root_dir: Path,
+    config: Optional[DocumentTypeConfig],
+    *,
+    locale: Optional[str] = None,
+) -> List[dict]:
+    if not config:
+        return []
+
+    records, issues = collect_documents_with_issues(
+        root_dir,
+        config,
+        locale=locale,
+    )
+
+    doc_types_present = {rec.doc_type for rec in records}
+    for section in config.section_order:
+        if section not in doc_types_present:
+            issues.append(
+                {
+                    "path": None,
+                    "reason": "empty-section",
+                    "message": f"Keine Inhalte für Section '{section}' gefunden",
+                }
+            )
+    return issues

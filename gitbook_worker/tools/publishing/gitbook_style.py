@@ -31,7 +31,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
-from gitbook_worker.tools.publishing import summary_generator
+from gitbook_worker.tools.publishing import document_types, summary_generator
 from gitbook_worker.tools.logging_config import get_logger
 
 SKIP_DIRS: set[str] = {
@@ -439,6 +439,8 @@ def ensure_clean_summary(
     locale: Optional[str] = None,
     manual_marker: Optional[str] = DEFAULT_MANUAL_MARKER,
     summary_appendices_last: bool = False,
+    validate_doc_types: bool = False,
+    fail_on_doc_type_issues: bool = False,
 ) -> bool:
     """Regenerate SUMMARY.md from book.json structure.
     Returns True if the file was changed.
@@ -461,8 +463,17 @@ def ensure_clean_summary(
             "summary_mode 'manifest' gewählt, aber keine Manifest-Datei angegeben"
         )
 
+    doc_type_config = None
     if document_manifest_path:
         logger.info("document manifest resolved to %s", document_manifest_path)
+        try:
+            raw_manifest = summary_generator._load_manifest(document_manifest_path)
+            if raw_manifest:
+                doc_type_config = document_types.load_document_type_config(raw_manifest)
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.warning(
+                "Konnte Manifest nicht laden (%s): %s", document_manifest_path, exc
+            )
 
     # Get mode from module-level map
     mode = SUMMARY_MODE_MAP.get(
@@ -516,6 +527,20 @@ def ensure_clean_summary(
                 return False
         except Exception:
             old_content = ""
+
+    # Optional validation before generation
+    if validate_doc_types:
+        issues = document_types.validate_doc_types(
+            context.root_dir,
+            doc_type_config,
+            locale=locale,
+        )
+        for issue in issues:
+            prefix = "ERROR" if fail_on_doc_type_issues else "WARN"
+            path_info = f" ({issue['path']})" if issue.get("path") else ""
+            logger.error(f"Doc-Type {prefix}: {issue.get('message')}{path_info}")
+        if fail_on_doc_type_issues and issues:
+            raise SystemExit(1)
 
     # Generate new summary content using the tree-based generator
     try:
@@ -609,6 +634,18 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         help="Setze Anhänge (Anhang/Appendix) ans Ende der SUMMARY-Reihenfolge",
     )
 
+    summary_parser.add_argument(
+        "--validate-doc-types",
+        action="store_true",
+        help="Prüft doc_type-Abdeckung und meldet fehlende/ungültige Einträge",
+    )
+
+    summary_parser.add_argument(
+        "--fail-on-doc-type-issues",
+        action="store_true",
+        help="Bricht ab, wenn doc_type-Probleme gefunden werden (impliziert --validate-doc-types)",
+    )
+
     return parser.parse_args(argv)
 
 
@@ -633,6 +670,11 @@ def main(argv: list[str] | None = None) -> int:
             locale=args.locale,
             manual_marker=args.summary_manual_marker,
             summary_appendices_last=getattr(args, "summary_appendices_last", False),
+            validate_doc_types=(
+                getattr(args, "validate_doc_types", False)
+                or getattr(args, "fail_on_doc_type_issues", False)
+            ),
+            fail_on_doc_type_issues=getattr(args, "fail_on_doc_type_issues", False),
         )
         print("SUMMARY.MD UPDATED" if changed else "SUMMARY.MD OK")
         return 0

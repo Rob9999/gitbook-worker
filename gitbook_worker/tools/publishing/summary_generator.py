@@ -16,7 +16,9 @@ from gitbook_worker.tools.publishing.document_types import (
     DocumentTypeConfig,
     build_doc_type_summary,
     collect_documents,
+    collect_documents_with_issues,
     load_document_type_config,
+    validate_doc_types,
 )
 
 logger = logging.getLogger(__name__)
@@ -491,7 +493,11 @@ def generate_doc_type_summary(
     if not doc_type_config:
         return None
 
-    records = collect_documents(root_dir)
+    records, _issues = collect_documents_with_issues(
+        root_dir,
+        doc_type_config,
+        locale=locale,
+    )
     return build_doc_type_summary(records, doc_type_config, locale=locale)
 
 

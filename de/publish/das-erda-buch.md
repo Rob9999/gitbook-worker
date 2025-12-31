@@ -20,7 +20,19 @@ header-includes:
 ---
 
 <a id="md-readme"></a>
-# content
+# Startseite
+
+Willkommen! Diese Seite fasst die wichtigsten Einstiege zusammen:
+
+- [Cover & Überblick](#md-index)
+- [Vorwort](#md-preface) und [Inhaltshinweis](#md-placeholder)
+- [Kapitel 1 – Beobachtbare Muster](#md-chapters-chapter-01)
+- [Kapitel 2 – Vergleichstabellen](#md-chapters-chapter-02)
+- [Beispiel-Sammlungen (Emoji)](#md-examples-readme)
+- [Anhänge & Nachschlagewerke](#md-appendices-readme)
+- [Tabellen- und Abbildungsverzeichnisse](#md-list-of-tables)
+
+> Tipp: Nutze diese Seite als Navigation, falls du direkt in die Kapitel oder Beispiele springen willst.
 
 
 \newpage
