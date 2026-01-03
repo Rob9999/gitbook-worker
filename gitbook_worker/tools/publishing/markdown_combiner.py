@@ -9,10 +9,14 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from pathlib import Path
 from typing import List
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing import preprocess_md
+from gitbook_worker.tools.publishing.header_level_adjuster import (
+    adjust_headings_for_inclusion,
+)
 from gitbook_worker.tools.publishing.geometry_package_injector import (
     add_geometry_package,
 )
@@ -77,6 +81,7 @@ def combine_markdown(files: List[str], paper_format: str = "a4") -> str:
     for p in files:
         try:
             processed = preprocess_md.process(p, paper_format=paper_format)
+            processed = adjust_headings_for_inclusion(processed, Path(p))
             # Convert SVG references to PDF for LaTeX compatibility
             processed = re.sub(
                 r"(!\[[^\]]*\]\([^)]*\.gitbook/assets/[^)]+)\.svg\)",

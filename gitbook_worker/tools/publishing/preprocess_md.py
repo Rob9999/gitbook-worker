@@ -391,8 +391,31 @@ def paper_for_width(px: int, *, base_paper: PaperInfo | None = None) -> PaperInf
     return base_info
 
 
-def _escape_ampersands(value: str) -> str:
-    return re.sub(r"(?<!\\)&", r"\\&", value)
+def _escape_table_text(value: str) -> str:
+    """Escape LaTeX specials in table cells without double-escaping.
+
+    Keeps math segments ($...$) untouched to avoid breaking formulas.
+    """
+
+    parts = re.split(r"(\$[^$]*\$)", value)
+    escaped: list[str] = []
+    for part in parts:
+        if part.startswith("$") and part.endswith("$"):
+            escaped.append(part)
+            continue
+        escaped.append(re.sub(r"(?<!\\)([_&#%])", r"\\\1", part))
+    return "".join(escaped)
+
+
+def _escape_table_line(line: str) -> str:
+    if "|" not in line:
+        return line
+    segments = line.split("|")
+    escaped_segments = [segments[0]]
+    for segment in segments[1:-1]:
+        escaped_segments.append(_escape_table_text(segment))
+    escaped_segments.append(segments[-1])
+    return "|".join(escaped_segments)
 
 
 def wrap_block(
@@ -423,7 +446,7 @@ def wrap_block(
                 and re.match(r"^\s*\|?\s*:?-+", lines[i + 1])
             ):
                 header = [
-                    _escape_ampersands(x.strip())
+                    _escape_table_text(x.strip())
                     for x in line.strip().strip("|").split("|")
                 ]
                 alignments = [
@@ -447,7 +470,7 @@ def wrap_block(
                 i += 2
                 while i < len(lines) and "|" in lines[i] and lines[i].strip():
                     row = [
-                        _escape_ampersands(x.strip())
+                        _escape_table_text(x.strip())
                         for x in lines[i].strip().strip("|").split("|")
                     ]
                     out_lines.append(f"{' & '.join(row)} \\\\")
@@ -519,7 +542,7 @@ def process(path: str, paper_format: str = "a4") -> str:
                 i += 1
             cols = table_lines[0].count("|") - 1
             paper_info = paper_for_columns(cols=cols, base_paper=current_paper_info)
-            escaped_lines = [_escape_ampersands(l) for l in table_lines]
+            escaped_lines = [_escape_table_line(l) for l in table_lines]
             logger.info(
                 "In document '%s': Detected table with %d columns, paper: %s",
                 path,
