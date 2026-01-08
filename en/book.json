@@ -1,6 +1,7 @@
 {
     "title": "The ERDA Book",
     "author": "ERDA Team",
+    "date": "2026-01-08",
     "language": "en",
     "description": "A neutral sample book for testing, layout checks, and localisation workflows.",
     "root": "content/",

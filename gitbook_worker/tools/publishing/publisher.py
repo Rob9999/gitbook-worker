@@ -46,7 +46,7 @@ import sys
 import tempfile
 from collections import OrderedDict
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
 from collections.abc import Mapping
@@ -233,6 +233,7 @@ class ProjectMetadata:
     name: str
     authors: tuple[str, ...]
     license: str | None
+    date: str | None
     policy: str
     warnings: tuple[str, ...] = ()
 
@@ -246,6 +247,8 @@ class ProjectMetadata:
             metadata["author"] = list(self.authors)
         if self.license:
             metadata["rights"] = [self.license]
+        if self.date:
+            metadata["date"] = [self.date]
         return metadata
 
 
@@ -1760,6 +1763,35 @@ def _coerce_str(value: Any) -> str | None:
     return None
 
 
+_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def _coerce_date(value: Any) -> str | None:
+    """Coerce a date-like value into YYYY-MM-DD.
+
+    Notes:
+      - YAML may deserialize YYYY-MM-DD into a datetime.date.
+      - We intentionally validate the date format to keep publishing metadata
+        stable and predictable.
+    """
+
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date().isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        if not _DATE_RE.match(text):
+            raise ValueError("expected YYYY-MM-DD")
+        # Validate that the date is a real calendar date (e.g. rejects 2024-02-31)
+        return datetime.fromisoformat(text).date().isoformat()
+    return None
+
+
 def _coerce_policy(value: Any) -> str:
     if isinstance(value, str):
         text = value.strip().lower()
@@ -1806,19 +1838,20 @@ def _extract_authors(value: Any) -> tuple[str, ...]:
 
 def _load_book_json(
     manifest_dir: Path,
-) -> tuple[str | None, tuple[str, ...], str | None]:
+) -> tuple[str | None, tuple[str, ...], str | None, Any]:
     book_path = manifest_dir / "book.json"
     if not book_path.exists():
-        return None, (), None
+        return None, (), None, None
     try:
         data = json.loads(book_path.read_text(encoding="utf-8"))
     except Exception as exc:  # pragma: no cover - best effort fallback
         logger.debug("book.json konnte nicht gelesen werden: %s", exc)
-        return None, (), None
+        return None, (), None, None
     title = _coerce_str(data.get("title"))
     authors = _extract_authors(data.get("author"))
     license_value = _coerce_str(data.get("license"))
-    return title, authors, license_value
+    book_date = data.get("date")
+    return title, authors, license_value, book_date
 
 
 def _resolve_repo_hint(
@@ -1847,7 +1880,9 @@ def _resolve_project_metadata(
         project_cfg.get("attribution_policy") if project_cfg else None
     )
     repo_name, repo_owner = _resolve_repo_hint(manifest_path, repository)
-    book_title, book_authors, book_license = _load_book_json(manifest_path.parent)
+    book_title, book_authors, book_license, book_date_raw = _load_book_json(
+        manifest_path.parent
+    )
 
     warnings: list[str] = []
 
@@ -1885,10 +1920,37 @@ def _resolve_project_metadata(
         license_value = "<MISSING project.license>"
         warnings.append(msg + " attribution_policy=warn")
 
+    # Document date override handling.
+    # Precedence:
+    # 1) publish.yml: project.date
+    # 2) book.json: date
+    # 3) fallback: keep existing derived/frontmatter date behaviour
+    date_value: str | None = None
+    manifest_date_raw = project_cfg.get("date") if project_cfg else None
+    if manifest_date_raw is not None:
+        try:
+            date_value = _coerce_date(manifest_date_raw)
+        except ValueError as exc:
+            raise ProjectMetadataError(
+                f"project.date ungültig (erwartet YYYY-MM-DD): {exc}"
+            ) from exc
+        if not date_value:
+            raise ProjectMetadataError("project.date ungültig (erwartet YYYY-MM-DD).")
+    elif book_date_raw is not None:
+        try:
+            date_value = _coerce_date(book_date_raw)
+        except ValueError as exc:
+            raise ProjectMetadataError(
+                f"book.json date ungültig (erwartet YYYY-MM-DD): {exc}"
+            ) from exc
+        if not date_value:
+            raise ProjectMetadataError("book.json date ungültig (erwartet YYYY-MM-DD).")
+
     return ProjectMetadata(
         name=name,
         authors=tuple(authors),
         license=license_value,
+        date=date_value,
         policy=policy,
         warnings=tuple(warnings),
     )

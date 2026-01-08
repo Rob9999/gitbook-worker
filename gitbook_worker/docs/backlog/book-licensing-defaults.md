@@ -22,6 +22,14 @@ Sichere, generische Lizenz-/Attributions-Defaults bereitstellen, wenn ein Buchpr
 3. Repository-Metadaten als letzte Eskalationsstufe: Repo-Name → project name; Repo owner → org/author placeholder; Git remote URL → source link.
 4. Keine Daten? → Fail mit klarer Fehlermeldung + Beispielsnippet.
 
+**Datum (publishing date)**
+- Optional kann ein explizites Datum gesetzt werden, um die Dokument-Metadaten zu stabilisieren.
+- Priorität:
+  1) `publish.yml`: `project.date: YYYY-MM-DD`
+  2) `book.json`: `"date": "YYYY-MM-DD"`
+  3) Fallback: bisheriges Verhalten (z. B. Frontmatter-/Dokument-Logik)
+- Ungültige Werte sollen früh und klar fehlschlagen (z. B. `2026-13-40`).
+
 # Empfohlene Felder in `publish.yml`
 ```yaml
 project:
@@ -31,7 +39,17 @@ project:
       email: "author@example.com"
       org: "Organisation"
   license: "CC BY 4.0"   # oder CC BY-SA 4.0, CC0, etc.
+  date: "2026-01-08"    # optional, YYYY-MM-DD
   attribution_policy: "fail"  # fail | warn
+```
+
+# Empfohlene Felder in `book.json` (GitBook)
+```json
+{
+  "title": "Mein Buch",
+  "author": ["Vorname Nachname"],
+  "date": "2026-01-08"
+}
 ```
 
 # Default-Verhalten (wenn Felder fehlen)
