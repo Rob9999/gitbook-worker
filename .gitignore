@@ -1,7 +1,9 @@
 # Local environment variables
 .env
 
+# test virtual environments
 .venv-smoke/
+.smoke-venv/
 
 # lua / latex
 .texmf-cache/
