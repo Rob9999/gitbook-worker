@@ -28,6 +28,7 @@
 * [Emoji-Beispiele – Natur & Essen](examples/emoji-nature-and-food.md)
 * [Emoji-Beispiele – Objekte, Symbole & Flaggen](examples/emoji-objects-symbols-flags.md)
 * [Emoji-Beispiele – Smileys & Personen](examples/emoji-smileys-and-people.md)
+* [🧪 Emoji im Header – Überschriften](examples/emoji-headings.md)
 
 ## template
 

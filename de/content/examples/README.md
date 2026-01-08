@@ -18,6 +18,8 @@ Die Beispiele sind nach Unicode-Kategorien organisiert:
 - **[Natur & Essen](emoji-nature-and-food.md)**: Tiere, Pflanzen, Wettersymbole und Lebensmittel (U+1F330–U+1F37F, U+1F400–U+1F4FF)
   
 - **[Aktivitäten & Reisen](emoji-activities-and-travel.md)**: Sport, Hobbys, Verkehrsmittel und Orte (U+1F680–U+1F6FF, U+1F3A0–U+1F3FF)
+
+- **[Emoji im Header – Überschriften](emoji-headings.md)**: Regressionstest für Emojis in Überschriften (H1/H2/H3), inkl. ZWJ/VS16/Flaggen.
   
 - **[Objekte, Symbole & Flaggen](emoji-objects-symbols-flags.md)**: Alltags-Objekte, technische Symbole, Zeichen und internationale Flaggen (U+1F4A0–U+1F4FF, U+1F500–U+1F5FF, U+1F1E6–U+1F1FF)
 

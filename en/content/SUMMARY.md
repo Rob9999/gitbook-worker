@@ -29,6 +29,7 @@
 * [Emoji examples – Objects, symbols & flags](examples/emoji-objects-symbols-flags.md)
 * [Emoji examples – Smileys & people](examples/emoji-smileys-and-people.md)
 * [Examples](examples/README.md)
+* [🧪 Emoji in headings – Header samples](examples/emoji-headings.md)
 
 ## template
 

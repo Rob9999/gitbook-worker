@@ -21,6 +21,8 @@ Examples are organized by Unicode categories:
   
 - **[Objects, Symbols & Flags](emoji-objects-symbols-flags.md)**: Everyday objects, technical symbols, signs, and international flags (U+1F4A0–U+1F4FF, U+1F500–U+1F5FF, U+1F1E6–U+1F1FF)
 
+- **[Emoji in headings – Header samples](emoji-headings.md)**: Regression test for emojis in H1/H2/H3 headings, including ZWJ/VS16/flags.
+
 ## Test Coverage
 
 These examples validate:
