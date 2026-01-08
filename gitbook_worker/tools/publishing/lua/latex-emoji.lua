@@ -163,7 +163,11 @@ local function get_prologue()
 %s}
 \ltjsetparameter{jacharrange={-208}}
 \fi
-\newcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
+\ifcsname panEmoji\endcsname
+  \renewcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
+\else
+  \newcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
+\fi
 ]]):format(fname, fopts, dcrsrc)
   if bxcoloremoji then
     return ([[

@@ -114,6 +114,7 @@ def test_run_creates_missing_readme(tmp_path: Path) -> None:
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        logs_dir=repo / "logs",
         content_config_path=None,
         language_id="default",
         content_entry=entry,
@@ -126,6 +127,7 @@ def test_run_creates_missing_readme(tmp_path: Path) -> None:
         reset_others=False,
         publisher_args=(),
         dry_run=False,
+        isolated=False,
     )
     run(config)
     # Case-insensitive check: orchestrator creates README.md (uppercase)
@@ -152,6 +154,7 @@ def test_update_citation_dry_run(tmp_path: Path) -> None:
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        logs_dir=repo / "logs",
         content_config_path=None,
         language_id="default",
         content_entry=entry,
@@ -164,6 +167,7 @@ def test_update_citation_dry_run(tmp_path: Path) -> None:
         reset_others=False,
         publisher_args=(),
         dry_run=True,
+        isolated=False,
     )
     run(config)
     content = cff.read_text(encoding="utf-8")
@@ -189,6 +193,7 @@ def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
     config = OrchestratorConfig(
         root=repo,
         manifest=repo / "publish.yml",
+        logs_dir=repo / "logs",
         content_config_path=None,
         language_id="default",
         content_entry=entry,
@@ -201,6 +206,7 @@ def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
         reset_others=False,
         publisher_args=(),
         dry_run=False,
+        isolated=False,
     )
     run(config)
 
@@ -237,6 +243,7 @@ project:
     config = OrchestratorConfig(
         root=repo,
         manifest=manifest,
+        logs_dir=repo / "logs",
         content_config_path=None,
         language_id="default",
         content_entry=entry,
@@ -249,6 +256,7 @@ project:
         reset_others=False,
         publisher_args=(),
         dry_run=False,
+        isolated=False,
     )
     ctx = RuntimeContext(config)
     ctx.tools_dir = repo / "tools"

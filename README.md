@@ -1,6 +1,6 @@
-# GitBook Worker (v2.0.4)
+# GitBook Worker (v2.0.5)
 
-**Latest Release**: v2.0.4 (December 31, 2025) - [Release Notes](docs/releases/v2.0.4.md)
+**Latest Release**: v2.0.5 (January 8, 2026) - [Release Notes](docs/releases/v2.0.5.md)
 
 GitBook Worker ships the multi-language 2.x line. The Python package installs via
 `pip install -e .`, and the publishing pipeline is driven by `content.yaml`, which lists
@@ -9,11 +9,12 @@ the orchestration/publishing steps for that content root.
 
 > Kundenguide (Installation & Start): siehe [docs/customer-installation.md](docs/customer-installation.md).
 
-## 🎉 What's New in v2.0.4 (hotfix)
+## 🎉 What's New in v2.0.5 (hotfix)
 
-- Converter is launched via fully qualified module path to avoid collisions with user/local `tools` modules in neighboring projects.
-- Added customer installation guide covering clean venv setup, uninstall of stale `tools`, and verified orchestrator commands.
-- Release tag: `release-v.2.0.4-hotfix`; packaging version: 2.0.4.post1.
+- Publisher now prints the relevant TeX `.log` excerpt when Pandoc/LuaLaTeX fails (so you see the real LaTeX error, not just `exit status 1`).
+- Orchestrator gained `--isolated` and `--logs-dir`, auto-picks `<root>/content.yaml`, and improves repo-root detection for multilingual workspaces.
+- Emoji headings: hardened LaTeX macro handling to avoid bookmark crashes with `hyperref`.
+- Release tag: `release-v.2.0.5-hotfix`; packaging version: 2.0.5.post1.
 
 ## 🔙 Highlights from v2.0.0
 
@@ -30,7 +31,7 @@ the orchestration/publishing steps for that content root.
 - ✅ Windows/Linux path compatibility for Docker Desktop
 - ⚠️ Breaking: Docker font management changed (see release notes)
 
-See [docs/releases/v2.0.4.md](docs/releases/v2.0.4.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
+See [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
 
 ## Quick start
 

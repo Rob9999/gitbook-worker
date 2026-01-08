@@ -175,6 +175,7 @@ class OrchestratorConfig:
 
     root: Path
     manifest: Path
+    logs_dir: Path
     content_config_path: Path | None
     language_id: str
     content_entry: ContentEntry
@@ -187,6 +188,7 @@ class OrchestratorConfig:
     reset_others: bool
     publisher_args: tuple[str, ...]
     dry_run: bool
+    isolated: bool
     steps_override: tuple[str, ...] | None = None
 
 
@@ -271,6 +273,14 @@ class RuntimeContext:
     def env(self, extra: Mapping[str, str] | None = None) -> MutableMapping[str, str]:
         env: MutableMapping[str, str] = os.environ.copy()
         env["PYTHONPATH"] = self.python_path
+        # Ensure subprocesses log into the same directory as the orchestrator.
+        # logging_config.get_log_directory() honours DOCKER_LOG_DIR with highest
+        # priority, so we re-use it as a general log-dir override.
+        env["DOCKER_LOG_DIR"] = str(self.config.logs_dir)
+        if self.config.isolated:
+            # Prevent user-site packages from affecting imports in local runs.
+            # This keeps behaviour consistent across environments.
+            env.setdefault("PYTHONNOUSERSITE", "1")
         if self.config.repository:
             env.setdefault("GITHUB_REPOSITORY", self.config.repository)
         env.setdefault("ORCHESTRATOR_PROFILE", self.config.profile.name)
@@ -578,6 +588,18 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     root = (
         args.root.resolve() if args.root is not None else detect_repo_root(Path.cwd())
     )
+    logs_dir = (
+        args.logs_dir.resolve() if getattr(args, "logs_dir", None) else (root / "logs")
+    )
+
+    # Prefer repo-root content.yaml automatically unless the caller provided an
+    # explicit --content-config.
+    content_config = args.content_config
+    if content_config is None:
+        for candidate in (root / "content.yaml", root / "content.yml"):
+            if candidate.exists():
+                content_config = candidate
+                break
     repository = args.repository or os.getenv("GITHUB_REPOSITORY")
     repository_template = repository.lower() if repository else ""
     variables = {
@@ -590,7 +612,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         repo_root=root,
         language=args.language,
         manifest=args.manifest,
-        content_config=args.content_config,
+        content_config=content_config,
         allow_missing_config=True,
         allow_remote_entries=True,
         require_manifest=True,
@@ -616,6 +638,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     return OrchestratorConfig(
         root=root,
         manifest=manifest,
+        logs_dir=logs_dir,
         content_config_path=language_ctx.content_config_path,
         language_id=language_id,
         content_entry=content_entry,
@@ -628,6 +651,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         reset_others=args.reset_others,
         publisher_args=publisher_args,
         dry_run=args.dry_run,
+        isolated=getattr(args, "isolated", False),
         steps_override=steps_override,
     )
 
@@ -1217,6 +1241,11 @@ STEP_HANDLERS = {
 def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--root", type=Path, help="Repository root")
     parser.add_argument(
+        "--logs-dir",
+        type=Path,
+        help="Log-Verzeichnis (Standard: <root>/logs)",
+    )
+    parser.add_argument(
         "--manifest",
         type=Path,
         help="Pfad zu publish.yml (Standard: --root/publish.yml)",
@@ -1239,7 +1268,7 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--content-config",
         type=Path,
-        help="Pfad zu content.yaml (Standard: Repository-Root)",
+        help="Pfad zu content.yaml (Standard: erkennt <root>/content.yaml automatisch)",
     )
     parser.add_argument(
         "--lang",
@@ -1253,6 +1282,11 @@ def _add_common_args(parser: argparse.ArgumentParser) -> None:
         dest="silent",
         action="store_true",
         help="Unterdrückt das Startup-Banner auf stdout (Logs bleiben aktiv)",
+    )
+    parser.add_argument(
+        "--isolated",
+        action="store_true",
+        help="Isolierter Lauf: PYTHONNOUSERSITE=1 und kontrollierter PYTHONPATH für Subprozesse",
     )
 
 
@@ -1311,7 +1345,7 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     _print_start_banner(getattr(args, "silent", False))
     config = build_config(args)
-    reconfigure_root_logger(config.root / "logs")
+    reconfigure_root_logger(config.logs_dir)
     _log_start_context(args, config)
     if args.command == "validate":
         ok, errors = validate_manifest(

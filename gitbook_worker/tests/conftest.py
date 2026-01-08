@@ -24,6 +24,14 @@ for _path in (WORKER_DIR, REPO_ROOT):
 
 os.environ.setdefault("GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP", "1")
 
+# Matplotlib defaults to a GUI backend (often Tk) on Windows.
+# In minimal Python installs Tk/Tcl may be missing, causing tests that
+# generate charts to fail during backend initialization.
+#
+# Use a headless backend for the test suite by default. Users can override
+# it by exporting MPLBACKEND explicitly.
+os.environ.setdefault("MPLBACKEND", "Agg")
+
 
 from . import GH_TEST_ARTIFACTS_DIR, GH_TEST_LOGS_DIR, GH_TEST_OUTPUT_DIR
 from gitbook_worker.tools.logging_config import make_specific_logger

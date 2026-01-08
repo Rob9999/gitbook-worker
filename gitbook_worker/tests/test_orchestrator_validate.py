@@ -87,6 +87,7 @@ def test_run_logs_failure_analytics(monkeypatch, caplog, manifest_file: Path):
     config = OrchestratorConfig(
         root=manifest_file.parent,
         manifest=manifest_file,
+        logs_dir=manifest_file.parent / "logs",
         content_config_path=None,
         language_id="default",
         content_entry=entry,
@@ -99,6 +100,7 @@ def test_run_logs_failure_analytics(monkeypatch, caplog, manifest_file: Path):
         reset_others=False,
         publisher_args=(),
         dry_run=False,
+        isolated=False,
     )
 
     with pytest.raises(RuntimeError):

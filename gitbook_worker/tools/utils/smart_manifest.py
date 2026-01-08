@@ -73,7 +73,9 @@ def _load_config(path: Path | None = None) -> SmartManifestConfig:
         raise SmartManifestConfigError(str(exc)) from exc
 
     filenames_raw = data.get("filenames")
-    if isinstance(filenames_raw, Sequence) and not isinstance(filenames_raw, (str, bytes)):
+    if isinstance(filenames_raw, Sequence) and not isinstance(
+        filenames_raw, (str, bytes)
+    ):
         filenames = tuple(str(item) for item in filenames_raw if str(item).strip())
     else:
         filenames = DEFAULT_FILENAMES
@@ -93,12 +95,18 @@ def _load_config(path: Path | None = None) -> SmartManifestConfig:
                 if isinstance(filenames_override_raw, Sequence) and not isinstance(
                     filenames_override_raw, (str, bytes)
                 ):
-                    extracted = [str(item).strip() for item in filenames_override_raw if str(item).strip()]
+                    extracted = [
+                        str(item).strip()
+                        for item in filenames_override_raw
+                        if str(item).strip()
+                    ]
                     filenames_override = tuple(extracted) if extracted else None
                 directory_raw = entry.get("directory")
                 directory = str(directory_raw).strip() if directory_raw else None
                 search_rules.append(
-                    _SearchRule(kind=kind, directory=directory, filenames=filenames_override)
+                    _SearchRule(
+                        kind=kind, directory=directory, filenames=filenames_override
+                    )
                 )
             elif isinstance(entry, str):
                 if entry.strip():
@@ -119,6 +127,12 @@ def detect_repo_root(start: Path | None = None) -> Path:
     current = (start or Path.cwd()).resolve()
     for candidate in [current, *current.parents]:
         if (candidate / ".git").exists():
+            return candidate
+        # Multilingual repos often define their workspace via content.yaml even
+        # when book.json/publish.yml live in language subfolders.
+        if (candidate / "content.yaml").exists() or (
+            candidate / "content.yml"
+        ).exists():
             return candidate
         if any((candidate / name).exists() for name in DEFAULT_FILENAMES):
             return candidate
@@ -190,7 +204,9 @@ def resolve_manifest(
         elif rule.kind == "repo_root":
             base_dir = repo_root_path
         elif rule.kind == "directory" and rule.directory:
-            base_dir = _resolve_directory(rule.directory, cwd=cwd_path, repo_root=repo_root_path)
+            base_dir = _resolve_directory(
+                rule.directory, cwd=cwd_path, repo_root=repo_root_path
+            )
 
         if base_dir is None:
             continue

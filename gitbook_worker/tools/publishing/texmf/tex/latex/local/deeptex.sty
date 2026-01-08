@@ -5,6 +5,21 @@
 % Link handling and pdf metadata hooks
 \usepackage{hyperref}
 
+% Workaround: ensure emoji macros exist even if latex-emoji is missing/not yet
+% loaded. Also guard PDF strings to avoid duplicate definitions and bookmark
+% crashes. This block is idempotent so that latex-emoji can still redefine the
+% macros later.
+\makeatletter
+\@ifundefined{panEmojiFont}{\newcommand{\panEmojiFont}{}}{\renewcommand{\panEmojiFont}{}}
+\@ifundefined{panEmoji}{\newcommand{\panEmoji}[1]{#1}}{\renewcommand{\panEmoji}[1]{#1}}
+\@ifundefined{coloremoji}{\newcommand{\coloremoji}[1]{#1}}{\renewcommand{\coloremoji}[1]{#1}}
+\pdfstringdefDisableCommands{%%
+	\def\panEmojiFont{}%%
+	\def\panEmoji#1{#1}%%
+	\def\coloremoji#1{#1}%%
+}
+\makeatother
+
 \usepackage{enumitem}
 \usepackage{amssymb}
 \setlistdepth{9}

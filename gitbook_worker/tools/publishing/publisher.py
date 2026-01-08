@@ -2933,62 +2933,66 @@ def _run_pandoc(
             logger.info("🚀 Führe Pandoc aus: %s", cmd)
             _run(cmd)
         except subprocess.CalledProcessError:
-            # LuaLaTeX writes errors to .log file in CWD (output directory), not temp_dir!
-            # Find and log it before proceeding with error
+            # With -output-directory we expect LuaLaTeX to write .log files into
+            # the temporary output directory. Pandoc commonly uses a tex2pdf.*
+            # job name, so we must search broadly and pick the best candidate.
+            temp_root = Path(temp_dir)
             pdf_path = Path(pdf_out)
-            log_file = pdf_path.with_suffix(".log")
+            pdf_name = pdf_path.stem
+            log_candidates: list[Path] = []
 
-            if log_file.exists():
+            try:
+                log_candidates = list(temp_root.glob("**/*.log"))
+            except Exception:
+                log_candidates = []
+
+            chosen_log: Path | None = None
+            if log_candidates:
+                preferred = [
+                    p
+                    for p in log_candidates
+                    if p.name.startswith("tex2pdf") and p.suffix.lower() == ".log"
+                ]
+                if not preferred:
+                    preferred = [
+                        p
+                        for p in log_candidates
+                        if p.stem == pdf_name and p.suffix.lower() == ".log"
+                    ]
+                pool = preferred or log_candidates
+                # Pick the newest log (best chance to contain the failure)
+                chosen_log = max(
+                    pool,
+                    key=lambda p: p.stat().st_mtime if p.exists() else 0,
+                )
+
+            if chosen_log and chosen_log.exists():
                 try:
-                    log_content = log_file.read_text(encoding="utf-8", errors="replace")
-                    # Extract last ~150 lines where the actual error is
+                    log_content = chosen_log.read_text(
+                        encoding="utf-8", errors="replace"
+                    )
                     log_lines = log_content.splitlines()
-                    if len(log_lines) > 150:
-                        excerpt = "\n".join(log_lines[-150:])
-                    else:
-                        excerpt = log_content
+                    excerpt = (
+                        "\n".join(log_lines[-200:])
+                        if len(log_lines) > 200
+                        else log_content
+                    )
                     logger.error(
                         "=== TeX LOG FILE (%s) ===\n%s\n=== END TeX LOG ===",
-                        log_file.name,
+                        str(chosen_log),
                         excerpt,
+                    )
+                    logger.error(
+                        "Hinweis: Für Debugging kann ERDA_KEEP_LATEX_TEMP=1 gesetzt werden, dann wird das Temp-Verzeichnis nach '_latex-debug' kopiert."
                     )
                 except Exception as log_exc:
                     logger.warning(
-                        "Could not read TeX log file %s: %s", log_file, log_exc
+                        "Could not read TeX log file %s: %s", chosen_log, log_exc
                     )
             else:
-                # Fallback: search temp_dir (shouldn't happen but defensive)
-                pdf_name = pdf_path.stem
-                log_candidates = list(Path(temp_dir).glob(f"**/{pdf_name}.log"))
-                if not log_candidates:
-                    log_candidates = list(Path(temp_dir).glob("**/*.log"))
-
-                if log_candidates:
-                    try:
-                        log_content = log_candidates[0].read_text(
-                            encoding="utf-8", errors="replace"
-                        )
-                        log_lines = log_content.splitlines()
-                        excerpt = (
-                            "\n".join(log_lines[-150:])
-                            if len(log_lines) > 150
-                            else log_content
-                        )
-                        logger.error(
-                            "=== TeX LOG FILE (%s) ===\n%s\n=== END TeX LOG ===",
-                            log_candidates[0].name,
-                            excerpt,
-                        )
-                    except Exception as log_exc:
-                        logger.warning(
-                            "Could not read TeX log file %s: %s",
-                            log_candidates[0],
-                            log_exc,
-                        )
-                else:
-                    logger.warning(
-                        "No TeX log file found (checked %s and %s)", log_file, temp_dir
-                    )
+                logger.warning(
+                    "No TeX log file found under %s (pdf_out=%s)", temp_root, pdf_out
+                )
             raise
         finally:
             if keep_latex_temp:
