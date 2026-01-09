@@ -1,6 +1,9 @@
 # Local environment variables
 .env
 
+# customer test files
+customer-de/
+
 # test virtual environments
 .venv-smoke/
 .smoke-venv/

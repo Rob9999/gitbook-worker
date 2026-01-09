@@ -10,7 +10,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Mapping, Optional
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing import preprocess_md
@@ -68,7 +68,11 @@ def normalize_md(text: str) -> str:
     return "".join(out)
 
 
-def combine_markdown(files: List[str], paper_format: str = "a4") -> str:
+def combine_markdown(
+    files: List[str],
+    paper_format: str = "a4",
+    heading_targets: Optional[Mapping[str | Path, int]] = None,
+) -> str:
     """Return a single Markdown string combining ``files``.
 
     Each file is processed by :mod:`preprocess_md` before normalisation.
@@ -76,12 +80,24 @@ def combine_markdown(files: List[str], paper_format: str = "a4") -> str:
 
     SVG image references are automatically converted to PDF references for
     LaTeX compatibility (assumes SVG→PDF conversion happens during asset copying).
+
+    ``heading_targets`` allows callers to prescribe the desired first heading
+    level per file; a constant offset is applied to all headings in the file.
     """
+    normalized_targets: dict[Path, int] = {}
+    if heading_targets:
+        normalized_targets = {
+            Path(path).resolve(): level for path, level in heading_targets.items()
+        }
+
     parts: List[str] = []
     for p in files:
         try:
             processed = preprocess_md.process(p, paper_format=paper_format)
-            processed = adjust_headings_for_inclusion(processed, Path(p))
+            target_level = normalized_targets.get(Path(p).resolve())
+            processed = adjust_headings_for_inclusion(
+                processed, Path(p), target_level=target_level
+            )
             # Convert SVG references to PDF for LaTeX compatibility
             processed = re.sub(
                 r"(!\[[^\]]*\]\([^)]*\.gitbook/assets/[^)]+)\.svg\)",

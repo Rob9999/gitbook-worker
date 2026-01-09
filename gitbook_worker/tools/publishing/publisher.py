@@ -3090,29 +3090,64 @@ def _run_pandoc(
         os.environ.update({"TMPDIR": original_tmpdir})
 
 
-def _extract_md_paths_from_summary(summary_path: Path, root_dir: Path) -> List[str]:
+@dataclass(frozen=True)
+class SummaryEntry:
+    path: Path
+    depth: int
+
+
+def _extract_md_entries_from_summary(
+    summary_path: Path, root_dir: Path
+) -> List[SummaryEntry]:
     if not summary_path.exists():
         return []
 
-    resolved: "OrderedDict[str, None]" = OrderedDict()
+    resolved: "OrderedDict[Path, SummaryEntry]" = OrderedDict()
     pattern = re.compile(r"\(([^)]+\.(?:md|markdown))\)", re.IGNORECASE)
+    indent_stack: list[int] = []
 
     try:
         with summary_path.open("r", encoding="utf-8") as handle:
             for line in handle:
-                for match in pattern.findall(line):
+                matches = pattern.findall(line)
+                if not matches:
+                    continue
+
+                expanded = line.expandtabs(4)
+                indent = len(expanded) - len(expanded.lstrip(" "))
+
+                while indent_stack and indent < indent_stack[-1]:
+                    indent_stack.pop()
+                if not indent_stack or indent > indent_stack[-1]:
+                    indent_stack.append(indent)
+                depth = len(indent_stack) or 1
+
+                for match in matches:
                     target = match.split("#", 1)[0].strip()
                     if not target or target.startswith(("http://", "https://")):
                         continue
                     candidate = (root_dir / target).resolve()
                     if candidate.suffix.lower() not in {".md", ".markdown"}:
                         continue
-                    resolved[str(candidate)] = None
+                    if not candidate.exists():
+                        logger.debug(
+                            "SUMMARY.md references non-existent file: %s", target
+                        )
+                        continue
+                    if candidate not in resolved:
+                        resolved[candidate] = SummaryEntry(candidate, depth)
     except Exception as exc:
         logger.warning("Konnte SUMMARY in %s nicht lesen: %s", summary_path, exc)
         return []
 
-    return list(resolved.keys())
+    return list(resolved.values())
+
+
+def _extract_md_paths_from_summary(summary_path: Path, root_dir: Path) -> List[str]:
+    return [
+        str(entry.path)
+        for entry in _extract_md_entries_from_summary(summary_path, root_dir)
+    ]
 
 
 def _iter_summary_candidates(folder: Path, summary_path: Optional[Path]) -> List[Path]:
@@ -3133,12 +3168,38 @@ def _iter_summary_candidates(folder: Path, summary_path: Optional[Path]) -> List
     return candidates
 
 
+@dataclass(frozen=True)
+class MarkdownCollection:
+    files: List[str]
+    heading_targets: dict[Path, int]
+
+
+def _build_default_heading_targets(
+    md_files: List[str], folder_path: Path
+) -> dict[Path, int]:
+    targets: dict[Path, int] = {}
+    for name in md_files:
+        try:
+            resolved = Path(name).resolve()
+        except Exception:
+            continue
+
+        try:
+            rel_parts = resolved.relative_to(folder_path).parts
+            depth = max(1, len(rel_parts))
+        except Exception:
+            depth = 1
+
+        targets[resolved] = depth
+    return targets
+
+
 def _collect_folder_md(
     folder: str,
     use_summary: bool,
     *,
     summary_layout: Optional[SummaryContext] = None,
-) -> List[str]:
+) -> MarkdownCollection:
     folder_path = Path(folder).resolve()
     root_dir = summary_layout.root_dir if summary_layout else folder_path
     summary_candidates = _iter_summary_candidates(
@@ -3147,14 +3208,18 @@ def _collect_folder_md(
 
     if use_summary:
         for candidate in summary_candidates:
-            md_files = _extract_md_paths_from_summary(candidate, root_dir)
+            entries = _extract_md_entries_from_summary(candidate, root_dir)
             logger.info(
                 "ℹ %d Markdown-Dateien aus %s gelesen.",
-                len(md_files),
+                len(entries),
                 candidate,
             )
-            if md_files:
-                return md_files
+            if entries:
+                files = [str(entry.path) for entry in entries]
+                heading_targets = {
+                    entry.path.resolve(): max(1, entry.depth) for entry in entries
+                }
+                return MarkdownCollection(files=files, heading_targets=heading_targets)
     # Fallback: alle .md rekursiv, README bevorzugt
     md_files: List[str] = []
     for root, _, files in os.walk(folder_path):
@@ -3166,7 +3231,8 @@ def _collect_folder_md(
                 else:
                     md_files.append(full)
     logger.info("ℹ %d Markdown-Dateien in %s gefunden.", len(md_files), folder_path)
-    return md_files
+    heading_targets = _build_default_heading_targets(md_files, folder_path)
+    return MarkdownCollection(files=md_files, heading_targets=heading_targets)
 
 
 def convert_a_file(
@@ -3321,14 +3387,21 @@ def convert_a_folder(
     if assets:
         logger.info("Assets to copy          : %d", len(assets))
 
-    md_files = _collect_folder_md(
+    md_collection = _collect_folder_md(
         folder, use_summary=use_summary, summary_layout=summary_layout
     )
+    md_files = md_collection.files
+    heading_targets = md_collection.heading_targets
     if not md_files:
         logger.info("ℹ Keine Markdown-Dateien in %s – übersprungen.", folder)
         raise Exception(f"No markdown files found in {folder}")
     combined = add_geometry_package(
-        combine_markdown(md_files, paper_format=paper_format), paper_format=paper_format
+        combine_markdown(
+            md_files,
+            paper_format=paper_format,
+            heading_targets=heading_targets,
+        ),
+        paper_format=paper_format,
     )
     # Escape the first/top-level Markdown heading in the combined document to
     # avoid LaTeX errors (e.g. unescaped '&' in titles).

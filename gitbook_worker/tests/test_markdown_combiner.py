@@ -92,3 +92,27 @@ def test_normalize_md_handles_display_math_subscripts():
     text = "$$x₁$$"
     normalized = markdown_combiner.normalize_md(text)
     assert normalized == "$$x_{1}$$"
+
+
+def test_combine_markdown_respects_heading_targets_down(tmp_path):
+    md_file = tmp_path / "doc.md"
+    md_file.write_text("# Title\n\n## Child", encoding="utf-8")
+
+    combined = markdown_combiner.combine_markdown(
+        [str(md_file)], heading_targets={md_file: 3}
+    )
+
+    assert "### Title" in combined
+    assert "#### Child" in combined
+
+
+def test_combine_markdown_respects_heading_targets_up(tmp_path):
+    md_file = tmp_path / "doc.md"
+    md_file.write_text("### Title\n\n#### Child", encoding="utf-8")
+
+    combined = markdown_combiner.combine_markdown(
+        [str(md_file)], heading_targets={md_file: 1}
+    )
+
+    assert "# Title" in combined
+    assert "## Child" in combined

@@ -5,6 +5,15 @@
 % Link handling and pdf metadata hooks
 \usepackage{hyperref}
 
+% Some TeX Live / hyperref combinations can end up with \Hy@toclinkstart being
+% referenced by the hyperref TOC hook while not yet defined. This breaks
+% \tableofcontents reading and can manifest as a corrupted/missing TOC.
+% Define no-op fallbacks to keep compilation robust.
+\makeatletter
+\providecommand{\Hy@toclinkstart}[1]{}
+\providecommand{\Hy@toclinkend}{}
+\makeatother
+
 % Workaround: ensure emoji macros exist even if latex-emoji is missing/not yet
 % loaded. Also guard PDF strings to avoid duplicate definitions and bookmark
 % crashes. This block is idempotent so that latex-emoji can still redefine the
