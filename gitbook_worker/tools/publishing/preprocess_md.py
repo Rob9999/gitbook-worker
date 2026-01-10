@@ -215,7 +215,7 @@ def _anchor_from_path(path: Path) -> str:
 def _insert_anchor(body: str, anchor: str) -> str:
     """Insert the anchor *after* YAML front matter if present."""
 
-    anchor_line = f'<a id="{anchor}"></a>\n'
+    anchor_line = f'<a id="{anchor}"></a>\n\n'
     if not body.startswith("---"):
         return anchor_line + body
 

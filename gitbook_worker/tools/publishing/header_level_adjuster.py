@@ -12,8 +12,73 @@ metadata or code samples.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Iterable, Optional
+from gitbook_worker.tools.logging_config import get_logger
+
+logger = get_logger(__name__)
+
+# Toggle: align a document's first heading to the summary-derived level while
+# preserving its internal cascade. Enabled via env for reversible experiments.
+FORCE_SUMMARY_LEVEL = os.environ.get("GBW_FORCE_SUMMARY_LEVEL", "0") == "1"
+
+# ---------- Summary-driven test helper ----------
+
+
+def _parse_summary_lines(summary_text: str) -> list[tuple[int, str, str]]:
+    """Return (depth, title, href) tuples from a GitBook-style SUMMARY.md.
+
+    Depth is derived from leading spaces before ``*`` (2 spaces == one level).
+    """
+
+    entries: list[tuple[int, str, str]] = []
+    for raw in summary_text.splitlines():
+        line = raw.rstrip()
+        if not line.lstrip().startswith("*"):
+            continue
+
+        leading_spaces = len(line) - len(line.lstrip(" "))
+        depth = leading_spaces // 2 + 1  # 0/2 -> 1 (top-level), etc.
+
+        # Extract [title](href) without relying on regex-heavy parsing.
+        title_start = line.find("[")
+        link_sep = line.find("](")
+        end_paren = line.rfind(")")
+        if title_start == -1 or link_sep == -1 or end_paren == -1:
+            continue
+
+        title = line[title_start + 1 : link_sep]
+        href = line[link_sep + 2 : end_paren]
+        entries.append((depth, title, href))
+
+    return entries
+
+
+def render_summary_toc(summary_path: Path) -> str:
+    """Generate a TOC preview that enforces heading levels from SUMMARY.md.
+
+    For testing header leveling, we intentionally ignore any existing headings
+    inside the target documents and instead map each SUMMARY.md entry to a
+    synthetic heading ``#`` repeated by its summary depth.
+    """
+
+    text = summary_path.read_text(encoding="utf-8")
+    rows = _parse_summary_lines(text)
+    rendered: list[str] = []
+    for depth, title, href in rows:
+        rendered.append(f"{'#'*depth} {title}  ({href})")
+    return "\n".join(rendered)
+
+
+def demo_summary_toc(summary_path: Path) -> None:
+    """Print a SUMMARY.md-driven TOC for manual inspection.
+
+    Usage (from repo root):
+    ``python -m gitbook_worker.tools.publishing.header_level_adjuster demo``
+    """
+
+    print(render_summary_toc(summary_path))
 
 
 def _first_heading_level(lines: Iterable[str]) -> Optional[int]:
@@ -118,7 +183,9 @@ def adjust_headings_for_inclusion(
     the parent README heuristic is used and only downward adjustments are
     applied (i.e. headings are made deeper, not shallower).
     """
-
+    logger.debug(
+        "Adjusting headings for %s (target_level=%s)", source_path, target_level
+    )
     lines = content.splitlines(keepends=True)
     current_level = _first_heading_level(lines)
     if current_level is None:
@@ -141,7 +208,7 @@ def adjust_headings_for_inclusion(
             return content
     else:
         delta = target_level - current_level
-        if delta == 0:
+        if not FORCE_SUMMARY_LEVEL and delta == 0:
             return content
 
     adjusted: list[str] = []
@@ -189,8 +256,40 @@ def adjust_headings_for_inclusion(
             level = len(prefix)
             new_level = max(1, min(6, level + delta))
             rest = line[len(prefix) :].lstrip()
-            adjusted.append(f"{'#'*new_level} {rest}{newline}")
+            adjusted_line = f"{'#'*new_level} {rest}{newline}"
+            adjusted.append(adjusted_line)
+            logger.info(
+                "Adjusted heading: level %d -> %d: '%s' -> '%s'",
+                level,
+                new_level,
+                line.strip(),
+                adjusted_line.strip(),
+            )
         else:
             adjusted.append(raw)
 
-    return "".join(adjusted)
+    joined = "".join(adjusted)
+
+    logger.debug(
+        "Shifting headings in %s: current_level=%d, target_level=%d, delta=%d, lines=%s, adjusted=%s",
+        source_path,
+        current_level,
+        target_level,
+        delta,
+        lines,
+        adjusted,
+    )
+
+    return joined
+
+
+if __name__ == "__main__":
+    import sys
+
+    args = sys.argv[1:]
+    if not args:
+        summary = Path("customer-de/content/SUMMARY.md")
+    else:
+        summary = Path(args[0])
+
+    demo_summary_toc(summary)

@@ -3170,7 +3170,9 @@ def _iter_summary_candidates(folder: Path, summary_path: Optional[Path]) -> List
 
 @dataclass(frozen=True)
 class MarkdownCollection:
+    # list of markdown file paths
     files: List[str]
+    # mapping of markdown file path to desired heading target depth (header level)
     heading_targets: dict[Path, int]
 
 
