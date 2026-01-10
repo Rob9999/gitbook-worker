@@ -596,7 +596,7 @@ Diese Seite enthält eine breite Emoji-Auswahl für Rendering-, Font- und Bookma
 \newpage
 
 ---
-title: Sprachproben – 100 Sprachen (ohne Russisch)
+title: Sprachproben – 100 Sprachen
 description: Neutrale kurze Beispielsätze in vielen Sprachen für Font-/Rendering-Tests.
 date: 2026-01-10
 version: 1.0
@@ -609,9 +609,9 @@ history:
 <a id="md-examples-language-samples-100"></a>
 
 
-# Sprachproben – 100 Sprachen (ohne Russisch)
+# Sprachproben – 100 Sprachen
 
-Diese Seite enthält kurze, neutrale Beispielsätze in vielen Sprachen (ohne Russisch).
+Diese Seite enthält kurze, neutrale Beispielsätze in vielen Sprachen.
 Sie dient als Regressionstest für Schriften, Silbentrennung, Sonderzeichen und PDF-Bookmarks.
 
 ## 🇩🇪 DE - Germany (Deutschland)
@@ -625,10 +625,15 @@ In der Ruhe liegt die Kraft.
 ## 🇨🇭 CH - Switzerland (Schweiz)
 ### Deutsch
 In der Ruhe liegt die Kraft.
+
 ### Français
 Dans le calme réside la force.
+
 ### Italiano
 Nella calma risiede la forza.
+
+### Rumantsch
+En la quietezza è forza.
 
 ## 🇬🇧 GB - United Kingdom (United Kingdom)
 ### English
@@ -641,6 +646,15 @@ In calm lies strength.
 ## 🇪🇸 ES - Spain (España)
 ### Español
 En la calma está la fuerza.
+
+### Català
+En la calma hi ha força.
+
+### Euskara
+Lasaitasunean indarra dago.
+
+### Galego
+Na calma hai forza.
 
 ## 🇲🇽 MX - Mexico (México)
 ### Español
@@ -669,8 +683,10 @@ In de rust schuilt kracht.
 ## 🇧🇪 BE - Belgium (België / Belgique)
 ### Nederlands
 In de rust schuilt kracht.
+
 ### Français
 Dans le calme réside la force.
+
 ### Deutsch
 In der Ruhe liegt die Kraft.
 
@@ -762,37 +778,37 @@ Sakinlikte güç vardır.
 ### हिन्दी
 शांति में शक्ति है।
 
-## 🇮🇳 IN - India (भारत) – বাংলা
 ### বাংলা
 শান্তিতে শক্তি আছে।
 
-## 🇮🇳 IN - India (भारत) – తెలుగు
 ### తెలుగు
 నిశ్శబ్దంలో బలం ఉంటుంది.
 
-## 🇮🇳 IN - India (भारत) – मराठी
 ### मराठी
 शांततेत शक्ती आहे.
 
-## 🇮🇳 IN - India (भारत) – ગુજરાતી
 ### ગુજરાતી
 શાંતિમાં શક્તિ છે.
 
-## 🇮🇳 IN - India (भारत) – ಕನ್ನಡ
 ### ಕನ್ನಡ
 ಶಾಂತಿಯಲ್ಲಿ ಶಕ್ತಿ ಇದೆ.
 
-## 🇮🇳 IN - India (भारत) – മലയാളം
 ### മലയാളം
 ശാന്തിയിൽ ശക്തിയുണ്ട്.
 
-## 🇮🇳 IN - India (भारत) – ଓଡ଼ିଆ
 ### ଓଡ଼ିଆ
 ଶାନ୍ତିରେ ଶକ୍ତି ଅଛି।
+
+### ਪੰਜਾਬੀ
+ਸ਼ਾਂਤੀ ਵਿੱਚ ਤਾਕਤ ਹੈ।
+
+### অসমীয়া
+শান্তিত শক্তি আছে।
 
 ## 🇱🇰 LK - Sri Lanka (ශ්‍රී ලංකාව)
 ### සිංහල
 නිශ්ශබ්දතාවයේ ශක්තිය ඇත.
+
 ### தமிழ்
 அமைதியில் வலிமை உள்ளது.
 
@@ -880,6 +896,9 @@ Asudalykda güýç bar.
 ### Қазақша
 Тыныштықта күш бар.
 
+### Qazaq (Latin)
+Tynyqtyqta küş bar.
+
 ## 🇺🇦 UA - Ukraine (Україна)
 ### Українська
 У спокої є сила.
@@ -943,8 +962,10 @@ In calm lies strength.
 ## 🇳🇬 NG - Nigeria (Nigeria)
 ### Yoruba
 Nínú ìdákẹ́jẹ̀ ni agbára wà.
+
 ### Igbo
-N’udo dị ike.
+N'udo dị ike.
+
 ### Hausa
 A cikin natsuwa akwai ƙarfi.
 
@@ -959,6 +980,7 @@ Ci dalal am na doole.
 ## 🇨🇲 CM - Cameroon (Cameroun)
 ### Français
 Dans le calme réside la force.
+
 ### English
 In calm lies strength.
 
@@ -977,14 +999,17 @@ Na calma está a força.
 ## 🇿🇦 ZA - South Africa (South Africa)
 ### English
 In calm lies strength.
+
 ### Afrikaans
 In kalmte lê krag.
+
 ### isiZulu
 Ekuthuleni kukhona amandla.
 
 ## 🇲🇦 MA - Morocco (المغرب)
 ### العربية
 في الهدوء تكمن القوة.
+
 ### Tamazight
 Deg wazal tella tazmert.
 
@@ -1007,6 +1032,7 @@ Deg wazal tella tazmert.
 ## 🇮🇶 IQ - Iraq (العراق)
 ### العربية
 في الهدوء تكمن القوة.
+
 ### کوردی
 لە ئارامییدا هێز هەیە.
 
@@ -1021,18 +1047,21 @@ En la calma está la fuerza.
 ## 🇵🇪 PE - Peru (Perú)
 ### Español
 En la calma está la fuerza.
+
 ### Quechua
 Ch’iniypi kallpa kan.
 
 ## 🇧🇴 BO - Bolivia (Bolivia)
 ### Español
 En la calma está la fuerza.
+
 ### Aymara
 Sumankañan ch’amawa.
 
 ## 🇵🇾 PY - Paraguay (Paraguay)
 ### Español
 En la calma está la fuerza.
+
 ### Guaraní
 Py’aguýpe oĩ mbarete.
 
@@ -1043,6 +1072,7 @@ Nan kalm gen fòs.
 ## 🇨🇦 CA - Canada (Canada)
 ### English
 In calm lies strength.
+
 ### Français
 Dans le calme réside la force.
 
@@ -1053,12 +1083,14 @@ In calm lies strength.
 ## 🇳🇿 NZ - New Zealand (Aotearoa)
 ### English
 In calm lies strength.
+
 ### Māori
 I te mārie ka kitea te kaha.
 
 ## 🇫🇯 FJ - Fiji (Fiji)
 ### English
 In calm lies strength.
+
 ### iTaukei
 E tiko ena vakacegu na kaukauwa.
 
@@ -1070,41 +1102,17 @@ I le filemu e iai le malosi.
 ### lea faka-Tonga
 ‘I he melino ‘oku ‘i ai ‘a e mālohi.
 
-## 🇮🇳 IN - India (भारत) – தமிழ்
-### தமிழ்
-அமைதியில் வலிமை உள்ளது.
-
-## 🇮🇳 IN - India (भारत) – ਪੰਜਾਬੀ
-### ਪੰਜਾਬੀ
-ਸ਼ਾਂਤੀ ਵਿੱਚ ਤਾਕਤ ਹੈ।
-
-## 🇮🇳 IN - India (भारत) – অসমীয়া
-### অসমীয়া
-শান্তিত শক্তি আছে।
-
-## 🇪🇸 ES - Spain (España) – Català
-### Català
-En la calma hi ha força.
-
-## 🇪🇸 ES - Spain (España) – Euskara
-### Euskara
-Lasaitasunean indarra dago.
-
-## 🇪🇸 ES - Spain (España) – Galego
-### Galego
-Na calma hai forza.
-
-## 🇨🇭 CH - Switzerland (Schweiz) – Rumantsch
-### Rumantsch
-En la quietezza è forza.
 
 ## 🇸🇬 SG - Singapore (Singapore)
 ### English
 In calm lies strength.
+
 ### 中文（简体）
 宁静中有力量。
+
 ### Bahasa Melayu
 Dalam ketenangan ada kekuatan.
+
 ### தமிழ்
 அமைதியில் வலிமை உள்ளது.
 
@@ -1112,13 +1120,12 @@ Dalam ketenangan ada kekuatan.
 ### မြန်မာစာ
 တိတ်ဆိတ်မှုထဲမှာ အားရှိတယ်။
 
-## 🇰🇿 KZ - Kazakhstan (Қазақстан) – Qazaq Latin
-### Qazaq (Latin)
-Tynyqtyqta küş bar.
-
 ## 🇵🇸 PS - Palestine (فلسطين)
 ### العربية
 في الهدوء تكمن القوة.
+
+### English
+In calm lies strength.
 
 ## 🇱🇧 LB - Lebanon (لبنان)
 ### العربية
@@ -1131,6 +1138,7 @@ Tynyqtyqta küş bar.
 ## 🇨🇾 CY - Cyprus (Κύπρος)
 ### Ελληνικά
 Στη γαλήνη βρίσκεται η δύναμη.
+
 ### Türkçe
 Sakinlikte güç vardır.
 
@@ -1145,10 +1153,6 @@ U miru je snaga.
 ## 🇲🇪 ME - Montenegro (Crna Gora)
 ### Crnogorski
 U miru je snaga.
-
-## 🇵🇸 PS - Palestine (فلسطين) – English
-### English
-In calm lies strength.
 
 
 \newpage
