@@ -33,4 +33,27 @@ Short neutral content that exercises the pipeline features.
 
 ### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Faces (selection)
+
+😀 😃 😄 😁 😆 😊 🙂 😉 😌 😇 🤔 😐 🙄 😎 🥳 🤓 😴
+
+#### Hands & gestures (with skin tones)
+
+👍 👍🏻 👍🏼 👍🏽 👍🏾 👍🏿
+👋 👋🏻 👋🏼 👋🏽 👋🏾 👋🏿
+🙌 🙌🏻 🙌🏼 🙌🏽 🙌🏾 🙌🏿
+👏 👏🏻 👏🏼 👏🏽 👏🏾 👏🏿
+
+#### People & roles (ZWJ/sequences)
+
+🧑‍💻 👩‍💻 👨‍💻
+🧑‍🔬 👩‍🔬 👨‍🔬
+🧑‍🚀 👩‍🚀 👨‍🚀
+🧑‍🍳 👩‍🍳 👨‍🍳
+🧑‍🏫 👩‍🏫 👨‍🏫
+
+#### Families & relationships (ZWJ)
+
+👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦 👩‍👦

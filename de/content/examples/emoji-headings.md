@@ -33,4 +33,20 @@ Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
 
 ### Beispielgruppe
 
-Kurzer Emoji-Abschnitt.
+Diese Seite enthält Emoji direkt in Überschriften, um Bookmarks/TOC und PDF-Strings zu testen.
+
+#### 🧪 Überschrift mit Emoji
+
+Inline: ✅ ⚠️ ℹ️ 🔒 🔑 ♻️
+
+#### 🧩 ZWJ-Sequenzen (komplex)
+
+👩‍💻 👨‍💻 🧑‍🚀 👨‍👩‍👧‍👦
+
+#### 🏁 Flaggen im Fließtext
+
+🇩🇪 🇪🇺 🇬🇧 🇺🇸 🇺🇳
+
+#### 🔢 Keycaps & Varianten
+
+0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 #️⃣ *️⃣

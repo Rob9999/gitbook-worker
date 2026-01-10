@@ -33,4 +33,26 @@ Short neutral content that exercises the pipeline features.
 
 ### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Plants & nature
+
+🌱 🌿 🍀 🍃 🌾 🌵 🌳 🌲 🌴 🍁 🍂 🍄 🌸 🌼 🌻 🌺 🌷 🪴
+
+#### Animals (selection)
+
+🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦉 🦇
+🐺 🐗 🐴 🦄 🐝 🦋 🐞 🪲 🐢 🐍 🦎 🐙 🦀 🦐 🐟 🐠 🐡 🦈 🐳 🐬
+
+#### Weather & elements
+
+🌈 🌙 ⭐ 🌟 ☀️ 🌧️ ❄️ 🌪️ 🌊 💧 🔥
+
+#### Food (neutral, broad)
+
+🍞 🥖 🥨 🧀 🥚 🥗 🥦 🥑 🍅 🥕 🌽 🥔 🍄
+🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍒 🥝
+
+#### Drinks
+
+☕ 🍵 🧃 🥛 🧊

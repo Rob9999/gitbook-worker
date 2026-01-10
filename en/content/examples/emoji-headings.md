@@ -33,4 +33,20 @@ Short neutral content that exercises the pipeline features.
 
 ### Sample set
 
-Short emoji section.
+This page places emojis in headings to test bookmarks/TOC and PDF strings.
+
+#### 🧪 Heading with emoji
+
+Inline: ✅ ⚠️ ℹ️ 🔒 🔑 ♻️
+
+#### 🧩 ZWJ sequences (complex)
+
+👩‍💻 👨‍💻 🧑‍🚀 👨‍👩‍👧‍👦
+
+#### 🏁 Flags in text
+
+🇩🇪 🇪🇺 🇬🇧 🇺🇸 🇺🇳
+
+#### 🔢 Keycaps & variants
+
+0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 #️⃣ *️⃣

@@ -33,4 +33,26 @@ Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
 
 ### Beispielgruppe
 
-Kurzer Emoji-Abschnitt.
+Diese Seite enthält eine breite Emoji-Auswahl für Rendering-, Font- und Bookmark-Tests.
+
+#### Pflanzen & Natur
+
+🌱 🌿 🍀 🍃 🌾 🌵 🌳 🌲 🌴 🍁 🍂 🍄 🌸 🌼 🌻 🌺 🌷 🪴
+
+#### Tiere (Auswahl)
+
+🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦉 🦇
+🐺 🐗 🐴 🦄 🐝 🦋 🐞 🪲 🐢 🐍 🦎 🐙 🦀 🦐 🐟 🐠 🐡 🦈 🐳 🐬
+
+#### Wetter & Elemente
+
+🌈 🌙 ⭐ 🌟 ☀️ 🌧️ ❄️ 🌪️ 🌊 💧 🔥
+
+#### Essen (neutral, breit)
+
+🍞 🥖 🥨 🧀 🥚 🥗 🥦 🥑 🍅 🥕 🌽 🥔 🍄
+🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍒 🥝
+
+#### Getränke
+
+☕ 🍵 🧃 🥛 🧊

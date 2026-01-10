@@ -33,4 +33,27 @@ Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
 
 ### Beispielgruppe
 
-Kurzer Emoji-Abschnitt.
+Diese Seite enthält eine breite Emoji-Auswahl für Rendering-, Font- und Bookmark-Tests.
+
+#### Gesichter (Auswahl)
+
+😀 😃 😄 😁 😆 😊 🙂 😉 😌 😇 🤔 😐 🙄 😎 🥳 🤓 😴
+
+#### Hände & Gesten (mit Skin-Tones)
+
+👍 👍🏻 👍🏼 👍🏽 👍🏾 👍🏿
+👋 👋🏻 👋🏼 👋🏽 👋🏾 👋🏿
+🙌 🙌🏻 🙌🏼 🙌🏽 🙌🏾 🙌🏿
+👏 👏🏻 👏🏼 👏🏽 👏🏾 👏🏿
+
+#### Personen & Rollen (ZWJ/Sequenzen)
+
+🧑‍💻 👩‍💻 👨‍💻
+🧑‍🔬 👩‍🔬 👨‍🔬
+🧑‍🚀 👩‍🚀 👨‍🚀
+🧑‍🍳 👩‍🍳 👨‍🍳
+🧑‍🏫 👩‍🏫 👨‍🏫
+
+#### Familien & Beziehungen (ZWJ)
+
+👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦 👩‍👦

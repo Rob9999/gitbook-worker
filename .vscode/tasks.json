@@ -53,6 +53,27 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "test"
+		},
+		{
+			"label": "Build de PDF after emoji expansion",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.workflow_orchestrator",
+				"run",
+				"--root",
+				"C:\\gitbook-worker",
+				"--content-config",
+				"content.yaml",
+				"--lang",
+				"de",
+				"--profile",
+				"local"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }
