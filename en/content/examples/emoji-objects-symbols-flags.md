@@ -31,6 +31,6 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
 Short emoji section.

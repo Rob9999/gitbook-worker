@@ -1,0 +1,58 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Check de PDF TOC",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.utils.pdf_toc_extractor",
+				"--pdf",
+				"de/publish/das-erda-buch.pdf",
+				"--format",
+				"text"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Build en PDF (local)",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.workflow_orchestrator",
+				"run",
+				"--root",
+				"C:\\gitbook-worker",
+				"--content-config",
+				"content.yaml",
+				"--lang",
+				"en",
+				"--profile",
+				"local"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Check en PDF TOC",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.utils.pdf_toc_extractor",
+				"--pdf",
+				"en/publish/the-erda-book.pdf",
+				"--format",
+				"text"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		}
+	]
+}

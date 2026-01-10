@@ -31,6 +31,6 @@ Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
 
 ## Emoji-Test
 
-###   
+### Beispielgruppe
 
 Kurzer Emoji-Abschnitt.
