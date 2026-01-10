@@ -21,7 +21,7 @@ header-includes:
 
 <a id="md-readme"></a>
 
-﻿# Placeholder Content
+# Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
@@ -37,9 +37,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-index"></a>
-
-﻿---
+---
 title: Home
 description: Overview for the neutral sample book
 date: 2024-06-01
@@ -48,6 +46,8 @@ doc_type: cover
 authors:
   - ERDA Team
 ---
+<a id="md-index"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -64,14 +64,14 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-preface"></a>
-
-﻿---
+---
 title: Preface
 date: 2024-06-01
 version: 1.0
 doc_type: preface
 ---
+<a id="md-preface"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -88,15 +88,15 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-chapters-chapter-01"></a>
-
-﻿---
+---
 title: Chapter 1 – Observable patterns
 date: 2024-06-01
 version: 1.0
 doc_type: chapter
 chapter_number: 1
 ---
+<a id="md-chapters-chapter-01"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -113,15 +113,15 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-chapters-chapter-02"></a>
-
-﻿---
+---
 title: Chapter 2 – Comparative tables
 date: 2024-06-01
 version: 1.0
 doc_type: chapter
 chapter_number: 2
 ---
+<a id="md-chapters-chapter-02"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -138,14 +138,14 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-chapters-readme"></a>
-
-﻿---
+---
 title: Chapters
 date: 2024-06-01
 version: 1.0
 doc_type: placeholder
 ---
+<a id="md-chapters-readme"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -162,13 +162,13 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-epilogue"></a>
-
-﻿---
+---
 doc_type: epilog
 title: Epilogue
 version: 1.0.0
 ---
+<a id="md-epilogue"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -185,9 +185,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-list-of-tables"></a>
-
-﻿---
+---
 title: List of Tables
 date: 2025-12-29
 version: 1.0
@@ -196,6 +194,8 @@ auto_generate: true
 include_chapter_tables: true
 numbering_style: "decimal"
 ---
+<a id="md-list-of-tables"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -212,9 +212,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-list-of-figures"></a>
-
-﻿---
+---
 title: List of Figures
 date: 2025-12-29
 version: 1.0
@@ -223,6 +221,8 @@ auto_generate: true
 include_formats: [png, jpg, svg, pdf]
 numbering_style: "decimal"
 ---
+<a id="md-list-of-figures"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -239,9 +239,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-appendices-appendix-a"></a>
-
-﻿---
+---
 title: Appendix A – Data sources and table layout
 date: 2024-06-01
 version: 1.0
@@ -249,6 +247,8 @@ doc_type: appendix
 appendix_id: "A"
 category: "technical"
 ---
+<a id="md-appendices-appendix-a"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -265,9 +265,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-appendices-emoji-font-coverage"></a>
-
-﻿---
+---
 title: Appendix – Emoji & font coverage
 description: Evidence of suitable fonts for all scripts and coloured emojis used in the sample content.
 date: 2024-06-05
@@ -280,6 +278,8 @@ history:
     date: 2024-06-05
     changes: Initial version with font matrix and testing notes.
 ---
+<a id="md-appendices-emoji-font-coverage"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -296,14 +296,14 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-appendices-readme"></a>
-
-﻿---
+---
 title: Appendices
 date: 2024-06-01
 version: 1.0
 doc_type: placeholder
 ---
+<a id="md-appendices-readme"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -320,13 +320,13 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-glossary"></a>
-
-﻿---
+---
 doc_type: glossary
 title: Glossary
 version: 1.0.0
 ---
+<a id="md-glossary"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -343,15 +343,15 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-references"></a>
-
-﻿---
+---
 title: Citations & further reading
 date: 2024-06-01
 version: 1.0
 doc_type: bibliography
 citation_style: "APA"
 ---
+<a id="md-references"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -368,9 +368,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-attributions"></a>
-
-﻿---
+---
 title: Acknowledgments & Attributions
 date: 2025-12-29
 version: 1.0
@@ -382,6 +380,8 @@ categories:
   - libraries
   - contributors
 ---
+<a id="md-attributions"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.
@@ -398,9 +398,7 @@ Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deseru
 
 \newpage
 
-<a id="md-colophon"></a>
-
-﻿---
+---
 title: Colophon
 date: 2025-12-29
 version: 1.0
@@ -408,6 +406,8 @@ doc_type: colophon
 position: "back"
 include_technical_details: true
 ---
+<a id="md-colophon"></a>
+
 # Placeholder Content
 
 This repository ships neutral placeholder content for testing and running the publishing pipeline.

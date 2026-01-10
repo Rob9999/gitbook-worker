@@ -1,19 +1,20 @@
-﻿---
+---
 title: Zitationen & weiterführende Quellen
 date: 2024-06-01
 version: 1.0
 doc_type: bibliography
 citation_style: "APA"
 ---
-# Platzhalterinhalt
 
-Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
+# Zitationen & weiterführende Quellen
 
-Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
+Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Zweck
 
+Dieses Dokument ist als Platzhalter für automatisierte Generierung gedacht.
 
+## Hinweise
+
+Quelle: content/references.md

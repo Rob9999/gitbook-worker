@@ -1,4 +1,4 @@
-﻿---
+---
 title: Home
 description: Overview for the neutral sample book
 date: 2024-06-01
@@ -7,15 +7,20 @@ doc_type: cover
 authors:
   - ERDA Team
 ---
-# Placeholder Content
 
-This repository ships neutral placeholder content for testing and running the publishing pipeline.
+# Home
 
+This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
 The original book content has been removed from these files.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Purpose
 
+Short neutral content that exercises the pipeline features.
 
+## Pipeline Features
+
+- YAML frontmatter (document metadata)
+- Heading hierarchy (TOC / PDF bookmarks)
+- Lists, code blocks, blockquotes
+- Tables and references
+- Stable navigation (SUMMARY.md)

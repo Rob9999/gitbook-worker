@@ -515,7 +515,9 @@ def wrap_block(
 
 def process(path: str, paper_format: str = "a4") -> str:
     """Process ``path`` and return transformed Markdown content."""
-    with open(path, "r", encoding="utf-8") as f:
+    # Use utf-8-sig to transparently strip a UTF-8 BOM (\ufeff) if present.
+    # BOMs can break Pandoc block parsing and lead to missing TOC/bookmarks.
+    with open(path, "r", encoding="utf-8-sig") as f:
         lines = f.readlines()
 
     lines = _convert_html_figures(lines)
