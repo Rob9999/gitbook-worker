@@ -15,6 +15,7 @@ if os.environ.get("GITBOOK_WORKER_LOG_STDOUT_ONLY") is None:
 from gitbook_worker.tools.logging_config import get_logger
 
 from .smart_font_stack import SmartFontError, prepare_runtime_font_loader
+from .font_attribution import generate_font_attribution_files
 
 logger = get_logger(__name__)
 
@@ -59,6 +60,27 @@ def _parse_args(argv: Optional[List[str]]) -> argparse.Namespace:
         help="Continue even if some fonts are missing (for diagnostics)",
     )
 
+    attribution_parser = subparsers.add_parser(
+        "generate-attribution",
+        help="Generate ATTRIBUTION.md and LICENSE-* files from fonts.yml",
+    )
+    attribution_parser.add_argument(
+        "--out-dir",
+        type=Path,
+        required=True,
+        help="Target directory where ATTRIBUTION.md and LICENSE-* are written",
+    )
+    attribution_parser.add_argument(
+        "--config",
+        type=Path,
+        help="Optional fonts.yml path (defaults to gitbook_worker/defaults/fonts.yml)",
+    )
+    attribution_parser.add_argument(
+        "--license-fonts",
+        type=Path,
+        help="Optional path to LICENSE-FONTS (defaults to repo root)",
+    )
+
     return parser.parse_args(argv)
 
 
@@ -99,6 +121,18 @@ def _load_manifest_fonts(manifest_path: Path) -> List[Dict[str, str]]:
 
 def main(argv: Optional[List[str]] = None) -> int:
     args = _parse_args(argv)
+
+    if args.command == "generate-attribution":
+        try:
+            generate_font_attribution_files(
+                out_dir=args.out_dir,
+                fonts_config_path=args.config,
+                license_fonts_path=args.license_fonts,
+            )
+        except Exception as exc:
+            logger.error("Attribution-Generierung fehlgeschlagen: %s", exc)
+            return 1
+        return 0
 
     if args.command != "sync":  # pragma: no cover - defensive
         logger.error("Unsupported command: %s", args.command)

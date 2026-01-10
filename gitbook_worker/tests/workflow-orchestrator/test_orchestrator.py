@@ -4,6 +4,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
+import yaml
 
 from gitbook_worker.tools.workflow_orchestrator import (
     OrchestratorConfig,
@@ -16,6 +17,7 @@ from gitbook_worker.tools.workflow_orchestrator.orchestrator import (
     parse_args,
     _step_publisher,
     RuntimeContext,
+    _step_generate_attribution,
 )
 from gitbook_worker.tools.utils.smart_content import ContentEntry
 
@@ -263,3 +265,98 @@ project:
     ctx.tools_dir.mkdir(parents=True, exist_ok=True)
     with pytest.raises(FileNotFoundError):
         _step_publisher(ctx)
+
+
+def test_step_generate_attribution_creates_files(tmp_path: Path) -> None:
+    repo = tmp_path
+    manifest = repo / "publish.yml"
+    out_dir = repo / "publish"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Minimal fonts.yml + LICENSE-FONTS stubs so generation is deterministic.
+    (repo / "fonts.yml").write_text(
+        """
+version: 1.0.0
+fonts:
+  EMOJI:
+    name: "Twemoji Mozilla"
+    paths: ["/tmp/TwemojiMozilla.ttf"]
+    license: "CC BY 4.0"
+    license_url: "https://creativecommons.org/licenses/by/4.0/"
+    version: "0.1"
+  SERIF:
+    name: "DejaVu Serif"
+    paths: []
+    license: "Bitstream Vera License + Public Domain"
+    license_url: "https://dejavu-fonts.github.io/License.html"
+    version: "2.37"
+""".lstrip(),
+        encoding="utf-8",
+    )
+    (repo / "LICENSE-FONTS").write_text(
+        """
+Creative Commons Attribution 4.0 International
+CC-BY TEXT
+
+Bitstream Vera License (for bundled DejaVu fonts)
+BITSTREAM TEXT
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    manifest.write_text(
+        """
+publish:
+  - path: .
+    out: book.pdf
+    build: true
+    out_dir: publish
+    generate_attribution: true
+project:
+  license: MIT
+""".lstrip(),
+        encoding="utf-8",
+    )
+
+    profile = OrchestratorProfile(
+        name="test",
+        steps=("generate_attribution",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    entry = ContentEntry(id="default", uri="./", type="local")
+    config = OrchestratorConfig(
+        root=repo,
+        manifest=manifest,
+        logs_dir=repo / "logs",
+        content_config_path=None,
+        language_id="default",
+        content_entry=entry,
+        language_root=repo,
+        profile=profile,
+        repo_visibility="public",
+        repository="example/repo",
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+        isolated=False,
+    )
+
+    ctx = RuntimeContext(
+        config, manifest_data=yaml.safe_load(manifest.read_text(encoding="utf-8"))
+    )
+
+    # Ensure the generator uses our tmp repo stubs.
+    cwd = Path.cwd()
+    try:
+        import os
+
+        os.chdir(repo)
+        _step_generate_attribution(ctx)
+    finally:
+        os.chdir(cwd)
+
+    assert (out_dir / "ATTRIBUTION.md").exists()
+    assert (out_dir / "LICENSE-CC-BY-4.0").exists()
+    assert (out_dir / "LICENSE-BITSTREAM-VERA").exists()

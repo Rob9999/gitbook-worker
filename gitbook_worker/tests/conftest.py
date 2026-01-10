@@ -33,6 +33,28 @@ os.environ.setdefault("GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP", "1")
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
+    """Skip manual tests by default.
+
+    Manual tests are intended for explicit, human-reviewed runs.
+    Enable them by setting:
+      GITBOOK_WORKER_RUN_MANUAL_TESTS=1
+    """
+
+    flag = os.getenv("GITBOOK_WORKER_RUN_MANUAL_TESTS", "").strip().lower()
+    if flag in {"1", "true", "yes", "on"}:
+        return
+
+    marker = pytest.mark.skip(
+        reason="manual test (set GITBOOK_WORKER_RUN_MANUAL_TESTS=1 to enable)"
+    )
+    for item in items:
+        if item.get_closest_marker("manual") is not None:
+            item.add_marker(marker)
+
+
 from . import GH_TEST_ARTIFACTS_DIR, GH_TEST_LOGS_DIR, GH_TEST_OUTPUT_DIR
 from gitbook_worker.tools.logging_config import make_specific_logger
 from gitbook_worker.tools.utils.smart_content import load_content_config

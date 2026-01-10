@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from string import Template
-from typing import Iterable, Mapping, MutableMapping, Sequence
+from typing import Iterable, List, Mapping, MutableMapping, Sequence
 
 import yaml
 
@@ -119,6 +119,7 @@ _DEFAULT_STEPS = (
     "update_citation",
     "converter",
     "engineering-document-formatter",
+    "generate_attribution",
     "publisher",
 )
 
@@ -1020,6 +1021,53 @@ def _step_converter(ctx: RuntimeContext) -> None:
     )
 
 
+def _step_generate_attribution(ctx: RuntimeContext) -> None:
+    """Generate font attribution files into publish out_dir(s).
+
+    This step is a no-op unless at least one publish[] entry declares:
+
+      generate_attribution: true
+
+    The files are generated before the publisher runs so they can be referenced
+    by the publishing pipeline (e.g. included in combined markdown).
+    """
+
+    publish_entries = ctx._manifest_data.get("publish")
+    if not isinstance(publish_entries, list):
+        LOGGER.info("No publish[] entries found; skipping attribution generation")
+        return
+
+    from gitbook_worker.tools.publishing.font_attribution import (
+        generate_font_attribution_files,
+    )
+
+    manifest_dir = ctx.config.manifest.parent
+    targets: List[Path] = []
+
+    for entry in publish_entries:
+        if not isinstance(entry, Mapping):
+            continue
+        if not _as_bool(entry.get("build"), default=False):
+            continue
+        if not _as_bool(entry.get("generate_attribution"), default=False):
+            continue
+
+        raw_out_dir = entry.get("out_dir")
+        out_dir = Path(str(raw_out_dir)) if raw_out_dir else Path("publish")
+        if not out_dir.is_absolute():
+            out_dir = (manifest_dir / out_dir).resolve()
+        targets.append(out_dir)
+
+    unique_targets = list(dict.fromkeys(targets))
+    if not unique_targets:
+        LOGGER.info("No targets with generate_attribution=true; skipping")
+        return
+
+    for out_dir in unique_targets:
+        generate_font_attribution_files(out_dir=out_dir)
+        LOGGER.info("Generated font attribution in %s", out_dir)
+
+
 def _format_yaml_value(value: object) -> str:
     """Format a Python value as a YAML-compatible string.
 
@@ -1236,6 +1284,7 @@ STEP_HANDLERS = {
     "ai-reference-check": _step_ai_reference_check,
     "converter": _step_converter,
     "engineering-document-formatter": _step_engineering_docs,
+    "generate_attribution": _step_generate_attribution,
     "publisher": _step_publisher,
 }
 

@@ -8,6 +8,7 @@ profiles:
     - update_citation
     - converter
     - engineering-document-formatter
+    - generate_attribution
     - publisher
     docker:
       use_registry: true
@@ -17,12 +18,14 @@ profiles:
     description: Lokale Ausführung ohne Registry-Zugriff.
     steps:
     - converter
+    - generate_attribution
     - publisher
     docker:
       use_registry: false
   publisher:
     description: Führt nur den Publisher aus (z. B. für workflow_call).
     steps:
+    - generate_attribution
     - publisher
     docker:
       use_registry: true
@@ -53,6 +56,7 @@ publish:
   summary_appendices_last: true
   keep_combined: true
   build: true
+  generate_attribution: true
   reset_build_flag: false
   use_document_types: true
   document_type_config:

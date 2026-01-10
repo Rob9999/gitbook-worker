@@ -215,7 +215,7 @@ def _anchor_from_path(path: Path) -> str:
 def _insert_anchor(body: str, anchor: str) -> str:
     """Insert the anchor *after* YAML front matter if present."""
 
-    anchor_line = f'<a id="{anchor}"></a>\n\n'
+    anchor_line = f'<a id="{anchor}"></a>\n\n'  # the second newline is very important for separating from a succeeding header (e.g. # Title), content would otherwise be corrupted while rendering the markdown (also for pdf)
     if not body.startswith("---"):
         return anchor_line + body
 
