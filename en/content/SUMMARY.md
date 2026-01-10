@@ -31,6 +31,7 @@
 * [Examples](examples/README.md)
 * [Image examples – Assets & layout](examples/image-assets-and-layout.md)
 * [Image examples – Captions & density](examples/image-captions-and-density.md)
+* [Language samples – 100 languages (excluding Russian)](examples/language-samples-100.md)
 * [🧪 Emoji in headings – Header samples](examples/emoji-headings.md)
 
 ## template
