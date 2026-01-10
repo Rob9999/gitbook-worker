@@ -6,17 +6,31 @@ order: 5
 
 # Widmung
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Gewidmet allen, die zur Open-Source-Bewegung beitragen.
 
-## Zweck
+---
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Den Entwicklern, die ihren Code teilen.  
+Den Dokumentierenden, die Wissen zugänglich machen.  
+Den Übersetzern, die Sprachbarrieren überwinden.  
+Den Testern, die Qualität sicherstellen.  
+Den Designern, die Ästhetik mit Funktion verbinden.
 
-## Pipeline-Features
+---
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+Für diejenigen, die spät in der Nacht debuggen,  
+früh am Morgen dokumentieren,  
+und unermüdlich an der Verbesserung der Technologie  
+für alle arbeiten.
+
+---
+
+Für die Gemeinschaft,  
+die glaubt, dass Wissen frei sein sollte,  
+Werkzeuge offen,  
+und Zusammenarbeit die Grundlage des Fortschritts ist.
+
+---
+
+*In Dankbarkeit für alle, die das Ökosystem aufbauen,  
+in dem wir alle gedeihen.*

@@ -14,20 +14,16 @@ history:
 
 # Emoji-Beispiele – Aktivitäten & Reisen
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Diese Seite testet Emojis für Sport, Hobbys, Verkehrsmittel und Reisen.
 
-## Zweck
+## Besonderheiten
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Emojis in dieser Kategorie enthalten:
 
-## Pipeline-Features
-
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+- **Personen in Aktion**: Sportler mit Skin-Tone- und Gender-Varianten
+- **Fahrzeuge**: Autos, Flugzeuge, Schiffe in verschiedenen Varianten
+- **Gebäude**: Verschiedene Architekturstile
+- **Symbole**: Verkehrsschilder, Warnsymbole
 
 ## Emoji-Test
 

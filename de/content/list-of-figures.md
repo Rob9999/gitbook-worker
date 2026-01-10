@@ -10,17 +10,31 @@ numbering_style: "decimal"
 
 # Abbildungsverzeichnis
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieser Abschnitt katalogisiert alle Abbildungen, Diagramme und Illustrationen, die im gesamten Dokument verwendet werden. Jede Abbildung ist nummeriert und beschriftet für einfache Referenzierung.
 
 ## Zweck
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Das Abbildungsverzeichnis bietet:
 
-## Pipeline-Features
+- **Index visueller Inhalte**: Übersicht über alle grafischen Elemente
+- **Schnellzugriff**: Direkte Navigation zu spezifischen Illustrationen
+- **Inhaltsprüfung**: Überprüfung, dass alle Bilder korrekt beschriftet sind
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+## Unterstützte Formate
+
+Das Dokument enthält Abbildungen in verschiedenen Formaten:
+
+- **Rastergrafiken**: PNG, JPEG für Fotos und Screenshots
+- **Vektorgrafiken**: SVG für skalierbare Diagramme und Icons
+- **Gemischte Inhalte**: Kombination verschiedener Formate nach Bedarf
+
+## Organisation
+
+Abbildungen werden sequenziell aufgelistet mit:
+
+- Abbildungsnummer
+- Beschreibender Bildunterschrift
+- Seitenposition (in PDF-Ausgabe)
+- Formattyp wo relevant
+
+_Hinweis: Die vollständige Liste wird während des Build-Prozesses automatisch generiert und umfasst alle beschrifteten Abbildungen aus allen Dokumentabschnitten._

@@ -14,20 +14,16 @@ history:
 
 # Emoji examples – Smileys & people
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests the display of facial emojis, gestures, and people with various skin tones.
 
-## Purpose
+## Why these tests are important
 
-Short neutral content that exercises the pipeline features.
+Emojis representing people are particularly complex:
 
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Skin tone modifiers**: Five different skin tones (U+1F3FB to U+1F3FF)
+- **ZWJ sequences**: Complex emoji composed of multiple Unicode characters
+- **Gender variants**: Male, female, and neutral forms
+- **Font fallbacks**: Switching between text and emoji fonts
 
 ## Emoji test
 

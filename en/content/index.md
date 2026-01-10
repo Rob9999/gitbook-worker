@@ -12,17 +12,54 @@ authors:
 
 <div><figure><img src=".gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo</p></figcaption></figure></div>
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Welcome to this technical documentation framework demonstration.
 
-## Purpose
+## About this document
 
-Short neutral content that exercises the pipeline features.
+This publication showcases capabilities of modern documentation systems:
 
-## Pipeline Features
+- **Multilingual support**: Parallel English and German versions
+- **Rich formatting**: Tables, figures, code blocks, and lists
+- **Unicode excellence**: 100+ languages, emoji, and complex scripts
+- **Professional output**: High-quality PDF generation with proper typography
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Document structure
+
+The content is organized into:
+
+### Core chapters
+
+Main content demonstrating various documentation patterns and structures.
+
+### Examples
+
+Practical demonstrations of:
+
+- Emoji rendering across categories
+- Image formats (raster and vector)
+- Language samples and scripts
+
+### Appendices
+
+Supplementary material including:
+
+- Technical specifications
+- Font coverage analysis
+- Reference materials
+
+## Navigation
+
+Use the table of contents (sidebar or PDF bookmarks) to navigate between sections. Each chapter includes:
+
+- Clear heading hierarchy
+- Cross-references where relevant
+- Practical examples
+
+## Technical foundation
+
+Built with:
+
+- **Markdown**: Source content format
+- **YAML frontmatter**: Structured metadata
+- **Python pipeline**: Automated build and validation
+- **LaTeX/XeLaTeX**: Professional PDF typesetting

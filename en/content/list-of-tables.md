@@ -10,17 +10,22 @@ numbering_style: "decimal"
 
 # List of Tables
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section provides a comprehensive index of all tables appearing throughout the document. Tables are numbered sequentially and referenced by their location in the text.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+The list of tables serves multiple functions:
 
-## Pipeline Features
+- **Quick reference**: Locate specific tables without scanning the entire document
+- **Content overview**: Understand the range of comparative and structured information presented
+- **Navigation aid**: Jump directly to tables of interest
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Organization
+
+Tables are listed in order of appearance with:
+
+- Table number
+- Descriptive caption
+- Page reference (in PDF output)
+
+_Note: The complete list is automatically generated during the build process and includes all captioned tables from the chapters and appendices._

@@ -6,17 +6,47 @@ order: 6
 
 # Hinweis der Übersetzung
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieses Dokument demonstriert mehrsprachige Publishing-Fähigkeiten und Übersetzungs-Workflows.
 
-## Zweck
+## Übersetzungsprinzipien
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Bei der Übersetzung technischer Dokumentation:
 
-## Pipeline-Features
+- **Terminologiekonsistenz**: Einheitliche Übersetzung technischer Begriffe beibehalten
+- **Kulturelle Anpassung**: Beispiele und Metaphern an die Zielkultur anpassen
+- **Formaterhaltung**: Struktur, Überschriften und Formatierung identisch halten
+- **Technische Genauigkeit**: Alle Codebeispiele, Befehle und Referenzen überprüfen
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+## Sprachliche Überlegungen
+
+### Deutsche Konventionen
+
+Diese deutsche Version folgt den Rechtschreib- und Grammatikkonventionen:
+
+- Rechtschreibung: Neue deutsche Rechtschreibung (2006 Reform)
+- Interpunktion: Deutsche Anführungszeichen („“)
+- Datumsformat: TT.MM.JJJJ
+- Zahlenformatierung: Punkt für Tausender (1.000), Komma für Dezimalstellen (3,14)
+
+### Unicode-Unterstützung
+
+Das Dokument umfasst umfangreiche Unicode-Inhalte:
+
+- **100+ Sprachen**: Abdeckung wichtiger Schriftsysteme
+- **Emoji-Rendering**: Korrekte Darstellung von Flaggen, Symbolen und kombinierten Sequenzen
+- **Rechts-nach-links-Text**: Unterstützung für Arabisch, Hebräisch und andere RTL-Schriften
+
+## Übersetzungs-Workflow
+
+Inhalte werden in parallelen Sprachverzeichnissen gepflegt:
+
+```
+de/     # Deutsch
+en/     # Englisch (Britisch)
+```
+
+Jede Sprache enthält:
+
+- Unabhängige SUMMARY.md (Navigationsstruktur)
+- Sprachspezifische Metadaten (book.json)
+- Lokalisierte Frontmatter und Terminologie

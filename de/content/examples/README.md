@@ -7,17 +7,41 @@ doc_type: example
 
 # Beispiele
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieser Abschnitt enthält verschiedene Beispieldokumente, die unterschiedliche Aspekte der Dokumentenerstellung und -formatierung demonstrieren.
 
-## Zweck
+## Übersicht der Beispielkategorien
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+### Emoji-Tests
 
-## Pipeline-Features
+Die Emoji-Beispieldateien testen die korrekte Darstellung von Unicode-Emoji in verschiedenen Kontexten:
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+- **Emoji-Headings**: Emojis in Überschriften und TOC-Bookmarks
+- **Smileys and People**: Gesichter, Personen, Gesten
+- **Nature and Food**: Tiere, Pflanzen, Lebensmittel
+- **Activities and Travel**: Sport, Reisen, Verkehr
+- **Objects and Symbols**: Gegenstände, Symbole, Flaggen
+
+### Bild-Tests
+
+Die Bild-Beispiele demonstrieren verschiedene Aspekte der Bildintegration:
+
+- **Assets and Layout**: Grundlegende Bildeinbindung (PNG, SVG)
+- **Captions and Density**: Bildunterschriften und dichte Bildfolgen
+
+### Sprachtests
+
+Die Sprachproben-Datei enthält Beispiele in über 100 Sprachen zur Überprüfung von:
+
+- Schriftarten und Zeichensatzabdeckung
+- Textrichtung (LTR, RTL)
+- Silbentrennung und Zeilenumbruch
+- PDF-Bookmark-Kodierung
+
+## Zweck der Beispiele
+
+Diese Beispieldateien dienen als:
+
+1. **Regressionstests** für die Publishing-Pipeline
+2. **Referenzimplementierungen** für Dokumentformate
+3. **Qualitätssicherung** für Schrift- und Layout-Rendering
+4. **Dokumentation** der unterstützten Features

@@ -7,17 +7,22 @@ doc_type: placeholder
 
 # Chapters
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section contains the main chapters of the document, organised sequentially to build a coherent narrative.
 
-## Purpose
+## Structure
 
-Short neutral content that exercises the pipeline features.
+The chapters are designed to progressively introduce concepts, starting with foundational ideas and advancing to more complex topics. Each chapter builds upon the previous one whilst maintaining independence for reference purposes.
 
-## Pipeline Features
+## Chapter organisation
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+### Chapter 1 – Observable patterns
+
+Introduces design patterns in software development, their historical context, and practical applications.
+
+### Chapter 2 – Comparative tables
+
+Explores the use of tables for structured information presentation and technology comparisons.
+
+## Reading guidance
+
+Readers new to the subject should proceed sequentially through the chapters. Experienced readers may navigate directly to specific topics of interest using the table of contents.

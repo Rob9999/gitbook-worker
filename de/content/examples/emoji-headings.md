@@ -14,22 +14,18 @@ history:
 
 # 🧪 Emoji im Header – Überschriften
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Diese Seite testet die korrekte Darstellung von Emojis in Überschriften unterschiedlicher Ebenen. Besonders relevant ist dabei die Kodierung in PDF-Bookmarks und im Inhaltsverzeichnis.
 
-## Zweck
+## 🎯 Testszenarien
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Emojis in Überschriften stellen besondere Anforderungen an die Dokumentverarbeitung:
 
-## Pipeline-Features
+- **PDF-Bookmarks**: Korrekte Unicode-Kodierung im PDF-Inhaltsverzeichnis
+- **TOC-Generierung**: Inhaltsverzeichnis mit Emoji-Zeichen
+- **Font-Fallbacks**: Wechsel zwischen Text- und Emoji-Schriftarten
+- **Hierarchie**: Emojis auf allen Überschriftenebenen (H1-H6)
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
-
-## Emoji-Test
+## 📋 Emoji-Test
 
 ### Beispielgruppe
 

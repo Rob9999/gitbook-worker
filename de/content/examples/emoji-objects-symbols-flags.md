@@ -14,20 +14,27 @@ history:
 
 # Emoji-Beispiele – Objekte, Symbole & Flaggen
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Diese Seite testet Emojis für Gegenstände, Symbole und Länderflaggen.
 
-## Zweck
+## Technische Herausforderungen
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+### Flaggen-Emojis
 
-## Pipeline-Features
+Länderflaggen sind besonders komplex:
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+- **Regional Indicator Symbols**: Zwei Buchstaben-Zeichen bilden eine Flagge
+- **ISO 3166-1**: Basierend auf Ländercodes (z.B. DE = 🇩🇪)
+- **Font-Abhängigkeit**: Nicht alle Systeme zeigen alle Flaggen
+- **Fallback**: Bei fehlendem Support werden Buchstaben angezeigt
+
+### Symbol-Emojis
+
+Symbole umfassen:
+
+- **Mathematische Symbole**: ➕ ➖ ➗ × ÷
+- **Geometrische Formen**: ■ ● ▲ ⭐
+- **Piktogramme**: ♿ ⚠️ ☢️ ☣️
+- **Keycaps**: 0️⃣ 1️⃣ 2️⃣ #️⃣
 
 ## Emoji-Test
 

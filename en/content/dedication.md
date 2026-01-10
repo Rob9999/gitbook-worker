@@ -6,17 +6,8 @@ order: 5
 
 # Dedication
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+To all contributors to the open-source community who generously share their knowledge, code, and time.
 
-## Purpose
+To the pioneers of digital typography who made beautiful, accessible documents possible for everyone.
 
-Short neutral content that exercises the pipeline features.
-
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+To the readers who seek understanding through well-crafted documentation.

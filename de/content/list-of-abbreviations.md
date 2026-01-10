@@ -6,17 +6,78 @@ order: 7
 
 # Abkürzungsverzeichnis
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieser Abschnitt definiert im Dokument verwendete Abkürzungen und Akronyme.
 
-## Zweck
+## Technische Abkürzungen
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+**API**  
+Application Programming Interface
 
-## Pipeline-Features
+**CAP**  
+Consistency, Availability, Partition tolerance (Theorem)
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+**CLI**  
+Command-Line Interface
+
+**CPU**  
+Central Processing Unit
+
+**CSS**  
+Cascading Style Sheets
+
+**DPI**  
+Dots Per Inch (Punkte pro Zoll)
+
+**HTML**  
+HyperText Markup Language
+
+**HTTP**  
+HyperText Transfer Protocol
+
+**IDE**  
+Integrated Development Environment
+
+**ISO**  
+International Organization for Standardization
+
+**JSON**  
+JavaScript Object Notation
+
+**LTR**  
+Left-to-Right (Textrichtung von links nach rechts)
+
+**PDF**  
+Portable Document Format
+
+**PNG**  
+Portable Network Graphics
+
+**RTL**  
+Right-to-Left (Textrichtung von rechts nach links)
+
+**SQL**  
+Structured Query Language
+
+**SVG**  
+Scalable Vector Graphics
+
+**TOC**  
+Table of Contents (Inhaltsverzeichnis)
+
+**UI**  
+User Interface (Benutzerschnittstelle)
+
+**URL**  
+Uniform Resource Locator
+
+**UTF**  
+Unicode Transformation Format
+
+**XML**  
+Extensible Markup Language
+
+**YAML**  
+YAML Ain't Markup Language
+
+**ZWJ**  
+Zero Width Joiner (Unicode-Verbindungszeichen)

@@ -14,20 +14,16 @@ history:
 
 # Emoji-Beispiele – Smileys & Personen
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Diese Seite testet die Darstellung von Gesichts-Emojis, Gesten und Personen mit verschiedenen Hautfarbtönen.
 
-## Zweck
+## Warum diese Tests wichtig sind
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Emojis zur Darstellung von Menschen sind besonders komplex:
 
-## Pipeline-Features
-
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+- **Skin-Tone-Modifikatoren**: Fünf verschiedene Hautfarbtöne (U+1F3FB bis U+1F3FF)
+- **ZWJ-Sequenzen**: Komplexe Emoji aus mehreren Unicode-Zeichen
+- **Gender-Varianten**: Männliche, weibliche und neutrale Formen
+- **Font-Fallbacks**: Wechsel zwischen Text- und Emoji-Fonts
 
 ## Emoji-Test
 

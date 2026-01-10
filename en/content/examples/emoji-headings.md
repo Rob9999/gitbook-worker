@@ -14,22 +14,18 @@ history:
 
 # 🧪 Emoji in headings – Header samples
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests the correct display of emojis in headings at different levels. Particularly relevant is the encoding in PDF bookmarks and the table of contents.
 
-## Purpose
+## 🎯 Test scenarios
 
-Short neutral content that exercises the pipeline features.
+Emojis in headings place special demands on document processing:
 
-## Pipeline Features
+- **PDF bookmarks**: Correct Unicode encoding in PDF table of contents
+- **TOC generation**: Table of contents with emoji characters
+- **Font fallbacks**: Switching between text and emoji fonts
+- **Hierarchy**: Emojis at all heading levels (H1-H6)
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
-
-## Emoji test
+## 📋 Emoji test
 
 ### Sample set
 

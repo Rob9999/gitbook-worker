@@ -14,20 +14,16 @@ history:
 
 # Emoji-Beispiele – Natur & Essen
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Diese Seite testet Emojis aus den Kategorien Tiere, Pflanzen und Lebensmittel.
 
-## Zweck
+## Testumfang
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Die Emoji dieser Kategorie sind meist einfacher als Personen-Emojis:
 
-## Pipeline-Features
-
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+- **Keine Skin-Tone-Modifikatoren**: Einheitliche Darstellung
+- **Wenig ZWJ-Sequenzen**: Meist einzelne Unicode-Zeichen
+- **Hohe Kompatibilität**: Gut unterstützt in allen Schriftarten
+- **Farbe und Detail**: Test für Color-Emoji-Rendering
 
 ## Emoji-Test
 

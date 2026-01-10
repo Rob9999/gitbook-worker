@@ -6,17 +6,78 @@ order: 7
 
 # List of Abbreviations
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section defines abbreviations and acronyms used throughout the document.
 
-## Purpose
+## Technical abbreviations
 
-Short neutral content that exercises the pipeline features.
+**API**  
+Application Programming Interface
 
-## Pipeline Features
+**CAP**  
+Consistency, Availability, Partition tolerance (theorem)
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+**CLI**  
+Command-Line Interface
+
+**CPU**  
+Central Processing Unit
+
+**CSS**  
+Cascading Style Sheets
+
+**DPI**  
+Dots Per Inch
+
+**HTML**  
+HyperText Markup Language
+
+**HTTP**  
+HyperText Transfer Protocol
+
+**IDE**  
+Integrated Development Environment
+
+**ISO**  
+International Organization for Standardization
+
+**JSON**  
+JavaScript Object Notation
+
+**LTR**  
+Left-to-Right (text direction)
+
+**PDF**  
+Portable Document Format
+
+**PNG**  
+Portable Network Graphics
+
+**RTL**  
+Right-to-Left (text direction)
+
+**SQL**  
+Structured Query Language
+
+**SVG**  
+Scalable Vector Graphics
+
+**TOC**  
+Table of Contents
+
+**UI**  
+User Interface
+
+**URL**  
+Uniform Resource Locator
+
+**UTF**  
+Unicode Transformation Format
+
+**XML**  
+Extensible Markup Language
+
+**YAML**  
+YAML Ain't Markup Language
+
+**ZWJ**  
+Zero Width Joiner (Unicode)

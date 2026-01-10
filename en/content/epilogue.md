@@ -6,17 +6,23 @@ version: 1.0.0
 
 # Epilogue
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Documentation is a living artefact. As technologies evolve and understanding deepens, good documentation grows and adapts to serve its readers better.
 
-## Purpose
+## The documentation journey
 
-Short neutral content that exercises the pipeline features.
+Creating effective documentation is an iterative process:
 
-## Pipeline Features
+1. **Initial creation**: Capturing knowledge whilst it's fresh
+2. **Review and refinement**: Improving clarity and accuracy
+3. **User feedback**: Learning from readers' experiences
+4. **Continuous improvement**: Evolving with changing needs
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Looking forward
+
+The principles demonstrated in this documentation – clear structure, comprehensive examples, and attention to technical detail – remain relevant regardless of the specific tools or technologies employed.
+
+## Final thoughts
+
+Good documentation respects the reader's time and intelligence. It provides clear paths to understanding whilst remaining accessible to those encountering the material for the first time.
+
+May your own documentation efforts be similarly rewarding, both in their creation and in the value they provide to your readers.

@@ -14,20 +14,27 @@ history:
 
 # Emoji examples – Objects, symbols & flags
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests emojis for objects, symbols, and country flags.
 
-## Purpose
+## Technical challenges
 
-Short neutral content that exercises the pipeline features.
+### Flag emojis
 
-## Pipeline Features
+Country flags are particularly complex:
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Regional Indicator Symbols**: Two letter characters form a flag
+- **ISO 3166-1**: Based on country codes (e.g. DE = 🇩🇪)
+- **Font dependency**: Not all systems display all flags
+- **Fallback**: Letters are displayed when support is missing
+
+### Symbol emojis
+
+Symbols include:
+
+- **Mathematical symbols**: ➕ ➖ ➗ × ÷
+- **Geometric shapes**: ■ ● ▲ ⭐
+- **Pictograms**: ♿ ⚠️ ☢️ ☣️
+- **Keycaps**: 0️⃣ 1️⃣ 2️⃣ #️⃣
 
 ## Emoji test
 

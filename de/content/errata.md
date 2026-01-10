@@ -6,17 +6,49 @@ version: 1.0.0
 
 # Errata
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieser Abschnitt dokumentiert Korrekturen und Aktualisierungen des veröffentlichten Dokuments.
 
 ## Zweck
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Die Errata-Seite dient dazu:
 
-## Pipeline-Features
+- Nach Veröffentlichung entdeckte Fehler zu dokumentieren
+- Korrekturen für bekannte Probleme bereitzustellen
+- Versionsspezifische Änderungen zu verfolgen
+- Dokumentgenauigkeit über die Zeit aufrechtzuerhalten
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+## Wie man Probleme meldet
+
+Wenn Sie einen Fehler entdecken:
+
+1. Überprüfen Sie diese Seite, ob er bereits dokumentiert ist
+2. Notieren Sie Versionsnummer, Seite/Abschnitt und Art des Problems
+3. Melden Sie über den entsprechenden Kanal (Issue-Tracker, E-Mail usw.)
+
+## Errata-Format
+
+Jeder Eintrag enthält:
+
+- **Version**: Welche Version den Fehler enthält
+- **Ort**: Seitennummer oder Abschnittsverweis
+- **Typ**: Typografischer, technischer, faktischer oder Formatierungsfehler
+- **Beschreibung**: Was ist inkorrekt
+- **Korrektur**: Die korrekten Informationen
+- **Status**: Behoben in Version X.X.X oder ausstehend
+
+## Version 1.0.0
+
+_Keine Errata für diese Version gemeldet._
+
+---
+
+## Kontinuierliche Verbesserung
+
+Dieses Dokument wird als lebendiger Datensatz geführt. Regelmäßige Überprüfungen stellen sicher:
+
+- Technische Genauigkeit
+- Aktuelle Referenzen
+- Korrektur typografischer Fehler
+- Verbesserung der Klarheit
+
+Prüfen Sie die Release Notes für den aktuellen Versionsstatus.

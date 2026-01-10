@@ -1,16 +1,31 @@
-# Placeholder Content
+# Documentation Framework
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This documentation demonstrates a complete publishing workflow from Markdown source files to professional PDF output.
 
-## Purpose
+## Overview
 
-Short neutral content that exercises the pipeline features.
+The framework supports:
 
-## Pipeline Features
+- **Multi-language content**: Parallel English and German versions
+- **Structured navigation**: Hierarchical table of contents with PDF bookmarks
+- **Rich formatting**: Tables, code blocks, lists, and images
+- **Unicode support**: Extensive language and emoji coverage
+- **Metadata management**: YAML frontmatter for document properties
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Document structure
+
+The documentation is organised into:
+
+- **Chapters**: Main content sections
+- **Examples**: Demonstration files for various features
+- **Appendices**: Supplementary reference material
+
+## Technical features
+
+This framework showcases:
+
+- Reproducible PDF generation
+- Font management and fallback chains
+- Image asset handling (raster and vector)
+- Cross-reference management
+- Automated list generation (tables, figures, abbreviations)

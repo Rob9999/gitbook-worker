@@ -10,17 +10,31 @@ numbering_style: "decimal"
 
 # List of Figures
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section catalogues all figures, diagrams, and illustrations used throughout the document. Each figure is numbered and captioned for easy reference.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+The list of figures provides:
 
-## Pipeline Features
+- **Visual content index**: Overview of all graphical elements
+- **Quick access**: Direct navigation to specific illustrations
+- **Content audit**: Verification that all images are properly captioned
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Supported formats
+
+The document includes figures in various formats:
+
+- **Raster images**: PNG, JPEG for photographs and screenshots
+- **Vector graphics**: SVG for scalable diagrams and icons
+- **Mixed content**: Combination of different formats as needed
+
+## Organization
+
+Figures are listed sequentially with:
+
+- Figure number
+- Descriptive caption
+- Page location (in PDF output)
+- Format type where relevant
+
+_Note: The complete list is automatically generated during the build process and includes all captioned figures from all document sections._

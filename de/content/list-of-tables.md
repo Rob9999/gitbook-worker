@@ -10,17 +10,22 @@ numbering_style: "decimal"
 
 # Tabellenverzeichnis
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Dieser Abschnitt bietet einen umfassenden Index aller im Dokument vorkommenden Tabellen. Tabellen sind fortlaufend nummeriert und nach ihrer Position im Text referenziert.
 
 ## Zweck
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Das Tabellenverzeichnis erfüllt mehrere Funktionen:
 
-## Pipeline-Features
+- **Schnellreferenz**: Spezifische Tabellen lokalisieren, ohne das gesamte Dokument zu durchsuchen
+- **Inhaltsübersicht**: Den Umfang der dargestellten vergleichenden und strukturierten Informationen verstehen
+- **Navigationshilfe**: Direkt zu interessierenden Tabellen springen
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+## Organisation
+
+Tabellen werden in Reihenfolge ihres Auftretens aufgelistet mit:
+
+- Tabellennummer
+- Beschreibender Bildunterschrift
+- Seitenverweis (in PDF-Ausgabe)
+
+_Hinweis: Die vollständige Liste wird während des Build-Prozesses automatisch generiert und umfasst alle beschrifteten Tabellen aus den Kapiteln und Anhängen._

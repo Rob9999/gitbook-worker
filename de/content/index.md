@@ -12,17 +12,54 @@ authors:
 
 <div><figure><img src=".gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo</p></figcaption></figure></div>
 
-Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
-Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
+Willkommen zu dieser Demonstration eines technischen Dokumentations-Frameworks.
 
-## Zweck
+## Über dieses Dokument
 
-Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
+Diese Publikation demonstriert die Fähigkeiten moderner Dokumentationssysteme:
 
-## Pipeline-Features
+- **Mehrsprachige Unterstützung**: Parallele englische und deutsche Versionen
+- **Reichhaltige Formatierung**: Tabellen, Abbildungen, Codeblöcke und Listen
+- **Unicode-Exzellenz**: 100+ Sprachen, Emojis und komplexe Schriften
+- **Professionelle Ausgabe**: Hochwertige PDF-Generierung mit korrekter Typografie
 
-- YAML-Frontmatter (Metadaten je Dokument)
-- Überschriften-Hierarchie (TOC / Bookmarks)
-- Listen, Codeblöcke, Zitate
-- Tabellen und Verweise
-- Stabile Navigation (SUMMARY.md)
+## Dokumentstruktur
+
+Der Inhalt ist organisiert in:
+
+### Kernkapitel
+
+Hauptinhalte, die verschiedene Dokumentationsmuster und Strukturen demonstrieren.
+
+### Beispiele
+
+Praktische Demonstrationen von:
+
+- Emoji-Rendering über Kategorien hinweg
+- Bildformate (Raster und Vektor)
+- Sprachproben und Schriften
+
+### Anhänge
+
+Ergänzendes Material einschließlich:
+
+- Technische Spezifikationen
+- Schriftabdeckungsanalyse
+- Referenzmaterialien
+
+## Navigation
+
+Verwenden Sie das Inhaltsverzeichnis (Seitenleiste oder PDF-Lesezeichen), um zwischen Abschnitten zu navigieren. Jedes Kapitel enthält:
+
+- Klare Überschriftenhierarchie
+- Querverweise wo relevant
+- Praktische Beispiele
+
+## Technische Grundlage
+
+Erstellt mit:
+
+- **Markdown**: Quell-Inhaltsformat
+- **YAML-Frontmatter**: Strukturierte Metadaten
+- **Python-Pipeline**: Automatisierter Build und Validierung
+- **LaTeX/XeLaTeX**: Professioneller PDF-Satz

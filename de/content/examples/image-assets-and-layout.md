@@ -12,16 +12,58 @@ history:
 
 # Bild-Beispiele – Assets & Layout
 
-Diese Seite nutzt bewusst nur neutrale, rechtlich unkritische Assets aus `content/.gitbook/assets/`.
+Diese Seite demonstriert die Integration verschiedener Bildformate in Markdown-Dokumente. Alle verwendeten Assets befinden sich im Verzeichnis `content/.gitbook/assets/` und sind rechtlich unkritisch.
 
-## Rasterbild (PNG)
+## Bildformate im Vergleich
+
+### Rasterbilder (PNG)
+
+Rasterbilder eignen sich für:
+- Fotos und komplexe Grafiken
+- Bilder mit vielen Farbverläufen
+- Screenshots und Bildschirmaufnahmen
+
+**Nachteil**: Bei Vergrößerung kann es zu Qualitätsverlusten kommen.
 
 <div><figure><img src="../.gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo (PNG)</p></figcaption></figure></div>
 
-## Vektorbild (SVG)
+### Vektorbilder (SVG)
+
+Vektorbilder bieten:
+- Beliebige Skalierbarkeit ohne Qualitätsverlust
+- Kleine Dateigrößen bei einfachen Grafiken
+- Scharfe Darstellung auf allen Bildschirmauflösungen
+
+**Ideal für**: Diagramme, Icons, technische Zeichnungen
 
 ![Neutrales Raster (SVG)](../.gitbook/assets/neutral-grid.svg)
 
-## Diagramm (SVG)
+### Diagramme und Workflows
+
+Strukturierte Darstellungen wie Flowcharts profitieren besonders von Vektorgrafiken:
 
 ![Neutraler Workflow (SVG)](../.gitbook/assets/neutral-flow.svg)
+
+## Best Practices
+
+### Bildgrößen
+
+- **Web**: 72-96 DPI ausreichend
+- **Druck**: Mindestens 300 DPI bei Rasterbildern
+- **SVG**: Auflösungsunabhängig
+
+### Dateiformate
+
+| Format | Verwendung | Transparenz | Kompression |
+|--------|------------|-------------|-------------|
+| PNG | Screenshots, Logos | Ja | Verlustfrei |
+| JPEG | Fotos | Nein | Verlustbehaftet |
+| SVG | Diagramme, Icons | Ja | Vektorgrafik |
+| WebP | Modern, Web | Ja | Beide Modi |
+
+### Alt-Texte
+
+Jedes Bild sollte einen beschreibenden Alt-Text haben:
+- Verbessert Barrierefreiheit
+- Hilft Suchmaschinen
+- Wird angezeigt, wenn Bild nicht geladen werden kann

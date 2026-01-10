@@ -14,20 +14,16 @@ history:
 
 # Emoji examples – Nature & food
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests emojis from the categories of animals, plants, and food.
 
-## Purpose
+## Test scope
 
-Short neutral content that exercises the pipeline features.
+Emojis in this category are usually simpler than people emojis:
 
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **No skin tone modifiers**: Uniform display
+- **Few ZWJ sequences**: Mostly single Unicode characters
+- **High compatibility**: Well supported in all fonts
+- **Colour and detail**: Test for colour emoji rendering
 
 ## Emoji test
 
