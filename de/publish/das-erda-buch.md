@@ -31,6 +31,8 @@ header-includes:
 
 # Startseite
 
+![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+
 Dieses Repository enthält neutralen Platzhalterinhalt, um die Publishing-Pipeline reproduzierbar zu testen.
 Der ursprüngliche Buchinhalt wurde aus diesen Dateien entfernt.
 
@@ -265,6 +267,72 @@ Kurzer, neutraler Inhalt, der die Pipeline-Features abdeckt.
 - Listen, Codeblöcke, Zitate
 - Tabellen und Verweise
 - Stabile Navigation (SUMMARY.md)
+
+
+\newpage
+
+---
+title: Bild-Beispiele – Assets & Layout
+description: Neutrale Testbilder aus .gitbook/assets (Raster + SVG) für Rendering- und PDF-Regressionstests.
+date: 2026-01-10
+version: 1.0
+doc_type: example
+category: "image-test"
+show_in_summary: true
+history:
+  - version: 1.0
+---
+<a id="md-examples-image-assets-and-layout"></a>
+
+
+# Bild-Beispiele – Assets & Layout
+
+Diese Seite nutzt bewusst nur neutrale, rechtlich unkritische Assets aus `content/.gitbook/assets/`.
+
+## Rasterbild (PNG)
+
+![ERDA Logo (PNG)](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+
+## Vektorbild (SVG)
+
+![Neutrales Raster (SVG)](.gitbook/assets/neutral-grid.pdf)
+
+## Diagramm (SVG)
+
+![Neutraler Workflow (SVG)](.gitbook/assets/neutral-flow.pdf)
+
+
+\newpage
+
+---
+title: Bild-Beispiele – Captions & Dichte
+description: Testseite für viele kleine Abbildungen und Captions in kurzer Folge.
+date: 2026-01-10
+version: 1.0
+doc_type: example
+category: "image-test"
+show_in_summary: true
+history:
+  - version: 1.0
+---
+<a id="md-examples-image-captions-and-density"></a>
+
+
+# Bild-Beispiele – Captions & Dichte
+
+Ziel: Regressionstests für Zeilenumbruch, Seitenumbruch, Bild-Captions und SVG-Rendering.
+
+## Galerie (SVG)
+
+![Neutrale Formen – A](.gitbook/assets/neutral-shapes.pdf)
+
+![Neutrale Formen – B](.gitbook/assets/neutral-shapes.pdf)
+
+## Mischung (SVG + PNG)
+
+![Neutrales Raster](.gitbook/assets/neutral-grid.pdf)
+
+![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
 
 
 \newpage

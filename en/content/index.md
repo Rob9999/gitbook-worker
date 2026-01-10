@@ -10,6 +10,8 @@ authors:
 
 # Home
 
+<div><figure><img src=".gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo</p></figcaption></figure></div>
+
 This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
 The original book content has been removed from these files.
 

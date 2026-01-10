@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="320" viewBox="0 0 960 320" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral shapes test</title>
+  <desc id="desc">A simple SVG containing circles, rectangles and lines to test vector rendering.</desc>
+
+  <rect x="1" y="1" width="958" height="318" fill="none" stroke="black" stroke-width="2"/>
+
+  <rect x="80" y="70" width="220" height="160" fill="none" stroke="black" stroke-width="2"/>
+  <circle cx="520" cy="150" r="80" fill="none" stroke="black" stroke-width="2"/>
+  <polygon points="740,230 860,70 920,230" fill="none" stroke="black" stroke-width="2"/>
+
+  <line x1="80" y1="260" x2="920" y2="260" stroke="black" stroke-width="2"/>
+
+  <text x="190" y="256" text-anchor="middle" font-size="14">baseline</text>
+  <text x="520" y="285" text-anchor="middle" font-size="14">circles / rectangles / polygons</text>
+</svg>

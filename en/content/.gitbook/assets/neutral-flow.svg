@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="240" viewBox="0 0 960 240" role="img" aria-labelledby="title desc">
+  <title id="title">Neutral workflow diagram</title>
+  <desc id="desc">Three boxes connected by arrows: Convert, Attribution, Publish.</desc>
+
+  <rect x="1" y="1" width="958" height="238" fill="none" stroke="black" stroke-width="2"/>
+
+  <rect x="70" y="70" width="220" height="100" fill="none" stroke="black" stroke-width="2"/>
+  <rect x="370" y="70" width="220" height="100" fill="none" stroke="black" stroke-width="2"/>
+  <rect x="670" y="70" width="220" height="100" fill="none" stroke="black" stroke-width="2"/>
+
+  <line x1="290" y1="120" x2="370" y2="120" stroke="black" stroke-width="2"/>
+  <polygon points="370,120 356,112 356,128" fill="black"/>
+
+  <line x1="590" y1="120" x2="670" y2="120" stroke="black" stroke-width="2"/>
+  <polygon points="670,120 656,112 656,128" fill="black"/>
+
+  <text x="180" y="126" text-anchor="middle" font-size="22">Convert</text>
+  <text x="480" y="126" text-anchor="middle" font-size="22">Attribution</text>
+  <text x="780" y="126" text-anchor="middle" font-size="22">Publish</text>
+
+  <text x="480" y="210" text-anchor="middle" font-size="14">Simple vector graphic for rendering tests (SVG).</text>
+</svg>

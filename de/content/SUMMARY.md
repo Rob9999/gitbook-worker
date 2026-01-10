@@ -24,6 +24,8 @@
 ## example
 
 * [Beispiele](examples/README.md)
+* [Bild-Beispiele – Assets & Layout](examples/image-assets-and-layout.md)
+* [Bild-Beispiele – Captions & Dichte](examples/image-captions-and-density.md)
 * [Emoji-Beispiele – Aktivitäten & Reisen](examples/emoji-activities-and-travel.md)
 * [Emoji-Beispiele – Natur & Essen](examples/emoji-nature-and-food.md)
 * [Emoji-Beispiele – Objekte, Symbole & Flaggen](examples/emoji-objects-symbols-flags.md)

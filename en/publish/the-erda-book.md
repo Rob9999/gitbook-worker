@@ -55,6 +55,8 @@ authors:
 
 # Home
 
+![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+
 This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
 The original book content has been removed from these files.
 
@@ -299,9 +301,33 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Travel & navigation
+
+🧭 🗺️ 📍 📌 🧳 🎒 🧷 🧾 🕒 ⏱️ ⏳
+
+#### Vehicles
+
+🚗 🚕 🚙 🚌 🚎 🚐 🚑 🚒 🚓 🚚 🚛 🚜 🛻 🚲 🛴 🛵 🏍️
+🚂 🚆 🚇 🚊 🚉 🚝 🚄
+✈️ 🛫 🛬 🛩️ 🚁 🚀 🛰️
+⛵ 🛶 🚤 🛳️ ⛴️ ⚓
+
+#### Places
+
+🏁 🗿 🗽 🗼 🏰 🏯 🏟️ 🏖️ 🏜️ 🏕️ 🏔️ 🏙️ 🌉 🌆 🛣️ 🛤️
+
+#### Activities & sports
+
+⚽ 🏀 🏈 ⚾ 🥎 🎾 🏐 🏉 🎱 🏓 🏸 🥊 🥋 🏹 🎣 🤿
+🏃‍♀️ 🏃‍♂️ 🚴‍♀️ 🚴‍♂️ 🏊‍♀️ 🏊‍♂️ 🧗‍♀️ 🧗‍♂️ ⛷️ 🏂 🏄‍♀️ 🏄‍♂️
+
+#### Weather (as travel context)
+
+☀️ 🌤️ ⛅ 🌥️ ☁️ 🌦️ 🌧️ ⛈️ 🌩️ ❄️ 🌨️ 💨 🌫️
 
 
 \newpage
@@ -341,9 +367,31 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Plants & nature
+
+🌱 🌿 🍀 🍃 🌾 🌵 🌳 🌲 🌴 🍁 🍂 🍄 🌸 🌼 🌻 🌺 🌷 🪴
+
+#### Animals (selection)
+
+🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐸 🐵 🐔 🐧 🐦 🦉 🦇
+🐺 🐗 🐴 🦄 🐝 🦋 🐞 🪲 🐢 🐍 🦎 🐙 🦀 🦐 🐟 🐠 🐡 🦈 🐳 🐬
+
+#### Weather & elements
+
+🌈 🌙 ⭐ 🌟 ☀️ 🌧️ ❄️ 🌪️ 🌊 💧 🔥
+
+#### Food (neutral, broad)
+
+🍞 🥖 🥨 🧀 🥚 🥗 🥦 🥑 🍅 🥕 🌽 🥔 🍄
+🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🫐 🍒 🥝
+
+#### Drinks
+
+☕ 🍵 🧃 🥛 🧊
 
 
 \newpage
@@ -383,9 +431,30 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Tech & tools
+
+💻 🖥️ ⌨️ 🖱️ 🖨️ 📱 📷 🎥 🎛️ 🎚️ 🔋 🔌 💾 💿 📀
+⚙️ 🔧 🔩 🛠️ ⛏️ 🔨 🪛 🪚 🧰 🧲
+🔬 🧪 🧬 📡 🛰️ 🧯
+
+#### Symbols & UI
+
+✅ ☑️ ❌ ⚠️ ℹ️ 🔔 🔕 🔒 🔓 🔑 🗝️ ♻️ 🧾 🏷️
+➕ ➖ ✖️ ➗ 🟰
+⬆️ ⬇️ ⬅️ ➡️ ↗️ ↘️ ↙️ ↖️
+0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 #️⃣ *️⃣
+
+#### Documents & organization
+
+📄 📃 📑 🧷 📌 📍 🗂️ 📁 📂 🗃️ 🗄️ 🧮 📊 📈 📉
+
+#### Flags (selection)
+
+🇩🇪 🇦🇹 🇨🇭 🇪🇺 🇬🇧 🇺🇸 🇨🇦 🇧🇷 🇯🇵 🇰🇷 🇮🇳 🇦🇺 🇿🇦 🇺🇳
 
 
 \newpage
@@ -425,9 +494,32 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
-Short emoji section.
+This page contains a broad emoji set for rendering/font/bookmark tests.
+
+#### Faces (selection)
+
+😀 😃 😄 😁 😆 😊 🙂 😉 😌 😇 🤔 😐 🙄 😎 🥳 🤓 😴
+
+#### Hands & gestures (with skin tones)
+
+👍 👍🏻 👍🏼 👍🏽 👍🏾 👍🏿
+👋 👋🏻 👋🏼 👋🏽 👋🏾 👋🏿
+🙌 🙌🏻 🙌🏼 🙌🏽 🙌🏾 🙌🏿
+👏 👏🏻 👏🏼 👏🏽 👏🏾 👏🏿
+
+#### People & roles (ZWJ/sequences)
+
+🧑‍💻 👩‍💻 👨‍💻
+🧑‍🔬 👩‍🔬 👨‍🔬
+🧑‍🚀 👩‍🚀 👨‍🚀
+🧑‍🍳 👩‍🍳 👨‍🍳
+🧑‍🏫 👩‍🏫 👨‍🏫
+
+#### Families & relationships (ZWJ)
+
+👨‍👩‍👧‍👦 👩‍👩‍👧 👨‍👨‍👦 👩‍👦
 
 
 \newpage
@@ -457,6 +549,72 @@ Short neutral content that exercises the pipeline features.
 - Lists, code blocks, blockquotes
 - Tables and references
 - Stable navigation (SUMMARY.md)
+
+
+\newpage
+
+---
+title: Image examples – Assets & layout
+description: Neutral test images from .gitbook/assets (raster + SVG) for rendering and PDF regression tests.
+date: 2026-01-10
+version: 1.0
+doc_type: example
+category: "image-test"
+show_in_summary: true
+history:
+  - version: 1.0
+---
+<a id="md-examples-image-assets-and-layout"></a>
+
+
+# Image examples – Assets & layout
+
+This page uses only neutral, legally safe assets from `content/.gitbook/assets/`.
+
+## Raster image (PNG)
+
+![ERDA Logo (PNG)](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+
+## Vector image (SVG)
+
+![Neutral grid (SVG)](.gitbook/assets/neutral-grid.pdf)
+
+## Diagram (SVG)
+
+![Neutral workflow (SVG)](.gitbook/assets/neutral-flow.pdf)
+
+
+\newpage
+
+---
+title: Image examples – Captions & density
+description: Test page for repeated figures and captions in a short sequence.
+date: 2026-01-10
+version: 1.0
+doc_type: example
+category: "image-test"
+show_in_summary: true
+history:
+  - version: 1.0
+---
+<a id="md-examples-image-captions-and-density"></a>
+
+
+# Image examples – Captions & density
+
+Goal: regression tests for line wrapping, page breaks, figure captions and SVG rendering.
+
+## Gallery (SVG)
+
+![Neutral shapes – A](.gitbook/assets/neutral-shapes.pdf)
+
+![Neutral shapes – B](.gitbook/assets/neutral-shapes.pdf)
+
+## Mixed (SVG + PNG)
+
+![Neutral grid](.gitbook/assets/neutral-grid.pdf)
+
+![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
 
 
 \newpage
@@ -496,9 +654,25 @@ Short neutral content that exercises the pipeline features.
 
 ## Emoji test
 
-###   
+### Sample set
 
-Short emoji section.
+This page places emojis in headings to test bookmarks/TOC and PDF strings.
+
+#### 🧪 Heading with emoji
+
+Inline: ✅ ⚠️ ℹ️ 🔒 🔑 ♻️
+
+#### 🧩 ZWJ sequences (complex)
+
+👩‍💻 👨‍💻 🧑‍🚀 👨‍👩‍👧‍👦
+
+#### 🏁 Flags in text
+
+🇩🇪 🇪🇺 🇬🇧 🇺🇸 🇺🇳
+
+#### 🔢 Keycaps & variants
+
+0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 #️⃣ *️⃣
 
 
 \newpage
