@@ -2,49 +2,89 @@
 
 ## cover
 
-* [README](README.md)
-* [Placeholder Content](index.md)
+* [Placeholder Content](README.md)
+* [Home](index.md)
+
+## Dedication
+
+* [Dedication](dedication.md)
 
 ## Preface
 
-* [Placeholder Content](preface.md)
+* [Preface](preface.md)
 
 ## Main Content
 
-* [Chapter 1 – Placeholder Content](chapters/chapter-01.md)
-* [Chapter 2 – Placeholder Content](chapters/chapter-02.md)
-* [Chapter 3 – Placeholder Content](chapters/README.md)
+* [Chapter 1 – Chapter 1 – Observable patterns](chapters/chapter-01.md)
+* [Chapter 2 – Chapter 2 – Comparative tables](chapters/chapter-02.md)
 
 ## Epilogue
 
-* [Placeholder Content](epilogue.md)
+* [Epilogue](epilogue.md)
+
+## example
+
+* [Emoji examples – Activities & travel](examples/emoji-activities-and-travel.md)
+* [Emoji examples – Nature & food](examples/emoji-nature-and-food.md)
+* [Emoji examples – Objects, symbols & flags](examples/emoji-objects-symbols-flags.md)
+* [Emoji examples – Smileys & people](examples/emoji-smileys-and-people.md)
+* [Examples](examples/README.md)
+* [🧪 Emoji in headings – Header samples](examples/emoji-headings.md)
+
+## template
+
+* [Template for multilingual neutral text](templates/multilingual-neutral-text.md)
+* [Templates](templates/README.md)
+
+## Translator's Note
+
+* [Translator's Note](translators-note.md)
 
 ## List of Tables
 
-* [Placeholder Content](list-of-tables.md)
+* [List of Tables](list-of-tables.md)
 
 ## List of Figures
 
-* [Placeholder Content](list-of-figures.md)
+* [List of Figures](list-of-figures.md)
+
+## List of Abbreviations
+
+* [List of Abbreviations](list-of-abbreviations.md)
 
 ## Appendices
 
-* [Appendix A – Placeholder Content](appendices/appendix-a.md)
-* [Appendix B – Placeholder Content](appendices/emoji-font-coverage.md)
-* [Appendix C – Placeholder Content](appendices/README.md)
+* [Appendix A – Data sources and table layout](appendices/appendix-a.md)
+* [Appendix – Emoji & font coverage](appendices/emoji-font-coverage.md)
+
+## Legal Notices
+
+* [Legal Notice](legal-notice.md)
 
 ## Glossary
 
-* [Placeholder Content](glossary.md)
+* [Glossary](glossary.md)
 
 ## References
 
-* [Placeholder Content](references.md)
+* [Citations & further reading](references.md)
+
+## Index
+
+* [Index](book-index.md)
 
 ## Acknowledgments
 
-* [Placeholder Content](attributions.md)
+* [Acknowledgments & Attributions](attributions.md)
+
+## Errata
+
+* [Errata](errata.md)
+
+## Release Notes
+
+* [Release Notes](release-notes.md)
 
 ## Colophon
 
-* [Placeholder Content](colophon.md)
+* [Colophon](colophon.md)

@@ -2,53 +2,88 @@
 
 ## cover
 
-* [Platzhalterinhalt](README.md)
-* [Platzhalterinhalt](index.md)
+* [Startseite](index.md)
+
+## Widmung
+
+* [Widmung](dedication.md)
 
 ## Vorwort
 
-* [Platzhalterinhalt](preface.md)
+* [Vorwort](preface.md)
 
 ## Hauptinhalt
 
-* [Chapter 1 – Platzhalterinhalt](chapters/chapter-01.md)
-* [Chapter 2 – Platzhalterinhalt](chapters/chapter-02.md)
-* [Chapter 3 – Platzhalterinhalt](chapters/README.md)
+* [Chapter 1 – Kapitel 1 – Beobachtbare Muster](chapters/chapter-01.md)
+* [Chapter 2 – Kapitel 2 – Vergleichstabellen](chapters/chapter-02.md)
 
 ## Abschluss
 
-* [Platzhalterinhalt](epilog.md)
+* [Abschluss](epilog.md)
+
+## example
+
+* [Beispiele](examples/README.md)
+* [Emoji-Beispiele – Aktivitäten & Reisen](examples/emoji-activities-and-travel.md)
+* [Emoji-Beispiele – Natur & Essen](examples/emoji-nature-and-food.md)
+* [Emoji-Beispiele – Objekte, Symbole & Flaggen](examples/emoji-objects-symbols-flags.md)
+* [Emoji-Beispiele – Smileys & Personen](examples/emoji-smileys-and-people.md)
+* [🧪 Emoji im Header – Überschriften](examples/emoji-headings.md)
+
+## template
+
+* [Vorlage für mehrsprachige neutrale Texte](templates/multilingual-neutral-text.md)
+* [Vorlagen](templates/README.md)
+
+## Hinweis der Übersetzenden
+
+* [Hinweis der Übersetzung](translators-note.md)
 
 ## Tabellenverzeichnis
 
-* [Platzhalterinhalt](list-of-tables.md)
+* [Tabellenverzeichnis](list-of-tables.md)
 
 ## Abbildungsverzeichnis
 
-* [Platzhalterinhalt](list-of-figures.md)
+* [Abbildungsverzeichnis](list-of-figures.md)
+
+## Abkürzungsverzeichnis
+
+* [Abkürzungsverzeichnis](list-of-abbreviations.md)
 
 ## Anhänge
 
-* [Appendix A – Platzhalterinhalt](appendices/appendix-a.md)
-* [Appendix B – Platzhalterinhalt](appendices/emoji-font-coverage.md)
-* [Appendix C – Platzhalterinhalt](appendices/README.md)
+* [Appendix A – Datenquellen und Tabellenlayout](appendices/appendix-a.md)
+* [Appendix – Emoji- & Schriftabdeckung](appendices/emoji-font-coverage.md)
+
+## Rechtliche Hinweise
+
+* [Rechtliche Hinweise](legal-notice.md)
 
 ## Glossar
 
-* [Platzhalterinhalt](glossary.md)
+* [Glossar](glossary.md)
 
 ## Literatur
 
-* [Platzhalterinhalt](references.md)
+* [Zitationen & weiterführende Quellen](references.md)
 
 ## Register
 
-* [Platzhalterinhalt](index-register.md)
+* [Register](index-register.md)
 
 ## Danksagungen
 
-* [Platzhalterinhalt](attributions.md)
+* [Danksagungen & Zuschreibungen](attributions.md)
+
+## Errata
+
+* [Errata](errata.md)
+
+## Release Notes
+
+* [Release Notes](release-notes.md)
 
 ## Impressum
 
-* [Platzhalterinhalt](colophon.md)
+* [Kolophon](colophon.md)
