@@ -178,7 +178,7 @@ All tests successfully collected (pytest --collect-only).
 Resolves: Complete test coverage requirement
 Refs: #smart-modules #test-coverage
 
-Signed-off-by: GitHub Copilot <noreply@github.com>"
+Signed-off-by: Agent <noreply@example.de>"
 ```
 
 ### Option C: Generate Coverage Report

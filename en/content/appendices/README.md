@@ -1,26 +1,18 @@
----
+﻿---
 title: Appendices
 date: 2024-06-01
 version: 1.0
 doc_type: placeholder
 ---
+# Placeholder Content
 
-# Appendices
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-This folder contains supplementary materials and reference documents for the main content of the ERDA Book.
+The original book content has been removed from these files.
 
-## Contents
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- **[Appendix A – Data Sources and Table Layout](appendix-a.md)**: Detailed overview of data sources, table formats, and references to public data catalogs.
-- **[Emoji Font Coverage](emoji-font-coverage.md)**: Technical documentation on emoji coverage in the fonts used.
 
-## Purpose
-
-The appendices provide:
-- Reference values for data structures and formats
-- Technical references for font rendering and emoji support
-- Source references for datasets and external resources
-
----
-
-*This folder is continuously expanded. Changes are documented in the version history.*

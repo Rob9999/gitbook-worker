@@ -72,7 +72,7 @@ from erda_workflow_tools.publishing import publisher
 
 ### ✅ 4. Proof-of-Concept Package (Task 3)
 
-**Location:** `.github/poc-standalone-package/`
+**Location:** (removed from repository; historical PoC)
 
 **Structure:**
 ```
@@ -107,7 +107,7 @@ poc-standalone-package/
 .github/
 ├── PACKAGE-MIGRATION.md              # ✅ Phase 1 guide
 ├── PHASE2-STANDALONE-PACKAGE.md      # ✅ Phase 2 roadmap
-├── poc-standalone-package/           # ✅ Working PoC
+├── poc-standalone-package/           # (removed; historical PoC)
 │   ├── src/erda_workflow_tools/
 │   ├── tests/
 │   ├── pyproject.toml
@@ -295,7 +295,7 @@ graph TD
 
 1. **PACKAGE-MIGRATION.md** - Phase 1 implementation guide
 2. **PHASE2-STANDALONE-PACKAGE.md** - Complete Phase 2 roadmap
-3. **poc-standalone-package/** - Working proof-of-concept
+3. **poc-standalone-package/** - Proof-of-concept (removed from repository; historical)
 4. **gitbook_worker/__init__.py** - Updated package root
 5. **tools/__init__.py** - Backward-compatibility layer
 
@@ -303,8 +303,8 @@ graph TD
 
 - **Migration Guide**: `.github/PACKAGE-MIGRATION.md`
 - **Phase 2 Plan**: `.github/PHASE2-STANDALONE-PACKAGE.md`
-- **PoC README**: `.github/poc-standalone-package/README.md`
-- **Install Guide**: `.github/poc-standalone-package/INSTALL-TEST.md`
+- **PoC README**: (removed from repository; historical)
+- **Install Guide**: (removed from repository; historical)
 
 ## Conclusion
 

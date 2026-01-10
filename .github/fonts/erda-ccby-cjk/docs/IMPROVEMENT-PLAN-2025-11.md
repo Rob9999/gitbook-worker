@@ -384,7 +384,7 @@ class FontConfig:
     
     # Font metadata
     vendor_id: str = "ERDA"
-    copyright: str = "Copyright 2025 ERDA Project"
+    copyright: str = "Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany."
     license: str = "CC BY 4.0"
     license_url: str = "https://creativecommons.org/licenses/by/4.0/"
     

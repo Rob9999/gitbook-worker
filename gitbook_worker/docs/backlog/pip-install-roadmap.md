@@ -27,7 +27,7 @@ history:
 - Registry-Mirroring (nur PyPI, kein GitHub Packages in diesem Schritt).
 
 ## Ist-Stand
-- PoC `poc-standalone-package` existiert (minimal, Version 0.1.0, nur hello/CLI-Dummy).
+- Seit `release-v.2.0.5-hotfix` wird das Paket als Wheel über GitHub Releases gebaut und per Smoke-Test verifiziert.
 - Smart Font Stack Architektur entworfen (`docs/architecture/smart-font-stack.md`), Font-Backlogs vorhanden (dynamic generation, attribution).
 - CI-Workflows existieren für Orchestrator/Tests (Docker-basiert), aber keine PyPI-Pipeline.
 

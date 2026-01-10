@@ -1,4 +1,4 @@
----
+﻿---
 title: List of Tables
 date: 2025-12-29
 version: 1.0
@@ -7,27 +7,15 @@ auto_generate: true
 include_chapter_tables: true
 numbering_style: "decimal"
 ---
+# Placeholder Content
 
-# List of Tables
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-> **Note**: This list of tables will be automatically generated from all chapter and appendix tables in future versions.
+The original book content has been removed from these files.
 
-## Chapter Tables
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- Table 1.1: Measurement Series Experimental Setup ............. (Ch. 1)
-- Table 2.1: Comparison Values Layout A vs. B ................. (Ch. 2)
-- Table 2.2: Statistical Evaluation ........................... (Ch. 2)
 
-## Appendix Tables
-
-- Table A.1: Public Climate Data Catalogs ..................... (App. A)
-- Table A.2: Table Formats Overview ........................... (App. A)
-- Table B.1: Font Matrix for Characters ....................... (App. B)
-- Table B.2: Emoji Coverage by Category ....................... (App. B)
-
----
-
-**Automatic Generation (v2.0.1+)**:
-- All tables with captions will be automatically captured
-- Numbering follows chapter affiliation
-- Page numbers extracted from generated PDF

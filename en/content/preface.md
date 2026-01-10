@@ -1,16 +1,18 @@
----
+﻿---
 title: Preface
 date: 2024-06-01
 version: 1.0
 doc_type: preface
 ---
+# Placeholder Content
 
-# Preface
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-This preface explains the purpose and structure of the sample book. All content is deliberately phrased in a neutral way so it can be used for usability tests, layout demos and localisation workflows.
+The original book content has been removed from these files.
 
-- **Audience:** teams who want to test text, image or table components without using real customer data.
-- **Structure:** each section contains at least one element commonly found in book production – for example figures, cross-references, citations or tables.
-- **International scope:** the included template for multilingual text covers common major languages and can be extended.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-Further guidance can be found in [Chapter 1](./chapters/chapter-01.md), while [Chapter 2](./chapters/chapter-02.md) provides concrete table layouts.
+

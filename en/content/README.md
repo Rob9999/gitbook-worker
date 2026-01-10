@@ -1,14 +1,12 @@
-# Start page
+﻿# Placeholder Content
 
-This is your quick navigation:
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-- [Cover & overview](index.md)
-- [Preface](preface.md) and [Content note](placeholder.md)
-- [Chapter 1 – Observable patterns](chapters/chapter-01.md)
-- [Chapter 2 – Comparative tables](chapters/chapter-02.md)
-- [Emoji example collections](examples/README.md)
-- [Appendices & references](appendices/README.md)
-- [Lists of tables, figures, abbreviations](list-of-tables.md)
+The original book content has been removed from these files.
 
-> Tip: Use this page as a hub when you want to jump directly to chapters or examples.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
 

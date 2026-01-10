@@ -1,16 +1,19 @@
----
+﻿---
 title: Citations & further reading
 date: 2024-06-01
 version: 1.0
 doc_type: bibliography
 citation_style: "APA"
 ---
+# Placeholder Content
 
-# Citations & further reading
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-1. **United Nations Data Portal.** Accessed on 1 June 2024. https://data.un.org/
-2. **World Bank Open Data.** Accessed on 1 June 2024. https://data.worldbank.org/
-3. **World Meteorological Organization – Public Resources.** Accessed on 1 June 2024. https://public.wmo.int/en
-4. **Smithsonian Open Access.** Accessed on 1 June 2024. https://www.si.edu/openaccess
+The original book content has been removed from these files.
 
-References within the book use numbered footnotes to point consistently to this list.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+

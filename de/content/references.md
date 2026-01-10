@@ -1,16 +1,19 @@
----
+﻿---
 title: Zitationen & weiterführende Quellen
 date: 2024-06-01
 version: 1.0
 doc_type: bibliography
 citation_style: "APA"
 ---
+# Platzhalterinhalt
 
-# Zitationen & weiterführende Quellen
+Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
 
-1. **United Nations Data Portal.** Zugriff am 01.06.2024. https://data.un.org/
-2. **World Bank Open Data.** Zugriff am 01.06.2024. https://data.worldbank.org/
-3. **World Meteorological Organization – Public Resources.** Zugriff am 01.06.2024. https://public.wmo.int/en
-4. **Smithsonian Open Access.** Zugriff am 01.06.2024. https://www.si.edu/openaccess
+Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-Verweise innerhalb des Buchs nutzen nummerierte Fußnoten, um konsistent auf diese Liste zu zeigen.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+

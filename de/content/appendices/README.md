@@ -1,26 +1,18 @@
----
+﻿---
 title: Anhänge
 date: 2024-06-01
 version: 1.0
 doc_type: placeholder
 ---
+# Platzhalterinhalt
 
-# Anhänge
+Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
 
-Dieser Ordner enthält ergänzende Materialien und Referenzdokumente zum Hauptinhalt des ERDA-Buchs.
+Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-## Inhalt
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- **[Appendix A – Datenquellen und Tabellenlayout](appendix-a.md)**: Detaillierte Übersicht über verwendete Datenquellen, Tabellenformate und Referenzen zu öffentlichen Datenkatalogen.
-- **[Emoji Font Coverage](emoji-font-coverage.md)**: Technische Dokumentation zur Emoji-Abdeckung der verwendeten Schriftarten.
 
-## Zweck
-
-Die Anhänge bieten:
-- Nachschlagewerte für Datenstrukturen und Formate
-- Technische Referenzen für Font-Rendering und Emoji-Support
-- Quellenverweise für Datensätze und externe Ressourcen
-
----
-
-*Dieser Ordner wird kontinuierlich erweitert. Änderungen werden im Versionsverlauf dokumentiert.*

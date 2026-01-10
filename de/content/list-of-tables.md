@@ -1,4 +1,4 @@
----
+﻿---
 title: Tabellenverzeichnis
 date: 2025-12-29
 version: 1.0
@@ -7,27 +7,15 @@ auto_generate: true
 include_chapter_tables: true
 numbering_style: "decimal"
 ---
+# Platzhalterinhalt
 
-# Tabellenverzeichnis
+Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
 
-> **Hinweis**: Dieses Tabellenverzeichnis wird in zukünftigen Versionen automatisch aus allen Kapitel- und Appendix-Tabellen generiert.
+Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-## Kapitel-Tabellen
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- Tabelle 1.1: Messreihen Versuchsaufbau ..................... (Kap. 1)
-- Tabelle 2.1: Vergleichswerte Layout A vs. B ................. (Kap. 2)
-- Tabelle 2.2: Statistische Auswertung ........................ (Kap. 2)
 
-## Appendix-Tabellen
-
-- Tabelle A.1: Öffentliche Klimadatenkataloge ................. (App. A)
-- Tabelle A.2: Tabellenformate Übersicht ...................... (App. A)
-- Tabelle B.1: Font-Matrix für Schriftzeichen ................. (App. B)
-- Tabelle B.2: Emoji-Abdeckung nach Kategorien ................ (App. B)
-
----
-
-**Automatische Generierung (v2.0.1+)**:
-- Alle Tabellen mit Captions werden automatisch erfasst
-- Nummerierung erfolgt nach Kapitel-Zugehörigkeit
-- Seitenzahlen werden aus dem generierten PDF extrahiert

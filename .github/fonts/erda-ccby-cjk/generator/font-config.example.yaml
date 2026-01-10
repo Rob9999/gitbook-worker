@@ -20,11 +20,11 @@ grid:
   em: 1000
   pixels: 8
 metadata:
-  copyright_notice: © 2025 ERDA Project. This font is licensed under CC BY 4.0. Code
+  copyright_notice: Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany. This font is licensed under CC BY 4.0. Code
     is licensed under MIT.
   description: Fallback font for CJK (Chinese, Japanese, Korean) characters with CC
     BY 4.0 license. Monospace bitmap font.
-  designer: ERDA Contributors
+  designer: Robert Alexander Massinger
   family_name: ERDA CC-BY CJK
   full_name: ERDA CC-BY CJK Fallback
   license: CC BY 4.0

@@ -1,16 +1,18 @@
----
+﻿---
 title: Vorwort
 date: 2024-06-01
 version: 1.0
 doc_type: preface
 ---
+# Platzhalterinhalt
 
-# Vorwort
+Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
 
-Dieses Vorwort erläutert Zweck und Aufbau des Beispielbuchs. Alle Inhalte sind bewusst neutral formuliert, damit sie für Usability-Tests, Layout-Demos und Lokalisierungsworkflows genutzt werden können.
+Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-- **Zielgruppe:** Teams, die Text-, Bild- oder Tabellenkomponenten ohne reale Kundendaten testen möchten.
-- **Struktur:** Jede Sektion enthält mindestens ein Element, das in typischen Buchproduktionen vorkommt – z. B. Abbildungen, Querverweise, Zitationen oder Tabellen.
-- **Internationalität:** Die beiliegende Vorlage für mehrsprachige Texte deckt gängige Hauptsprachen ab und kann erweitert werden.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-Weiterführende Hinweise finden sich in [Kapitel 1](./chapters/chapter-01.md), während [Kapitel 2](./chapters/chapter-02.md) konkrete Tabellenlayouts bietet.
+

@@ -2,7 +2,7 @@
 version: 0.2.0
 date: 2025-11-29
 history:
-  - "2025-11-29: Initial smart font stack concept (GitHub Copilot)."
+  - "2025-11-29: Initial smart font stack concept."
    - "2025-11-29: Erste Implementierung (smart_font_stack.py + fonts sync CLI)."
 ---
 

@@ -66,7 +66,7 @@ class FontMetadata:
     """Font version"""
 
     copyright_notice: str = (
-        "© 2025 ERDA Project. "
+        "Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany. "
         "This font is licensed under CC BY 4.0. "
         "Code is licensed under MIT."
     )
@@ -81,7 +81,7 @@ class FontMetadata:
     vendor: str = "ERDA Project"
     """Vendor name"""
 
-    designer: str = "ERDA Contributors"
+    designer: str = "Robert Alexander Massinger, Munich, Bavaria, Germany"
     """Designer name"""
 
     description: str = (

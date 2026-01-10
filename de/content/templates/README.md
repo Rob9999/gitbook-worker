@@ -1,65 +1,18 @@
----
+﻿---
 title: Vorlagen
 date: 2024-06-02
 version: 1.1
 doc_type: template
 ---
+# Platzhalterinhalt
 
-# Vorlagen
+Dieses Repository enthaelt neutralen Platzhalterinhalt zum Testen und Ausfuehren der Publishing-Pipeline.
 
-Dieser Ordner enthält wiederverwendbare Textvorlagen für mehrsprachige, neutrale Dokumentation.
+Der urspruengliche Buchinhalt wurde aus diesen Dateien entfernt.
 
-## Verfügbare Vorlagen
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-### [Mehrsprachige Neutrale Texte](multilingual-neutral-text.md)
 
-Eine strukturierte Vorlage für internationale Dokumentation mit:
-- **Neutraler Formulierung**: Keine kultur-, marken- oder personenspezifischen Begriffe
-- **Mehrsprachigkeit**: Beispieltexte in 10+ Hauptsprachen (DE, EN, FR, ES, ZH, JA, AR, HI, RU, PT)
-- **Konsistenter Aufbau**: Kontextbeschreibung → Sprachspezifische Absätze → Tabellen
-
-**Verwendungszwecke**:
-- Template für globale Dokumentationsprojekte
-- Testmaterial für Unicode-Abdeckung und Font-Rendering
-- Demonstrationsobjekt für mehrsprachige PDF-Generierung
-
-## Struktur der Vorlagen
-
-Jede Vorlage folgt diesem Schema:
-
-```markdown
----
-title: Vorlagentitel
-date: YYYY-MM-DD
-version: X.Y
----
-
-# Kontext
-Kurze Beschreibung des Szenarios.
-
-## Sprache (ISO-Code)
-Neutraler Absatz ohne kulturspezifische Referenzen.
-```
-
-## Best Practices
-
-**Bei Verwendung der Vorlagen**:
-- ✅ Verwende kurze, prägnante Sätze
-- ✅ Vermeide idiomatische Ausdrücke
-- ✅ Nutze ISO-Sprachcodes (de-DE, en-US, fr-FR, etc.)
-- ✅ Dokumentiere Anpassungen im Versionsverlauf
-- ❌ Keine personenbezogenen Daten
-- ❌ Keine Markennamen ohne Notwendigkeit
-- ❌ Keine kulturspezifischen Metaphern
-
-## Erweiterung
-
-Neue Vorlagen sollten:
-1. YAML-Frontmatter mit `title`, `date`, `version` haben
-2. Mindestens 3 Sprachen abdecken (DE, EN, +1)
-3. Im Versionsverlauf dokumentiert sein
-4. Neutrale, wiederverwendbare Textbausteine enthalten
-
----
-
-*Dieser Ordner wird bei Bedarf erweitert. Vorschläge für neue Vorlagen sind willkommen.*

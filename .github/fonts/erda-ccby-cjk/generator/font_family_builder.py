@@ -97,9 +97,9 @@ def build_bitmap_font(
             "uniqueFontIdentifier": f"{font_family}-Regular",
             "fullName": f"{font_family} Regular",
             "psName": f"{font_family.replace(' ', '')}-Regular",
-            "designer": "ERDA Project",
-            "designerURL": "https://github.com/enkidevs/gitbook-worker",
-            "copyright": "ERDA Project — Licensed under CC BY 4.0",
+            "designer": "Robert Alexander Massinger",
+            "designerURL": "https://github.com/rob9999/gitbook-worker",
+            "copyright": "Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany.",
             "version": "Version 1.0",
             "manufacturer": "ERDA",
         }

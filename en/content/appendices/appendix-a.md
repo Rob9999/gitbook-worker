@@ -1,4 +1,4 @@
----
+﻿---
 title: Appendix A – Data sources and table layout
 date: 2024-06-01
 version: 1.0
@@ -6,25 +6,15 @@ doc_type: appendix
 appendix_id: "A"
 category: "technical"
 ---
+# Placeholder Content
 
-# Appendix A – Data sources and table layout
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-## A.1 Data sources
-1. Public climate data catalogues from regional weather services.
-2. Neutral example values from internal sandbox systems.
-3. International open-data repositories such as [UN Data](https://data.un.org/) or [World Bank Open Data](https://data.worldbank.org/).
+The original book content has been removed from these files.
 
-## A.2 Table layout
-<a id="table-layout"></a>
-| Column | Data type | Description |
-|--------|----------|-------------|
-| `timestamp` | ISO-8601 | Timestamp of the measurement |
-| `metric` | String | Measurement (temperature, humidity, etc.) |
-| `value` | Decimal number | Measured value |
-| `unit` | String | Associated unit |
-| `notes` | Free text | Context or notes |
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-## A.3 Reuse
-- The table can be imported directly into dataframes.
-- Use relative links such as [Chapter 2](../chapters/chapter-02.md) for cross-references.
-- Graphics can be found in the [`content/.github/assets`](../images/) directory.
+

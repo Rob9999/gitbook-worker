@@ -1,4 +1,4 @@
----
+﻿---
 title: List of Figures
 date: 2025-12-29
 version: 1.0
@@ -7,33 +7,15 @@ auto_generate: true
 include_formats: [png, jpg, svg, pdf]
 numbering_style: "decimal"
 ---
+# Placeholder Content
 
-# List of Figures
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-> **Note**: This list of figures will be automatically generated from all embedded images in future versions.
+The original book content has been removed from these files.
 
-## Chapter Figures
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- Fig. 1.1: Experimental Setup Overview ........................ (Ch. 1)
-- Fig. 1.2: Measurement Curve Temperature Profile .............. (Ch. 1)
-- Fig. 2.1: Diagram Comparative Analysis ....................... (Ch. 2)
 
-## Appendix Figures
-
-- Fig. A.1: Schematic Structure Data Catalog ................... (App. A)
-- Fig. B.1: Font Coverage Matrix ............................... (App. B)
-
-## Emoji Examples
-
-- Fig. E.1: Smileys & People Overview .......................... (Ex.)
-- Fig. E.2: Nature & Food Emoji Palette ........................ (Ex.)
-- Fig. E.3: Activities & Travel Categories ..................... (Ex.)
-- Fig. E.4: Objects, Symbols & Flags ........................... (Ex.)
-
----
-
-**Automatic Generation (v2.0.1+)**:
-- All images with alt-text or captions will be captured
-- Numbering follows chapter affiliation
-- Format detection: PNG, JPG, SVG, PDF
-- Page numbers extracted from generated PDF

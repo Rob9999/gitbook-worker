@@ -47,7 +47,9 @@ from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_fl
 LOGGER = get_logger(__name__)
 TOOL_NAME = "gitbook-worker"
 LICENSE_SHORT = "MIT (see LICENSE)"
-COPYRIGHT = "Copyright (c) 2025 Robert Alexander Massinger"
+COPYRIGHT = (
+    "Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany."
+)
 
 
 def _command_line() -> str:

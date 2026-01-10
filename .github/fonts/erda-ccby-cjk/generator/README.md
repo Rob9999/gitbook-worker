@@ -168,7 +168,7 @@ python tests/test_license_coverage.py chinese
 All modules in this directory are licensed under **CC BY 4.0**.
 
 ```
-© 2025 ERDA Project
+Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany.
 License: Creative Commons Attribution 4.0 International (CC BY 4.0)
 ```
 

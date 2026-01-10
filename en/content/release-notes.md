@@ -1,9 +1,17 @@
----
+﻿---
 doc_type: release-notes
 title: Release Notes
 version: 1.0.0
 ---
+# Placeholder Content
 
-# Release Notes
+This repository ships neutral placeholder content for testing and running the publishing pipeline.
 
-Placeholder for release notes.
+The original book content has been removed from these files.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+
