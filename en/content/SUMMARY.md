@@ -2,7 +2,7 @@
 
 ## cover
 
-* [Placeholder Content](README.md)
+* [Documentation Framework](README.md)
 * [Home](index.md)
 
 ## Dedication
@@ -24,6 +24,7 @@
 
 ## example
 
+* [Citation & Footnote Examples](examples/citation-examples.md)
 * [Emoji examples – Activities & travel](examples/emoji-activities-and-travel.md)
 * [Emoji examples – Nature & food](examples/emoji-nature-and-food.md)
 * [Emoji examples – Objects, symbols & flags](examples/emoji-objects-symbols-flags.md)
@@ -32,6 +33,7 @@
 * [Image examples – Assets & layout](examples/image-assets-and-layout.md)
 * [Image examples – Captions & density](examples/image-captions-and-density.md)
 * [Language Samples – 100 Languages](examples/language-samples-100.md)
+* [Markdown Advanced Features](examples/markdown-advanced-features.md)
 * [🧪 Emoji in headings – Header samples](examples/emoji-headings.md)
 
 ## template
@@ -57,8 +59,9 @@
 
 ## Appendices
 
+* [Appendix A – Appendices](appendices/README.md)
 * [Appendix A – Data sources and table layout](appendices/appendix-a.md)
-* [Appendix – Emoji & font coverage](appendices/emoji-font-coverage.md)
+* [Appendix B – Emoji & font coverage](appendices/emoji-font-coverage.md)
 
 ## Legal Notices
 

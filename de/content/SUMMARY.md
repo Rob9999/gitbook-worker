@@ -16,6 +16,7 @@
 
 * [Chapter 1 – Kapitel 1 – Beobachtbare Muster](chapters/chapter-01.md)
 * [Chapter 2 – Kapitel 2 – Vergleichstabellen](chapters/chapter-02.md)
+* [Chapter 3 – Kapitel](chapters/README.md)
 
 ## Abschluss
 
@@ -30,7 +31,9 @@
 * [Emoji-Beispiele – Natur & Essen](examples/emoji-nature-and-food.md)
 * [Emoji-Beispiele – Objekte, Symbole & Flaggen](examples/emoji-objects-symbols-flags.md)
 * [Emoji-Beispiele – Smileys & Personen](examples/emoji-smileys-and-people.md)
+* [Markdown Erweiterte Features](examples/markdown-advanced-features.md)
 * [Sprachproben – 100 Sprachen](examples/language-samples-100.md)
+* [Zitations- & Fußnoten-Beispiele](examples/citation-examples.md)
 * [🧪 Emoji im Header – Überschriften](examples/emoji-headings.md)
 
 ## template
@@ -56,8 +59,9 @@
 
 ## Anhänge
 
+* [Appendix A – Anhänge](appendices/README.md)
 * [Appendix A – Datenquellen und Tabellenlayout](appendices/appendix-a.md)
-* [Appendix – Emoji- & Schriftabdeckung](appendices/emoji-font-coverage.md)
+* [Appendix B – Emoji- & Schriftabdeckung](appendices/emoji-font-coverage.md)
 
 ## Rechtliche Hinweise
 

@@ -21,22 +21,37 @@ header-includes:
 
 <a id="md-readme"></a>
 
-# Placeholder Content
+# Documentation Framework
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This documentation demonstrates a complete publishing workflow from Markdown source files to professional PDF output.
 
-## Purpose
+## Overview
 
-Short neutral content that exercises the pipeline features.
+The framework supports:
 
-## Pipeline Features
+- **Multi-language content**: Parallel English and German versions
+- **Structured navigation**: Hierarchical table of contents with PDF bookmarks
+- **Rich formatting**: Tables, code blocks, lists, and images
+- **Unicode support**: Extensive language and emoji coverage
+- **Metadata management**: YAML frontmatter for document properties
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Document structure
+
+The documentation is organised into:
+
+- **Chapters**: Main content sections
+- **Examples**: Demonstration files for various features
+- **Appendices**: Supplementary reference material
+
+## Technical features
+
+This framework showcases:
+
+- Reproducible PDF generation
+- Font management and fallback chains
+- Image asset handling (raster and vector)
+- Cross-reference management
+- Automated list generation (tables, figures, abbreviations)
 
 
 \newpage
@@ -57,20 +72,57 @@ authors:
 
 ![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Welcome to this technical documentation framework demonstration.
 
-## Purpose
+## About this document
 
-Short neutral content that exercises the pipeline features.
+This publication showcases capabilities of modern documentation systems:
 
-## Pipeline Features
+- **Multilingual support**: Parallel English and German versions
+- **Rich formatting**: Tables, figures, code blocks, and lists
+- **Unicode excellence**: 100+ languages, emoji, and complex scripts
+- **Professional output**: High-quality PDF generation with proper typography
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Document structure
+
+The content is organized into:
+
+### Core chapters
+
+Main content demonstrating various documentation patterns and structures.
+
+### Examples
+
+Practical demonstrations of:
+
+- Emoji rendering across categories
+- Image formats (raster and vector)
+- Language samples and scripts
+
+### Appendices
+
+Supplementary material including:
+
+- Technical specifications
+- Font coverage analysis
+- Reference materials
+
+## Navigation
+
+Use the table of contents (sidebar or PDF bookmarks) to navigate between sections. Each chapter includes:
+
+- Clear heading hierarchy
+- Cross-references where relevant
+- Practical examples
+
+## Technical foundation
+
+Built with:
+
+- **Markdown**: Source content format
+- **YAML frontmatter**: Structured metadata
+- **Python pipeline**: Automated build and validation
+- **LaTeX/XeLaTeX**: Professional PDF typesetting
 
 
 \newpage
@@ -85,20 +137,11 @@ order: 5
 
 # Dedication
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+To all contributors to the open-source community who generously share their knowledge, code, and time.
 
-## Purpose
+To the pioneers of digital typography who made beautiful, accessible documents possible for everyone.
 
-Short neutral content that exercises the pipeline features.
-
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+To the readers who seek understanding through well-crafted documentation.
 
 
 \newpage
@@ -114,20 +157,36 @@ doc_type: preface
 
 # Preface
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Documentation is the bridge between knowledge and understanding. Well-structured documentation empowers readers to grasp complex concepts, reference critical information, and apply learned principles effectively.
 
-## Purpose
+## About this documentation
 
-Short neutral content that exercises the pipeline features.
+This document serves multiple purposes:
 
-## Pipeline Features
+1. **Demonstration**: Showcasing a complete documentation workflow
+2. **Reference**: Providing examples of various documentation patterns
+3. **Testing**: Validating the publishing pipeline across different scenarios
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Target audience
+
+This documentation is designed for:
+
+- Technical writers seeking workflow examples
+- Developers implementing documentation systems
+- Content creators exploring publishing options
+- Anyone interested in structured document creation
+
+## How to use this documentation
+
+Readers can approach this document in different ways:
+
+- **Sequential reading**: Follow the chapters in order for a comprehensive understanding
+- **Reference use**: Navigate directly to specific sections using the table of contents
+- **Example study**: Examine the examples section for practical demonstrations
+
+## Acknowledgements
+
+This documentation framework builds upon established best practices from the technical writing community and leverages modern open-source tools for document processing and PDF generation.
 
 
 \newpage
@@ -144,43 +203,77 @@ chapter_number: 1
 
 # Chapter 1 – Observable patterns
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+In software development, we repeatedly encounter similar problems for which proven solutions have been established over time. These recurring structures are referred to as design patterns.
 
-## Purpose
+## Historical development
 
-This section demonstrates a meaningful outline with sub-levels.
+The systematic documentation of design patterns began in the 1990s. Inspired by architecture, where Christopher Alexander described patterns for building construction, software developers transferred this idea to programming.
 
-## Structure
+### Early pioneers
 
-### Section A
+The so-called "Gang of Four" (Gamma, Helm, Johnson, Vlissides) published the seminal work "Design Patterns" in 1994, which categorised and described 23 patterns.
 
-Neutral sample text.
+### Modern developments
 
-### Section B
+Today, hundreds of documented patterns exist for a wide variety of application areas – from microservices and reactive programming to cloud architectures.
 
-Neutral sample text.
+## Categories of patterns
 
-## Pipeline Features
+Design patterns can be divided into three main categories:
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+### Creational patterns
 
-### Example table
+These patterns deal with object creation and attempt to make object instantiation more flexible:
 
-| Item | Purpose |
-|---|---|
-| Heading | TOC/bookmarks |
-| Table | list of tables |
+- **Singleton**: Ensures that only one instance of a class exists
+- **Factory**: Encapsulates object creation
+- **Builder**: Separates the construction of complex objects from their representation
 
-### Example code block
+### Structural patterns
 
-```
-python -m gitbook_worker.tools.workflow_orchestrator --help
-```
+Structural patterns describe how classes and objects can be composed into larger structures:
+
+- **Adapter**: Enables collaboration between incompatible interfaces
+- **Composite**: Forms tree structures to represent part-whole hierarchies
+- **Decorator**: Dynamically extends objects with additional functionality
+
+### Behavioural patterns
+
+These patterns address the interaction between objects and the distribution of responsibilities:
+
+- **Observer**: Defines a dependency between objects so that changes are automatically propagated
+- **Strategy**: Encapsulates interchangeable algorithms
+- **Command**: Encapsulates requests as objects
+
+## Advantages of using patterns
+
+Using established design patterns offers several advantages:
+
+1. **Common language**: Teams can communicate complex concepts precisely
+2. **Proven solutions**: Patterns have been proven in practice and are well documented
+3. **Maintainability**: Code becomes more structured and easier to understand
+4. **Flexibility**: Changes can often be implemented with less effort
+
+## Limitations and challenges
+
+Despite their advantages, design patterns are not a panacea:
+
+- **Over-engineering**: Not every problem requires a complex pattern
+- **Learning curve**: Understanding and correct application require experience
+- **Context dependency**: A pattern must fit the specific situation
+
+## Practical application
+
+When deciding on a design pattern, the following questions should be asked:
+
+1. What problem needs to be solved?
+2. Is there an established pattern for this problem?
+3. Does the complexity of the pattern justify the expected benefit?
+4. Does the pattern fit with the existing architecture?
+
+## Summary
+
+Design patterns are a valuable tool in software development. They provide tested solutions for recurring problems and promote a common technical language. However, their sensible application requires experience and judgement to avoid falling into the trap of over-engineering.
 
 
 \newpage
@@ -197,43 +290,126 @@ chapter_number: 2
 
 # Chapter 2 – Comparative tables
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Tables are an indispensable tool for the structured presentation of information. They enable direct comparison of different options, technologies, or concepts at a glance.
 
-## Purpose
+## Fundamentals of tabular presentation
 
-This section demonstrates a meaningful outline with sub-levels.
+A well-designed table follows clear principles:
 
-## Structure
+### Structure and organisation
 
-### Section A
+| Element | Description | Purpose |
+|---------|-------------|---------|
+| Header row | Contains column labels | Orientation for the reader |
+| Data rows | Contain the actual information | Comparable presentation |
+| Summary | Optional: sums or averages | Aggregated insights |
 
-Neutral sample text.
+### Design principles
 
-### Section B
+Effective tables are characterised by the following features:
 
-Neutral sample text.
+1. **Clarity**: Unambiguous column and row labels
+2. **Consistency**: Uniform formatting within columns
+3. **Readability**: Appropriate line spacing and font sizes
+4. **Relevance**: Display only necessary information
 
-## Pipeline Features
+## Comparison of programming paradigms
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+A practical example of using comparison tables is the juxtaposition of different programming paradigms:
 
-### Example table
+| Paradigm | Main features | Typical languages | Application areas |
+|-----------|---------------|-------------------|-------------------|
+| Imperative | Step-by-step instructions | C, Pascal, BASIC | Systems programming |
+| Object-oriented | Classes and objects | Java, C++, Python | Enterprise applications |
+| Functional | Immutable data | Haskell, Erlang, F\# | Data processing |
+| Declarative | What instead of How | SQL, HTML, Prolog | Database queries |
 
-| Item | Purpose |
-|---|---|
-| Heading | TOC/bookmarks |
-| Table | list of tables |
+### Detailed consideration
 
-### Example code block
+Each paradigm has its strengths and weaknesses:
 
-```
-python -m gitbook_worker.tools.workflow_orchestrator --help
-```
+**Imperative programming**
+- Direct control over flow
+- Efficient at hardware level
+- Can become confusing with complexity
+
+**Object-oriented programming**
+- Modular structure
+- Reusability through inheritance
+- Can lead to overhead
+
+**Functional programming**
+- No side effects
+- Easy to test
+- Learning curve for switchers
+
+## Technology comparisons
+
+Comparison tables are particularly suitable for technology decisions:
+
+### Web framework comparison
+
+| Framework | Language | Performance | Learning curve | Community |
+|-----------|---------|-------------|----------------|-----------|
+| Django | Python | Medium | Medium | Very large |
+| Flask | Python | High | Low | Large |
+| Spring | Java | Medium | High | Very large |
+| Express | JavaScript | High | Low | Very large |
+| Rails | Ruby | Medium | Medium | Large |
+
+### Evaluation criteria
+
+Various factors play a role in technology selection:
+
+1. **Performance**: Throughput and response times
+2. **Developer productivity**: Speed of development
+3. **Maintainability**: Long-term maintenance effort
+4. **Scalability**: Growth potential
+5. **Ecosystem**: Available libraries and tools
+
+## Database comparison
+
+Another common application area is database comparisons:
+
+| Type | Example | Consistency | Scaling | Use case |
+|-----|----------|------------|---------|-----------|
+| Relational | PostgreSQL | ACID | Vertical | Transactions |
+| Document | MongoDB | Eventual | Horizontal | Flexible schemas |
+| Key-value | Redis | Eventual | Horizontal | Caching |
+| Graph | Neo4j | ACID | Vertical | Relationships |
+| Column | Cassandra | Eventual | Horizontal | Time series |
+
+### CAP theorem
+
+For distributed databases, the CAP theorem is relevant:
+
+- **C**onsistency: All nodes see the same data
+- **A**vailability: System always responds
+- **P**artition tolerance: System functions despite network failures
+
+According to the CAP theorem, only two of the three properties can be guaranteed simultaneously.
+
+## Best practices for tables
+
+When creating comparison tables, the following points should be considered:
+
+### Content aspects
+
+- Select relevant comparison criteria
+- Use objective and verifiable data
+- Cite sources where necessary
+- Ensure data is current
+
+### Visual design
+
+- Zebra pattern for better readability in long tables
+- Highlighting of important rows or columns
+- Responsive design for different screen sizes
+- Sorting and filtering options for interactive tables
+
+## Summary
+
+Comparison tables are a powerful tool for the structured presentation of complex information. They enable quick comparisons and informed decisions. The key to success lies in carefully selecting relevant criteria and presenting them clearly and consistently.
 
 
 \newpage
@@ -248,20 +424,210 @@ version: 1.0.0
 
 # Epilogue
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Documentation is a living artefact. As technologies evolve and understanding deepens, good documentation grows and adapts to serve its readers better.
 
-## Purpose
+## The documentation journey
 
-Short neutral content that exercises the pipeline features.
+Creating effective documentation is an iterative process:
 
-## Pipeline Features
+1. **Initial creation**: Capturing knowledge whilst it's fresh
+2. **Review and refinement**: Improving clarity and accuracy
+3. **User feedback**: Learning from readers' experiences
+4. **Continuous improvement**: Evolving with changing needs
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Looking forward
+
+The principles demonstrated in this documentation – clear structure, comprehensive examples, and attention to technical detail – remain relevant regardless of the specific tools or technologies employed.
+
+## Final thoughts
+
+Good documentation respects the reader's time and intelligence. It provides clear paths to understanding whilst remaining accessible to those encountering the material for the first time.
+
+May your own documentation efforts be similarly rewarding, both in their creation and in the value they provide to your readers.
+
+
+\newpage
+
+---
+title: Citation & Footnote Examples
+date: 2026-01-11
+version: 1.0
+doc_type: example
+category: documentation-features
+---
+<a id="md-examples-citation-examples"></a>
+
+
+# Citation & Footnote Examples
+
+This page demonstrates various citation styles and footnote usage in Markdown documents.
+
+## Footnotes
+
+Markdown supports footnotes[^1] that appear at the bottom of the page. You can reference the same footnote multiple times[^1].
+
+Here's a longer footnote with multiple paragraphs[^longnote].
+
+Inline footnotes are also possible.^[This is an inline footnote.]
+
+### Named vs Numbered Footnotes
+
+You can use descriptive names for footnotes[^bignote] or just numbers[^2].
+
+## Citation Styles
+
+### APA Style (7th Edition)
+
+**Books:**
+
+Smith, J. A., & Johnson, M. B. (2023). *Research Methods in Documentation*. Academic Press.
+
+**Journal Articles:**
+
+Brown, L. K., Davis, R. T., & Wilson, S. E. (2024). Advanced typesetting techniques for multilingual documents. *Journal of Technical Communication*, 45(3), 234-256. https://doi.org/10.1234/jtc.2024.01
+
+**Online Sources:**
+
+Unicode Consortium. (2023, September 12). *Unicode Standard 15.1.0*. https://www.unicode.org/versions/Unicode15.1.0/
+
+### IEEE Style
+
+**Journal Article:**
+
+[1] L. K. Brown, R. T. Davis, and S. E. Wilson, "Advanced typesetting techniques for multilingual documents," *J. Tech. Commun.*, vol. 45, no. 3, pp. 234-256, 2024, doi: 10.1234/jtc.2024.01.
+
+**Conference Paper:**
+
+[2] J. A. Smith and M. B. Johnson, "Automated documentation pipelines," in *Proc. Int. Conf. Software Engineering*, London, UK, 2023, pp. 123-130.
+
+**Book:**
+
+[3] A. Martinez, *Modern Documentation Frameworks*, 2nd ed. Boston, MA, USA: Tech Publishers, 2024.
+
+### Chicago Style (Author-Date)
+
+**Books:**
+
+Martinez, Ana. 2024. *Modern Documentation Frameworks*. 2nd ed. Boston: Tech Publishers.
+
+**Journal Articles:**
+
+Brown, Laura K., Robert T. Davis, and Sarah E. Wilson. 2024. "Advanced Typesetting Techniques for Multilingual Documents." *Journal of Technical Communication* 45 (3): 234-256. https://doi.org/10.1234/jtc.2024.01.
+
+### Zenodo Standard (DOI-based)
+
+Zenodo provides persistent identifiers (DOIs) for research data and publications[^zenodo].
+
+**Dataset:**
+
+Smith, John A.; Johnson, Mary B. (2023). Sample Documentation Dataset (Version 1.2) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.1234567
+
+**Software:**
+
+Brown, Laura K.; Davis, Robert T. (2024). GitBook Worker: Automated Documentation Pipeline (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.7654321
+
+**Publication:**
+
+Martinez, Ana; Wilson, Sarah E.; Thompson, James R. (2023). Best Practices for Technical Documentation. *Zenodo Preprints*. https://doi.org/10.5281/zenodo.8901234
+
+### BibTeX Format
+
+For LaTeX/academic documents:
+
+```bibtex
+@article{brown2024advanced,
+  title={Advanced Typesetting Techniques for Multilingual Documents},
+  author={Brown, Laura K and Davis, Robert T and Wilson, Sarah E},
+  journal={Journal of Technical Communication},
+  volume={45},
+  number={3},
+  pages={234--256},
+  year={2024},
+  doi={10.1234/jtc.2024.01}
+}
+
+@software{brown2024gitbook,
+  author={Brown, Laura K and Davis, Robert T},
+  title={GitBook Worker: Automated Documentation Pipeline},
+  version={1.0.0},
+  year={2024},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.7654321},
+  url={https://doi.org/10.5281/zenodo.7654321}
+}
+
+@dataset{smith2023sample,
+  author={Smith, John A and Johnson, Mary B},
+  title={Sample Documentation Dataset},
+  version={1.2},
+  year={2023},
+  publisher={Zenodo},
+  doi={10.5281/zenodo.1234567}
+}
+```
+
+## In-Text Citations
+
+### Narrative Citations
+
+As Smith and Johnson (2023) demonstrated, automated documentation pipelines significantly reduce manual effort.
+
+Brown et al. (2024) found that multilingual support improves documentation accessibility by 67%.
+
+### Parenthetical Citations
+
+Recent research shows improved documentation quality with automation (Smith & Johnson, 2023; Brown et al., 2024).
+
+Multiple studies support this approach (Martinez, 2024; Wilson & Thompson, 2023; Davis, 2022).
+
+## Citation with Footnotes Combined
+
+According to recent research[^research], automated documentation systems show promise[^3]. The study by Brown et al. (2024) provides empirical evidence for these claims[^4].
+
+## Licence Attribution (Zenodo/CC Standard)
+
+**Font Attribution:**
+
+Twemoji Mozilla (2023). Twitter Emoji (Twemoji) COLRv1 Font. Licensed under CC BY 4.0. Available at: https://github.com/mozilla/twemoji-colr. DOI: 10.5281/zenodo.3234567 (example DOI).
+
+**Data Attribution:**
+
+This document uses language samples from the Unicode Common Locale Data Repository (CLDR), licensed under Unicode License Agreement. Unicode Consortium (2023). https://www.unicode.org/copyright.html
+
+## Cross-References
+
+See [Chapter 1](#md-chapters-chapter-01) for more on design patterns.
+
+For emoji rendering details, refer to [Appendix B](#md-appendices-emoji-font-coverage).
+
+---
+
+[^1]: This is a simple footnote with a reference back to the text.
+
+[^2]: Footnotes can be numbered sequentially.
+
+[^longnote]: This is a longer footnote with multiple paragraphs.
+
+    You can include additional paragraphs by indenting them.
+    
+    Even code blocks can appear in footnotes:
+    
+    ```python
+    def example():
+        return "footnote code"
+    ```
+
+[^bignote]: Descriptive names make footnotes easier to manage in large documents.
+
+    They're especially useful when you need to reorganise content.
+
+[^zenodo]: Zenodo is an open-access repository operated by CERN, providing DOIs for research outputs including data, software, publications, and more. See https://zenodo.org for details.
+
+[^research]: Martinez, A. (2024). *Modern Documentation Frameworks*, pp. 45-67.
+
+[^3]: Specifically, build automation and validation pipelines reduce errors by approximately 80% (Smith & Johnson, 2023).
+
+[^4]: The study included 150 documentation projects across 12 organisations over a 2-year period.
 
 
 \newpage
@@ -284,20 +650,16 @@ history:
 
 # Emoji examples – Activities & travel
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests emojis for sports, hobbies, vehicles, and travel.
 
-## Purpose
+## Special features
 
-Short neutral content that exercises the pipeline features.
+Emojis in this category contain:
 
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **People in action**: Athletes with skin tone and gender variants
+- **Vehicles**: Cars, aeroplanes, ships in various variants
+- **Buildings**: Different architectural styles
+- **Symbols**: Traffic signs, warning symbols
 
 ## Emoji test
 
@@ -350,20 +712,16 @@ history:
 
 # Emoji examples – Nature & food
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests emojis from the categories of animals, plants, and food.
 
-## Purpose
+## Test scope
 
-Short neutral content that exercises the pipeline features.
+Emojis in this category are usually simpler than people emojis:
 
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **No skin tone modifiers**: Uniform display
+- **Few ZWJ sequences**: Mostly single Unicode characters
+- **High compatibility**: Well supported in all fonts
+- **Colour and detail**: Test for colour emoji rendering
 
 ## Emoji test
 
@@ -414,20 +772,27 @@ history:
 
 # Emoji examples – Objects, symbols & flags
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests emojis for objects, symbols, and country flags.
 
-## Purpose
+## Technical challenges
 
-Short neutral content that exercises the pipeline features.
+### Flag emojis
 
-## Pipeline Features
+Country flags are particularly complex:
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Regional Indicator Symbols**: Two letter characters form a flag
+- **ISO 3166-1**: Based on country codes (e.g. DE = 🇩🇪)
+- **Font dependency**: Not all systems display all flags
+- **Fallback**: Letters are displayed when support is missing
+
+### Symbol emojis
+
+Symbols include:
+
+- **Mathematical symbols**: ➕ ➖ ➗ × ÷
+- **Geometric shapes**: ■ ● ▲ ⭐
+- **Pictograms**: ♿ ⚠️ ☢️ ☣️
+- **Keycaps**: 0️⃣ 1️⃣ 2️⃣ #️⃣
 
 ## Emoji test
 
@@ -477,20 +842,16 @@ history:
 
 # Emoji examples – Smileys & people
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests the display of facial emojis, gestures, and people with various skin tones.
 
-## Purpose
+## Why these tests are important
 
-Short neutral content that exercises the pipeline features.
+Emojis representing people are particularly complex:
 
-## Pipeline Features
-
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Skin tone modifiers**: Five different skin tones (U+1F3FB to U+1F3FF)
+- **ZWJ sequences**: Complex emoji composed of multiple Unicode characters
+- **Gender variants**: Male, female, and neutral forms
+- **Font fallbacks**: Switching between text and emoji fonts
 
 ## Emoji test
 
@@ -535,20 +896,44 @@ doc_type: example
 
 # Examples
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section contains various example documents that demonstrate different aspects of document creation and formatting.
 
-## Purpose
+## Overview of example categories
 
-Short neutral content that exercises the pipeline features.
+### Emoji tests
 
-## Pipeline Features
+The emoji example files test the correct display of Unicode emoji in various contexts:
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Emoji-Headings**: Emojis in headings and TOC bookmarks
+- **Smileys and People**: Faces, people, gestures
+- **Nature and Food**: Animals, plants, food
+- **Activities and Travel**: Sports, travel, transport
+- **Objects and Symbols**: Objects, symbols, flags
+
+### Image tests
+
+The image examples demonstrate various aspects of image integration:
+
+- **Assets and Layout**: Basic image integration (PNG, SVG)
+- **Captions and Density**: Image captions and dense image sequences
+
+### Language tests
+
+The language samples file contains examples in over 100 languages to verify:
+
+- Fonts and character set coverage
+- Text direction (LTR, RTL)
+- Hyphenation and line breaking
+- PDF bookmark encoding
+
+## Purpose of the examples
+
+These example files serve as:
+
+1. **Regression tests** for the publishing pipeline
+2. **Reference implementations** for document formats
+3. **Quality assurance** for font and layout rendering
+4. **Documentation** of supported features
 
 
 \newpage
@@ -569,19 +954,61 @@ history:
 
 # Image examples – Assets & layout
 
-This page uses only neutral, legally safe assets from `content/.gitbook/assets/`.
+This page demonstrates the integration of various image formats into Markdown documents. All assets used are located in the `content/.gitbook/assets/` directory and are legally safe.
 
-## Raster image (PNG)
+## Image formats compared
+
+### Raster images (PNG)
+
+Raster images are suitable for:
+- Photographs and complex graphics
+- Images with many colour gradients
+- Screenshots and screen captures
+
+**Disadvantage**: Enlargement can lead to quality loss.
 
 ![ERDA Logo (PNG)](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
 
-## Vector image (SVG)
+### Vector images (SVG)
+
+Vector images offer:
+- Arbitrary scalability without quality loss
+- Small file sizes for simple graphics
+- Sharp display on all screen resolutions
+
+**Ideal for**: Diagrams, icons, technical drawings
 
 ![Neutral grid (SVG)](.gitbook/assets/neutral-grid.pdf)
 
-## Diagram (SVG)
+### Diagrams and workflows
+
+Structured representations such as flowcharts particularly benefit from vector graphics:
 
 ![Neutral workflow (SVG)](.gitbook/assets/neutral-flow.pdf)
+
+## Best practices
+
+### Image sizes
+
+- **Web**: 72-96 DPI sufficient
+- **Print**: At least 300 DPI for raster images
+- **SVG**: Resolution-independent
+
+### File formats
+
+| Format | Use case | Transparency | Compression |
+|--------|----------|--------------|-------------|
+| PNG | Screenshots, logos | Yes | Lossless |
+| JPEG | Photographs | No | Lossy |
+| SVG | Diagrams, icons | Yes | Vector |
+| WebP | Modern, web | Yes | Both modes |
+
+### Alt texts
+
+Every image should have a descriptive alt text:
+- Improves accessibility
+- Helps search engines
+- Displayed when image cannot be loaded
 
 
 \newpage
@@ -602,19 +1029,65 @@ history:
 
 # Image examples – Captions & density
 
-Goal: regression tests for line wrapping, page breaks, figure captions and SVG rendering.
+This test page checks the behaviour with multiple images in quick succession. Particularly relevant for:
+
+- **Page breaks**: How does the layout behave with many images?
+- **Image captions**: Are captions positioned correctly?
+- **Spacing**: Sufficient space between images?
+- **Numbering**: Sequential image numbers in lists of figures?
 
 ## Gallery (SVG)
 
+Multiple similar images in sequence test the layout:
+
 ![Neutral shapes – A](.gitbook/assets/neutral-shapes.pdf)
+
+_Figure 1: First instance of shape representation_
 
 ![Neutral shapes – B](.gitbook/assets/neutral-shapes.pdf)
 
+_Figure 2: Second instance to check for repetitions_
+
 ## Mixed (SVG + PNG)
+
+Combination of different image formats in one section:
 
 ![Neutral grid](.gitbook/assets/neutral-grid.pdf)
 
+_Figure 3: Vector graphic with grid pattern_
+
 ![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+
+_Figure 4: Raster graphic (PNG format)_
+
+## Technical aspects
+
+### Image captions
+
+Image captions should:
+
+1. Clearly describe the image
+2. Establish context to surrounding text
+3. Include source references where needed
+4. Be consistently numbered
+
+### Layout challenges
+
+When placing multiple images, the following aspects must be considered:
+
+- **Widow/orphan control**: Don't separate captions from images
+- **Page breaks**: Don't split large images in the middle
+- **Spacing**: Sufficient space between elements
+- **Alignment**: Consistent positioning
+
+### Accessibility
+
+For better accessibility:
+
+- Every image gets a meaningful alt text
+- Captions supplement visually presented information
+- Colour schemes consider colour blindness
+- Contrasts are sufficiently high
 
 
 \newpage
@@ -1176,6 +1649,376 @@ U miru je snaga.
 \newpage
 
 ---
+title: Markdown Advanced Features
+date: 2026-01-11
+version: 1.0
+doc_type: example
+category: documentation-features
+---
+<a id="md-examples-markdown-advanced-features"></a>
+
+
+# Markdown Advanced Features
+
+This page demonstrates advanced Markdown syntax and features beyond basic formatting.
+
+## Task Lists
+
+- [x] Basic Markdown syntax documented
+- [x] Emoji support implemented
+- [x] Multilingual content tested
+- [ ] Interactive examples added
+- [ ] Video tutorials created
+- [ ] Community feedback incorporated
+
+### Nested Task Lists
+
+- [x] Phase 1: Planning
+  - [x] Requirements gathering
+  - [x] Architecture design
+- [x] Phase 2: Implementation
+  - [x] Core features
+  - [ ] Advanced features
+- [ ] Phase 3: Release
+  - [ ] Beta testing
+  - [ ] Documentation review
+
+## Strikethrough
+
+~~This text is crossed out.~~
+
+You can combine strikethrough with other formatting: ~~**bold and struck**~~ or ~~*italic and struck*~~.
+
+This is useful for showing ~~deprecated~~ obsolete features or corrections.
+
+## Subscript and Superscript
+
+### Subscript
+
+Water molecule: H~2~O
+
+Chemical formula: C~6~H~12~O~6~ (glucose)
+
+### Superscript
+
+Mathematical notation: E = mc^2^
+
+Footnote reference^[1]^
+
+Exponentials: 2^10^ = 1024
+
+## Highlighting / Mark
+
+This is ==highlighted text== using the mark syntax.
+
+You can ==**combine highlighting with bold**== or ==*with italic*==.
+
+Use highlighting to ==draw attention to important information==.
+
+## Definition Lists
+
+Term 1
+: Definition of term 1 with inline `code`.
+
+Term 2
+: First definition of term 2.
+: Second definition of term 2.
+
+API
+: Application Programming Interface
+: A set of protocols and tools for building software applications.
+
+Markdown
+: A lightweight markup language with plain text formatting syntax.
+: Created by John Gruber in 2004.
+
+## Abbreviations
+
+The HTML specification is maintained by the W3C.
+
+*[HTML]: HyperText Markup Language
+*[W3C]: World Wide Web Consortium
+*[API]: Application Programming Interface
+
+This document uses UTF-8 encoding and follows ISO standards.
+
+*[UTF-8]: 8-bit Unicode Transformation Format
+*[ISO]: International Organization for Standardization
+
+## Mathematical Equations
+
+### Inline Math
+
+The Pythagorean theorem is $a^2 + b^2 = c^2$.
+
+Einstein's famous equation: $E = mc^2$.
+
+The quadratic formula: $x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$.
+
+### Display Math
+
+$$
+\int_{-\infty}^{\infty} e^{-x^2} dx = \sqrt{\pi}
+$$
+
+Matrix notation:
+
+$$
+\begin{bmatrix}
+a & b \\
+c & d
+\end{bmatrix}
+\begin{bmatrix}
+x \\
+y
+\end{bmatrix}
+=
+\begin{bmatrix}
+ax + by \\
+cx + dy
+\end{bmatrix}
+$$
+
+Greek letters and symbols:
+
+$$
+\alpha + \beta = \gamma \quad \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
+$$
+
+## Callouts / Admonitions
+
+> **Note:**  
+> This is an informational note using blockquote syntax.
+> Use notes for additional context or clarification.
+
+> **Warning:**  
+> This is a warning message about potential issues.
+> Warnings alert users to common mistakes or risks.
+
+> **Tip:**  
+> This is a helpful tip or best practice.
+> Tips provide guidance for optimal usage.
+
+> **Important:**  
+> Critical information that users must read.
+> Use for essential details that affect functionality.
+
+## Extended Code Features
+
+### Code with Line Numbers
+
+```python {.numberLines startFrom="10"}
+def calculate_fibonacci(n):
+    if n <= 1:
+        return n
+    return calculate_fibonacci(n-1) + calculate_fibonacci(n-2)
+
+result = calculate_fibonacci(10)
+print(f"Fibonacci(10) = {result}")
+```
+
+### Code with Highlighting
+
+```javascript {highlight=[2,5-7]}
+function processData(data) {
+    const filtered = data.filter(item => item.active);  // highlighted
+    const sorted = filtered.sort((a, b) => a.value - b.value);
+    
+    return sorted.map(item => ({  // start highlight
+        id: item.id,
+        value: item.value * 2
+    }));  // end highlight
+}
+```
+
+### Code with Filename
+
+```python title="example.py"
+# example.py
+def greet(name):
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    print(greet("World"))
+```
+
+## Tables with Alignment
+
+### Complex Table
+
+| Feature | Basic | Professional | Enterprise |
+|:--------|:-----:|:------------:|-----------:|
+| Users   | 5     | 50           | Unlimited  |
+| Storage | 10GB  | 100GB        | 1TB        |
+| Support | Email | Priority     | 24/7       |
+| Price   | Free  | £50/month    | £200/month |
+
+### Table with Formatting
+
+| Code | Output | Description |
+|------|--------|-------------|
+| `**bold**` | **bold** | Bold text |
+| `*italic*` | *italic* | Italic text |
+| `~~strike~~` | ~~strike~~ | Strikethrough |
+| `==mark==` | ==mark== | Highlighted |
+| `H~2~O` | H~2~O | Subscript |
+| `X^2^` | X^2^ | Superscript |
+
+## Keyboard Keys
+
+Press <kbd>Ctrl</kbd> + <kbd>C</kbd> to copy.
+
+Use <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> to open the command palette.
+
+Save with <kbd>Ctrl</kbd> + <kbd>S</kbd> (Windows/Linux) or <kbd>⌘</kbd> + <kbd>S</kbd> (macOS).
+
+## HTML Entities and Special Characters
+
+### Arrows and Symbols
+
+← → ↑ ↓ ↔ ↕ ⇐ ⇒ ⇔
+
+✓ ✗ ☐ ☑ ☒
+
+★ ☆ ♠ ♣ ♥ ♦
+
+### Mathematical Symbols
+
+± × ÷ ≠ ≈ ≤ ≥ ∞ ∑ ∏ ∫ √ ∂
+
+### Currency and Units
+
+£ € $ ¥ ¢ ° º ª
+
+### Typography
+
+– — … ' ' " " « » ‹ ›
+
+© ® ™ § ¶
+
+## Details / Accordion
+
+<details>
+<summary>Click to expand: Installation instructions</summary>
+
+To install the software:
+
+1. Download the latest release
+2. Extract the archive
+3. Run the installer
+4. Follow the setup wizard
+
+```bash
+wget https://example.com/software.tar.gz
+tar -xzf software.tar.gz
+cd software/
+./install.sh
+```
+
+</details>
+
+<details>
+<summary>Troubleshooting common issues</summary>
+
+### Issue 1: Installation fails
+
+**Solution:** Ensure you have administrator privileges.
+
+### Issue 2: Font rendering problems
+
+**Solution:** Update your font cache with `fc-cache -fv`.
+
+</details>
+
+## Horizontal Rules with Different Styles
+
+---
+
+***
+
+___
+
+<!-- Each creates a horizontal rule -->
+
+## Escaped Characters
+
+Use backslash to escape special characters:
+
+\*Not italic\* \**Not bold\** \`Not code\`
+
+\# Not a heading
+
+\[Not a link\](url)
+
+## Line Breaks and Spacing
+
+Regular line break  
+using two spaces at the end.
+
+Hard break with backslash\
+works the same way.
+
+Use `<br>` for explicit breaks:<br>Like this.
+
+## Comments
+
+<!-- This is a comment and won't appear in the output -->
+
+<!--
+Multi-line comments
+can span multiple lines
+and are useful for notes
+-->
+
+## Emojis with Shortcodes
+
+:smile: :heart: :thumbsup: :rocket: :tada:
+
+:warning: :information_source: :question: :exclamation:
+
+:checkmark: :x: :heavy_check_mark: :cross_mark:
+
+## Links with References
+
+This is a [reference link][1] and another [reference link][ref].
+
+[1]: https://example.com "Example Site"
+[ref]: https://github.com "GitHub"
+
+Auto-detection: https://example.com becomes a link.
+
+Email: <user@example.com>
+
+## Combined Advanced Features
+
+Here's a complete example combining multiple features:
+
+> **Important:** Data Processing Pipeline  
+> The new pipeline processes ==1 million records/second==.[^perf]
+>
+> Key improvements:
+> - [x] Reduced latency by 50%
+> - [x] Increased throughput: ~~10k~~ → **1M** ops/sec
+> - [ ] Add real-time monitoring
+>
+> Performance formula: $T = \frac{N}{R \times E}$ where:
+> - T = Total time
+> - N = Number of records  
+> - R = Records per second
+> - E = Efficiency factor (0.8-0.95)
+>
+> Press <kbd>Ctrl</kbd> + <kbd>R</kbd> to run.
+
+[^perf]: Measured on test environment: Intel Xeon E5-2699 v4, 128GB RAM, NVMe SSD storage. Actual performance may vary.
+
+---
+
+*This page demonstrates the full range of extended Markdown syntax supported by modern documentation systems.*
+
+
+\newpage
+
+---
 title: "🧪 Emoji in headings – Header samples"
 description: "Regression test page for emojis in headings (bookmarks/ToC) and in the front matter title."
 date: 2026-01-08
@@ -1193,22 +2036,18 @@ history:
 
 # 🧪 Emoji in headings – Header samples
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This page tests the correct display of emojis in headings at different levels. Particularly relevant is the encoding in PDF bookmarks and the table of contents.
 
-## Purpose
+## 🎯 Test scenarios
 
-Short neutral content that exercises the pipeline features.
+Emojis in headings place special demands on document processing:
 
-## Pipeline Features
+- **PDF bookmarks**: Correct Unicode encoding in PDF table of contents
+- **TOC generation**: Table of contents with emoji characters
+- **Font fallbacks**: Switching between text and emoji fonts
+- **Hierarchy**: Emojis at all heading levels (H1-H6)
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
-
-## Emoji test
+## 📋 Emoji test
 
 ### Sample set
 
@@ -1245,20 +2084,144 @@ show_in_summary: false
 
 # Template for multilingual neutral text
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This template provides guidelines for creating content suitable for all language versions.
 
-## Purpose
+## Principles
 
-Short neutral content that exercises the pipeline features.
+Multilingual neutral content:
 
-## Pipeline Features
+- **Cultural neutrality**: Avoid culture-specific references, idioms, or examples
+- **Universal concepts**: Use internationally recognised ideas and terminology
+- **Technical focus**: Emphasise technical accuracy over cultural context
+- **Symbol preference**: Use symbols, diagrams, and code over prose where possible
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Language considerations
+
+### Avoid
+
+❌ **Culture-specific examples:**
+
+```markdown
+Like preparing a traditional Sunday roast...
+As American as apple pie...
+```
+
+❌ **Regional idioms:**
+
+```markdown
+It's raining cats and dogs
+The proof is in the pudding
+```
+
+❌ **Country-specific references:**
+
+```markdown
+As required by UK GDPR...
+Similar to the US ZIP code system...
+```
+
+### Prefer
+
+✅ **Universal examples:**
+
+```markdown
+Like preparing a meal...
+A widely recognised pattern...
+```
+
+✅ **Clear, literal language:**
+
+```markdown
+Heavy rainfall
+Evidence demonstrates that...
+```
+
+✅ **International standards:**
+
+```markdown
+As required by ISO 8601...
+Following RFC 3339 date format...
+```
+
+## Content patterns
+
+### Technical documentation
+
+Technical content is naturally more neutral:
+
+```markdown
+## Installation
+
+1. Download the package
+2. Extract to a directory
+3. Run the installer
+4. Verify installation with `command --version`
+```
+
+### Code examples
+
+Code transcends language barriers:
+
+```python
+# Universal technical concepts
+def calculate_total(items):
+    return sum(item.price for item in items)
+```
+
+### Mathematical notation
+
+Mathematics is international:
+
+```markdown
+The Pythagorean theorem: $a^2 + b^2 = c^2$
+```
+
+### Visual elements
+
+Diagrams and symbols work across languages:
+
+- Flowcharts
+- Sequence diagrams
+- Icons and symbols (Unicode)
+- Tables and matrices
+
+## Metadata structure
+
+For multilingual documents:
+
+```yaml
+---
+title: Your Title
+date: YYYY-MM-DD
+version: X.Y
+doc_type: chapter  # or appropriate type
+language_neutral: true  # Flag for neutral content
+translation_notes: "Focus on technical accuracy"
+---
+```
+
+## Testing checklist
+
+Before publishing multilingual content:
+
+- [ ] No culture-specific references
+- [ ] No idioms or colloquialisms
+- [ ] Technical terms properly defined
+- [ ] Code examples are universal
+- [ ] Numbers and dates use ISO formats
+- [ ] Currency symbols avoided (use generic "units")
+- [ ] Time zones specified if relevant
+- [ ] Measurements use metric (SI) units
+
+## Translation workflow
+
+When translating neutral content:
+
+1. **Preserve structure**: Keep headings and formatting identical
+2. **Technical accuracy**: Verify technical terms in target language
+3. **Literal translation**: Avoid creative interpretation
+4. **Code unchanged**: Never translate code variable names or commands
+5. **Metadata sync**: Keep version and date metadata consistent
 
 
 \newpage
@@ -1274,20 +2237,71 @@ doc_type: template
 
 # Templates
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This directory contains reusable templates and patterns for documentation.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+Templates provide:
 
-## Pipeline Features
+- **Consistency**: Standardised structure across similar content
+- **Efficiency**: Quick starting points for new documents
+- **Quality**: Pre-validated formatting and metadata
+- **Guidance**: Examples of best practices
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Available templates
+
+### Multilingual neutral text
+
+Template for content that must work across all language versions:
+
+- Neutral cultural references
+- Internationally recognised examples
+- Language-independent code samples
+- Universal symbols and notation
+
+See [multilingual-neutral-text.md](#md-templates-multilingual-neutral-text) for details.
+
+## Template structure
+
+Each template includes:
+
+```yaml
+---
+title: Template Name
+date: YYYY-MM-DD
+version: X.Y
+doc_type: template
+show_in_summary: false  # Usually hidden from main TOC
+---
+```
+
+## How to use templates
+
+1. **Copy** the template file to your target location
+2. **Rename** to match your content purpose
+3. **Update** frontmatter (title, date, version, doc_type)
+4. **Replace** template content with your material
+5. **Validate** structure and formatting
+
+## Template categories
+
+### Content templates
+
+- Chapter structures
+- Example patterns
+- Reference documentation layouts
+
+### Metadata templates
+
+- Frontmatter configurations
+- Navigation structures
+- Build configurations
+
+### Multilingual templates
+
+- Parallel translation frameworks
+- Language-neutral content patterns
+- Internationalisation guidelines
 
 
 \newpage
@@ -1302,20 +2316,50 @@ order: 6
 
 # Translator's Note
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This document demonstrates multilingual publishing capabilities and translation workflows.
 
-## Purpose
+## Translation principles
 
-Short neutral content that exercises the pipeline features.
+When translating technical documentation:
 
-## Pipeline Features
+- **Terminology consistency**: Maintain consistent translation of technical terms
+- **Cultural adaptation**: Adapt examples and metaphors to target culture
+- **Format preservation**: Keep structure, headings, and formatting identical
+- **Technical accuracy**: Verify all code examples, commands, and references
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Language considerations
+
+### British English conventions
+
+This English version follows British English spelling and grammar conventions:
+
+- Spelling: colour, organise, licence (noun)
+- Punctuation: Single quotes for regular text, double for nested
+- Date format: DD/MM/YYYY
+- Number formatting: Comma for thousands (1,000)
+
+### Unicode support
+
+The document includes extensive Unicode content:
+
+- **100+ languages**: Covering major writing systems
+- **Emoji rendering**: Proper display of flags, symbols, and combined sequences
+- **Right-to-left text**: Support for Arabic, Hebrew, and other RTL scripts
+
+## Translation workflow
+
+Content is maintained in parallel language directories:
+
+```
+de/     # German (Deutsch)
+en/     # English (British)
+```
+
+Each language maintains:
+
+- Independent SUMMARY.md (navigation structure)
+- Language-specific metadata (book.json)
+- Localised frontmatter and terminology
 
 
 \newpage
@@ -1334,20 +2378,25 @@ numbering_style: "decimal"
 
 # List of Tables
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section provides a comprehensive index of all tables appearing throughout the document. Tables are numbered sequentially and referenced by their location in the text.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+The list of tables serves multiple functions:
 
-## Pipeline Features
+- **Quick reference**: Locate specific tables without scanning the entire document
+- **Content overview**: Understand the range of comparative and structured information presented
+- **Navigation aid**: Jump directly to tables of interest
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Organization
+
+Tables are listed in order of appearance with:
+
+- Table number
+- Descriptive caption
+- Page reference (in PDF output)
+
+_Note: The complete list is automatically generated during the build process and includes all captioned tables from the chapters and appendices._
 
 
 \newpage
@@ -1366,20 +2415,34 @@ numbering_style: "decimal"
 
 # List of Figures
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section catalogues all figures, diagrams, and illustrations used throughout the document. Each figure is numbered and captioned for easy reference.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+The list of figures provides:
 
-## Pipeline Features
+- **Visual content index**: Overview of all graphical elements
+- **Quick access**: Direct navigation to specific illustrations
+- **Content audit**: Verification that all images are properly captioned
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Supported formats
+
+The document includes figures in various formats:
+
+- **Raster images**: PNG, JPEG for photographs and screenshots
+- **Vector graphics**: SVG for scalable diagrams and icons
+- **Mixed content**: Combination of different formats as needed
+
+## Organization
+
+Figures are listed sequentially with:
+
+- Figure number
+- Descriptive caption
+- Page location (in PDF output)
+- Format type where relevant
+
+_Note: The complete list is automatically generated during the build process and includes all captioned figures from all document sections._
 
 
 \newpage
@@ -1394,20 +2457,194 @@ order: 7
 
 # List of Abbreviations
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section defines abbreviations and acronyms used throughout the document.
+
+## Technical abbreviations
+
+**API**  
+Application Programming Interface
+
+**CAP**  
+Consistency, Availability, Partition tolerance (theorem)
+
+**CLI**  
+Command-Line Interface
+
+**CPU**  
+Central Processing Unit
+
+**CSS**  
+Cascading Style Sheets
+
+**DPI**  
+Dots Per Inch
+
+**HTML**  
+HyperText Markup Language
+
+**HTTP**  
+HyperText Transfer Protocol
+
+**IDE**  
+Integrated Development Environment
+
+**ISO**  
+International Organization for Standardization
+
+**JSON**  
+JavaScript Object Notation
+
+**LTR**  
+Left-to-Right (text direction)
+
+**PDF**  
+Portable Document Format
+
+**PNG**  
+Portable Network Graphics
+
+**RTL**  
+Right-to-Left (text direction)
+
+**SQL**  
+Structured Query Language
+
+**SVG**  
+Scalable Vector Graphics
+
+**TOC**  
+Table of Contents
+
+**UI**  
+User Interface
+
+**URL**  
+Uniform Resource Locator
+
+**UTF**  
+Unicode Transformation Format
+
+**XML**  
+Extensible Markup Language
+
+**YAML**  
+YAML Ain't Markup Language
+
+**ZWJ**  
+Zero Width Joiner (Unicode)
+
+
+\newpage
+
+---
+title: Appendices
+date: 2024-06-01
+version: 1.0
+doc_type: appendix-overview
+---
+<a id="md-appendices-readme"></a>
+
+
+# Appendices
+
+Supplementary materials, technical specifications, and reference information.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+Appendices provide:
 
-## Pipeline Features
+- **Supplementary detail**: In-depth technical information
+- **Reference material**: Tables, specifications, and data
+- **Technical documentation**: Implementation details and configurations
+- **Supporting evidence**: Font coverage, testing results, methodologies
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Organisation
+
+Appendices are labelled alphabetically:
+
+- **Appendix A**: Data sources and table layout
+- **Appendix B**: Emoji and font coverage
+
+Each appendix includes:
+
+- Unique identifier (A, B, C...)
+- Descriptive title
+- Category classification (technical, reference, etc.)
+- Version history
+
+## Structure
+
+### Frontmatter
+
+Each appendix uses consistent metadata:
+
+```yaml
+---
+title: Appendix X – Title
+date: YYYY-MM-DD
+version: X.Y
+doc_type: appendix
+appendix_id: "X"
+category: "technical" | "reference" | "legal"
+---
+```
+
+### Content patterns
+
+Appendices typically include:
+
+- Technical specifications
+- Data tables and matrices
+- Testing methodologies
+- Configuration examples
+- Detailed calculations
+- Reference implementations
+
+## Navigation
+
+Appendices appear:
+
+- After main content chapters
+- Before indices (table of contents, figures, etc.)
+- In alphabetical order by identifier
+
+They are accessible via:
+
+- Table of contents links
+- PDF bookmarks
+- Cross-references from main text
+
+## Cross-referencing
+
+Reference appendices from main text:
+
+```markdown
+See [Appendix A](../appendices/appendix-a.md) for data sources.
+Font coverage is detailed in [Appendix B](../appendices/emoji-font-coverage.md).
+```
+
+## Types of appendices
+
+### Technical appendices
+
+- Implementation details
+- Algorithm specifications
+- Configuration references
+- Testing procedures
+
+### Reference appendices
+
+- Data tables
+- Glossaries
+- Bibliography
+- Standards references
+
+### Legal appendices
+
+- Licence texts
+- Compliance documentation
+- Attribution details
+- Legal notices
 
 
 \newpage
@@ -1425,30 +2662,141 @@ category: "technical"
 
 # Appendix A – Data sources and table layout
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This appendix documents the data sources and structural conventions used in tables throughout this document.
 
-## Purpose
+## Table design principles
 
-This section demonstrates a meaningful outline with sub-levels.
+### Readability
 
-## Structure
+Tables are designed for:
 
-### Section A
+- **Quick scanning**: Clear headers and consistent alignment
+- **Data comparison**: Parallel structure for easy comparison
+- **Reference use**: Complete information without requiring external context
 
-Neutral sample text.
+### Consistency
 
-### Section B
+All tables follow:
 
-Neutral sample text.
+- Consistent column ordering
+- Uniform header formatting
+- Standard alignment rules (left for text, right for numbers)
+- Descriptive captions
 
-## Pipeline Features
+## Table types
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+### Comparative tables
+
+Structure for comparing options:
+
+| Feature | Option A | Option B | Option C |
+|---------|----------|----------|----------|
+| Performance | High | Medium | Low |
+| Complexity | Low | Medium | High |
+| Cost | Low | Medium | High |
+
+### Reference tables
+
+Data lookup format:
+
+| Key | Value | Description |
+|-----|-------|-------------|
+| Term 1 | Definition | Detailed explanation |
+| Term 2 | Definition | Detailed explanation |
+
+### Multi-level tables
+
+Hierarchical information:
+
+| Category | Subcategory | Details |
+|----------|-------------|----------|
+| Type A | Variant 1 | Specifications |
+| | Variant 2 | Specifications |
+| Type B | Variant 1 | Specifications |
+
+## Data sources
+
+### Primary sources
+
+Tables are compiled from:
+
+- Official documentation and specifications
+- Published standards (ISO, RFC, etc.)
+- Peer-reviewed research where applicable
+- Vendor documentation and release notes
+
+### Data verification
+
+All tabulated data:
+
+1. Cross-referenced with primary sources
+2. Verified for current accuracy
+3. Dated to indicate currency
+4. Linked to source documentation where possible
+
+### Update policy
+
+Tables are reviewed:
+
+- During major version updates
+- When underlying specifications change
+- Following significant technology releases
+- As corrections are identified
+
+## Formatting conventions
+
+### Numerical data
+
+- **Integers**: No decimal separator (1000, not 1,000)
+- **Decimals**: Period as decimal separator (3.14)
+- **Percentages**: Number followed by % symbol (85%)
+- **Ranges**: En dash between values (10–20)
+
+### Text alignment
+
+- **Left-aligned**: Text, descriptions, category names
+- **Right-aligned**: Numbers, dates, versions
+- **Centre-aligned**: Yes/No, checkmarks, symbols
+
+### Special symbols
+
+- ✓ = Supported/Yes
+- ✗ = Not supported/No
+- — = Not applicable
+- ≈ = Approximately
+- ≥/≤ = Greater/less than or equal
+
+## Caption format
+
+Table captions include:
+
+```markdown
+Table X.Y: Descriptive title
+```
+
+Where:
+
+- X = Chapter number
+- Y = Sequential table number within chapter
+- Title describes content succinctly
+
+## Accessibility
+
+### Screen readers
+
+Tables use:
+
+- Proper Markdown table syntax for correct HTML rendering
+- Descriptive headers that work when read sequentially
+- Captions that provide context independent of surrounding text
+
+### Print readability
+
+Table design considers:
+
+- Page width constraints in PDF output
+- Readability at standard print sizes
+- Clear distinction between header and data rows
 
 ### Example table
 
@@ -1467,7 +2815,7 @@ python -m gitbook_worker.tools.workflow_orchestrator --help
 \newpage
 
 ---
-title: Appendix – Emoji & font coverage
+title: Appendix B – Emoji & font coverage
 description: Evidence of suitable fonts for all scripts and coloured emojis used in the sample content.
 date: 2024-06-05
 version: 1.0
@@ -1482,28 +2830,206 @@ history:
 <a id="md-appendices-emoji-font-coverage"></a>
 
 
-# Appendix – Emoji & font coverage
+# Appendix B – Emoji & font coverage
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This appendix documents font coverage for the diverse Unicode content used throughout this document, including emoji rendering and multilingual text support.
 
-## Purpose
+## Font stack
 
-This section demonstrates a meaningful outline with sub-levels.
+The document uses a carefully configured font stack:
 
-## Structure
+### Primary text fonts
 
-### Section A
+**DejaVu Serif / DejaVu Sans**
 
-Neutral sample text.
+- **Coverage**: Latin, Cyrillic, Greek, basic IPA
+- **Purpose**: Main body text and headings
+- **Licence**: Free (Bitstream Vera derivative)
+- **Unicode blocks**: ∼3,000 glyphs covering common scripts
 
-### Section B
+### Emoji fonts
 
-Neutral sample text.
+**Twemoji Mozilla (COLRv1)**
 
-## Pipeline Features
+- **Coverage**: Full Emoji 13.0+ support
+- **Format**: COLRv1 (colour font format)
+- **Purpose**: Primary emoji rendering
+- **Licence**: CC BY 4.0
+- **Rendering**: Native colour in modern systems
 
-- YAML frontmatter (document metadata)
+**Twitter Color Emoji (Fallback)**
+
+- **Coverage**: Emoji 12.0
+- **Format**: CBDT/CBLC (bitmap colour)
+- **Purpose**: Fallback for older systems
+- **Licence**: CC BY 4.0 / MIT
+
+## Emoji categories tested
+
+Comprehensive testing across all Unicode emoji categories:
+
+### 😀 People & Emotions
+
+- Faces: 😀 😃 😄 😁 😅
+- Hands: 👋 🤚 🖐 ✋ 🖖
+- People: 👶 👧 🧒 👦 👨
+- Skin tones: 👋🏻 👋🏼 👋🏽 👋🏾 👋🏿
+
+### 🐕 Animals & Nature
+
+- Mammals: 🐕 🐈 🐎 🐄 🐖
+- Birds: 🐓 🐔 🐤 🐣 🐥
+- Plants: 🌲 🌳 🌴 🌵 🌾
+- Weather: ☀️ ⛅ ☁️ ⛈️ 🌧️
+
+### 🍕 Food & Drink
+
+- Prepared food: 🍕 🍔 🍟 🌭 🥪
+- Fruit: 🍎 🍊 🍋 🍌 🍉
+- Drinks: ☕ 🍵 🥤 🍺 🍷
+
+### ⚽ Activities & Sports
+
+- Sports: ⚽ 🏀 🏈 ⚾ 🥎
+- Games: 🎮 🎯 🎲 🎰 🎳
+- Arts: 🎨 🎭 🎪 🎬 🎤
+
+### 🚗 Travel & Places
+
+- Vehicles: 🚗 🚕 🚙 🚌 🚎
+- Buildings: 🏠 🏡 🏢 🏣 🏤
+- Geography: 🏔 ⛰️ 🏕 🏖 🏜
+
+### 💡 Objects
+
+- Tech: 💻 ⌨ 🖥 🖨 🖱
+- Tools: 🔨 ⛏️ 🛠 ⚒️ 🔧
+- Office: 📝 ✏ ✏️ 🖊 🖋
+
+### 🔣 Symbols
+
+- Math: ➕ ➖ ✖ ➗ 🟰
+- Arrows: ⬆ ⬇ ⬅ ➡ ↔️
+- Shapes: ◼️ ◻️ 🔲 🔳 ⬛
+
+### 🏁 Flags
+
+- Country flags: 🇬🇧 🇩🇪 🇫🇷 🇪🇸 🇮🇹
+- Regional flags: 🏴‍☠️ (requires ZWJ support)
+- Special flags: 🏳 🏴 🏳️‍🌈
+
+## Complex emoji sequences
+
+### Zero-Width Joiner (ZWJ) sequences
+
+Testing compound emoji:
+
+- **Family**: 👨‍👩‍👧‍👦 (requires ZWJ support)
+- **Professions**: 👨‍⚕️ 👩‍🏫 👨‍🌾
+- **Combinations**: 🏴‍☠️ 🏳️‍🌈
+
+### Skin tone modifiers
+
+Fitzpatrick scale support:
+
+- Type 1-2 (light): 👋🏻
+- Type 3 (medium-light): 👋🏼
+- Type 4 (medium): 👋🏽
+- Type 5 (medium-dark): 👋🏾
+- Type 6 (dark): 👋🏿
+
+### Flag sequences
+
+Regional indicator symbols:
+
+- 🇬 + 🇧 = 🇬🇧 (UK flag)
+- 🇩 + 🇪 = 🇩🇪 (German flag)
+
+## Script coverage
+
+Multilingual text support across 100+ languages:
+
+### Latin-based scripts
+
+- Western European: English, German, French, Spanish
+- Eastern European: Polish, Czech, Hungarian
+- Special characters: Ā Ē Ī Ō Ū (macrons)
+
+### Cyrillic
+
+- Russian: Привет мир
+- Ukrainian: Привіт світ
+- Bulgarian: Здравей свят
+
+### Greek
+
+- Modern Greek: Γεια σου κόσμε
+- Polytonic Greek: ἀρχή (archaic)
+
+### Asian scripts
+
+- Chinese (Simplified): 你好世界
+- Japanese: こんにちは世界 (Hiragana)
+- Korean: 안녕하세요 세계 (Hangul)
+
+### Arabic & RTL scripts
+
+- Arabic: مرحبا بالعالم (RTL)
+- Hebrew: שלום עולם (RTL)
+- Persian: سلام دنیا (RTL)
+
+### South Asian scripts
+
+- Devanagari: नमस्ते दुनिया (Hindi)
+- Tamil: வணக்கம் உலகம்
+- Bengali: হ্যালো বিশ্ব
+
+### Other scripts
+
+- Thai: สวัสดีชาวโลก
+- Amharic: ሰላም ልዑል
+- Georgian: გამარჯობა მსოფლიო
+
+## Testing methodology
+
+### Visual verification
+
+All emoji and scripts:
+
+1. Rendered in PDF output
+2. Visually inspected for correctness
+3. Checked for proper colour rendering (emoji)
+4. Verified in both screen and print modes
+
+### Font fallback chain
+
+The system tests fallback behaviour:
+
+```
+Primary → Secondary → System fallback
+```
+
+- If primary font lacks a glyph, system tries secondary
+- Final fallback to system fonts if needed
+- Missing glyphs indicated by □ (replacement character)
+
+### Known limitations
+
+1. **ZWJ sequences**: Complex emoji may render as separate glyphs on older systems
+2. **COLRv1 support**: Requires modern font rendering (Cairo 1.18+, FreeType 2.13+)
+3. **RTL layout**: Simplified handling; complex bidirectional text may need adjustment
+4. **Rare scripts**: Some scripts require additional font installation
+
+## Font configuration
+
+See [`fonts-storage/fonts.conf`](../../fonts-storage/fonts.conf) for the complete fontconfig configuration.
+
+Key settings:
+
+- Emoji font priority ordering
+- Script-specific font mappings
+- Fallback chains
+- Hinting and antialiasing preferences- YAML frontmatter (document metadata)
 - Heading hierarchy (TOC / PDF bookmarks)
 - Lists, code blocks, blockquotes
 - Tables and references
@@ -1535,20 +3061,61 @@ version: 1.0.0
 
 # Legal Notice
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This document serves as a demonstration of legal notice formatting in technical publications.
 
-## Purpose
+## Publisher information
 
-Short neutral content that exercises the pipeline features.
+In a production document, this section would include:
 
-## Pipeline Features
+- Publisher name and address
+- Responsible parties
+- Editorial team contact information
+- ISBN/ISSN numbers where applicable
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## Copyright notice
+
+Typical copyright statements include:
+
+- Copyright year and holder
+- Rights reserved statement
+- Permitted use conditions
+- Trademark acknowledgements
+
+## Licence terms
+
+For open-source documentation:
+
+- **Content licence**: Creative Commons or similar
+- **Code licence**: MIT, Apache, GPL, or other open-source licence
+- **Asset licences**: Individual licences for fonts, images, and third-party content
+
+See [LICENSE-CODE](../../LICENSE-CODE) and [LICENSE-FONTS](../../LICENSE-FONTS) for specific terms.
+
+## Liability disclaimer
+
+Standard disclaimers typically cover:
+
+- Accuracy of information
+- Fitness for particular purpose
+- Third-party content responsibility
+- External link liability
+
+## Data protection
+
+For digital publications:
+
+- Data collection practices
+- Privacy policy references
+- Cookie usage (web versions)
+- Analytics and tracking disclosure
+
+## Contact
+
+In production, include:
+
+- Technical support contact
+- Editorial feedback address
+- Legal enquiries contact
 
 
 \newpage
@@ -1563,16 +3130,139 @@ version: 1.0.0
 
 # Glossary
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Definitions of technical terms used throughout this document.
 
-## Purpose
+## A
 
-This document is a placeholder for automated generation.
+**API** (Application Programming Interface)  
+Interface that enables software components to communicate with each other.
 
-## Notes
+**Accessibility**  
+Design of content that is usable by people with disabilities.
 
-Source: content/glossary.md
+## B
+
+**Bibliography**  
+List of sources cited or referenced in a document.
+
+**Build Pipeline**  
+Automated process for converting source files into output formats.
+
+## C
+
+**CI/CD** (Continuous Integration / Continuous Deployment)  
+Practice of frequently integrating code and automatically deploying it.
+
+**COLRv1**  
+Modern colour font format for vector graphics in fonts.
+
+## D
+
+**Documentation Framework**  
+Structured system for creating and managing documentation.
+
+## E
+
+**Emoji**  
+Pictographic characters from the Unicode Standard representing emotions and objects.
+
+## F
+
+**Fontconfig**  
+Library for configuring and customising font access.
+
+**Frontmatter**  
+Metadata block at the beginning of a Markdown file (YAML format).
+
+## G
+
+**Git**  
+Distributed version control system for tracking code changes.
+
+**Glyph**  
+Visual character representing one or more Unicode code points.
+
+## I
+
+**ISO 8601**  
+International standard for date and time formats.
+
+## L
+
+**LaTeX**  
+Typesetting system for high-quality typographic output.
+
+**Licence**  
+Legal agreement regarding the use of software or content.
+
+## M
+
+**Markdown**  
+Lightweight markup language for formatting text.
+
+**Metadata**  
+Information about documents (title, author, date, etc.).
+
+## O
+
+**Open Source**  
+Software with freely available source code.
+
+**OpenType**  
+Modern font format with advanced typographic capabilities.
+
+## P
+
+**Pandoc**  
+Universal document conversion tool.
+
+**PDF** (Portable Document Format)  
+Platform-independent file format for documents.
+
+## R
+
+**Rendering**  
+Process of visually displaying code or markup.
+
+**RTL** (Right-to-Left)  
+Text direction from right to left (Arabic, Hebrew).
+
+## S
+
+**Semantic Versioning**  
+Version numbering using the MAJOR.MINOR.PATCH scheme.
+
+**SVG** (Scalable Vector Graphics)  
+Vector graphics format for scalable images.
+
+## U
+
+**Unicode**  
+Universal character encoding standard for all writing systems.
+
+## V
+
+**Version Control**  
+System for tracking and managing changes to files.
+
+## X
+
+**XeLaTeX**  
+LaTeX engine with native Unicode and OpenType support.
+
+## Y
+
+**YAML** (YAML Ain't Markup Language)  
+Human-readable data serialisation format.
+
+## Z
+
+**ZWJ** (Zero Width Joiner)  
+Invisible Unicode character for combining emojis.
+
+---
+
+_Note: This glossary contains terms relevant to this documentation framework. For complete definitions, please consult official specifications and standards._
 
 
 \newpage
@@ -1589,16 +3279,127 @@ citation_style: "APA"
 
 # Citations & further reading
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Bibliography and additional resources for further reading.
 
 ## Purpose
 
-This document is a placeholder for automated generation.
+This bibliography:
 
-## Notes
+- **Documents sources**: All cited references
+- **Enables verification**: Readers can check original sources
+- **Provides context**: Background information on topics
+- **Extends knowledge**: Further reading materials
 
-Source: content/references.md
+## Citation style
+
+This document uses **APA style** (7th edition):
+
+```
+Author, A. A. (Year). Title of work. Publisher.
+```
+
+For online resources:
+
+```
+Author, A. A. (Year). Title. Website Name. URL
+```
+
+## Categories
+
+### Technical standards
+
+Official specifications and standards:
+
+- ISO, RFC, W3C specifications
+- Unicode Consortium documents
+- OpenType specifications
+
+### Documentation
+
+Official tool and software documentation:
+
+- Pandoc manual
+- LaTeX/XeLaTeX references
+- Git documentation
+- Python libraries
+
+### Articles and tutorials
+
+Best practices and guides:
+
+- Technical blog posts
+- Tutorial websites
+- Community resources
+
+### Books
+
+Technical books on relevant topics:
+
+- Documentation methodology
+- Typography and typesetting
+- Software development
+
+## Example entries
+
+### Standards
+
+**Unicode Consortium.** (2023). *The Unicode Standard, Version 15.0*. Unicode Consortium. https://www.unicode.org/versions/Unicode15.0.0/
+
+**Internet Engineering Task Force.** (2018). *RFC 8259: The JavaScript Object Notation (JSON) Data Interchange Format*. IETF. https://tools.ietf.org/html/rfc8259
+
+### Software documentation
+
+**Pandoc.** (2023). *Pandoc User's Guide*. https://pandoc.org/MANUAL.html
+
+**LaTeX Project.** (2023). *LaTeX2e: An unofficial reference manual*. https://latexref.xyz/
+
+### Articles
+
+**Semantic Versioning.** (2023). *Semantic Versioning 2.0.0*. https://semver.org/
+
+**Markdown Guide.** (2023). *Basic Syntax*. https://www.markdownguide.org/basic-syntax/
+
+## Further resources
+
+### Online communities
+
+- **Stack Overflow**: Questions and answers on technical problems
+- **GitHub**: Open-source projects and discussions
+- **Reddit**: r/LaTeX, r/Markdown, r/technicalwriting
+
+### Learning platforms
+
+- **Write the Docs**: Community for technical writers
+- **Overleaf**: Online LaTeX editor with tutorials
+- **GitHub Learning Lab**: Git and GitHub courses
+
+### Tools
+
+- **Zotero**: Reference management
+- **Grammarly**: Language checking
+- **draw.io**: Diagram creation
+
+## Source verification
+
+When using sources:
+
+1. **Check currency**: Is the information still current?
+2. **Assess authority**: Is the source trustworthy?
+3. **Multiple sources**: Confirm information
+4. **Primary sources**: Prefer official documentation
+
+## Contribution guidelines
+
+When adding new references:
+
+- Consistent citation style (APA)
+- Complete bibliographic information
+- Access date for online resources
+- Categorisation for easy navigation
+
+---
+
+_Note: This bibliography is continuously updated. Contributions and corrections are welcome._
 
 
 \newpage
@@ -1613,16 +3414,95 @@ version: 1.0.0
 
 # Index
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+Alphabetical subject index for quick access to topics.
 
 ## Purpose
 
-This document is a placeholder for automated generation.
+The index enables:
 
-## Notes
+- **Quick lookup**: Immediate access to specific terms
+- **Cross-references**: Linking related concepts
+- **Completeness**: Overview of covered topics
+- **Navigation**: Alternative access pattern to table of contents
 
-Source: content/book-index.md
+## Structure
+
+The index is organised:
+
+- **Alphabetically**: Sorted by initial letter
+- **Hierarchically**: Main and sub-terms
+- **With page references**: Direct links to sections
+- **Cross-referenced**: "See also" notes
+
+## Usage
+
+### In printed versions
+
+The index appears:
+
+- At the end of the document
+- After appendices and lists
+- With page numbers for each reference
+
+### In digital versions
+
+The index provides:
+
+- Clickable links to sections
+- Search functionality within the index
+- Integration with PDF bookmarks
+
+## Indexing
+
+### Entries
+
+Typical index entries:
+
+```
+Term, Page
+  Sub-term, Page
+  Sub-term, Page
+Another Term, Page
+  see also: Related Term
+```
+
+### Conventions
+
+- **Bold**: Primary definition or main discussion
+- *Italic*: Passing mention
+- (Figure): Visual representation
+- (Table): Tabular information
+
+## Automatic generation
+
+This index can be automatically generated from:
+
+- Explicit index markers in Markdown
+- Headings and subsections
+- Glossary entries
+- Code example titles
+
+## Best practices
+
+For effective indexing:
+
+1. **Consistent terms**: Use uniform terminology
+2. **Multiple entries**: Index concepts under different search terms
+3. **Cross-references**: Connect related terms
+4. **Avoid over-indexing**: Include only significant references
+
+## Maintenance
+
+The index should be:
+
+- Updated with each major version
+- Include new terms from added chapters
+- Remove obsolete references
+- Check consistency with glossary
+
+---
+
+_Note: A complete index is generated during the final build process and includes all indexed terms with precise page references._
 
 
 \newpage
@@ -1644,20 +3524,78 @@ categories:
 
 # Acknowledgments & Attributions
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This document acknowledges the contributors, tools, and resources that made this publication possible.
 
-## Purpose
+## Font attributions
 
-Short neutral content that exercises the pipeline features.
+This document uses the following open-source fonts:
 
-## Pipeline Features
+### Twemoji Mozilla
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+- **Licence**: CC BY 4.0
+- **Source**: Mozilla's Twemoji COLRv1 implementation
+- **Purpose**: Emoji rendering in text
+- **Licence URL**: https://creativecommons.org/licenses/by/4.0/
+
+### DejaVu Fonts
+
+- **Licence**: Bitstream Vera Licence / Arev Licence
+- **Purpose**: Base text rendering
+- **Coverage**: Latin, Cyrillic, Greek, and extensive Unicode blocks
+
+### Twitter Color Emoji
+
+- **Licence**: CC BY 4.0 (artwork) / MIT (code)
+- **Source**: Twitter's open-source emoji set
+- **Purpose**: Fallback emoji rendering
+
+## Software tools
+
+Built with open-source software:
+
+- **Python**: Core automation and orchestration
+- **Pandoc**: Markdown to LaTeX conversion
+- **XeLaTeX/LuaLaTeX**: PDF typesetting
+- **GitBook**: Content structure and metadata
+
+## Python libraries
+
+Key dependencies:
+
+- **PyYAML**: Configuration and frontmatter parsing
+- **GitPython**: Git repository management
+- **Jinja2**: Template processing
+- **svglib**: SVG handling and conversion
+
+## Content and methodology
+
+Special acknowledgements:
+
+- **Unicode Consortium**: For comprehensive character encoding standards
+- **OpenType specification**: For modern font rendering capabilities
+- **Markdown community**: For lightweight, readable markup language
+
+## Contributors
+
+Gratitude to all who contributed:
+
+- Content authors and editors
+- Technical reviewers
+- Translation teams
+- Testing and quality assurance
+- Documentation framework developers
+
+## Licence compliance
+
+All third-party assets are used in accordance with their respective licences. See:
+
+- [LICENSE-CODE](../../LICENSE-CODE) for code licencing
+- [LICENSE-FONTS](../../LICENSE-FONTS) for font licencing
+- Individual attribution files in `fonts-storage/` for detailed font information
+
+---
+
+_This acknowledgements section demonstrates proper attribution practices for open-source documentation projects._
 
 
 \newpage
@@ -1672,20 +3610,52 @@ version: 1.0.0
 
 # Errata
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This section documents corrections and updates to the published document.
 
 ## Purpose
 
-Short neutral content that exercises the pipeline features.
+The errata page serves to:
 
-## Pipeline Features
+- Document errors discovered after publication
+- Provide corrections for known issues
+- Track version-specific changes
+- Maintain document accuracy over time
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+## How to report issues
+
+If you discover an error:
+
+1. Check this page to see if it's already documented
+2. Note the version number, page/section, and nature of the issue
+3. Report via the appropriate channel (issue tracker, email, etc.)
+
+## Errata format
+
+Each entry includes:
+
+- **Version**: Which version contains the error
+- **Location**: Page number or section reference
+- **Type**: Typographical, technical, factual, or formatting error
+- **Description**: What is incorrect
+- **Correction**: The correct information
+- **Status**: Fixed in version X.X.X or pending
+
+## Version 1.0.0
+
+_No errata reported for this version._
+
+---
+
+## Continuous improvement
+
+This document is maintained as a living record. Regular reviews ensure:
+
+- Technical accuracy
+- Up-to-date references
+- Correction of typographical errors
+- Improvement of clarity
+
+Check the release notes for the current version status.
 
 
 \newpage
@@ -1700,20 +3670,92 @@ version: 1.0.0
 
 # Release Notes
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This document tracks changes, improvements, and fixes across versions.
 
-## Purpose
+## Version 1.0.0 (2024-06-01)
 
-Short neutral content that exercises the pipeline features.
+### Initial release
 
-## Pipeline Features
+First public version of the documentation framework.
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+**Features:**
+
+- Multilingual support (English and German)
+- Comprehensive emoji rendering across all Unicode categories
+- 100+ language samples demonstrating font coverage
+- Professional PDF generation with proper typography
+- Structured navigation with table of contents
+- Code examples and technical documentation patterns
+
+**Content structure:**
+
+- Core chapters demonstrating documentation patterns
+- Examples section (emoji tests, image formats, language samples)
+- Appendices (technical specifications, font coverage)
+- Complete metadata framework (YAML frontmatter)
+
+**Technical foundation:**
+
+- Python-based build orchestration
+- Markdown source format
+- LaTeX/XeLaTeX PDF generation
+- Unicode and OpenType font support
+- Automated table of contents generation
+
+### Known limitations
+
+- Some complex emoji sequences may render differently depending on font support
+- RTL (right-to-left) text layout uses simplified handling
+- Large SVG images may require optimization for faster rendering
+
+### Requirements
+
+- Python 3.8+
+- XeLaTeX or LuaLaTeX
+- Required fonts: DejaVu, Twemoji Mozilla
+- Git for version control
+
+---
+
+## Version history format
+
+Future releases will follow this structure:
+
+### Version X.Y.Z (YYYY-MM-DD)
+
+**Added:**
+
+- New features and capabilities
+
+**Changed:**
+
+- Modifications to existing functionality
+
+**Fixed:**
+
+- Bug fixes and corrections
+
+**Deprecated:**
+
+- Features marked for future removal
+
+**Removed:**
+
+- Discontinued features
+
+**Security:**
+
+- Security-related changes
+
+---
+
+## Semantic versioning
+
+This project follows [Semantic Versioning](https://semver.org/):
+
+- **MAJOR** (X.0.0): Incompatible changes
+- **MINOR** (0.X.0): Backwards-compatible new features
+- **PATCH** (0.0.X): Backwards-compatible bug fixes
 
 
 \newpage
@@ -1731,17 +3773,46 @@ include_technical_details: true
 
 # Colophon
 
-This repository ships neutral placeholder content to test the publishing pipeline in a reproducible way.
-The original book content has been removed from these files.
+This document was created using a modern publishing workflow that transforms Markdown source files into professional PDF output.
 
-## Purpose
+## Production details
 
-Short neutral content that exercises the pipeline features.
+### Typography
 
-## Pipeline Features
+- **Body text**: Professional serif typeface
+- **Headings**: Sans-serif for clear hierarchy
+- **Code**: Monospace font for technical content
+- **Emoji**: Colour emoji font with extensive Unicode coverage
 
-- YAML frontmatter (document metadata)
-- Heading hierarchy (TOC / PDF bookmarks)
-- Lists, code blocks, blockquotes
-- Tables and references
-- Stable navigation (SUMMARY.md)
+### Software and tools
+
+This document was produced using:
+
+- **Python**: Workflow orchestration and document processing
+- **Markdown**: Lightweight markup for source content
+- **LaTeX**: Professional typesetting engine
+- **Git**: Version control for source management
+
+### Document format
+
+- **PDF/A compliance**: Archival-quality output
+- **Embedded fonts**: Complete font embedding for consistency
+- **Bookmarks**: Hierarchical navigation structure
+- **Metadata**: Comprehensive document properties
+
+### Design principles
+
+The visual design follows established principles:
+
+- Clear typographic hierarchy
+- Generous whitespace for readability
+- Consistent formatting throughout
+- Accessible colour contrasts
+
+### Licensing
+
+See the licensing sections for details on content, code, and font licenses.
+
+### Revision
+
+Version 1.0, January 2026
