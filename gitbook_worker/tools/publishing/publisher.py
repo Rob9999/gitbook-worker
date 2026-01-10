@@ -233,8 +233,8 @@ class ProjectMetadata:
     name: str
     authors: tuple[str, ...]
     license: str | None
-    date: str | None
-    policy: str
+    date: str | None = None
+    policy: str = "fail"
     warnings: tuple[str, ...] = ()
 
     def as_pandoc_metadata(

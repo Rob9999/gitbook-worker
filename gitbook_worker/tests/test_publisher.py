@@ -386,7 +386,7 @@ def test_build_pdf_reads_uppercase_summary(tmp_path, monkeypatch):
 
     captured: dict[str, list[str]] = {}
 
-    def fake_combine(files, paper_format="a4"):
+    def fake_combine(files, paper_format="a4", **_):
         captured["files"] = [Path(f).name for f in files]
         return "---\n---\n"
 
@@ -428,7 +428,7 @@ def test_build_pdf_refreshes_summary_from_book_json(tmp_path, monkeypatch):
 
     captured: dict[str, list[str]] = {}
 
-    def fake_combine(files, paper_format="a4"):
+    def fake_combine(files, paper_format="a4", **_):
         captured["files"] = [Path(f).name for f in files]
         return "---\n---\n"
 

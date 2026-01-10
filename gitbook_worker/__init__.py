@@ -20,5 +20,5 @@ For backward compatibility with legacy 'tools.*' imports,
 see the shim at repository root: tools/__init__.py
 """
 
-__version__ = "2.0.5.post1"
+__version__ = "2.0.6.post1"
 __all__ = ["tools"]
