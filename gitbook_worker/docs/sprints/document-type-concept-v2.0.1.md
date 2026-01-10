@@ -548,8 +548,7 @@ include_technical_details: true  # Schriften, Software, Druckdaten
 
 **Das ERDA Buch – Mehrsprachige Publishing Platform**
 
-© 2025 ERDA Team
-Alle Rechte vorbehalten.
+Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany.
 
 **ISBN**: 978-3-12345-678-9 (Print)  
 **eISBN**: 978-3-12345-679-6 (PDF)
