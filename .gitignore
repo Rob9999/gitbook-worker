@@ -96,6 +96,9 @@ testground/
 # Docker external logs (created by run-in-docker scripts)
 .docker-logs/
 
+# Release procedure docker logs (repo-local)
+/logs/docker/
+
 # OS generated files
 .DS_Store
 .DS_Store?

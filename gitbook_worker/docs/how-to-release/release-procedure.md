@@ -48,7 +48,7 @@ This guide describes the release workflow for hotfixes such as `release-v.2.0.6-
 3. **Docker-based Orchestrator Runs**
 
    * Run:
-     `python -m gitbook_worker.tools.workflow_orchestrator run --root <repo> --content-config content.yaml --lang customer-de --profile docker --isolated --logs-dir logs/docker`
+     `python -m gitbook_worker.tools.docker.run_docker orchestrator --use-dynamic --profile default --content-config content.yaml --lang customer-de --isolated --logs-dir logs/docker`
    * Human verification: If a PDF was generated, open and review it manually to confirm quality and uncover any unknown issues.
    * Fix blockers, address simple bugs, or create a backlog entry in `gitbook_worker/docs/backlog/` → involve the PO.
 

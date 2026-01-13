@@ -22,6 +22,7 @@ Optionen:
 """
 
 import argparse
+import shlex
 import sys
 from pathlib import Path
 
@@ -70,6 +71,10 @@ def _windows_path_to_docker(path: Path) -> str:
 def build_docker_args(
     command: str,
     profile: str = "local",
+    language: str = "de",
+    content_config: str = "content.yaml",
+    logs_dir: str | None = None,
+    isolated: bool = False,
     no_build: bool = False,
     verbose: bool = False,
     rebuild: bool = False,
@@ -178,13 +183,25 @@ def build_docker_args(
             "test -f /workspace/.github/fonts/erda-ccby-cjk/true-type/erda-ccby-cjk.ttf || "
             "{ echo 'ERROR: ERDA CC-BY CJK font file missing in /workspace/.github/fonts/'; exit 46; }; "
         )
-        orchestrator_cmd = (
-            "python3 -m gitbook_worker.tools.workflow_orchestrator run "
-            "--root /workspace "
-            "--content-config content.yaml "
-            "--lang de "
-            f"--profile {profile}"
-        )
+        orchestrator_cmd_parts: list[str] = [
+            "python3",
+            "-m",
+            "gitbook_worker.tools.workflow_orchestrator",
+            "run",
+            "--root",
+            "/workspace",
+            "--content-config",
+            content_config,
+            "--lang",
+            language,
+            "--profile",
+            profile,
+        ]
+        if logs_dir:
+            orchestrator_cmd_parts.extend(["--logs-dir", logs_dir])
+        if isolated:
+            orchestrator_cmd_parts.append("--isolated")
+        orchestrator_cmd = " ".join(shlex.quote(part) for part in orchestrator_cmd_parts)
         args.extend(
             [
                 "bash",
@@ -243,6 +260,30 @@ Beispiele:
         "--profile",
         default="local",
         help="Profil für den Orchestrator (default: local)",
+    )
+
+    parser.add_argument(
+        "--lang",
+        default="de",
+        help="Language ID from content config (default: de)",
+    )
+
+    parser.add_argument(
+        "--content-config",
+        default="content.yaml",
+        help="Path to content.yaml inside /workspace (default: content.yaml)",
+    )
+
+    parser.add_argument(
+        "--logs-dir",
+        default=None,
+        help="Optional logs directory (default: orchestrator default)",
+    )
+
+    parser.add_argument(
+        "--isolated",
+        action="store_true",
+        help="Run orchestrator with --isolated inside the container",
     )
 
     parser.add_argument(
@@ -318,6 +359,10 @@ Beispiele:
     docker_args = build_docker_args(
         command=args.command,
         profile=args.profile,
+        language=args.lang,
+        content_config=args.content_config,
+        logs_dir=args.logs_dir,
+        isolated=args.isolated,
         no_build=args.no_build,
         verbose=args.verbose,
         rebuild=args.rebuild,
