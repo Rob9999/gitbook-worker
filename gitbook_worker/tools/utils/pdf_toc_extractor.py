@@ -3,56 +3,23 @@
 Provides a CLI:
     python -m gitbook_worker.tools.utils.pdf_toc_extractor --pdf path.pdf [--format text|json]
 
-Uses pypdf to read outline entries, returns a flat list of title/page/level.
+Implementation note:
+    This CLI is a thin adapter that delegates extraction to the core
+    application use-case (Ports & Adapters / Hexagonal Architecture).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import dataclass
+import sys
 from pathlib import Path
-from typing import Iterable, List
-
-from pypdf import PdfReader
-
-
-@dataclass
-class TocEntry:
-    title: str
-    page: int
-    level: int
+from gitbook_worker.core.application.pdf_toc import extract_pdf_toc
+from gitbook_worker.core.ports.pdf_toc import PdfTocEntry
 
 
-def _flatten_outline(
-    outline: Iterable, reader: PdfReader, level: int = 1
-) -> List[TocEntry]:
-    entries: List[TocEntry] = []
-    for item in outline:
-        if isinstance(item, list):
-            entries.extend(_flatten_outline(item, reader, level=level + 1))
-            continue
-
-        title = getattr(item, "title", None) or str(item)
-        try:
-            page_index = reader.get_destination_page_number(item)
-            page_num = page_index + 1
-        except Exception:
-            page_num = -1
-        entries.append(TocEntry(title=title.strip(), page=page_num, level=level))
-    return entries
-
-
-def extract_pdf_toc(pdf_path: Path) -> List[TocEntry]:
-    reader = PdfReader(str(pdf_path))
-    outline = getattr(reader, "outline", None) or getattr(reader, "outlines", None)
-    if not outline:
-        return []
-    return _flatten_outline(outline, reader)
-
-
-def _format_text(entries: List[TocEntry]) -> str:
-    lines: List[str] = []
+def _format_text(entries: list[PdfTocEntry]) -> str:
+    lines: list[str] = []
     for entry in entries:
         indent = "  " * (entry.level - 1)
         page = "?" if entry.page < 1 else str(entry.page)
@@ -70,6 +37,14 @@ def main() -> None:
         help="Output format",
     )
     args = parser.parse_args()
+
+    # Windows default code pages (e.g. cp1252) can choke on TOC titles containing
+    # emoji or other unicode characters. Keep the active encoding (so PowerShell
+    # doesn't mis-decode output), but make writes resilient.
+    try:
+        sys.stdout.reconfigure(errors="replace")
+    except Exception:
+        pass
 
     entries = extract_pdf_toc(args.pdf)
     if args.format == "json":

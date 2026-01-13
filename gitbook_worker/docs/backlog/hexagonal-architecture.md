@@ -1,7 +1,10 @@
 ---
-version: 0.3.0
+version: 0.4.0
 date: 2026-01-13
 history:
+   - version: 0.4.0
+      date: 2026-01-13
+      description: Implemented the next hexagonal slice (PDF TOC extraction) with Port + Use-Case + Adapter; migrated the CLI and added tests
    - version: 0.3.0
       date: 2026-01-13
       description: Added explicit next-step and next-10-steps incremental plan to keep the hexagonal migration track actionable
@@ -54,13 +57,15 @@ Warum als nächstes?
 - Es gibt bereits **eine dedizierte CLI/Tooling-Nutzung** (TOC-Checks) und es ist damit gut testbar.
 - Optional/wechselnde Abhängigkeiten (z.B. PDF-Libraries) bleiben **in Adaptern**.
 
+Status: ✅ umgesetzt (Port + Use-Case + Adapter + CLI-Migration + Tests)
+
 Zielzustand (minimaler Slice, ohne Nebenkriegsschauplätze):
 
-- **Port:** `gitbook_worker/core/ports/pdf_toc.py` (z.B. `PdfTocExtractorPort`)
-- **Use-Case:** `gitbook_worker/core/application/pdf_toc.py` (z.B. `extract_pdf_toc(...)`)
-- **Adapter:** `gitbook_worker/adapters/pdf/pypdf_toc_extractor.py` (oder vergleichbar)
+- **Port:** `gitbook_worker/core/ports/pdf_toc.py` (`PdfTocExtractorPort`)
+- **Use-Case:** `gitbook_worker/core/application/pdf_toc.py` (`extract_pdf_toc(...)`)
+- **Adapter:** `gitbook_worker/adapters/pdf/pypdf_toc_extractor.py`
 - **Einbindung:** `gitbook_worker/tools/utils/pdf_toc_extractor.py` ruft nur noch den Use-Case.
-- **Tests:** Unit-Tests gegen den Use-Case (mit Fake-Port) + 1 Adapter-Smoke-Test (optional, wenn Dependency verfügbar).
+- **Tests:** `gitbook_worker/tests/core/test_pdf_toc.py` (Fake-Port Unit-Tests + pypdf Smoke-Test)
 
 Akzeptanzkriterien:
 
