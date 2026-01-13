@@ -1,3 +1,15 @@
+---
+version: 0.2.0
+date: 2026-01-12
+history:
+   - version: 0.2.0
+      date: 2026-01-12
+      description: Implemented first Ports & Adapters slice (SVG→PDF conversion) and documented incremental migration strategy
+   - version: 0.1.0
+      date: 2025-12-01
+      description: Initial notes on Hexagonal/Clean architecture for the project
+---
+
 Für ein mittelgroßes bis großes **CLI-Tools-Paket (100k–500k LoC)** mit klar getrennten Fachdomänen (Fonts, Lizenzen, Projekt-/Dokument-Konfigurationen, Konvertierung nach PDF/HTML usw., `CITATION.cff` pro Projekt) ist in der Praxis am robustesten:
 
 ## Empfehlung: **Modularer Monolith + Hexagonal/Clean Architecture + Plugin/Microkernel für Converter**
@@ -9,6 +21,27 @@ Das ist kein “ein Pattern”, sondern eine sehr bewährte **Kombination**, die
 * **Microkernel/Plugin-Architektur** *für die Konvertierer*: weil Formate/Engines typischerweise wachsen und wechseln.
 
 Damit kannst du neue Output-Formate, Render-Engines oder License-Backends hinzufügen, ohne den Kern umzubauen.
+
+---
+
+## Status im Repository (inkrementelle Migration)
+
+Diese Architektur wird in diesem Repo **inkrementell** eingeführt (kein Big-Bang-Refactor).
+
+### Implementiert (erster Slice): SVG → PDF als Port & Adapter
+
+Ziel: doppelte/abweichende SVG→PDF-Logik in Tools konsolidieren, so dass der “Kern” eine stabile, testbare API hat und die konkreten Libraries (CairoSVG, svglib/reportlab) nur noch Adapter sind.
+
+- **Port (Interface):** `gitbook_worker/core/ports/svg_to_pdf.py`
+- **Use-Case (Application):** `gitbook_worker/core/application/svg_to_pdf.py` (`ensure_svg_pdf`)
+- **Adapter:**
+   - `gitbook_worker/adapters/svg/cairosvg_svg_to_pdf.py`
+   - `gitbook_worker/adapters/svg/svglib_svg_to_pdf.py`
+- **Eingebunden in bestehende Tools (Adapter-Caller):**
+   - `gitbook_worker/tools/utils/asset_copy.py`
+   - `gitbook_worker/tools/publishing/publisher.py`
+
+Diese Änderung ist bewusst klein gehalten, aber sie zeigt die Abhängigkeitsrichtung: Tools/Infra hängen nun von einem Core-Use-Case ab (nicht umgekehrt).
 
 ---
 

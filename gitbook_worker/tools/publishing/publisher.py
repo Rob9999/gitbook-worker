@@ -53,20 +53,7 @@ from collections.abc import Mapping
 from functools import lru_cache
 from urllib.parse import urlparse
 
-try:
-    from cairosvg import svg2pdf as _cairo_svg2pdf
-except (
-    ImportError,
-    OSError,
-):  # pragma: no cover - optional dependency in older environments
-    _cairo_svg2pdf = None
-
-try:
-    from svglib.svglib import svg2rlg
-    from reportlab.graphics import renderPDF
-except (ImportError, OSError):  # pragma: no cover - optional dependency
-    svg2rlg = None
-    renderPDF = None
+from gitbook_worker.core.application.svg_to_pdf import ensure_svg_pdf
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.utils.asset_copy import copy_assets_to_temp
@@ -1995,17 +1982,14 @@ def _convert_svg_to_pdf(svg_file: Path) -> bool:
                 return True
         pdf_file.parent.mkdir(parents=True, exist_ok=True)
 
-        if _cairo_svg2pdf is not None:
-            _cairo_svg2pdf(url=str(svg_file), write_to=str(pdf_file))
+        result = ensure_svg_pdf(
+            svg_file,
+            pdf_file=pdf_file,
+            prefer=("cairosvg", "svglib"),
+            logger=logger,
+        )
+        if result.converted and pdf_file.exists():
             _mark_svg_pdf_available()
-            logger.info("Konvertiere SVG → PDF (CairoSVG): %s", pdf_file)
-            return True
-
-        if svg2rlg is not None and renderPDF is not None:
-            drawing = svg2rlg(str(svg_file))
-            renderPDF.drawToFile(drawing, str(pdf_file))
-            _mark_svg_pdf_available()
-            logger.info("Konvertiere SVG → PDF (svglib): %s", pdf_file)
             return True
 
         if not _SVG_CONVERSION_WARNED:
