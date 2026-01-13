@@ -1,7 +1,10 @@
 ---
-version: 0.2.0
-date: 2026-01-12
+version: 0.3.0
+date: 2026-01-13
 history:
+   - version: 0.3.0
+      date: 2026-01-13
+      description: Added explicit next-step and next-10-steps incremental plan to keep the hexagonal migration track actionable
    - version: 0.2.0
       date: 2026-01-12
       description: Implemented first Ports & Adapters slice (SVG→PDF conversion) and documented incremental migration strategy
@@ -42,6 +45,43 @@ Ziel: doppelte/abweichende SVG→PDF-Logik in Tools konsolidieren, so dass der �
    - `gitbook_worker/tools/publishing/publisher.py`
 
 Diese Änderung ist bewusst klein gehalten, aber sie zeigt die Abhängigkeitsrichtung: Tools/Infra hängen nun von einem Core-Use-Case ab (nicht umgekehrt).
+
+### Nächster inkrementeller Schritt (konkret geplant): PDF-TOC Extraktion als Port & Adapter
+
+Warum als nächstes?
+
+- Es ist ein **klar abgegrenzter IO-Use-Case** (PDF rein → strukturierte TOC raus).
+- Es gibt bereits **eine dedizierte CLI/Tooling-Nutzung** (TOC-Checks) und es ist damit gut testbar.
+- Optional/wechselnde Abhängigkeiten (z.B. PDF-Libraries) bleiben **in Adaptern**.
+
+Zielzustand (minimaler Slice, ohne Nebenkriegsschauplätze):
+
+- **Port:** `gitbook_worker/core/ports/pdf_toc.py` (z.B. `PdfTocExtractorPort`)
+- **Use-Case:** `gitbook_worker/core/application/pdf_toc.py` (z.B. `extract_pdf_toc(...)`)
+- **Adapter:** `gitbook_worker/adapters/pdf/pypdf_toc_extractor.py` (oder vergleichbar)
+- **Einbindung:** `gitbook_worker/tools/utils/pdf_toc_extractor.py` ruft nur noch den Use-Case.
+- **Tests:** Unit-Tests gegen den Use-Case (mit Fake-Port) + 1 Adapter-Smoke-Test (optional, wenn Dependency verfügbar).
+
+Akzeptanzkriterien:
+
+- TOC-Tool läuft unverändert weiter (gleiche CLI-Args, gleiche Ausgabeformate).
+- Core/Application kann ohne PDF-Library getestet werden.
+- Import von optionalen PDF-Dependencies passiert nur im Adapter (keine Import-Time Side-Effects im Package-Init).
+
+### Offener Plan: nächste 10 inkrementelle Schritte (ohne Big-Bang)
+
+Die Reihenfolge ist absichtlich so gewählt, dass jeder Schritt **klein** ist, **schnell testbar**, und jeweils nur 1–2 Call-Sites migriert.
+
+1) **PDF-TOC Extraktion hexagonal schneiden** (Port + Use-Case + Adapter; Tool ruft Use-Case)
+2) **Pfad-/Root-Resolution als Port** (z.B. Repo-Root/Project-Root Discovery; entkoppelt von `os.getcwd()`/git)
+3) **Content/Publish-Konfig-Parsing als Use-Case** (Validierung + Merge-Policy zentral, keine Duplikate in CLI/Tools)
+4) **Artifact-Layout/Publish-Paths als Domain-Service** (ein Ort für “wo liegen Outputs”, statt verteilte Pfad-Logik)
+5) **License-Attribution Generation als Use-Case** (Inputs: verwendete Assets/Fonts; Output: Attribution-Model; Writer als Port)
+6) **Font-Inventory als Port** (Discovery/Install als Adapter; Policies/Filtering im Core, inkl. `fonts.yml` als SoT)
+7) **External-Command Runner Port** (Pandoc/LaTeX als Adapter; im Core nur “run tool X with args”, inkl. strukturierter Fehler)
+8) **Renderer/Converter Registry minimal einführen** (einfaches Registry-Interface, ohne Plugin-Overengineering)
+9) **Workflow-Orchestrator: Plan vs Execute trennen** (Domain/Application erzeugt “Plan”; Adapter führt aus)
+10) **CLI Commands verschlanken** (CLI wird dünner Adapter; Use-Cases werden erste Anlaufstelle; Exit-Codes aus Core-Modell)
 
 ---
 
@@ -161,6 +201,3 @@ Du bist auf dem richtigen Weg, wenn:
 * Konfig-Merging ist zentral gelöst und nicht in jedem Command neu.
 * Lizenz-/Font-Policies sind **einmal** definiert und überall gleich.
 
----
-
-Wenn du mir sagst, in welcher Sprache/Toolchain du das baust (Go/Rust/Python/Node/Java) und ob Converter eher “externe Tools” (Pandoc etc.) oder “Libraries” sind, kann ich dir die **konkrete Paketstruktur + Interface-Sets** sehr passend vorschlagen (inkl. Fehler-/Exitcode-Strategie für CLIs).
