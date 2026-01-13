@@ -77,7 +77,7 @@ Akzeptanzkriterien:
 
 Die Reihenfolge ist absichtlich so gewählt, dass jeder Schritt **klein** ist, **schnell testbar**, und jeweils nur 1–2 Call-Sites migriert.
 
-1) **PDF-TOC Extraktion hexagonal schneiden** (Port + Use-Case + Adapter; Tool ruft Use-Case)
+1) ✅ **PDF-TOC Extraktion hexagonal schneiden** (Port + Use-Case + Adapter; Tool ruft Use-Case)
 2) **Pfad-/Root-Resolution als Port** (z.B. Repo-Root/Project-Root Discovery; entkoppelt von `os.getcwd()`/git)
 3) **Content/Publish-Konfig-Parsing als Use-Case** (Validierung + Merge-Policy zentral, keine Duplikate in CLI/Tools)
 4) **Artifact-Layout/Publish-Paths als Domain-Service** (ein Ort für “wo liegen Outputs”, statt verteilte Pfad-Logik)
