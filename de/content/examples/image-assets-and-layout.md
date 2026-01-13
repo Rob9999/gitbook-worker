@@ -25,7 +25,7 @@ Rasterbilder eignen sich für:
 
 **Nachteil**: Bei Vergrößerung kann es zu Qualitätsverlusten kommen.
 
-<div><figure><img src="../.gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo (PNG)</p></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/SAMPLE_Logo_simple.png" alt="SAMPLE Logo"><figcaption><p>SAMPLE Logo (PNG)</p></figcaption></figure></div>
 
 ### Vektorbilder (SVG)
 

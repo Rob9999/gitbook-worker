@@ -39,7 +39,7 @@ Kombination verschiedener Bildformate in einem Abschnitt:
 
 _Abbildung 3: Vektorgrafik mit Rastermuster_
 
-![ERDA Logo](../.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](../.gitbook/assets/SAMPLE_Logo_simple.png)
 
 _Abbildung 4: Rastergrafik (PNG-Format)_
 

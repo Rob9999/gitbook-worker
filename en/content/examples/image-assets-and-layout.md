@@ -25,7 +25,7 @@ Raster images are suitable for:
 
 **Disadvantage**: Enlargement can lead to quality loss.
 
-<div><figure><img src="../.gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo (PNG)</p></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/SAMPLE_Logo_simple.png" alt="SAMPLE Logo"><figcaption><p>SAMPLE Logo (PNG)</p></figcaption></figure></div>
 
 ### Vector images (SVG)
 

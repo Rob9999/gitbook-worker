@@ -38,9 +38,9 @@ meta:
   artifacts:
     keep_days: 7
 project:
-  name: Das ERDA Buch
+  name: Das SAMPLE Buch
   authors:
-  - ERDA Team
+  - SAMPLE Team
   date: 2026-01-08
   license: CC BY-SA 4.0
 publish:

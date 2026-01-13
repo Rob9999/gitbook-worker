@@ -38,9 +38,9 @@ meta:
   artifacts:
     keep_days: 7
 project:
-  name: The ERDA Book
+  name: The SAMPLE Book
   authors:
-  - ERDA Team
+  - SAMPLE Team
   license: CC BY-SA 4.0
 publish:
 - path: ./

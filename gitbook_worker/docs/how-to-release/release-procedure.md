@@ -89,6 +89,7 @@ This guide describes the release workflow for hotfixes such as `release-v.2.0.6-
 ## Documentation
 
 * Record every deviation or blocker in the appropriate backlog entry (`gitbook_worker/docs/backlog/`).
+* Example run log: `gitbook_worker/docs/release-preparation/release-run-2026-01-13-v2.1.0.md`.
 * In the release notes, document tested commands, relevant fixes, and any remaining risks.
 
 ## Notes

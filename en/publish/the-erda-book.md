@@ -63,14 +63,14 @@ date: 2024-06-01
 version: 1.0
 doc_type: cover
 authors:
-  - ERDA Team
+  - SAMPLE Team
 ---
 <a id="md-index"></a>
 
 
 # Home
 
-![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](.gitbook/assets/SAMPLE_Logo_simple.png)
 
 Welcome to this technical documentation framework demonstration.
 
@@ -967,7 +967,7 @@ Raster images are suitable for:
 
 **Disadvantage**: Enlargement can lead to quality loss.
 
-![ERDA Logo (PNG)](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+![SAMPLE Logo (PNG)](.gitbook/assets/SAMPLE_Logo_simple.png){fig-alt="SAMPLE Logo"}
 
 ### Vector images (SVG)
 
@@ -1056,7 +1056,7 @@ Combination of different image formats in one section:
 
 _Figure 3: Vector graphic with grid pattern_
 
-![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](.gitbook/assets/SAMPLE_Logo_simple.png)
 
 _Figure 4: Raster graphic (PNG format)_
 

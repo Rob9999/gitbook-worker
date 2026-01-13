@@ -1,6 +1,6 @@
 # English Edition
 
-This folder contains the British English version of the ERDA book structure.
+This folder contains the British English version of the SAMPLE book structure.
 
 - Content lives in `content/` (start at `content/index.md`).
 - Navigation is defined by `content/SUMMARY.md`.

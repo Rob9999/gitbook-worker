@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this book, please cite it as below."
-title: "ERDA – unsere demokratische Evolution: Strategie, Ethik und Zukunft Europas – Vom demokratischen Rechtsstaat zur resilienten Zivilisation"
+title: "SAMPLE – unsere demokratische Evolution: Strategie, Ethik und Zukunft Europas – Vom demokratischen Rechtsstaat zur resilienten Zivilisation"
 version: 1.0.1
 date-released: '2025-11-15'
 authors:
@@ -20,6 +20,6 @@ preferred-citation:
   authors:
     - family-names: Massinger
       given-names: Robert Alexander
-  title: "ERDA – unsere demokratische Evolution"
-  publisher: "ERDA Institut (in Gründung)"
+  title: "SAMPLE – unsere demokratische Evolution"
+  publisher: "SAMPLE Institut (in Gründung)"
   year: 2025

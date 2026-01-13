@@ -5,7 +5,7 @@ date: 2024-06-01
 version: 1.0
 doc_type: cover
 authors:
-- ERDA Team
+- SAMPLE Team
 geometry:
 - paperwidth=210mm
 - paperheight=297mm
@@ -31,7 +31,7 @@ header-includes:
 
 # Startseite
 
-![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](.gitbook/assets/SAMPLE_Logo_simple.png)
 
 Willkommen zu dieser Demonstration eines technischen Dokumentations-Frameworks.
 
@@ -702,7 +702,7 @@ Rasterbilder eignen sich für:
 
 **Nachteil**: Bei Vergrößerung kann es zu Qualitätsverlusten kommen.
 
-![ERDA Logo (PNG)](.gitbook/assets/ERDA_Logo_simple.png){fig-alt="ERDA Logo"}
+![SAMPLE Logo (PNG)](.gitbook/assets/SAMPLE_Logo_simple.png){fig-alt="SAMPLE Logo"}
 
 ### Vektorbilder (SVG)
 
@@ -791,7 +791,7 @@ Kombination verschiedener Bildformate in einem Abschnitt:
 
 _Abbildung 3: Vektorgrafik mit Rastermuster_
 
-![ERDA Logo](.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](.gitbook/assets/SAMPLE_Logo_simple.png)
 
 _Abbildung 4: Rastergrafik (PNG-Format)_
 

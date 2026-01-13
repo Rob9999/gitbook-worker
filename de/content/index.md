@@ -5,12 +5,12 @@ date: 2024-06-01
 version: 1.0
 doc_type: cover
 authors:
-  - ERDA Team
+  - SAMPLE Team
 ---
 
 # Startseite
 
-<div><figure><img src=".gitbook/assets/ERDA_Logo_simple.png" alt="ERDA Logo"><figcaption><p>ERDA Logo</p></figcaption></figure></div>
+<div><figure><img src=".gitbook/assets/SAMPLE_Logo_simple.png" alt="SAMPLE Logo"><figcaption><p>SAMPLE Logo</p></figcaption></figure></div>
 
 Willkommen zu dieser Demonstration eines technischen Dokumentations-Frameworks.
 

@@ -39,7 +39,7 @@ Combination of different image formats in one section:
 
 _Figure 3: Vector graphic with grid pattern_
 
-![ERDA Logo](../.gitbook/assets/ERDA_Logo_simple.png)
+![SAMPLE Logo](../.gitbook/assets/SAMPLE_Logo_simple.png)
 
 _Figure 4: Raster graphic (PNG format)_
 
