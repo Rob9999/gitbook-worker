@@ -2,9 +2,9 @@
 
 This file is generated from the configured fonts registry.
 
-- Source: `C:/gitbook-worker/gitbook_worker/defaults/fonts.yml`
+- Source: `/workspace/gitbook_worker/defaults/fonts.yml`
 - Fonts config version: `1.0.0`
-- Generated (UTC): `2026-01-10T23:54:12+00:00Z`
+- Generated (UTC): `2026-01-13T15:04:12+00:00Z`
 
 | Asset | Version | License | Source | Notes |
 |---|---:|---|---|---|

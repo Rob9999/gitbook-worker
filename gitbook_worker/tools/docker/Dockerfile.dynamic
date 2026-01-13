@@ -133,6 +133,7 @@ RUN cd /tmp \
     graphicx graphics \
     amsmath amsfonts \
     luacolor \
+    lua-ul \
     ulem \
     setspace \
     etoolbox \

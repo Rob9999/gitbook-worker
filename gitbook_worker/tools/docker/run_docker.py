@@ -201,7 +201,9 @@ def build_docker_args(
             orchestrator_cmd_parts.extend(["--logs-dir", logs_dir])
         if isolated:
             orchestrator_cmd_parts.append("--isolated")
-        orchestrator_cmd = " ".join(shlex.quote(part) for part in orchestrator_cmd_parts)
+        orchestrator_cmd = " ".join(
+            shlex.quote(part) for part in orchestrator_cmd_parts
+        )
         args.extend(
             [
                 "bash",
