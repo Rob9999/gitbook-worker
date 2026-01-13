@@ -132,6 +132,7 @@ RUN cd /tmp \
     hyperref url \
     graphicx graphics \
     amsmath amsfonts \
+    luacolor \
     ulem \
     setspace \
     etoolbox \
