@@ -1,7 +1,10 @@
 ---
-version: 0.5.0
-date: 2026-01-13
+version: 0.6.0
+date: 2026-01-14
 history:
+   - version: 0.6.0
+      date: 2026-01-14
+      description: Detailed the next 2 slices (Root resolution + Artifact layout) with concrete file targets, acceptance criteria, and test strategy
    - version: 0.5.0
       date: 2026-01-13
       description: Tightened architecture guardrails (dependency direction, packaging-first imports) and added a repeatable “next slice” template with testing guidance
@@ -90,6 +93,99 @@ Die Reihenfolge ist absichtlich so gewählt, dass jeder Schritt **klein** ist, *
 8) **Renderer/Converter Registry minimal einführen** (einfaches Registry-Interface, ohne Plugin-Overengineering)
 9) **Workflow-Orchestrator: Plan vs Execute trennen** (Domain/Application erzeugt “Plan”; Adapter führt aus)
 10) **CLI Commands verschlanken** (CLI wird dünner Adapter; Use-Cases werden erste Anlaufstelle; Exit-Codes aus Core-Modell)
+
+---
+
+## a) Konkretisierte nächste 2 Slices (sofort umsetzbar)
+
+Diese beiden Schritte sind bewusst so geschnitten, dass sie **Duplikate entfernen** und **die restliche Toolchain stabiler** machen, ohne einen großen Umbau.
+
+### Slice 2: Pfad-/Root-Resolution als Port
+
+**Problem heute**
+
+- Root-Erkennung existiert mehrfach (Docker-Tools, Publisher, Orchestrator, Tests) und nutzt unterschiedliche Heuristiken.
+- Das führt zu “läuft lokal, bricht in CI/Container” oder “cwd vs repo root” Inkonsistenzen.
+
+**Ist-Zustand (konkrete Stellen)**
+
+- Root-Argumente/Defaults in mehreren CLIs:
+   - `gitbook_worker/tools/workflow_orchestrator/orchestrator.py` (`--root`)
+   - `gitbook_worker/tools/publishing/pipeline.py` (`--root`)
+   - `gitbook_worker/tools/publishing/dump_publish.py` (`--root`)
+   - `gitbook_worker/tools/converter/convert_assets.py` (`--root`)
+- Root-Discovery Logik an mehreren Orten:
+   - `gitbook_worker/tools/utils/smart_manifest.py` (Repo-Root detection)
+   - `gitbook_worker/tools/docker/cli.py` (find repo root by `.git`)
+   - `gitbook_worker/tools/docker/run_docker.py` (best-effort root detection)
+   - `gitbook_worker/tools/utils/smart_git.py` (`git rev-parse --show-toplevel`)
+- Tests nutzen eigene Root-Helpers:
+   - `gitbook_worker/tests/conftest.py` (repo_root fixtures)
+
+**Zielzustand (minimaler Slice)**
+
+- **Port:** `gitbook_worker/core/ports/repo_root.py`
+   - `RepoRootResolverPort.resolve(start: Path) -> Path`
+   - klare Errors (z.B. `RepoRootNotFoundError`) statt `None`-Propagation
+- **Use-Case:** `gitbook_worker/core/application/repo_root.py`
+   - `resolve_repo_root(start: Path, resolver: RepoRootResolverPort) -> Path`
+   - optional: `resolve_repo_root_or_cwd(...)` falls Tools bewusst tolerant bleiben sollen
+- **Adapter:** `gitbook_worker/adapters/fs/repo_root_resolver.py`
+   - Heuristik-Order (explizit dokumentiert):
+      1) `GITBOOK_REPO_ROOT` (wenn gesetzt)
+      2) `git rev-parse --show-toplevel` (wenn git verfügbar)
+      3) Upwards scan: Marker-Dateien (`pyproject.toml`, `content.yaml`, `publish.yml`, `.git`)
+
+**Migratierte Call-Sites (max 2 im Slice)**
+
+- `gitbook_worker/tools/docker/run_docker.py`: ersetzt lokale Root-Detection durch Use-Case
+- `gitbook_worker/tools/docker/cli.py`: nutzt ebenfalls Use-Case (damit Docker-Tools konsistent sind)
+
+**Akzeptanzkriterien**
+
+- Docker-Tools finden in allen drei Modi konsistent den Root: `cwd` im Repo, Subfolder, und außerhalb (liefert klaren Fehler).
+- Core/Application importiert keine Git/OS-spezifischen Dependencies.
+- Mindestens 1 Unit-Test: Use-Case + Fake-Port.
+- Mindestens 1 Integration/Smoke-Test: Adapter findet Root in Test-Repo-Struktur.
+
+### Slice 4: Artifact-Layout/Publish-Paths als Domain-Service
+
+**Problem heute**
+
+- “Wo liegen Outputs?” ist verteilt (Publisher, Orchestrator, Smart-Publisher), mit Sonderfällen (`publish/`, `publish/temp/`, lang-spezifische publish dirs).
+
+**Ist-Zustand (konkrete Stellen)**
+
+- `gitbook_worker/tools/publishing/publisher.py`:
+   - `_resolve_publish_directory(...)`
+   - `publish_dir`/`tempfile.tempdir = <publish>/temp`
+   - schreibt/liest diverse Artefakte relativ zum publish dir
+- `gitbook_worker/tools/workflow_orchestrator/orchestrator.py`:
+   - schreibt `CITATION.cff` in das Publish-Verzeichnis
+- `gitbook_worker/tools/utils/smart_publisher.py`:
+   - arbeitet mit `target.out_dir`/`publish_dir`
+
+**Zielzustand (minimaler Slice)**
+
+- **Domain-Service/DTO:** `gitbook_worker/core/domain/artifacts.py`
+   - `ArtifactLayout(repo_root: Path, publish_dir: Path, temp_dir: Path, citation_path: Path, logs_dir: Path, ...)`
+   - keine IO: nur Pfade berechnen + invariants
+- **Use-Case:** `gitbook_worker/core/application/artifacts.py`
+   - `build_artifact_layout(repo_root: Path, publish_dir: Path | None, ...) -> ArtifactLayout`
+   - Policy: default publish dir vs overrides (z.B. manifest-dir vs repo-root)
+- **Adapter-Integration:** zunächst nur 1–2 Call-Sites umbauen
+
+**Migratierte Call-Sites (max 2 im Slice)**
+
+- `gitbook_worker/tools/workflow_orchestrator/orchestrator.py`: nutzt `ArtifactLayout.citation_path` statt harte `publish/`-Annahmen
+- `gitbook_worker/tools/publishing/publisher.py`: nutzt `ArtifactLayout.publish_dir/temp_dir` statt eigener temp-dir Setups
+
+**Akzeptanzkriterien**
+
+- Für gleiche Inputs werden in Orchestrator und Publisher identische Publish/Temp-Pfade berechnet.
+- Alle erzeugten Artefakte (inkl. `CITATION.cff`) landen ausschließlich im `<publish_dir>` (kein Copy ins Repo-Root).
+- `publish/temp` wird weiterhin genutzt, aber die Definition liegt an einem Ort.
+- Unit-Tests: Layout-Berechnung (pure), plus 1 Smoke-Test in einem temp workspace.
 
 ---
 
