@@ -30,16 +30,19 @@ from pathlib import Path
 def _detect_repo_root(start: Path) -> Path:
     """Best-effort repository root detection.
 
-    Walks up the directory tree looking for known markers (content.yaml, .git).
-    Falls back to the historical relative traversal if no marker is found.
+    Note: This file historically works even when invoked from arbitrary
+    locations because it modifies sys.path manually. For compatibility we keep
+    a safe fallback traversal if the hexagonal resolver cannot determine a root.
     """
 
-    markers = {"content.yaml", ".git"}
-    for candidate in [start, *start.parents]:
-        if any((candidate / marker).exists() for marker in markers):
-            return candidate
-    # Fallback: assume the repo root is three levels up (gitbook_worker/../..)
-    return start.parents[3]
+    try:
+        from gitbook_worker.adapters.fs.repo_root_resolver import DefaultRepoRootResolver
+        from gitbook_worker.core.application.repo_root import resolve_repo_root
+
+        return resolve_repo_root(start=start, resolver=DefaultRepoRootResolver())
+    except Exception:
+        # Fallback: assume the repo root is three levels up (gitbook_worker/../..)
+        return start.parents[3]
 
 
 _THIS_FILE = Path(__file__).resolve()

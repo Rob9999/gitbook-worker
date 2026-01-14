@@ -10,32 +10,16 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+
+from gitbook_worker.adapters.fs.repo_root_resolver import DefaultRepoRootResolver
+from gitbook_worker.core.application.repo_root import resolve_repo_root
 
 from . import smart_merge
 
 
-def find_repo_root(start_path: Optional[Path] = None) -> Path:
-    """Find repository root by looking for .git directory.
-
-    Args:
-        start_path: Starting path for search (default: current directory)
-
-    Returns:
-        Path to repository root
-    """
-    if start_path is None:
-        start_path = Path.cwd()
-
-    current = start_path.resolve()
-
-    while current != current.parent:
-        if (current / ".git").exists():
-            return current
-        current = current.parent
-
-    # Fallback to current directory
-    return Path.cwd()
+def find_repo_root(start_path: Path | None = None) -> Path:
+    start = start_path or Path.cwd()
+    return resolve_repo_root(start=start, resolver=DefaultRepoRootResolver())
 
 
 def cmd_get_name(args):
