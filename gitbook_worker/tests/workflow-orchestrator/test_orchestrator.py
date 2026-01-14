@@ -177,8 +177,8 @@ def test_update_citation_dry_run(tmp_path: Path) -> None:
     assert "2000-01-01" in content
 
 
-def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
-    """Test that update_citation updates the file and copies to root."""
+def test_update_citation_updates_in_publish_dir_only(tmp_path: Path) -> None:
+    """Test that update_citation updates the file in publish/ only."""
     repo = tmp_path
     (repo / "publish.yml").write_text("publish: []\n", encoding="utf-8")
     publish_dir = repo / "publish"
@@ -218,11 +218,9 @@ def test_update_citation_updates_and_copies_to_root(tmp_path: Path) -> None:
     assert "old" not in content
     assert "2000-01-01" not in content
 
-    # Check CITATION.cff was copied to root
+    # Policy: artifacts must stay within publish_dir; do not copy to repo root
     root_cff = repo / "CITATION.cff"
-    assert root_cff.exists()
-    root_content = root_cff.read_text(encoding="utf-8")
-    assert content == root_content
+    assert not root_cff.exists()
 
 
 def test_step_publisher_missing_pipeline_fails(tmp_path: Path) -> None:

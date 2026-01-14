@@ -20,7 +20,9 @@ class _FakeResolver:
 
 def test_resolve_repo_root_use_case_delegates() -> None:
     expected = Path("/tmp/example")
-    assert resolve_repo_root(start=Path("."), resolver=_FakeResolver(expected)) == expected
+    assert (
+        resolve_repo_root(start=Path("."), resolver=_FakeResolver(expected)) == expected
+    )
 
 
 def test_default_repo_root_resolver_scans_for_markers(tmp_path: Path) -> None:
@@ -35,7 +37,9 @@ def test_default_repo_root_resolver_scans_for_markers(tmp_path: Path) -> None:
     assert resolved == repo_root
 
 
-def test_default_repo_root_resolver_raises_when_unresolvable(tmp_path: Path, monkeypatch) -> None:
+def test_default_repo_root_resolver_raises_when_unresolvable(
+    tmp_path: Path, monkeypatch
+) -> None:
     monkeypatch.delenv("GITBOOK_REPO_ROOT", raising=False)
     start = tmp_path / "no_markers"
     start.mkdir()

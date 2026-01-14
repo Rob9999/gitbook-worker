@@ -928,7 +928,11 @@ def _step_ensure_readme(ctx: RuntimeContext) -> None:
 
 
 def _step_update_citation(ctx: RuntimeContext) -> None:
-    """Update citation.cff in publish/ directory and copy to root (for Zenodo/GitHub)."""
+    """Update CITATION.cff inside the language publish directory.
+
+    Policy: All generated artifacts must stay within the configured publish
+    directory; do not copy files into the repository root.
+    """
     citation_publish = ctx.language_root / "publish" / "CITATION.cff"
     if not citation_publish.exists():
         LOGGER.info("Keine CITATION.cff gefunden – Schritt wird übersprungen")
@@ -956,19 +960,7 @@ def _step_update_citation(ctx: RuntimeContext) -> None:
     if changed:
         citation_publish.write_text("\n".join(text) + "\n", encoding="utf-8")
 
-    # Copy to root for GitHub/Zenodo integration
-    citation_root = ctx.root / "CITATION.cff"
-    import shutil
-
-    shutil.copy2(citation_publish, citation_root)
-    if ctx.language_root != ctx.root:
-        LOGGER.info(
-            "CITATION.cff von Sprache '%s' (%s) nach Repository-Root kopiert",
-            ctx.language_id,
-            citation_publish.parent,
-        )
-    else:
-        LOGGER.info("CITATION.cff nach Repository-Root kopiert")
+    LOGGER.info("CITATION.cff verbleibt im Publish-Verzeichnis: %s", citation_publish)
 
 
 def _step_ai_reference_check(ctx: RuntimeContext) -> None:

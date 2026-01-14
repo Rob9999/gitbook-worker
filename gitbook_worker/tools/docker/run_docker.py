@@ -36,7 +36,9 @@ def _detect_repo_root(start: Path) -> Path:
     """
 
     try:
-        from gitbook_worker.adapters.fs.repo_root_resolver import DefaultRepoRootResolver
+        from gitbook_worker.adapters.fs.repo_root_resolver import (
+            DefaultRepoRootResolver,
+        )
         from gitbook_worker.core.application.repo_root import resolve_repo_root
 
         return resolve_repo_root(start=start, resolver=DefaultRepoRootResolver())
