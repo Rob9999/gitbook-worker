@@ -1,7 +1,10 @@
 ---
-version: 0.4.0
+version: 0.5.0
 date: 2026-01-13
 history:
+   - version: 0.5.0
+      date: 2026-01-13
+      description: Tightened architecture guardrails (dependency direction, packaging-first imports) and added a repeatable “next slice” template with testing guidance
    - version: 0.4.0
       date: 2026-01-13
       description: Implemented the next hexagonal slice (PDF TOC extraction) with Port + Use-Case + Adapter; migrated the CLI and added tests
@@ -183,6 +186,89 @@ Eine bewährte Struktur (sinngemäß):
 Entscheidend sind nicht die Ordnernamen, sondern die Regel:
 **Abhängigkeiten zeigen nach innen.**
 Domain kennt nichts von CLI, Filesystem oder PDF-Tools.
+
+---
+
+## Guardrails (damit es nicht „Clean Architecture in Theorie“ bleibt)
+
+Diese Regeln sind absichtlich “hart”, weil sie den Core testbar und stabil halten.
+
+### 1) Abhängigkeitsrichtung (praktisch)
+
+- `gitbook_worker/core/domain/**` darf nur von der Standardbibliothek abhängen.
+- `gitbook_worker/core/application/**` darf Domain importieren und Ports nutzen, aber keine Adapter.
+- `gitbook_worker/core/ports/**` definiert Interfaces/DTOs/Exceptions, aber enthält keine IO.
+- `gitbook_worker/adapters/**` implementiert Ports und darf schwere/optionale Libraries importieren.
+- `gitbook_worker/tools/**` ist ein CLI/Script-Adapter: ruft Use-Cases, macht Argument-Parsing, Exit-Codes, Logging.
+
+Wenn irgendwo ein Adapter in den Core importiert wird, ist die Schichtung faktisch gebrochen.
+
+### 2) Package-first Layout (Repo-spezifisch)
+
+Im Repo gilt: **Python-Code lives in `gitbook_worker/`**.
+
+- Neue Imports immer über `gitbook_worker.*`.
+- Der Fallback unter `tools/` ist nur Abwärtskompatibilität; neue Ports/Use-Cases/Adapter gehören nicht dorthin.
+
+### 3) Optional Dependencies nur im Adapter
+
+Regel: Wenn eine Dependency optional ist oder IO macht (pypdf, reportlab, LaTeX-Tools, …), dann:
+
+- Import erst im Adapter-Modul.
+- Core/Application bleibt import-time clean.
+- Tests können den Use-Case gegen Fake-Port laufen lassen (keine Third-Party nötig).
+
+### 4) Exit-Codes sind Teil des Contracts
+
+CLI-Tools sollen eindeutige Exit-Codes nutzen und diese dokumentieren.
+
+- Canonical Doc: `gitbook_worker/docs/attentions/exit-codes.md`
+- UX: CLI zeigt die Tabelle über `--help exit-codes` (oder äquivalent).
+
+---
+
+## “Next Slice” Template (wiederholbarer Bauplan)
+
+Wenn wir etwas als nächsten Hex-Slice ziehen, dann immer in dieser Reihenfolge.
+
+### Schritt A: Port definieren
+
+- Datei: `gitbook_worker/core/ports/<topic>.py`
+- Inhalt: Protocol/ABC, Requests/Responses (Dataclasses), domain-nahe Exceptions
+
+### Schritt B: Use-Case bauen
+
+- Datei: `gitbook_worker/core/application/<topic>.py`
+- Signatur: nimmt Port als Dependency entgegen (Constructor-Injection oder Parameter)
+- Logik: pure orchestration + policies, keine IO
+
+### Schritt C: Adapter implementieren
+
+- Datei: `gitbook_worker/adapters/<area>/<impl>.py`
+- Hält Third-Party Imports, IO, “dirty details”
+
+### Schritt D: Tool/CLI migrieren
+
+- Datei: `gitbook_worker/tools/**` bleibt dünn
+- Tut nur: args parsen, Use-Case aufrufen, exit-codes/logging, output-formatting
+
+### Schritt E: Tests (Definition of Done)
+
+- Unit-Test: Use-Case + Fake-Port (schnell, deterministisch)
+- Smoke-Test: Adapter gegen echte Lib (wenn verfügbar; minimal)
+- Optional: Golden output (Text/JSON) für CLI, falls Ausgabe contract-stabil ist
+
+---
+
+## Mapping: Wo liegt was im aktuellen Repo?
+
+Kurzform, damit neue Beiträge nicht “irgendwo” landen:
+
+- **Ports:** `gitbook_worker/core/ports/`
+- **Use-Cases:** `gitbook_worker/core/application/`
+- **Adapter:** `gitbook_worker/adapters/`
+- **CLI/Tools (Adapter-Caller):** `gitbook_worker/tools/`
+- **Engineering Docs:** `gitbook_worker/docs/` (diese Datei ist korrekt platziert)
 
 ---
 
