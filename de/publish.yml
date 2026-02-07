@@ -42,6 +42,7 @@ project:
   authors:
   - SAMPLE Team
   date: 2026-01-08
+  version: 1.0.0
   license: CC BY-SA 4.0
 publish:
 - path: ./

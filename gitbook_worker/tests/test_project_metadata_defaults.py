@@ -162,3 +162,162 @@ def test_project_metadata_to_pandoc_metadata() -> None:
     assert metadata["author"] == ["Alice"]
     assert metadata["rights"] == ["CC BY 4.0"]
     assert metadata["date"] == ["2026-01-08"]
+
+
+# ── Version handling tests ──────────────────────────────────────────────────
+
+
+def test_project_metadata_version_from_manifest(tmp_path: Path) -> None:
+    """project.version in publish.yml is picked up."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    manifest = _write_manifest(
+        repo,
+        {
+            "version": "0.1.0",
+            "publish": [],
+            "project": {"license": "CC BY 4.0", "version": "2.3.1"},
+        },
+    )
+
+    meta = publisher._resolve_project_metadata(manifest)
+
+    assert meta.version == "2.3.1"
+
+
+def test_project_metadata_version_prefers_manifest_over_book_json(
+    tmp_path: Path,
+) -> None:
+    """project.version in publish.yml takes precedence over book.json."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    manifest = _write_manifest(
+        repo,
+        {
+            "version": "0.1.0",
+            "publish": [],
+            "project": {"license": "CC BY 4.0", "version": "3.0.0"},
+        },
+    )
+    (repo / "book.json").write_text(
+        json.dumps({"title": "Book", "author": ["A"], "version": "1.0.0"}),
+        encoding="utf-8",
+    )
+
+    meta = publisher._resolve_project_metadata(manifest)
+
+    assert meta.version == "3.0.0"
+
+
+def test_project_metadata_version_falls_back_to_book_json(tmp_path: Path) -> None:
+    """When publish.yml has no project.version, book.json version is used."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    manifest = _write_manifest(
+        repo,
+        {
+            "version": "0.1.0",
+            "publish": [],
+            "project": {"license": "CC BY 4.0"},
+        },
+    )
+    (repo / "book.json").write_text(
+        json.dumps({"title": "Book", "author": ["A"], "version": "0.5.0"}),
+        encoding="utf-8",
+    )
+
+    meta = publisher._resolve_project_metadata(manifest)
+
+    assert meta.version == "0.5.0"
+
+
+def test_project_metadata_version_none_when_absent(tmp_path: Path) -> None:
+    """Version stays None when neither source provides it."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    manifest = _write_manifest(
+        repo,
+        {
+            "version": "0.1.0",
+            "publish": [],
+            "project": {"license": "CC BY 4.0"},
+        },
+    )
+
+    meta = publisher._resolve_project_metadata(manifest)
+
+    assert meta.version is None
+
+
+def test_project_metadata_version_numeric_yaml(tmp_path: Path) -> None:
+    """YAML may deserialize '1.0' as float; _coerce_version handles it."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    manifest = _write_manifest(
+        repo,
+        {
+            "version": "0.1.0",
+            "publish": [],
+            "project": {"license": "CC BY 4.0", "version": 1.0},
+        },
+    )
+
+    meta = publisher._resolve_project_metadata(manifest)
+
+    assert meta.version == "1.0"
+
+
+def test_pandoc_metadata_date_and_version() -> None:
+    """Date + version are combined with middle-dot separator."""
+    meta = publisher.ProjectMetadata(
+        name="P",
+        authors=("A",),
+        license="MIT",
+        date="2026-01-08",
+        version="1.2.0",
+    )
+
+    md = meta.as_pandoc_metadata()
+
+    assert md["date"] == ["2026-01-08 \u00b7 Version 1.2.0"]
+
+
+def test_pandoc_metadata_version_only() -> None:
+    """When only version is set (no date), date field shows version alone."""
+    meta = publisher.ProjectMetadata(
+        name="P",
+        authors=("A",),
+        license="MIT",
+        version="0.9.0",
+    )
+
+    md = meta.as_pandoc_metadata()
+
+    assert md["date"] == ["Version 0.9.0"]
+
+
+def test_pandoc_metadata_date_only_no_version() -> None:
+    """When only date is set (no version), behaviour is unchanged."""
+    meta = publisher.ProjectMetadata(
+        name="P",
+        authors=("A",),
+        license="MIT",
+        date="2026-06-01",
+    )
+
+    md = meta.as_pandoc_metadata()
+
+    assert md["date"] == ["2026-06-01"]
+
+
+def test_pandoc_metadata_neither_date_nor_version() -> None:
+    """When neither date nor version is set, no date key is emitted."""
+    meta = publisher.ProjectMetadata(
+        name="P",
+        authors=("A",),
+        license="MIT",
+    )
+
+    md = meta.as_pandoc_metadata()
+
+    assert "date" not in md

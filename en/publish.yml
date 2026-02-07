@@ -41,6 +41,7 @@ project:
   name: The SAMPLE Book
   authors:
   - SAMPLE Team
+  version: 1.0.0
   license: CC BY-SA 4.0
 publish:
 - path: ./

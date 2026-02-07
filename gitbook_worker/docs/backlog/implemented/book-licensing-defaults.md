@@ -40,6 +40,7 @@ project:
       org: "Organisation"
   license: "CC BY 4.0"   # oder CC BY-SA 4.0, CC0, etc.
   date: "2026-01-08"    # optional, YYYY-MM-DD
+  version: "1.0.0"      # optional, Projektversion (Semver, frei-form)
   attribution_policy: "fail"  # fail | warn
 ```
 
@@ -48,7 +49,8 @@ project:
 {
   "title": "Mein Buch",
   "author": ["Vorname Nachname"],
-  "date": "2026-01-08"
+  "date": "2026-01-08",
+  "version": "1.0.0"
 }
 ```
 

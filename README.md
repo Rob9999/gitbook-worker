@@ -1,6 +1,6 @@
-# GitBook Worker (v2.0.5)
+# GitBook Worker (v2.1.0)
 
-**Latest Release**: v2.0.5 (January 8, 2026) - [Release Notes](docs/releases/v2.0.5.md)
+**Latest Release**: v2.1.0 (January 12, 2026) - [Release Notes](docs/releases/v2.1.0.md)
 
 GitBook Worker ships the multi-language 2.x line. The Python package installs via
 `pip install -e .`, and the publishing pipeline is driven by `content.yaml`, which lists
@@ -9,20 +9,39 @@ the orchestration/publishing steps for that content root.
 
 > Kundenguide (Installation & Start): siehe [docs/customer-installation.md](docs/customer-installation.md).
 
-## 🎉 What's New in v2.0.5 (hotfix)
+## 🎉 What's New in v2.1.0
 
-- Publisher now prints the relevant TeX `.log` excerpt when Pandoc/LuaLaTeX fails (so you see the real LaTeX error, not just `exit status 1`).
-- Orchestrator gained `--isolated` and `--logs-dir`, auto-picks `<root>/content.yaml`, and improves repo-root detection for multilingual workspaces.
+- **Font Attribution Generator**: New `generate_attribution` workflow step auto-creates `ATTRIBUTION.md` and `LICENSE-*` files from `fonts.yml`, ensuring license compliance without manual effort.
+- **Project Version on Title Page**: New optional `project.version` in `publish.yml` (or `"version"` in `book.json`) is rendered on the PDF title page alongside the date, e.g. *2026-01-08 · Version 1.0.0*.
+- **Comprehensive Example Content**: 50+ multilingual example files (citations, advanced Markdown, 100+ language samples, emoji categories, image tests) for both `de` and `en`.
+- Release tag: `release-v.2.1.0`; packaging version: 2.1.0.
+
+See [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md) for the full changelog.
+
+## 🔧 What Changed in v2.0.6 (hotfix)
+
+- Heading normalizer now follows `SUMMARY.md` depth while preserving in-document cascades, fixing PDF ToC misalignment.
+- `ProjectMetadata` tolerates missing dates (default `None`) and retains policy default.
+- Added `pypdf` to runtime dependencies for CLI tools that import PDF utilities.
+- Documented release procedure in `gitbook_worker/docs/how-to-release/release-procedure.md`.
+- Release tag: `release-v.2.0.6-hotfix`; packaging version: 2.0.6.post1.
+
+See [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md) for details.
+
+<details>
+<summary>🔙 Highlights from v2.0.5 and v2.0.0</summary>
+
+### v2.0.5 (hotfix)
+- Publisher prints relevant TeX `.log` excerpt on Pandoc/LuaLaTeX failure.
+- Orchestrator gained `--isolated` and `--logs-dir`, auto-picks `<root>/content.yaml`.
 - Emoji headings: hardened LaTeX macro handling to avoid bookmark crashes with `hyperref`.
-- Release tag: `release-v.2.0.5-hotfix`; packaging version: 2.0.5.post1.
 
-## 🔙 Highlights from v2.0.0
+### v2.0.0
+**Critical Fix**: Color emoji rendering using **Twemoji Mozilla v0.7.0** (COLR/CPAL).
 
-**Critical Fix**: Color emoji rendering now works reliably using **Twemoji Mozilla v0.7.0** (COLR/CPAL format). Previous versions used Twitter Color Emoji (SVG-in-OpenType), which LuaTeX doesn't support for color rendering.
+**Docker Architecture**: Volume-mount font management instead of static COPY.
 
-**Docker Architecture**: Completely redesigned font management using volume mounts instead of static COPY commands. Fonts are now installed at container startup, enabling flexible configuration without image rebuilds.
-
-**License Compliance**: All fonts must be explicitly configured in `gitbook_worker/defaults/fonts.yml` with tracked licenses. No hardcoded fallbacks or system font auto-discovery.
+**License Compliance**: All fonts enforced via `gitbook_worker/defaults/fonts.yml`.
 
 **Key Changes**:
 - ✅ Color emojis render correctly in PDF output (🎨 🌈 ✨)
@@ -31,7 +50,8 @@ the orchestration/publishing steps for that content root.
 - ✅ Windows/Linux path compatibility for Docker Desktop
 - ⚠️ Breaking: Docker font management changed (see release notes)
 
-See [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md) for the latest changelog. For the prior major update, see [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md).
+See [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md) · [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
+</details>
 
 ## Quick start
 
@@ -103,7 +123,7 @@ The dedicated contributor walkthrough lives in `docs/contributor-new-language.md
   `book.json`, `publish/`, `CITATION.cff`, etc. `de/` currently holds the full ERDA book.
 - `gitbook_worker/` – Python package with publishing, conversion, QA, and Docker helpers.
 - `docs/` – user-facing guides (e.g., `docs/multilingual-content-guide.md`,
-  `docs/contributor-new-language.md`, `docs/releases/v2.0.0.md`).
+  `docs/contributor-new-language.md`, `docs/releases/v2.1.0.md`).
 - `gitbook_worker/docs/` – engineering docs such as sprint plans, migrations, RFCs, and
   the archived legacy package snapshot under `gitbook_worker/docs/archive/`.
 - `tests/` – pytest suites covering publishing, orchestration, and emoji QA.

@@ -221,6 +221,7 @@ class ProjectMetadata:
     authors: tuple[str, ...]
     license: str | None
     date: str | None = None
+    version: str | None = None
     policy: str = "fail"
     warnings: tuple[str, ...] = ()
 
@@ -234,8 +235,15 @@ class ProjectMetadata:
             metadata["author"] = list(self.authors)
         if self.license:
             metadata["rights"] = [self.license]
+        # Combine date and version into the date metadata field so that
+        # Pandoc's default template renders both on the title page.
+        date_parts: list[str] = []
         if self.date:
-            metadata["date"] = [self.date]
+            date_parts.append(self.date)
+        if self.version:
+            date_parts.append(f"Version {self.version}")
+        if date_parts:
+            metadata["date"] = [" \u00b7 ".join(date_parts)]
         return metadata
 
 
@@ -1779,6 +1787,20 @@ def _coerce_date(value: Any) -> str | None:
     return None
 
 
+def _coerce_version(value: Any) -> str | None:
+    """Coerce a version-like value into a non-empty string.
+
+    Accepts semver strings ("1.2.0"), prefixed versions ("v1.0"),
+    or free-form labels ("Draft 1").  Numeric YAML scalars like
+    ``1.0`` are also accepted and converted to their string form.
+    """
+
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
 def _coerce_policy(value: Any) -> str:
     if isinstance(value, str):
         text = value.strip().lower()
@@ -1825,20 +1847,21 @@ def _extract_authors(value: Any) -> tuple[str, ...]:
 
 def _load_book_json(
     manifest_dir: Path,
-) -> tuple[str | None, tuple[str, ...], str | None, Any]:
+) -> tuple[str | None, tuple[str, ...], str | None, Any, str | None]:
     book_path = manifest_dir / "book.json"
     if not book_path.exists():
-        return None, (), None, None
+        return None, (), None, None, None
     try:
         data = json.loads(book_path.read_text(encoding="utf-8"))
     except Exception as exc:  # pragma: no cover - best effort fallback
         logger.debug("book.json konnte nicht gelesen werden: %s", exc)
-        return None, (), None, None
+        return None, (), None, None, None
     title = _coerce_str(data.get("title"))
     authors = _extract_authors(data.get("author"))
     license_value = _coerce_str(data.get("license"))
     book_date = data.get("date")
-    return title, authors, license_value, book_date
+    book_version = _coerce_version(data.get("version"))
+    return title, authors, license_value, book_date, book_version
 
 
 def _resolve_repo_hint(
@@ -1867,8 +1890,8 @@ def _resolve_project_metadata(
         project_cfg.get("attribution_policy") if project_cfg else None
     )
     repo_name, repo_owner = _resolve_repo_hint(manifest_path, repository)
-    book_title, book_authors, book_license, book_date_raw = _load_book_json(
-        manifest_path.parent
+    book_title, book_authors, book_license, book_date_raw, book_version = (
+        _load_book_json(manifest_path.parent)
     )
 
     warnings: list[str] = []
@@ -1933,11 +1956,24 @@ def _resolve_project_metadata(
         if not date_value:
             raise ProjectMetadataError("book.json date ungültig (erwartet YYYY-MM-DD).")
 
+    # Project version handling.
+    # Precedence:
+    # 1) publish.yml: project.version
+    # 2) book.json: version
+    # 3) fallback: None (version is optional)
+    version_value: str | None = None
+    manifest_version_raw = project_cfg.get("version") if project_cfg else None
+    if manifest_version_raw is not None:
+        version_value = _coerce_version(manifest_version_raw)
+    if not version_value and book_version:
+        version_value = book_version
+
     return ProjectMetadata(
         name=name,
         authors=tuple(authors),
         license=license_value,
         date=date_value,
+        version=version_value,
         policy=policy,
         warnings=tuple(warnings),
     )
