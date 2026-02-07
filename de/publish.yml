@@ -48,7 +48,7 @@ publish:
 - path: ./
   out_format: pdf
   out_dir: ./publish
-  out: das-erda-buch.pdf
+  out: das-sample-buch.pdf
   source_type: folder
   source_format: markdown
   use_summary: true
