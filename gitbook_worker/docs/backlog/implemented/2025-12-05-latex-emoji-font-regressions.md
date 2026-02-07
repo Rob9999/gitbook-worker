@@ -1,7 +1,12 @@
 ---
-version: 0.1.0
+version: 0.2.0
 date: 2025-12-05
+status: implemented
+resolved_in: v2.1.0
 history:
+  - version: 0.2.0
+    date: 2025-01-XX
+    changes: Moved to implemented/ — all regressions verified as resolved (Lua filter, Twemoji URL, emoji assertions, combined-md path, Tcl/Tk backend).
   - version: 0.1.0
     date: 2025-12-05
     changes: Initial capture of LaTeX warnings and font regressions discovered before release 2.0.0.

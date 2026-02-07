@@ -1,7 +1,10 @@
 ---
-version: 0.2.0
+version: 0.3.0
 date: 2025-01-XX
+status: implemented
+resolved_in: v2.1.0
 history:
+  - v0.3.0 Moved to implemented/ — all blockers resolved, test fixes verified (2025-01-XX)
   - v0.2.0 Updated with test suite status and SVG pollution fix (2025-01-XX)
   - v0.1.0 Initial blocker list (user + AI)
 ---

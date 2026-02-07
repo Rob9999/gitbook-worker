@@ -845,15 +845,24 @@ def _step_ensure_readme(ctx: RuntimeContext) -> None:
     skipped_existing: int = 0
     skipped_pattern: int = 0
 
-    # Walk through all directories in repository
+    # Scope README generation to the language/content root so that code
+    # directories (e.g. gitbook_worker/) are never touched.  See backlog #10.
+    content_base = ctx.language_root
+    LOGGER.info(
+        "README generation scoped to language root: %s (repo root: %s)",
+        content_base,
+        ctx.root,
+    )
+
+    # Walk through directories in the language/content root only
     # Use iterdir + recursion to avoid expensive is_dir() checks on large repos
     def walk_dirs(base: Path) -> list[Path]:
         """Recursively collect directories, skipping hidden ones early."""
         dirs = []
         try:
             for item in base.iterdir():
-                # Skip hidden items (starting with .) except root
-                if item.name.startswith(".") and item != ctx.root:
+                # Skip hidden items (starting with .) except content base
+                if item.name.startswith(".") and item != content_base:
                     continue
                 if item.is_dir():
                     dirs.append(item)
@@ -864,15 +873,15 @@ def _step_ensure_readme(ctx: RuntimeContext) -> None:
             pass
         return dirs
 
-    for directory in walk_dirs(ctx.root):
-        # Skip root directory itself
-        if directory == ctx.root:
+    for directory in walk_dirs(content_base):
+        # Skip content base directory itself
+        if directory == content_base:
             continue
 
-        rel = directory.relative_to(ctx.root)
+        rel = directory.relative_to(content_base)
 
         # Check pattern matching (smart exclude/include)
-        if not readme_loader.matches_patterns(directory, ctx.root):
+        if not readme_loader.matches_patterns(directory, content_base):
             skipped_pattern += 1
             if config.logging.log_skipped:
                 LOGGER.debug("Skipped (pattern): %s", rel)

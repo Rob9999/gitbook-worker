@@ -1,7 +1,12 @@
 ---
-version: 0.1.0
+version: 0.2.0
 date: 2025-12-31
+status: implemented
+resolved_in: v2.1.0
 history:
+  - version: 0.2.0
+    date: 2025-01-XX
+    changes: Moved to implemented/ — fix verified in orchestrator.py (content_base = ctx.language_root).
   - version: 0.1.0
     date: 2025-12-31
     changes: Initial bug capture for README generator creating files in code area during docker-based orchestrator run.
