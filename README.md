@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.1.0** · [Release Notes](docs/releases/v2.1.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
+**v2.2.0 „Lückenlos"** · [Release Notes](docs/releases/v2.2.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -295,6 +295,15 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release-Verlauf</summary>
+
+#### 🎉 v2.2.0 „Lückenlos" (8. Februar 2026)
+
+- **Config-Completeness-Policy**: AGENTS.md §25–30 – jeder Konfigurationsschlüssel braucht einen dokumentierten Status.
+- **Per-File-Konfigurationsdokumentation**: 8 Dokumente in `docs/configs/` mit Schema-Versionen und Schlüssel-Tabellen.
+- **Vollständiger Config-Audit**: ~80+ Schlüssel über alle Dateien systematisch analysiert und dokumentiert.
+- **Sample-Content-Strategie**: Backlog für Edge-Case-Samples und Feature-Sprachbäume.
+
+→ [docs/releases/v2.2.0.md](docs/releases/v2.2.0.md)
 
 #### 🎉 v2.1.0 (7. Februar 2026)
 
@@ -651,6 +660,15 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### 🎉 v2.2.0 "Lückenlos" (February 8, 2026)
+
+- **Config Completeness Policy**: AGENTS.md §25–30 – every config key must have a documented status.
+- **Per-file config documentation**: 8 documents in `docs/configs/` with schema versions and key tables.
+- **Full config audit**: ~80+ keys across all files systematically analysed and documented.
+- **Sample content strategy**: backlog for edge-case samples and feature-specific language trees.
+
+→ [docs/releases/v2.2.0.md](docs/releases/v2.2.0.md)
 
 #### 🎉 v2.1.0 (February 7, 2026)
 

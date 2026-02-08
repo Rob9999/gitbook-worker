@@ -1,6 +1,6 @@
 # GitBook Worker package
 
-GitBook Worker (v2.1.0) is a standalone Python package for automating PDF
+GitBook Worker (v2.2.0 „Lückenlos") is a standalone Python package for automating PDF
 publishing, conversion utilities, and QA checks for GitBook projects. Install it
 from the repository root and use the CLI locally or in CI.
 
@@ -39,7 +39,7 @@ files under `defaults/` must be assigned one of these states:
 | 🚧 | WIP – planned but not yet implemented |
 | ❌ | Unused – declared but never read; must be cleaned up or implemented |
 
-**Rules** (see AGENTS.md §25–28):
+**Rules** (see AGENTS.md §25–30):
 
 1. New keys require simultaneous updates to `docs/configuration-reference.md`
    and the backlog entry `gitbook_worker/docs/backlog/config-completeness-and-documentation.md`.

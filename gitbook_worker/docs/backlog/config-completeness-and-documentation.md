@@ -1,14 +1,18 @@
 ---
-version: 1.1.0
+version: 2.0.0
 date: 2026-02-08
-status: open
+status: in-progress
 priority: high
+target_release: "v2.2.0 „Lückenlos""
 history:
+  - "2.0.0: 2026-02-08 — Release target v2.2.0 „Lückenlos" festgelegt, Prio 1 abgeschlossen"
   - "1.1.0: 2026-02-08 — Added sample content strategy (§7), config file versioning (§8), per-file docs in docs/configs/"
   - "1.0.0: 2026-02-08 — Initial backlog entry from config audit"
 ---
 
 # Backlog: Konfigurationsvollständigkeit, Dokumentation und Tests
+
+**Ziel-Release: v2.2.0 „Lückenlos"** — Alle Konfigurationslücken schließen.
 
 ## Motivation
 

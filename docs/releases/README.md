@@ -6,7 +6,8 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
-| **v2.1.0** | 2026-02-07 | `release-v.2.1.0` | [v2.1.0](v2.1.0.md) — Font attribution generator, example content, project version on PDF title page |
+| **v2.2.0** | 2026-02-08 | `release-v.2.2.0` | [v2.2.0](v2.2.0.md) — „Lückenlos": Config-Completeness-Policy, per-file config docs, audit backlog, sample strategy |
+| v2.1.0 | 2026-02-07 | `release-v.2.1.0` | [v2.1.0](v2.1.0.md) — Font attribution generator, example content, project version on PDF title page |
 | v2.0.6 | 2026-01-10 | `release-v.2.0.6-hotfix` | [v2.0.6](v2.0.6.md) — Heading normalizer follows SUMMARY.md depth, `pypdf` dependency added |
 | v2.0.5 | 2026-01-08 | `release-v.2.0.5-hotfix` | [v2.0.5](v2.0.5.md) — TeX log diagnostics, `--isolated`/`--logs-dir`, emoji heading hardening |
 | v2.0.4 | 2025-12-31 | `release-v.2.0.4-hotfix` | [v2.0.4](v2.0.4.md) — Converter module path fix, customer installation guide |
