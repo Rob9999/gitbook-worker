@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.0.0",
-  "title": "Edge Cases (DE)",
-  "author": "GitBook Worker QA",
-  "language": "de",
-  "description": "Isolierte Testfälle für Sonderfälle im Publishing-Pipeline."
+    "schema_version": "1.0.0",
+    "title": "Edge Cases (DE)",
+    "author": "GitBook Worker QA",
+    "language": "de",
+    "description": "Isolierte Testfälle für Sonderfälle im Publishing-Pipeline."
 }

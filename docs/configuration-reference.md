@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
+version: 1.2.0
 date: 2026-02-08
 history:
+  - "1.2.0: 2026-02-08 — pdf_options passthrough, author singular alias, format alias"
   - "1.1.0: 2026-02-08 — Added per-file docs references and config versioning table"
   - "1.0.0: 2026-02-08 — Initial configuration reference from code audit"
 ---
@@ -70,6 +71,7 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 |-----------|-----|---------|--------|--------------|
 | `name` | string | book.json:title | ✅ | Projektname (Titelseite) |
 | `authors` | array | book.json:author | ✅ | Autorenliste |
+| `author` | string | – | ✅ | Alias für `authors` (Singular → Array) |
 | `license` | string | – | ✅ | **Mandatory** – Pipeline bricht ab wenn fehlend |
 | `date` | string | heute | ✅ | ISO-Datum (YYYY-MM-DD) |
 | `version` | string | book.json:version | ✅ | Projektversion (Titelseite) |
@@ -81,6 +83,9 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 |-----------|-----|---------|--------|--------------|
 | `path` | string | – | ✅ | Quellverzeichnis (relativ zum Sprachbaum) |
 | `out_format` | string | `"pdf"` | ✅ | Nur `pdf` unterstützt; andere werden übersprungen |
+| `format` | string | – | ✅ | Alias für `out_format` |
+| `target_format` | string | – | ✅ | Alias für `out_format` |
+| `target_style` | string | – | 📝 | Deklarativ (wird nicht gelesen) |
 | `out_dir` | string | `"./publish"` | ✅ | Ausgabeverzeichnis |
 | `out` | string | – | ✅ | Dateiname der Ausgabe |
 | `build` | bool | `false` | ✅ | Gating-Flag: nur bei `true` wird gebaut |
@@ -122,11 +127,30 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 |-----------|-----|---------|--------|--------------|
 | `emoji_color` | bool | `true` | ✅ | Farb-Emojis aktivieren |
 | `emoji_bxcoloremoji` | bool | `false` | ✅ | bxcoloremoji-Paket nutzen (experimentell) |
-| `main_font` | string | `"DejaVu Serif"` | ✅ | → Pandoc `-V mainfont` |
-| `sans_font` | string | `"DejaVu Sans"` | ✅ | → Pandoc `-V sansfont` |
-| `mono_font` | string | `"DejaVu Sans Mono"` | ✅ | → Pandoc `-V monofont` |
+| `main_font` | string | `"DejaVu Serif"` | ✅ | → Pandoc `-V mainfont` (Legacy-Key) |
+| `sans_font` | string | `"DejaVu Sans"` | ✅ | → Pandoc `-V sansfont` (Legacy-Key) |
+| `mono_font` | string | `"DejaVu Sans Mono"` | ✅ | → Pandoc `-V monofont` (Legacy-Key) |
+| `mainfont` | string | – | ✅ | → Pandoc `-V mainfont` (bevorzugter Key) |
+| `sansfont` | string | – | ✅ | → Pandoc `-V sansfont` (bevorzugter Key) |
+| `monofont` | string | – | ✅ | → Pandoc `-V monofont` (bevorzugter Key) |
 | `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
+| `documentclass` | string | `"article"` | ✅ | LaTeX-Dokumentklasse (`report`, `book`, …) |
+| `fontsize` | string | `"10pt"` | ✅ | LaTeX-Schriftgröße |
+| `geometry` | string | `"margin=1in"` | ✅ | LaTeX-Geometry-Parameter |
+| `toc` | bool | folder=`true` | ✅ | Inhaltsverzeichnis |
+| `toc-depth` | int | `3` | ✅ | TOC-Tiefe |
+| `numbersections` | bool | `false` | ✅ | Abschnitte nummerieren |
+| `colorlinks` | bool | `false` | ✅ | Farbige Hyperlinks |
+| `linkcolor` | string | – | ✅ | Farbe interner Links |
+| `urlcolor` | string | – | ✅ | Farbe externer URLs |
+| `citecolor` | string | – | ✅ | Farbe von Zitationslinks |
+| `toccolor` | string | – | ✅ | Farbe von TOC-Links |
+| `lang` | string | book.json | ✅ | Pandoc `lang` (Silbentrennung/Babel) |
+| `header-includes` | string | – | ✅ | Raw-LaTeX für Dokumentpräambel |
+| `classoption` | string | – | ✅ | Zusätzliche LaTeX-Klassenoptionen |
+| `papersize` | string | – | ✅ | Papiergröße (`a4`, `letter`, …) |
+| `linestretch` | string | – | ✅ | Zeilenabstandsfaktor |
 
 ---
 
@@ -219,12 +243,12 @@ Template-basierte Docker-Namensvergabe.
 |-------|---------------|----------------|-------------|
 | `content.yaml` | 1.0.0 | ✓ | [content-yaml.md](configs/content-yaml.md) |
 | `publish.yml` | 0.1.1 | ✓ | [publish-yml.md](configs/publish-yml.md) |
-| `book.json` | – | ✗ (kein Schema-Feld) | [book-json.md](configs/book-json.md) |
+| `book.json` | 1.0.0 | ✓ | [book-json.md](configs/book-json.md) |
 | `fonts.yml` | 1.0.0 | ✓ | [fonts-yml.md](configs/fonts-yml.md) |
 | `frontmatter.yml` | 1.0.0 | ✓ | [frontmatter-yml.md](configs/frontmatter-yml.md) |
 | `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
 | `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
-| `docker_config.yml` | – | ✗ (fehlt!) | [docker-config-yml.md](configs/docker-config-yml.md) |
+| `docker_config.yml` | 1.0.0 | ✓ | [docker-config-yml.md](configs/docker-config-yml.md) |
 
 ---
 

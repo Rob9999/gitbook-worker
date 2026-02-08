@@ -358,9 +358,9 @@ class TestAllDefaultsHaveVersion:
         assert path.exists(), f"Missing defaults/{filename}"
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
         assert "version" in data, f"{filename} has no 'version' field"
-        assert is_semver(data["version"]), (
-            f"{filename} version {data['version']!r} is not valid SemVer"
-        )
+        assert is_semver(
+            data["version"]
+        ), f"{filename} version {data['version']!r} is not valid SemVer"
 
 
 # ── book.json fallback integration ──────────────────────────────────────────

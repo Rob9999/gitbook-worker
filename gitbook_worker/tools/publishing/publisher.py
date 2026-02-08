@@ -1930,6 +1930,9 @@ def _resolve_project_metadata(
         )
 
     authors = _extract_authors(project_cfg.get("authors") if project_cfg else None)
+    # Accept 'author' (singular) as alias for 'authors' (plural).
+    if not authors and project_cfg:
+        authors = _extract_authors(project_cfg.get("author"))
     if not authors and book_authors:
         authors = book_authors
     if not authors:
@@ -2108,6 +2111,31 @@ def _resource_paths_for_source(
     return _dedupe_preserve_order(merged)
 
 
+# Standard Pandoc/LaTeX variable keys that are transparently forwarded
+# as ``-V key=value`` when present in ``pdf_options``.
+_PDF_OPTIONS_PASSTHROUGH_VARS: tuple[str, ...] = (
+    "documentclass",
+    "fontsize",
+    "geometry",
+    "numbersections",
+    "colorlinks",
+    "linkcolor",
+    "urlcolor",
+    "citecolor",
+    "toccolor",
+    "classoption",
+    "papersize",
+    "linestretch",
+    "margin-left",
+    "margin-right",
+    "margin-top",
+    "margin-bottom",
+    "indent",
+    "subparagraph",
+    "thanks",
+)
+
+
 def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     if not isinstance(raw, Mapping):
         return {}
@@ -2123,7 +2151,17 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     if "emoji_bxcoloremoji" in raw:
         parsed["emoji_bxcoloremoji"] = _as_bool(raw.get("emoji_bxcoloremoji"))
 
+    # Legacy underscore-separated font keys (main_font, sans_font, mono_font)
     for key in ("main_font", "sans_font", "mono_font"):
+        value = raw.get(key)
+        if value is None:
+            continue
+        value_str = str(value).strip()
+        if value_str:
+            parsed[key] = value_str
+
+    # Pandoc-native font keys (mainfont, sansfont, monofont) – preferred form
+    for key in ("mainfont", "sansfont", "monofont"):
         value = raw.get(key)
         if value is None:
             continue
@@ -2140,11 +2178,53 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     if "abort_if_missing_glyph" in raw:
         parsed["abort_if_missing_glyph"] = _as_bool(raw.get("abort_if_missing_glyph"))
 
+    # -- Passthrough Pandoc/LaTeX variables --------------------------------- #
+    for key in _PDF_OPTIONS_PASSTHROUGH_VARS:
+        value = raw.get(key)
+        if value is None:
+            continue
+        # Boolean-ish values (e.g. numbersections, colorlinks) are normalised.
+        if isinstance(value, bool):
+            parsed[key] = "true" if value else "false"
+        else:
+            value_str = str(value).strip()
+            if value_str:
+                parsed[key] = value_str
+
+    # -- TOC control (dedicated keys, not plain -V) ------------------------- #
+    if "toc" in raw:
+        parsed["toc"] = _as_bool(raw.get("toc"))
+    if "toc-depth" in raw:
+        try:
+            parsed["toc_depth"] = int(raw["toc-depth"])
+        except (ValueError, TypeError):
+            logger.warning("pdf_options.toc-depth ungültig: %r", raw["toc-depth"])
+    if "toc_depth" in raw and "toc_depth" not in parsed:
+        try:
+            parsed["toc_depth"] = int(raw["toc_depth"])
+        except (ValueError, TypeError):
+            logger.warning("pdf_options.toc_depth ungültig: %r", raw["toc_depth"])
+
+    # -- lang override (Pandoc metadata, not -V) ---------------------------- #
+    if "lang" in raw:
+        lang_val = str(raw["lang"]).strip()
+        if lang_val:
+            parsed["lang"] = lang_val
+
+    # -- header-includes (raw LaTeX injected via Pandoc metadata) ----------- #
+    if "header-includes" in raw:
+        hi = raw["header-includes"]
+        if isinstance(hi, str) and hi.strip():
+            parsed["header_includes"] = hi
+        elif isinstance(hi, list):
+            parsed["header_includes"] = "\n".join(str(x) for x in hi)
+
     return parsed
 
 
 def _build_variable_overrides(pdf_options: Mapping[str, Any]) -> Dict[str, str]:
     variables: Dict[str, str] = {}
+    # Legacy underscore keys → Pandoc variable names
     mapping = {
         "main_font": "mainfont",
         "sans_font": "sansfont",
@@ -2155,6 +2235,19 @@ def _build_variable_overrides(pdf_options: Mapping[str, Any]) -> Dict[str, str]:
         value = pdf_options.get(option_key)
         if isinstance(value, str) and value.strip():
             variables[variable_key] = value.strip()
+
+    # Pandoc-native font keys (mainfont, sansfont, monofont) override legacy
+    for key in ("mainfont", "sansfont", "monofont"):
+        value = pdf_options.get(key)
+        if isinstance(value, str) and value.strip():
+            variables[key] = value.strip()
+
+    # Passthrough variables (documentclass, fontsize, geometry, etc.)
+    for key in _PDF_OPTIONS_PASSTHROUGH_VARS:
+        value = pdf_options.get(key)
+        if value is not None:
+            variables[key] = str(value).strip() if not isinstance(value, bool) else ("true" if value else "false")
+
     return variables
 
 
@@ -2231,7 +2324,12 @@ def get_publish_list(manifest_path: Optional[str] = None) -> List[Dict[str, Any]
             "path": str(path),
             "out": str(out),
             "out_dir": str(out_dir) if out_dir not in (None, "") else None,
-            "out_format": str(entry.get("out_format", "pdf") or "pdf").lower(),
+            "out_format": str(
+                entry.get("out_format")
+                or entry.get("target_format")
+                or entry.get("format")
+                or "pdf"
+            ).lower(),
             "source_type": str(entry.get("source_type") or entry.get("type") or "")
             .lower()
             .strip(),
@@ -3297,6 +3395,9 @@ def convert_a_file(
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
+    toc_override: Optional[bool] = None,
+    toc_depth: Optional[int] = None,
+    extra_args: Optional[Sequence[str]] = None,
 ) -> None:
     logger.info(
         "========================================================================"
@@ -3370,13 +3471,15 @@ def convert_a_file(
         _run_pandoc(
             tmp_md,
             pdf_out,
-            add_toc=False,  # Single files typically don't need TOC
+            add_toc=toc_override if toc_override is not None else False,
             title=title,
             resource_paths=resource_paths,
             emoji_options=options,
             variables=variables,
             metadata=metadata_map or None,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            toc_depth=toc_depth,
+            extra_args=extra_args,
         )
     finally:
         try:
@@ -3417,6 +3520,9 @@ def convert_a_folder(
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
+    toc_override: Optional[bool] = None,
+    toc_depth: Optional[int] = None,
+    extra_args: Optional[Sequence[str]] = None,
 ) -> None:
 
     logger.info(
@@ -3544,13 +3650,15 @@ def convert_a_folder(
         _run_pandoc(
             tmp_md,
             pdf_out,
-            add_toc=True,
+            add_toc=toc_override if toc_override is not None else True,
             title=title,
             resource_paths=final_paths,
             emoji_options=options,
             variables=variables,
             metadata=metadata_map or None,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            toc_depth=toc_depth,
+            extra_args=extra_args,
         )
     finally:
         try:
@@ -3595,6 +3703,9 @@ def build_pdf(
     variables: Optional[Dict[str, str]] = None,
     project_metadata: Optional[ProjectMetadata] = None,
     abort_if_missing_glyph: bool = True,
+    toc_override: Optional[bool] = None,
+    toc_depth: Optional[int] = None,
+    extra_args: Optional[Sequence[str]] = None,
 ) -> Tuple[bool, Optional[str]]:
     """
     Baut ein PDF gemäß Typ ('file'/'folder').
@@ -3635,6 +3746,9 @@ def build_pdf(
                 variables=variables,
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
+                toc_override=toc_override,
+                toc_depth=toc_depth,
+                extra_args=extra_args,
             )
         elif _typ == "folder":
             summary_layout: Optional[SummaryContext] = None
@@ -3682,6 +3796,9 @@ def build_pdf(
                 variables=variables,
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
+                toc_override=toc_override,
+                toc_depth=toc_depth,
+                extra_args=extra_args,
             )
         else:
             logger.warning("⚠ Unbekannter type='%s' – übersprungen.", typ)
@@ -3966,6 +4083,23 @@ def main() -> None:
             _build_variable_overrides(pdf_options) if pdf_options else {}
         )
         abort_missing_glyph = pdf_options.get("abort_if_missing_glyph", True)
+
+        # -- toc / toc-depth from pdf_options ------------------------------ #
+        toc_override: bool | None = pdf_options.get("toc") if "toc" in pdf_options else None
+        toc_depth: int | None = pdf_options.get("toc_depth")
+
+        # -- lang override from pdf_options (→ Pandoc metadata) ------------ #
+        lang_override = pdf_options.get("lang")
+        if lang_override:
+            # Inject as Pandoc metadata so hyphenation and babel work.
+            variable_overrides["lang"] = lang_override
+
+        # -- header-includes from pdf_options (raw LaTeX) ------------------ #
+        entry_extra_args: list[str] = []
+        header_includes = pdf_options.get("header_includes")
+        if header_includes:
+            entry_extra_args.extend(["-M", f"header-includes={header_includes}"])
+
         color_override = pdf_options.get("emoji_color") if pdf_options else None
         bx_override = pdf_options.get("emoji_bxcoloremoji") if pdf_options else None
         if "emoji_color" in pdf_options or "emoji_bxcoloremoji" in pdf_options:
@@ -4007,6 +4141,9 @@ def main() -> None:
             variables=variable_overrides or None,
             project_metadata=project_metadata,
             abort_if_missing_glyph=bool(abort_missing_glyph),
+            toc_override=toc_override,
+            toc_depth=toc_depth,
+            extra_args=entry_extra_args or None,
         )
         if ok:
             built.append(str((publish_dir_path / out).resolve()))

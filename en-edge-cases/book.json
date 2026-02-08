@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.0.0",
-  "title": "Edge Cases (EN)",
-  "author": "GitBook Worker QA",
-  "language": "en",
-  "description": "Isolated test cases for publishing pipeline edge cases."
+    "schema_version": "1.0.0",
+    "title": "Edge Cases (EN)",
+    "author": "GitBook Worker QA",
+    "language": "en",
+    "description": "Isolated test cases for publishing pipeline edge cases."
 }
