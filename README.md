@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.1.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.2.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -197,23 +197,41 @@ profiles:
 
 project:
   name: "Mein Buch"
+  author: "Autorenname"          # Alias für authors: ["..."] (seit v2.2.0)
   version: "1.0.0"
   license: "CC BY-SA 4.0"
 
 publish:
   - build: true
-    format: pdf
+    format: pdf                     # Alias: out_format, target_format
     source_type: folder
     source_format: markdown
     target_style: gitbook
     pdf_options:
+      # Fonts (Pandoc-native Keys bevorzugt)
       mainfont: "DejaVu Serif"
       sansfont: "DejaVu Sans"
       monofont: "DejaVu Sans Mono"
       mainfontfallback:
         - "Twemoji Mozilla"
         - "ERDA CC-BY CJK"
+      # Layout & Typografie (seit v2.2.0)
+      documentclass: book           # article | report | book
+      fontsize: 12pt
+      geometry: "a4paper, margin=2.5cm"
+      toc: true                     # Inhaltsverzeichnis
+      toc-depth: 3
+      numbersections: true
+      # Hyperlinks
+      colorlinks: true
+      linkcolor: blue
+      urlcolor: blue
+      # Sprache
+      lang: de-DE
 ```
+
+> Alle Standard-Pandoc/LaTeX-Variablen werden transparent als `-V key=value`
+> weitergereicht. Vollständige Referenz: [docs/configuration-reference.md](docs/configuration-reference.md).
 
 #### Tipps für optimale Ergebnisse
 
@@ -276,7 +294,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 ### Entwicklung
 
 - Abhängigkeiten in `setup.cfg`, Version in `gitbook_worker/__init__.py`
-  synchron halten (aktuell 2.1.0).
+  synchron halten (aktuell 2.2.0).
 - Tests: `pytest -q` aus dem Repository-Root.
 - Konventionen: siehe `AGENTS.md` (Formatting, Logging, Commit-Etikette).
 - Docs-Ablage: Nutzer-Docs → `docs/`, Engineering-Docs → `gitbook_worker/docs/`.
@@ -298,10 +316,12 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 #### 🎉 v2.2.0 „Lückenlos" (8. Februar 2026)
 
+- **pdf_options Passthrough**: Alle Standard-Pandoc/LaTeX-Variablen (`documentclass`, `fontsize`, `geometry`, `toc`, `toc-depth`, `numbersections`, `colorlinks`, `lang`, `header-includes`, …) werden transparent weitergereicht.
+- **Aliases**: `project.author` (Singular) → `authors`, `format`/`target_format` → `out_format`.
 - **Config-Completeness-Policy**: AGENTS.md §25–30 – jeder Konfigurationsschlüssel braucht einen dokumentierten Status.
 - **Per-File-Konfigurationsdokumentation**: 8 Dokumente in `docs/configs/` mit Schema-Versionen und Schlüssel-Tabellen.
 - **Vollständiger Config-Audit**: ~80+ Schlüssel über alle Dateien systematisch analysiert und dokumentiert.
-- **Sample-Content-Strategie**: Backlog für Edge-Case-Samples und Feature-Sprachbäume.
+- **461 Tests**, 0 Fehler.
 
 → [docs/releases/v2.2.0.md](docs/releases/v2.2.0.md)
 
@@ -427,7 +447,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.1.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.2.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -562,23 +582,41 @@ profiles:
 
 project:
   name: "My Book"
+  author: "Author Name"           # alias for authors: ["..."] (since v2.2.0)
   version: "1.0.0"
   license: "CC BY-SA 4.0"
 
 publish:
   - build: true
-    format: pdf
+    format: pdf                     # aliases: out_format, target_format
     source_type: folder
     source_format: markdown
     target_style: gitbook
     pdf_options:
+      # Fonts (Pandoc-native keys preferred)
       mainfont: "DejaVu Serif"
       sansfont: "DejaVu Sans"
       monofont: "DejaVu Sans Mono"
       mainfontfallback:
         - "Twemoji Mozilla"
         - "ERDA CC-BY CJK"
+      # Layout & typography (since v2.2.0)
+      documentclass: book           # article | report | book
+      fontsize: 12pt
+      geometry: "a4paper, margin=2.5cm"
+      toc: true                     # table of contents
+      toc-depth: 3
+      numbersections: true
+      # Hyperlinks
+      colorlinks: true
+      linkcolor: blue
+      urlcolor: blue
+      # Language
+      lang: en-GB
 ```
+
+> All standard Pandoc/LaTeX variables are transparently forwarded as `-V key=value`.
+> Full reference: [docs/configuration-reference.md](docs/configuration-reference.md).
 
 #### Tips for Optimal Results
 
@@ -641,7 +679,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 ### Development
 
 - Keep dependencies in `setup.cfg` and version in `gitbook_worker/__init__.py`
-  in sync (currently 2.1.0).
+  in sync (currently 2.2.0).
 - Tests: `pytest -q` from the repository root.
 - Conventions: see `AGENTS.md` (formatting, logging, commit etiquette).
 - Documentation: user docs → `docs/`, engineering docs → `gitbook_worker/docs/`.
@@ -663,10 +701,12 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 #### 🎉 v2.2.0 "Lückenlos" (February 8, 2026)
 
+- **pdf_options Passthrough**: all standard Pandoc/LaTeX variables (`documentclass`, `fontsize`, `geometry`, `toc`, `toc-depth`, `numbersections`, `colorlinks`, `lang`, `header-includes`, …) are forwarded transparently.
+- **Aliases**: `project.author` (singular) → `authors`, `format`/`target_format` → `out_format`.
 - **Config Completeness Policy**: AGENTS.md §25–30 – every config key must have a documented status.
 - **Per-file config documentation**: 8 documents in `docs/configs/` with schema versions and key tables.
 - **Full config audit**: ~80+ keys across all files systematically analysed and documented.
-- **Sample content strategy**: backlog for edge-case samples and feature-specific language trees.
+- **461 tests**, 0 failures.
 
 → [docs/releases/v2.2.0.md](docs/releases/v2.2.0.md)
 
