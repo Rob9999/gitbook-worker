@@ -68,5 +68,7 @@
 - Run tests from repo root (`python -m pytest gitbook_worker/tests -m "not slow"`) and note failures with rationale if any remain.
 - Build installable artifacts: `python -m build`; ensure dist filenames carry the target version.
 - Smoke the wheel in a fresh venv: `pip install dist/gitbook_worker-<ver>-py3-none-any.whl`; run `python -m gitbook_worker.tools.workflow_orchestrator --help` and check the banner shows the new version; optional dry-run `workflow_orchestrator run --dry-run --root <repo>`.
-- Tag and push: `git tag <version>` (or release-v.<version> / release-v.<label> for hotfix tags), `git push origin main --tags`.
-- Publish GitHub release with the tag and changelog; attach sdist/wheel if distributing; keep release notes in docs/releases in sync.
+- Update user-facing docs: README.md (version refs, examples, release history DE+EN), docs/HANDBOOK.md, docs/customer-installation.md, docs/configuration-reference.md, docs/releases/v<ver>.md. Commit docs separately.
+- Tag and push: use **annotated tags** (`git tag -a v<ver> -m "message"`); feature releases use `v<Major>.<Minor>.<Patch>`, hotfixes use `release-v.<ver>-hotfix`. Push with `git push origin main --tags`.
+- Publish GitHub release with the tag and changelog; attach sdist/wheel from `dist/` if distributing; keep release notes in docs/releases in sync.
+- Full step-by-step procedure: `gitbook_worker/docs/how-to-release/release-procedure.md`.

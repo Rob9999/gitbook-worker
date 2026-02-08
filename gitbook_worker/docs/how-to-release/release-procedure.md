@@ -1,13 +1,14 @@
 ---
-version: 1.0.0
-date: 2026-01-10
+version: 1.1.0
+date: 2026-02-08
 history:
-  - "init: 2026-01-10 add release procedure"
+  - "1.1.0: 2026-02-08 — Docs-Update-Schritt, GitHub-Release-Schritt, annotated-Tag-Hinweis, Tag-Format modernisiert"
+  - "1.0.0: 2026-01-10 — init: add release procedure"
 ---
 
 # Release Procedure
 
-This guide describes the release workflow for hotfixes such as `release-v.2.0.6-hotfix`. It follows the specifications defined in `AGENTS.md` and the established release process.
+This guide describes the release workflow for feature releases (e.g. `v2.2.0`) and hotfixes (e.g. `release-v.2.0.6-hotfix`). It follows the specifications defined in `AGENTS.md` and the established release process.
 
 ## Preparations
 
@@ -78,13 +79,42 @@ This guide describes the release workflow for hotfixes such as `release-v.2.0.6-
 
    * If issues occur, return to step 2 and repeat the process.
 
-8. **Tag & Push**
+8. **Update User-Facing Documentation**
 
-   * Tag format:
-     `release-v.<Major>.<Minor>.<Patch>[-hotfix|-<NAME>]`, e.g. `release-v.2.0.6-hotfix`
-   * Run:
-     `git tag release-v.2.0.6-hotfix`
-     `git push origin main --tags` (adjust branch if required).
+   Before tagging, ensure all user-facing docs reflect the new release:
+
+   * **`README.md`** — version numbers in `pip install` examples, `publish.yml` code blocks, release history (DE + EN), development section.
+   * **`docs/HANDBOOK.md`** — bump front-matter version; add/update sections covering new features.
+   * **`docs/customer-installation.md`** — bump front-matter version; add configuration examples for new features.
+   * **`docs/configuration-reference.md`** — add new keys, update status columns, bump front-matter version.
+   * **`docs/releases/v<Major>.<Minor>.<Patch>.md`** — finalize release notes (features, file lists, test counts, known limitations).
+   * Commit docs separately: `git commit -m "docs: <summary>"`.
+
+9. **Tag & Push**
+
+   * **Feature releases**: use SemVer tag, e.g. `v2.2.0`.
+   * **Hotfixes**: use descriptive tag, e.g. `release-v.2.0.6-hotfix`.
+   * Always use **annotated tags** (`-a`) with a message:
+     ```bash
+     git tag -a v2.2.0 -m "v2.2.0 Lueckenlos – short summary"
+     git push origin main --tags
+     ```
+   * If the tag needs to be moved after a doc-only follow-up commit:
+     ```bash
+     git tag -f -a v2.2.0 -m "v2.2.0 Lueckenlos – updated"
+     git push origin main --tags --force
+     ```
+
+10. **Publish GitHub Release**
+
+    * Go to GitHub → Releases → "Draft a new release".
+    * Select the tag created in step 9.
+    * Title: `v<Major>.<Minor>.<Patch> "<Codename>"` (e.g. `v2.2.0 "Lückenlos"`).
+    * Body: paste or link to `docs/releases/v<Major>.<Minor>.<Patch>.md`.
+    * Attach build artifacts from `dist/`:
+      * `gitbook_worker-<ver>-py3-none-any.whl`
+      * `gitbook_worker-<ver>.tar.gz`
+    * Publish the release.
 
 ## Documentation
 
@@ -97,3 +127,4 @@ This guide describes the release workflow for hotfixes such as `release-v.2.0.6-
 * Do not use fonts outside of `fonts.yml`; the Docker setup pulls fonts exclusively from this file (see `Dockerfile.dynamic`).
 * For LaTeX issues, set `ERDA_KEEP_LATEX_TEMP=1` and collect logs under `logs/`.
 * Maintain SemVer consistency (`__version__` in `gitbook_worker/__init__.py` and packaging metadata).
+* Prefer annotated tags over lightweight tags — they carry author, date, and message, which GitHub Releases and `git describe` rely on.
