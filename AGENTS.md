@@ -1,4 +1,4 @@
-# Agent Directives for GitBook Worker (v1.2.0)
+# Agent Directives for GitBook Worker (v1.3.0)
 
 ## Scope & How to Use This File
 - Diese Anweisungen gelten für das gesamte Repository; es gibt aktuell keine verschachtelten Abweichungen.
@@ -60,6 +60,8 @@
 26. **Neue Schalter nur mit Dokumentation**: Wer einen neuen Konfigurationsschlüssel einführt, muss gleichzeitig die Konfigurationsreferenz (`docs/configuration-reference.md`) und den Backlog-Eintrag (`gitbook_worker/docs/backlog/config-completeness-and-documentation.md`) aktualisieren.
 27. **WIP klar kennzeichnen**: Noch nicht fertig implementierte Schalter erhalten den Status 🚧 WIP in der Referenzdokumentation. Sie dürfen keine stillschweigende Fehl- oder Nicht-Funktion haben; stattdessen Warnung oder Early-Exit mit Hinweis.
 28. **Testpflicht für ✅-Schalter**: Jeder als „implementiert" markierte Schlüssel muss mindestens einen zugehörigen Unit- oder Integrationstest haben.
+29. **Konfigurationsdatei-Versionierung**: Jede YAML/JSON-Konfigurationsdatei muss ein `version`-Feld (SemVer) tragen. Schema-Änderungen bumpen dieses Feld und werden im zugehörigen Dokument unter `docs/configs/` mit Versionshistorie dokumentiert.
+30. **Sample-Content-Abdeckung**: Die Sprachbäume `de/` und `en/` müssen für jeden ✅-Schalter mindestens ein Sample-Dokument enthalten. Feature-spezifische Sprachbäume (z. B. `de-edge-cases/`) dienen dem isolierten Testen von Sonderfällen und werden in `content.yaml` mit `build: false` als Default eingetragen.
 
 ## How to release
 - Bump version consistently (setup.cfg, gitbook_worker/__init__.py, any manifest/release notes), following semver; remove stray duplicate packaging files.

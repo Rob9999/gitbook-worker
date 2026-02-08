@@ -1,7 +1,8 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
 history:
+  - "1.1.0: 2026-02-08 — Added per-file docs references and config versioning table"
   - "1.0.0: 2026-02-08 — Initial configuration reference from code audit"
 ---
 
@@ -9,7 +10,10 @@ history:
 
 Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
-Config-Completeness-Policy (AGENTS.md §25–28).
+Config-Completeness-Policy (AGENTS.md §25–30).
+
+> **Ausführliche Per-File-Dokumentation** mit Versionshistorie:
+> [docs/configs/](configs/README.md)
 
 **Legende:**
 ✅ Implementiert · 🔨 Teilweise · 📝 Deklarativ (extern/CI) · 🚧 WIP · ❌ Unused
@@ -208,9 +212,25 @@ Template-basierte Docker-Namensvergabe.
 
 ---
 
+## Konfigurationsdatei-Versionen
+
+| Datei | Schema-Version | `version`-Feld | Per-File-Dok |
+|-------|---------------|----------------|-------------|
+| `content.yaml` | 1.0.0 | ✓ | [content-yaml.md](configs/content-yaml.md) |
+| `publish.yml` | 0.1.1 | ✓ | [publish-yml.md](configs/publish-yml.md) |
+| `book.json` | – | ✗ (kein Schema-Feld) | [book-json.md](configs/book-json.md) |
+| `fonts.yml` | 1.0.0 | ✓ | [fonts-yml.md](configs/fonts-yml.md) |
+| `frontmatter.yml` | 1.0.0 | ✓ | [frontmatter-yml.md](configs/frontmatter-yml.md) |
+| `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
+| `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
+| `docker_config.yml` | – | ✗ (fehlt!) | [docker-config-yml.md](configs/docker-config-yml.md) |
+
+---
+
 ## Verwandte Dokumente
 
-- [AGENTS.md](../AGENTS.md) — Regeln 25–28 (Config-Completeness-Policy)
+- [docs/configs/](configs/README.md) — Per-File-Dokumentation mit Versionshistorie
+- [AGENTS.md](../AGENTS.md) — Regeln 25–30 (Config-Completeness-Policy)
 - [gitbook_worker/docs/backlog/config-completeness-and-documentation.md](../gitbook_worker/docs/backlog/config-completeness-and-documentation.md) — Backlog mit Action Items
 - [docs/Configure-Doc-Types.md](Configure-Doc-Types.md) — Doc-Type-System im Detail
 - [gitbook_worker/defaults/README.md](../gitbook_worker/defaults/README.md) — Font-System Architektur

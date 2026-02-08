@@ -1,9 +1,10 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
 status: open
 priority: high
 history:
+  - "1.1.0: 2026-02-08 — Added sample content strategy (§7), config file versioning (§8), per-file docs in docs/configs/"
   - "1.0.0: 2026-02-08 — Initial backlog entry from config audit"
 ---
 
@@ -242,11 +243,14 @@ Vollständig implementiert.
 ### Priorität 1: Dokumentation (dieses Release)
 
 - [x] Backlog-Eintrag erstellt (dieses Dokument)
-- [ ] Konfigurationsreferenz in `docs/configuration-reference.md` erstellen
+- [x] Konfigurationsreferenz in `docs/configuration-reference.md` erstellen
   - Alle Schlüssel mit Typ, Default, Status, Beschreibung
   - WIP-Schlüssel explizit kennzeichnen
-- [ ] AGENTS.md Regel 25 ergänzen (Config-Completeness-Policy)
-- [ ] `gitbook_worker/README.md` aktualisieren
+- [x] AGENTS.md Regel 25–28 ergänzen (Config-Completeness-Policy)
+- [x] `gitbook_worker/README.md` aktualisieren
+- [x] Per-Config-Datei Dokumentation in `docs/configs/` erstellen:
+  - content-yaml.md, publish-yml.md, book-json.md, fonts-yml.md
+  - frontmatter-yml.md, readme-yml.md, smart-yml.md, docker-config-yml.md
 
 ### Priorität 2: Unused Keys aufräumen
 
@@ -268,12 +272,77 @@ Vollständig implementiert.
 - [ ] `docker_config.yml` Kontexte vollständig in run_docker.py einbinden
 - [ ] `fonts.yml:copyright` → ATTRIBUTION.md erweitern
 
+### Priorität 5: Konfigurationsdatei-Versionierung
+
+- [ ] `docker_config.yml`: `version`-Feld ergänzen (aktuell fehlt es komplett)
+- [ ] `book.json`: `schema_version`-Feld einführen (das bestehende `version` bezieht sich auf die Projektversion)
+- [ ] Per-Config-Datei Versionshistorie in `docs/configs/*.md` bei jeder Schema-Änderung pflegen
+- [ ] Versionsprüfung im Code: Alle Defaults-Dateien validieren `version` beim Laden (wie bei publish.yml)
+- [ ] `docs/configs/README.md` Index-Tabelle bei Schema-Versionsänderungen aktualisieren
+
+### Priorität 6: Sample-Content-Strategie
+
+Sample-Inhalte in `de/` und `en/` dienen als Referenzimplementierung und
+Regressionstest für alle Konfigurationsschalter. Feature-spezifische
+Sprachbäume (z. B. `de-feature-x/`) erlauben isoliertes Testen von Sonderfällen
+ohne die Hauptbäume zu belasten.
+
+**Aktueller Bestand:**
+
+| Baum | Kapitel | Anhänge | Beispiele | Templates |
+|------|---------|---------|-----------|-----------|
+| `de/content/` | 2 | 2 | 10 | 1 |
+| `en/content/` | 2 | 2 | 10 | 1 |
+
+**Action Items:**
+
+- [ ] Fehlende Edge-Case-Samples ergänzen:
+  - [ ] Dokument ohne YAML-Frontmatter (testet `frontmatter.yml` Injection)
+  - [ ] Dokument mit vollständigem Frontmatter (testet „kein Überschreiben")
+  - [ ] Verzeichnis ohne README (testet `readme.yml` Auto-Generation)
+  - [ ] Markdown mit nur einer Zeile / leerem Body (Edge Case für Converter)
+  - [ ] Datei mit Right-to-Left Text (RTL) (testet Font-Fallback)
+  - [ ] Datei mit CJK-Zeichen (testet CJK-Font-Fallback)
+  - [ ] Datei mit äthiopischen Zeichen (testet ETHIOPIC-Font-Fallback)
+  - [ ] Markdown mit verschachtelten Tabellen und Code-Blöcken
+  - [ ] Markdown mit Fußnoten und Querverweisen
+- [ ] Feature-spezifische Sprachbäume in `content.yaml` vorsehen:
+  - [ ] `de-edge-cases/` — Edge Cases (leere Dateien, Sonderzeichen, RTL)
+  - [ ] `en-edge-cases/` — Englische Entsprechungen
+  - [ ] Struktur: `book.json`, `publish.yml`, `content/` mit fokussierten Testdateien
+  - [ ] In `content.yaml` eintragen mit `type: local`, `build: false` als Default
+- [ ] Jeder ✅-Schalter in `publish.yml` hat mindestens einen Sample, der ihn aktiviert
+- [ ] Sample-Builds in CI aufnehmen: `--lang de`, `--lang en`, ggf. `--lang de-edge-cases`
+
 ---
 
-## 6. Akzeptanzkriterien
+## 7. Konfigurationsdatei-Versionen (Ist-Stand)
+
+| Datei | `version`-Feld | Aktueller Wert | Anmerkung |
+|-------|---------------|----------------|-----------|
+| `content.yaml` | ✓ | 1.0.0 | |
+| `de/publish.yml` | ✓ | 0.1.1 | |
+| `en/publish.yml` | ✓ | 0.1.1 | |
+| `fonts.yml` | ✓ | 1.0.0 | |
+| `frontmatter.yml` | ✓ | 1.0.0 | |
+| `readme.yml` | ✓ | "1.0.0" | |
+| `smart.yml` | ✓ | 1.0.0 | |
+| `docker_config.yml` | ✗ | – | **Muss ergänzt werden** |
+| `book.json` | (ambig) | – | `version` = Projektversion, kein Schema-Feld |
+
+Jede Schema-Änderung muss:
+1. Das `version`-Feld in der Config-Datei bumpen
+2. Die Versionshistorie im zugehörigen `docs/configs/*.md` ergänzen
+3. Den Index in `docs/configs/README.md` aktualisieren
+
+---
+
+## 8. Akzeptanzkriterien
 
 1. Jeder Konfigurationsschlüssel hat einen dokumentierten Status (✅/🔨/📝/🚧/❌).
 2. Die Konfigurationsreferenz in `docs/` ist vollständig und aktuell.
 3. Kein Schlüssel bleibt ohne Zuordnung.
 4. Neue Schlüssel dürfen nur mit Status ✅ oder 🚧 + WIP-Markierung eingeführt werden.
 5. Tests existieren für alle ✅-Schlüssel.
+6. Jede Konfigurationsdatei hat ein `version`-Feld und ein zugehöriges Dokument in `docs/configs/`.
+7. Ausreichend Sample-Content existiert in `de/` und `en/`, Edge Cases in dedizierten Sprachbäumen.
