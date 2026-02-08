@@ -1,4 +1,4 @@
-# Agent Directives for GitBook Worker (v1.1.0)
+# Agent Directives for GitBook Worker (v1.2.0)
 
 ## Scope & How to Use This File
 - Diese Anweisungen gelten für das gesamte Repository; es gibt aktuell keine verschachtelten Abweichungen.
@@ -54,6 +54,12 @@
 
 ## Fixe
 24. Keine Dirty Fixe!!!
+
+## Konfigurationsvollständigkeit (Config-Completeness-Policy)
+25. **Jeder Konfigurationsschlüssel braucht einen Status**: Alle Einträge in `publish.yml`, `book.json`, `fonts.yml`, `content.yaml` und den Dateien unter `gitbook_worker/defaults/` müssen einem dieser Zustände zugeordnet sein: ✅ Implementiert, 🔨 Teilweise implementiert, 📝 Deklarativ (extern/CI), 🚧 WIP, ❌ Unused.
+26. **Neue Schalter nur mit Dokumentation**: Wer einen neuen Konfigurationsschlüssel einführt, muss gleichzeitig die Konfigurationsreferenz (`docs/configuration-reference.md`) und den Backlog-Eintrag (`gitbook_worker/docs/backlog/config-completeness-and-documentation.md`) aktualisieren.
+27. **WIP klar kennzeichnen**: Noch nicht fertig implementierte Schalter erhalten den Status 🚧 WIP in der Referenzdokumentation. Sie dürfen keine stillschweigende Fehl- oder Nicht-Funktion haben; stattdessen Warnung oder Early-Exit mit Hinweis.
+28. **Testpflicht für ✅-Schalter**: Jeder als „implementiert" markierte Schlüssel muss mindestens einen zugehörigen Unit- oder Integrationstest haben.
 
 ## How to release
 - Bump version consistently (setup.cfg, gitbook_worker/__init__.py, any manifest/release notes), following semver; remove stray duplicate packaging files.

@@ -291,6 +291,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 | Dokumenttypen konfigurieren | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
 | Handbuch (Referenz) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
 | Font-Architektur | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
+| Konfigurationsreferenz | [docs/configuration-reference.md](docs/configuration-reference.md) |
 
 <details>
 <summary>📋 Release-Verlauf</summary>
@@ -646,6 +647,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 | Configuring Document Types | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
 | Handbook (Reference) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
 | Font Architecture | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
+| Configuration Reference | [docs/configuration-reference.md](docs/configuration-reference.md) |
 
 <details>
 <summary>📋 Release History</summary>

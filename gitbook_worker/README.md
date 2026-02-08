@@ -1,6 +1,6 @@
 # GitBook Worker package
 
-GitBook Worker (v1.0.2) is a standalone Python package for automating PDF
+GitBook Worker (v2.1.0) is a standalone Python package for automating PDF
 publishing, conversion utilities, and QA checks for GitBook projects. Install it
 from the repository root and use the CLI locally or in CI.
 
@@ -25,6 +25,28 @@ point `python -m gitbook_worker.tools.workflow_orchestrator`.
 - `tools/docker/` – Dockerfiles and helper scripts that mirror the CI environment.
 - `defaults/` – baseline YAML configuration shipped with the package.
 - `scripts/` – thin wrappers for Docker orchestration and local convenience.
+
+## Configuration Completeness Policy
+
+Every configuration key in `publish.yml`, `book.json`, `fonts.yml`, and the
+files under `defaults/` must be assigned one of these states:
+
+| Status | Meaning |
+|--------|---------|
+| ✅ | Implemented – code reads the value, tests exist |
+| 🔨 | Partially implemented – code reads the value but behaviour is incomplete or untested |
+| 📝 | Declarative – exists for CI/CD or external tools, not consumed by Python code |
+| 🚧 | WIP – planned but not yet implemented |
+| ❌ | Unused – declared but never read; must be cleaned up or implemented |
+
+**Rules** (see AGENTS.md §25–28):
+
+1. New keys require simultaneous updates to `docs/configuration-reference.md`
+   and the backlog entry `gitbook_worker/docs/backlog/config-completeness-and-documentation.md`.
+2. WIP keys must emit a warning or early-exit – never fail silently.
+3. Every ✅ key must have at least one unit or integration test.
+
+Full audit results: `gitbook_worker/docs/backlog/config-completeness-and-documentation.md`.
 
 ## Running the orchestrator
 
