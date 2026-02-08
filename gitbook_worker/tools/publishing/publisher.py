@@ -1470,7 +1470,7 @@ def _build_font_header(
 
     # Font definitions with inline RawFeature (NO macro!)
     if include_mainfont:
-        if fallback_block and emoji_font:
+        if enable_lua_fallback and fallback_block and emoji_font:
             lines.append(f"\\IfFontExistsTF{{{emoji_font}}}{{")
             lines.append(
                 f"  \\setmainfont[RawFeature={{fallback=mainfont}}]{{{main_font}}}"
@@ -1482,7 +1482,11 @@ def _build_font_header(
             lines.append(f"\\setmainfont{{{main_font}}}")
 
     # Sans/Mono with conditional fallback
-    sans_options = "[RawFeature={fallback=mainfont}]" if fallback_block else ""
+    sans_options = (
+        "[RawFeature={fallback=mainfont}]"
+        if enable_lua_fallback and fallback_block
+        else ""
+    )
     lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
     lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
 

@@ -321,6 +321,8 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 - **Manifest-Version 0.1.1**: `_MANIFEST_VERSION_CURRENT` im Publisher aktualisiert — keine Warnmeldung mehr.
 - **FAQ-Dokument**: Neues [docs/FAQs.md](docs/FAQs.md) mit 5 häufigen Kundenproblemen und Lösungen.
 - **7 neue Unit-Tests** für `_should_skip_rename()`.
+- **Fix: RawFeature-Fallback trotz `ERDA_ENABLE_LUA_FALLBACK=0`**: `\setmainfont`/`\setsansfont`/`\setmonofont` erhielten `RawFeature` auch bei deaktiviertem Lua-Fallback — LuaLaTeX-Crash behoben.
+- **`--no-gitbook-rename` im Orchestrator**: CLI-Flag jetzt auch auf Orchestrator-Ebene verfügbar.
 
 → [docs/releases/v2.3.0.md](docs/releases/v2.3.0.md)
 
@@ -722,6 +724,8 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 - **Manifest version 0.1.1**: `_MANIFEST_VERSION_CURRENT` in publisher updated — no more version warnings.
 - **FAQ document**: New [docs/FAQs.md](docs/FAQs.md) with 5 common customer issues and solutions.
 - **7 new unit tests** for `_should_skip_rename()`.
+- **Fix: RawFeature fallback despite `ERDA_ENABLE_LUA_FALLBACK=0`**: `\setmainfont`/`\setsansfont`/`\setmonofont` received `RawFeature` even with disabled Lua fallback — LuaLaTeX crash fixed.
+- **`--no-gitbook-rename` on orchestrator**: CLI flag now available at orchestrator level.
 
 → [docs/releases/v2.3.0.md](docs/releases/v2.3.0.md)
 
