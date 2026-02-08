@@ -303,25 +303,58 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 → [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md)
 
-#### 🔧 v2.0.6 (Hotfix)
+#### 🔧 v2.0.6 (10. Januar 2026, Hotfix)
 
 - Heading-Normalizer folgt `SUMMARY.md`-Tiefe, behebt PDF-ToC-Versatz.
 - `pypdf` als Laufzeitabhängigkeit hinzugefügt.
+- Release-Prozedur dokumentiert.
 
 → [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md)
 
-#### v2.0.5 (Hotfix)
+#### v2.0.5 (8. Januar 2026, Hotfix)
 
 - TeX-Log-Auszug bei Pandoc/LuaLaTeX-Fehlern.
 - `--isolated` und `--logs-dir` für den Orchestrator.
+- Emoji-Überschriften in LaTeX gehärtet.
 
 → [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md)
 
-#### v2.0.0
+#### v2.0.4 (31. Dezember 2025, Hotfix)
 
-- Farb-Emoji-Rendering mit Twemoji Mozilla (COLR/CPAL).
-- Docker-Volume-Mount-Architektur für Fonts.
-- Font-Compliance via `fonts.yml` erzwungen.
+- Converter nutzt vollqualifizierten Modulpfad, vermeidet Kollisionen mit lokalen `tools`-Paketen.
+- Kundeninstallationsanleitung hinzugefügt.
+
+→ [docs/releases/v2.0.4.md](docs/releases/v2.0.4.md)
+
+#### v2.0.3 (31. Dezember 2025, Hotfix)
+
+- Emoji-Testartefakte ins pytest-Temp-Verzeichnis verschoben.
+- PEP-440-konforme Versionierung (2.0.3.post1).
+
+→ [docs/releases/v2.0.3.post1.md](docs/releases/v2.0.3.post1.md)
+
+#### v2.0.2 (31. Dezember 2025, Hotfix)
+
+- Doc-Type-Summary-Ausrichtung, Template-Einträge sichtbar.
+- Übersetzerhinweise mit expliziten H1-Überschriften.
+
+→ [docs/releases/v2.0.2.md](docs/releases/v2.0.2.md)
+
+#### v2.0.1 (29. Dezember 2025, Hotfix)
+
+- Manifest-Preflight: `project.license` wird erzwungen.
+- Root-Handling und Tool-Fallback für pip-Installationen repariert.
+- Dry-Run-Sicherheit verbessert.
+
+→ [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md)
+
+#### v2.0.0 (5. Dezember 2025)
+
+- **Mehrsprachige Architektur**: Inhalte über `content.yaml`, lokale und remote Sprachbäume.
+- **Farb-Emoji-Rendering** mit Twemoji Mozilla (COLR/CPAL).
+- **Smart Font Stack**: Deterministische Font-Verwaltung mit Lizenz-Compliance.
+- **Docker-Volume-Mount-Architektur** für Fonts.
+- **ERDA CC-BY CJK Font**: Eigene mehrsprachige Schriftart.
 
 → [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
 
@@ -625,25 +658,58 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 → [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md)
 
-#### 🔧 v2.0.6 (hotfix)
+#### 🔧 v2.0.6 (January 10, 2026, hotfix)
 
 - Heading normaliser follows `SUMMARY.md` depth, fixes PDF ToC misalignment.
 - `pypdf` added as runtime dependency.
+- Release procedure documented.
 
 → [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md)
 
-#### v2.0.5 (hotfix)
+#### v2.0.5 (January 8, 2026, hotfix)
 
 - TeX log excerpt on Pandoc/LuaLaTeX failure.
 - `--isolated` and `--logs-dir` for the orchestrator.
+- Emoji heading LaTeX macro hardened.
 
 → [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md)
 
-#### v2.0.0
+#### v2.0.4 (December 31, 2025, hotfix)
 
-- Colour emoji rendering with Twemoji Mozilla (COLR/CPAL).
-- Docker volume-mount architecture for fonts.
-- Font compliance enforced via `fonts.yml`.
+- Converter uses fully qualified module path, avoiding collisions with local `tools` packages.
+- Customer installation guide added.
+
+→ [docs/releases/v2.0.4.md](docs/releases/v2.0.4.md)
+
+#### v2.0.3 (December 31, 2025, hotfix)
+
+- Emoji test artifacts moved to pytest temp directory.
+- PEP 440 compliant versioning (2.0.3.post1).
+
+→ [docs/releases/v2.0.3.post1.md](docs/releases/v2.0.3.post1.md)
+
+#### v2.0.2 (December 31, 2025, hotfix)
+
+- Doc-type summary alignment, template entries surfaced.
+- Translator notes with explicit H1 headings.
+
+→ [docs/releases/v2.0.2.md](docs/releases/v2.0.2.md)
+
+#### v2.0.1 (December 29, 2025, hotfix)
+
+- Manifest preflight: `project.license` enforced.
+- Root handling and tool fallback for pip installs fixed.
+- Dry-run safety improved.
+
+→ [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md)
+
+#### v2.0.0 (December 5, 2025)
+
+- **Multilingual architecture**: content via `content.yaml`, local and remote language trees.
+- **Colour emoji rendering** with Twemoji Mozilla (COLR/CPAL).
+- **Smart Font Stack**: deterministic font management with license compliance.
+- **Docker volume-mount architecture** for fonts.
+- **ERDA CC-BY CJK Font**: custom multilingual typeface.
 
 → [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
 
