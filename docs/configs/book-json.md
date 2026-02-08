@@ -1,8 +1,9 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
-config_schema_version: "– (kein version-Feld)"
+config_schema_version: "1.0.0"
 history:
+  - "1.1.0: 2026-02-08 — language→Pandoc implementiert, schema_version eingeführt, Legacy-Keys als 📝 markiert"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
 
@@ -23,37 +24,37 @@ aus dem GitBook-Ökosystem.
 
 ## Schema-Version
 
-**Kein `version`-Feld** vorhanden — `book.json` hat kein eigenes Schema-Versions-Feld.
-Das Feld `version` in der Datei bezieht sich auf die **Projektversion**, nicht auf
-das Datei-Schema.
+Aktuell: **1.0.0** — Feld `schema_version` (Top-Level).
 
-> 🚧 **Backlog**: Ein `schema_version`-Feld sollte eingeführt werden, um
-> zukünftige Erweiterungen sauber zu versionieren.
+Das Feld `version` in der Datei bezieht sich weiterhin auf die **Projektversion**;
+`schema_version` ist das eigentliche Datei-Schema-Versionsfeld.
 
 ## Schlüssel-Referenz
 
 | Schlüssel | Typ | Pflicht | Default | Status | Beschreibung |
 |-----------|-----|---------|---------|--------|--------------|
+| `schema_version` | string | – | – | ✅ | SemVer-Schema-Version der Datei |
 | `title` | string | – | – | ✅ | Fallback für `project.name` in `publish.yml` |
 | `author` | string | – | – | ✅ | Fallback für `project.authors` |
 | `date` | string | – | – | ✅ | Fallback für `project.date` |
 | `version` | string | – | – | ✅ | Fallback für `project.version` (Projektversion, nicht Schema) |
-| `language` | string | – | – | ❌ | Deklariert, nie vom Publisher gelesen |
-| `description` | string | – | – | ❌ | Deklariert, nie vom Publisher gelesen |
-| `root` | string | – | `"content/"` | ❌ | Deklariert, nie vom Publisher gelesen |
-| `structure.readme` | string | – | `"README.md"` | ❌ | Deklariert, nie vom Publisher gelesen |
-| `structure.summary` | string | – | `"SUMMARY.md"` | ❌ | Deklariert, nie vom Publisher gelesen |
+| `language` | string | – | – | ✅ | Pandoc `lang`-Variable für Silbentrennung/Locale |
+| `description` | string | – | – | 📝 | Legacy GitBook Metadatum (informativ) |
+| `root` | string | – | `"content/"` | 📝 | Legacy GitBook Metadatum (informativ) |
+| `structure.readme` | string | – | `"README.md"` | 📝 | Legacy GitBook Metadatum (informativ) |
+| `structure.summary` | string | – | `"SUMMARY.md"` | 📝 | Legacy GitBook Metadatum (informativ) |
 
-## Offene Punkte
+## Implementierte Änderungen (v2.2.0)
 
-- **`language`** → Könnte als Pandoc `lang`-Variable genutzt werden
-- **`root`** → Könnte für Content-Pfadauflösung statt Hardcoding genutzt werden
-- **`structure.*`** → Könnte README/SUMMARY-Pfade dynamisch auflösen statt Annahme von Defaults
+- ✅ **`language`** → Wird als Pandoc `lang`-Metadatum gesetzt (Silbentrennung, Locale)
+- ✅ **`schema_version`** → Neues Feld für Datei-Schema-Versionierung mit SemVer-Validation
+- 📝 **`description`**, **`root`**, **`structure.*`** → Als Legacy-GitBook-Metadaten dokumentiert (informativ, kein Code liest sie)
 
 ## Beispiel
 
 ```json
 {
+  "schema_version": "1.0.0",
   "title": "Das SAMPLE Buch",
   "author": "SAMPLE Team",
   "date": "2026-01-08",
@@ -71,6 +72,7 @@ das Datei-Schema.
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 1.0.0 | 2026-02-08 | `schema_version` eingeführt, `language` implementiert |
 | – | 2025-12-05 | Übernahme des GitBook-Formats |
 
 ## Verwandte Dokumente

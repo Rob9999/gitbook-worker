@@ -1,0 +1,29 @@
+version: 0.1.0
+
+project:
+  name: "Edge Cases (EN)"
+  authors:
+    - "GitBook Worker QA"
+  license: "CC BY 4.0"
+  date: "2026-02-08"
+  version: "0.1.0"
+
+publish:
+  - path: content/
+    out_format: pdf
+    out_dir: publish/
+    out: edge-cases-en.pdf
+    build: false
+    source_type: folder
+    use_summary: true
+    summary_mode: gitbook
+    summary_manifest: content/SUMMARY.md
+    use_book_json: true
+    keep_combined: true
+    use_document_types: false
+    generate_attribution: false
+    pdf_options:
+      emoji_color: harfbuzz
+      main_font: "DejaVu Serif"
+      sans_font: "DejaVu Sans"
+      mono_font: "DejaVu Sans Mono"

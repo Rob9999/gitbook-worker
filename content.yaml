@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.1.0
 default: de
 contents:
   - id: de
@@ -9,6 +9,16 @@ contents:
     type: local
     uri: en/
     description: English content (placeholder)
+  - id: de-edge-cases
+    type: local
+    uri: de-edge-cases/
+    description: German edge-case samples (font fallbacks, frontmatter, tables)
+    build: false
+  - id: en-edge-cases
+    type: local
+    uri: en-edge-cases/
+    description: English edge-case samples (font fallbacks, frontmatter, tables)
+    build: false
   - id: ua
     type: git
     uri: github.com:rob9999@democratic-social-wins

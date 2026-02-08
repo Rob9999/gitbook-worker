@@ -14,6 +14,8 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
+from gitbook_worker.tools.utils.semver import is_semver
+
 
 def deep_merge(base: Dict[Any, Any], overlay: Dict[Any, Any]) -> Dict[Any, Any]:
     """Deep merge two dictionaries. Overlay values take precedence.
@@ -57,6 +59,15 @@ def load_yaml_safe(path: Path) -> Optional[Dict[Any, Any]]:
         return None
 
 
+def _validate_config_version(data: Dict[Any, Any], source: str) -> None:
+    """Warn if a docker_config YAML lacks a valid SemVer ``version`` field."""
+    version = data.get("version")
+    if version is None:
+        print(f"Warning: {source} has no 'version' field – consider adding one.")
+    elif not is_semver(version):
+        print(f"Warning: {source} 'version' is not valid SemVer: {version!r}")
+
+
 def merge_configs(
     repo_root: Path,
     publish_name: Optional[str] = None,
@@ -80,12 +91,14 @@ def merge_configs(
     )
     defaults = load_yaml_safe(defaults_path)
     if defaults:
+        _validate_config_version(defaults, str(defaults_path))
         merged = deep_merge(merged, defaults)
 
     # Layer 2: docker_config.yml (repo root)
     docker_config_path = repo_root / "docker_config.yml"
     docker_config = load_yaml_safe(docker_config_path)
     if docker_config:
+        _validate_config_version(docker_config, str(docker_config_path))
         merged = deep_merge(merged, docker_config)
 
     # Layer 3 & 4: publish.yml

@@ -222,6 +222,7 @@ class ProjectMetadata:
     license: str | None
     date: str | None = None
     version: str | None = None
+    language: str | None = None
     policy: str = "fail"
     warnings: tuple[str, ...] = ()
 
@@ -235,6 +236,8 @@ class ProjectMetadata:
             metadata["author"] = list(self.authors)
         if self.license:
             metadata["rights"] = [self.license]
+        if self.language:
+            metadata["lang"] = [self.language]
         # Combine date and version into the date metadata field so that
         # Pandoc's default template renders both on the title page.
         date_parts: list[str] = []
@@ -1847,21 +1850,37 @@ def _extract_authors(value: Any) -> tuple[str, ...]:
 
 def _load_book_json(
     manifest_dir: Path,
-) -> tuple[str | None, tuple[str, ...], str | None, Any, str | None]:
+) -> tuple[str | None, tuple[str, ...], str | None, Any, str | None, str | None]:
+    """Load metadata from *book.json*.
+
+    Returns:
+        Tuple of (title, authors, license, date, version, language).
+    """
     book_path = manifest_dir / "book.json"
     if not book_path.exists():
-        return None, (), None, None, None
+        return None, (), None, None, None, None
     try:
         data = json.loads(book_path.read_text(encoding="utf-8"))
     except Exception as exc:  # pragma: no cover - best effort fallback
         logger.debug("book.json konnte nicht gelesen werden: %s", exc)
-        return None, (), None, None, None
+        return None, (), None, None, None, None
     title = _coerce_str(data.get("title"))
     authors = _extract_authors(data.get("author"))
     license_value = _coerce_str(data.get("license"))
     book_date = data.get("date")
     book_version = _coerce_version(data.get("version"))
-    return title, authors, license_value, book_date, book_version
+    language = _coerce_str(data.get("language"))
+
+    # Validate schema_version if present (informational only).
+    schema_version = data.get("schema_version")
+    if schema_version is not None:
+        sv = str(schema_version).strip()
+        if sv and not _SEMVER_RE.fullmatch(sv):
+            logger.warning("book.json schema_version ist kein gültiges SemVer: %r", sv)
+        else:
+            logger.debug("book.json schema_version: %s", sv)
+
+    return title, authors, license_value, book_date, book_version, language
 
 
 def _resolve_repo_hint(
@@ -1890,9 +1909,14 @@ def _resolve_project_metadata(
         project_cfg.get("attribution_policy") if project_cfg else None
     )
     repo_name, repo_owner = _resolve_repo_hint(manifest_path, repository)
-    book_title, book_authors, book_license, book_date_raw, book_version = (
-        _load_book_json(manifest_path.parent)
-    )
+    (
+        book_title,
+        book_authors,
+        book_license,
+        book_date_raw,
+        book_version,
+        book_language,
+    ) = _load_book_json(manifest_path.parent)
 
     warnings: list[str] = []
 
@@ -1968,12 +1992,17 @@ def _resolve_project_metadata(
     if not version_value and book_version:
         version_value = book_version
 
+    # Language handling.
+    # book.json:language → Pandoc `lang` variable for proper hyphenation.
+    language_value: str | None = book_language
+
     return ProjectMetadata(
         name=name,
         authors=tuple(authors),
         license=license_value,
         date=date_value,
         version=version_value,
+        language=language_value,
         policy=policy,
         warnings=tuple(warnings),
     )

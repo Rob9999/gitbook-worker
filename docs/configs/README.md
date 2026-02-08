@@ -1,7 +1,8 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
 history:
+  - "1.1.0: 2026-02-08 — Schema-Versionen aktualisiert (book.json 1.0.0, docker_config.yml 1.0.0)"
   - "1.0.0: 2026-02-08 — Initial index"
 ---
 
@@ -14,16 +15,14 @@ Schlüssel-Tabelle und Änderungshistorie.
 |-------|---------------|-----|-----|
 | `content.yaml` | 1.0.0 | Repo-Root | [content-yaml.md](content-yaml.md) |
 | `publish.yml` | 0.1.1 | `<lang>/publish.yml` | [publish-yml.md](publish-yml.md) |
-| `book.json` | – (kein Feld) | `<lang>/book.json` | [book-json.md](book-json.md) |
+| `book.json` | 1.0.0 | `<lang>/book.json` | [book-json.md](book-json.md) |
 | `fonts.yml` | 1.0.0 | `gitbook_worker/defaults/` | [fonts-yml.md](fonts-yml.md) |
 | `frontmatter.yml` | 1.0.0 | `gitbook_worker/defaults/` | [frontmatter-yml.md](frontmatter-yml.md) |
 | `readme.yml` | 1.0.0 | `gitbook_worker/defaults/` | [readme-yml.md](readme-yml.md) |
 | `smart.yml` | 1.0.0 | `gitbook_worker/defaults/` | [smart-yml.md](smart-yml.md) |
-| `docker_config.yml` | – (fehlt!) | `gitbook_worker/defaults/` | [docker-config-yml.md](docker-config-yml.md) |
+| `docker_config.yml` | 1.0.0 | `gitbook_worker/defaults/` | [docker-config-yml.md](docker-config-yml.md) |
 
-> **Hinweis**: `docker_config.yml` und `book.json` haben kein `version`-Feld.
-> Laut Config-Completeness-Policy (AGENTS.md §25) muss ein `version`-Feld
-> ergänzt werden — siehe Backlog.
+Alle Konfigurationsdateien haben nun ein `version`-Feld (Config-Completeness-Policy AGENTS.md §29).
 
 ## Verwandte Dokumente
 

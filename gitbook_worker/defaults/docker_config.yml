@@ -17,6 +17,8 @@
 #
 # License: MIT
 
+version: 1.0.0
+
 docker_names:
   # Default naming (fallback for all contexts)
   default:

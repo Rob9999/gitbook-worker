@@ -1,8 +1,9 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
-config_schema_version: "– (fehlt!)"
+config_schema_version: "1.0.0"
 history:
+  - "1.1.0: 2026-02-08 — version-Feld ergänzt, SemVer-Validation in smart_merge.py"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
 
@@ -24,10 +25,10 @@ publish.yml → docker_config: { … }            (Override pro Publish-Entry)
 
 ## Schema-Version
 
-**Kein `version`-Feld vorhanden!**
+Aktuell: **1.0.0** — Feld `version` (Top-Level).
 
-> 🚧 **Backlog**: Ein `version`-Feld muss ergänzt werden, um zukünftige
-> Schema-Änderungen nachvollziehbar zu versionieren.
+Die Merge-Schicht in `smart_merge.py` validiert das `version`-Feld per SemVer
+und gibt eine Warnung aus, falls es fehlt oder ungültig ist.
 
 ## Template-Variablen
 
@@ -43,6 +44,7 @@ publish.yml → docker_config: { … }            (Override pro Publish-Entry)
 
 | Schlüssel | Typ | Default | Status | Beschreibung |
 |-----------|-----|---------|--------|--------------|
+| `version` | string | – | ✅ | SemVer-Schema-Version, beim Laden validiert |
 | `docker_names.default.image` | string | `"erda-gitbook-{context}:{branch}"` | 🔨 | Nutzung in `run_docker.py` zu verifizieren |
 | `docker_names.default.container` | string | `"erda-{context}-{publish_name}"` | 🔨 | Nutzung in `run_docker.py` zu verifizieren |
 | `docker_names.github-action.image` | string | `"ghcr.io/{repo_name}/gitbook:{branch}"` | 📝 | Für CI-Workflows |
@@ -56,7 +58,6 @@ publish.yml → docker_config: { … }            (Override pro Publish-Entry)
 
 ## Offene Punkte
 
-- **`version`-Feld fehlt** — Muss ergänzt werden (Config-Completeness-Policy)
 - **`default.*`** — Verifizieren, ob `run_docker.py` diese Templates tatsächlich interpoliert
 - **`test.*` und `docker-test.*`** — Verifizieren ob pytest-Fixtures diese lesen
 
@@ -64,6 +65,7 @@ publish.yml → docker_config: { … }            (Override pro Publish-Entry)
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 1.0.0 | 2026-02-08 | `version`-Feld ergänzt, SemVer-Validation |
 | – | 2025-12-05 | Initiale Konfiguration (ohne Versionsfeld) |
 
 ## Verwandte Dokumente

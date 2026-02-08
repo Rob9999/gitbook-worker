@@ -136,18 +136,19 @@ GitBook-kompatible Metadaten. Dient als Fallback für `publish.yml:project`.
 
 | Schlüssel | Typ | Default | Status | Beschreibung |
 |-----------|-----|---------|--------|--------------|
+| `schema_version` | string | – | ✅ | SemVer-Schema-Version der Datei |
 | `title` | string | – | ✅ | Fallback für `project.name` |
 | `author` | string | – | ✅ | Fallback für `project.authors` |
 | `date` | string | – | ✅ | Fallback für `project.date` |
 | `version` | string | – | ✅ | Fallback für `project.version` |
-| `language` | string | – | ❌ | Deklariert, nie vom Publisher gelesen |
-| `description` | string | – | ❌ | Deklariert, nie vom Publisher gelesen |
-| `root` | string | `"content/"` | ❌ | Deklariert, nie vom Publisher gelesen |
-| `structure.readme` | string | `"README.md"` | ❌ | Deklariert, nie vom Publisher gelesen |
-| `structure.summary` | string | `"SUMMARY.md"` | ❌ | Deklariert, nie vom Publisher gelesen |
+| `language` | string | – | ✅ | Pandoc `lang`-Metadatum für Silbentrennung |
+| `description` | string | – | 📝 | Legacy GitBook Metadatum (informativ) |
+| `root` | string | `"content/"` | 📝 | Legacy GitBook Metadatum (informativ) |
+| `structure.readme` | string | `"README.md"` | 📝 | Legacy GitBook Metadatum (informativ) |
+| `structure.summary` | string | `"SUMMARY.md"` | 📝 | Legacy GitBook Metadatum (informativ) |
 
-> **Offene Frage**: `language`, `root` und `structure.*` könnten sinnvoll
-> vom Publisher genutzt werden. Siehe Backlog-Eintrag §2.
+> `language` wird seit v2.2.0 als Pandoc `lang`-Metadatum genutzt.
+> `description`, `root` und `structure.*` sind informative Legacy-Felder.
 
 ---
 
@@ -165,9 +166,9 @@ Zentrale Font-Konfiguration. Single Source of Truth für alle Schriftarten.
 | `fonts.<KEY>.download_url` | string | `null` | ✅ | Download-URL für FontStorageBootstrapper |
 | `fonts.<KEY>.source_url` | string | `null` | ✅ | Quell-Repository (Attribution) |
 | `fonts.<KEY>.version` | string | – | ✅ | Font-Version |
-| `fonts.<KEY>.fontconfig_name` | string | `null` | ❌ | Deklariert, nie gelesen |
-| `fonts.<KEY>.copyright` | string | `null` | ❌ | Deklariert, nie gelesen |
-| `fonts.<KEY>.usage_note` | string | `null` | ❌ | Deklariert, nie gelesen |
+| `fonts.<KEY>.fontconfig_name` | string | `null` | 📝 | Informativ (fontconfig-Alias) |
+| `fonts.<KEY>.copyright` | string | `null` | ✅ | Copyright-Hinweis → ATTRIBUTION.md |
+| `fonts.<KEY>.usage_note` | string | `null` | ✅ | Nutzungshinweis → ATTRIBUTION.md |
 
 ---
 

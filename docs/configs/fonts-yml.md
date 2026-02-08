@@ -1,8 +1,9 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
 config_schema_version: "1.0.0"
 history:
+  - "1.1.0: 2026-02-08 — copyright→ATTRIBUTION, usage_note→ATTRIBUTION implementiert, fontconfig_name als 📝"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
 
@@ -44,9 +45,9 @@ Aktuell: **1.0.0** — Feld `version` (Top-Level).
 | `fonts.<KEY>.download_url` | string | – | `null` | ✅ | Download-URL für FontStorageBootstrapper |
 | `fonts.<KEY>.source_url` | string | – | `null` | ✅ | Quell-Repository (Attribution) |
 | `fonts.<KEY>.version` | string | ✓ | – | ✅ | Font-Version |
-| `fonts.<KEY>.fontconfig_name` | string | – | `null` | ❌ | Deklariert, nie gelesen |
-| `fonts.<KEY>.copyright` | string | – | `null` | ❌ | Deklariert, nie von `font_config.py` gelesen |
-| `fonts.<KEY>.usage_note` | string | – | `null` | ❌ | Deklariert, nie gelesen |
+| `fonts.<KEY>.fontconfig_name` | string | – | `null` | 📝 | Informativ (fontconfig-Alias, nicht programmatisch genutzt) |
+| `fonts.<KEY>.copyright` | string | – | `null` | ✅ | Copyright-Hinweis, wird in ATTRIBUTION.md gerendert |
+| `fonts.<KEY>.usage_note` | string | – | `null` | ✅ | Nutzungshinweis, wird in ATTRIBUTION.md gerendert |
 
 \* `paths` oder `download_url` — mindestens eines muss gesetzt sein.
 
@@ -62,17 +63,18 @@ Aktuell: **1.0.0** — Feld `version` (Top-Level).
 | SANS | DejaVu Sans | 2.37 | Bitstream Vera + PD |
 | SERIF | DejaVu Serif | 2.37 | Bitstream Vera + PD |
 
-## Offene Punkte
+## Implementierte Änderungen (v2.2.0)
 
-- **`fontconfig_name`** → Im Docker-Setup oder FontStorageBootstrapper nutzen, oder als informativ deklarieren
-- **`copyright`** → Im Attribution-Generator nutzen (Detail-Sektion in ATTRIBUTION.md)
-- **`usage_note`** → Im Attribution-Generator oder LICENSE-Dateien nutzen
+- ✅ **`copyright`** → Wird vom Attribution-Generator gelesen und als eigene Spalte in ATTRIBUTION.md gerendert
+- ✅ **`usage_note`** → Wird vom Attribution-Generator gelesen und in ATTRIBUTION.md Notes-Spalte gerendert
+- 📝 **`fontconfig_name`** → Als informatives Metadatum deklariert (beschreibt den fontconfig-Alias)
 
 ## Versionshistorie
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
 | 1.0.0 | 2026-01-08 | Initiales Schema mit 7 Fonts |
+| 1.0.0 | 2026-02-08 | copyright/usage_note von Attribution-Generator gelesen (kein Schemaänderung) |
 
 ## Verwandte Dokumente
 

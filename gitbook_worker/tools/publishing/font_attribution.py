@@ -22,6 +22,7 @@ class FontAttributionEntry:
     license_url: str
     source_url: str | None
     usage_note: str | None
+    copyright: str | None
 
 
 @dataclass(frozen=True)
@@ -121,8 +122,8 @@ def _render_attribution_md(
     lines.append(f"- Fonts config version: `{fonts_yml_version}`")
     lines.append(f"- Generated (UTC): `{generated_iso}`")
     lines.append("")
-    lines.append("| Asset | Version | License | Source | Notes |")
-    lines.append("|---|---:|---|---|---|")
+    lines.append("| Asset | Version | License | Copyright | Source | Notes |")
+    lines.append("|---|---:|---|---|---|---|")
 
     for font in fonts:
         license_id = _normalize_license_identifier(font.license_url, font.license)
@@ -131,6 +132,7 @@ def _render_attribution_md(
         if license_file:
             license_cell = f"[{font.license}]({license_file})"
 
+        copyright_cell = (font.copyright or "").replace("\n", " ").strip()
         source_cell = font.source_url or ""
         notes_cell = (font.usage_note or "").replace("\n", " ").strip()
         # Keep table stable and readable.
@@ -141,6 +143,7 @@ def _render_attribution_md(
                     font.name,
                     font.version,
                     license_cell,
+                    copyright_cell,
                     source_cell,
                     notes_cell,
                 ]
@@ -221,6 +224,9 @@ def generate_font_attribution_files(
                     str(raw.get("usage_note")).strip()
                     if raw.get("usage_note")
                     else None
+                ),
+                copyright=(
+                    str(raw.get("copyright")).strip() if raw.get("copyright") else None
                 ),
             )
         )
