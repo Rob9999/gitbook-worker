@@ -130,3 +130,78 @@ def test_parse_publisher_args() -> None:
         "--paper-format=a4",
         "--landscape",
     )
+
+
+# --- _should_skip_rename tests ---
+
+
+class TestShouldSkipRename:
+    """Tests for the _should_skip_rename() auto-detect / explicit key logic."""
+
+    def test_explicit_false_skips_rename(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\ngitbook_rename: false\n"
+            "project:\n  license: MIT\npublish:\n  - path: ./a.md\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is True
+
+    def test_explicit_true_keeps_rename(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\ngitbook_rename: true\n"
+            "project:\n  license: MIT\npublish:\n  - path: ./a.md\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is False
+
+    def test_auto_detect_all_file_entries(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\nproject:\n  license: MIT\n"
+            "publish:\n"
+            "  - path: ./a.md\n    source_type: file\n"
+            "  - path: ./b.md\n    source_type: file\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is True
+
+    def test_mixed_entries_no_skip(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\nproject:\n  license: MIT\n"
+            "publish:\n"
+            "  - path: ./a.md\n    source_type: file\n"
+            "  - path: ./content\n    source_type: folder\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is False
+
+    def test_no_source_type_no_skip(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\nproject:\n  license: MIT\n"
+            "publish:\n  - path: ./content\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is False
+
+    def test_empty_publish_no_skip(self, tmp_path: Path) -> None:
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\nproject:\n  license: MIT\npublish: []\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is False
+
+    def test_explicit_overrides_auto_detect(self, tmp_path: Path) -> None:
+        """Explicit gitbook_rename: true should keep rename even with all file entries."""
+        manifest = tmp_path / "publish.yml"
+        manifest.write_text(
+            "version: 0.1.1\ngitbook_rename: true\n"
+            "project:\n  license: MIT\n"
+            "publish:\n  - path: ./a.md\n    source_type: file\n",
+            encoding="utf-8",
+        )
+        assert pipeline._should_skip_rename(manifest) is False

@@ -1,0 +1,63 @@
+version: 0.1.1
+
+# Skip GitBook rename — file-based publishing needs original paths intact.
+# (Auto-detected since v2.3.0 when all entries are source_type: file,
+#  but explicit key is recommended for clarity.)
+gitbook_rename: false
+
+project:
+  name: "Marsian Habitats"
+  authors:
+    - "Mars Colony Planning Team"
+  license: "CC-BY-SA-4.0"
+  date: "2026-02-08"
+  version: "1.0.0"
+
+profiles:
+  local:
+    description: Lokale Ausführung ohne Docker.
+    steps:
+      - converter
+      - publisher
+    docker:
+      use_registry: false
+
+publish:
+  # Each .md file produces its own PDF
+  - path: ./Habitats/the-best-marsian-housing.md
+    out: the-best-marsian-housing.pdf
+    out_dir: ./publish
+    build: true
+    source_type: file
+    source_format: markdown
+    keep_combined: true
+    pdf_options:
+      documentclass: article
+      fontsize: 12pt
+      geometry: "a4paper, margin=2.5cm"
+      toc: false
+      mainfont: "DejaVu Serif"
+      sansfont: "DejaVu Sans"
+      monofont: "DejaVu Sans Mono"
+      colorlinks: true
+      linkcolor: blue
+      urlcolor: blue
+
+  - path: ./Habitats/the-more-best-marsian-housing.md
+    out: the-more-best-marsian-housing.pdf
+    out_dir: ./publish
+    build: true
+    source_type: file
+    source_format: markdown
+    keep_combined: true
+    pdf_options:
+      documentclass: article
+      fontsize: 12pt
+      geometry: "a4paper, margin=2.5cm"
+      toc: false
+      mainfont: "DejaVu Serif"
+      sansfont: "DejaVu Sans"
+      monofont: "DejaVu Sans Mono"
+      colorlinks: true
+      linkcolor: blue
+      urlcolor: blue

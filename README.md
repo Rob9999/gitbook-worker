@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.2.1 „Einheitlich"** · [Release Notes](docs/releases/v2.2.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
+**v2.3.0 „Pfadtreu"** · [Release Notes](docs/releases/v2.3.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.2.1-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.3.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -314,6 +314,16 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### 🎉 v2.3.0 „Pfadtreu" (8. Februar 2026)
+
+- **Auto-Detect: GitBook-Rename-Skip**: Wenn alle Publish-Einträge `source_type: file` sind, wird der destruktive Rename-Schritt automatisch übersprungen — keine `FileNotFoundError` mehr bei Flat-File-Szenarien.
+- **Neuer `gitbook_rename`-Key**: Explizite Steuerung via `gitbook_rename: false` in `publish.yml`.
+- **Manifest-Version 0.1.1**: `_MANIFEST_VERSION_CURRENT` im Publisher aktualisiert — keine Warnmeldung mehr.
+- **FAQ-Dokument**: Neues [docs/FAQs.md](docs/FAQs.md) mit 5 häufigen Kundenproblemen und Lösungen.
+- **7 neue Unit-Tests** für `_should_skip_rename()`.
+
+→ [docs/releases/v2.3.0.md](docs/releases/v2.3.0.md)
+
 #### 🔧 v2.2.1 „Einheitlich" (8. Februar 2026)
 
 - **publish.yml-Versionskonsistenz**: Alle 9 verbleibenden `publish.yml`-Dateien (README-Beispiele, Test-Szenarien, Edge-Cases) von Schema-Version `0.1.0` auf `0.1.1` aktualisiert.
@@ -453,7 +463,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.2.1-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.3.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -704,6 +714,16 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### 🎉 v2.3.0 "Pfadtreu" (February 8, 2026)
+
+- **Auto-Detect: GitBook Rename Skip**: When all publish entries are `source_type: file`, the destructive rename step is automatically skipped — no more `FileNotFoundError` in flat-file scenarios.
+- **New `gitbook_rename` key**: Explicit control via `gitbook_rename: false` in `publish.yml`.
+- **Manifest version 0.1.1**: `_MANIFEST_VERSION_CURRENT` in publisher updated — no more version warnings.
+- **FAQ document**: New [docs/FAQs.md](docs/FAQs.md) with 5 common customer issues and solutions.
+- **7 new unit tests** for `_should_skip_rename()`.
+
+→ [docs/releases/v2.3.0.md](docs/releases/v2.3.0.md)
 
 #### 🔧 v2.2.1 "Einheitlich" (February 8, 2026)
 

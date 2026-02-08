@@ -1,0 +1,7 @@
+version: 1.0.0
+default: customer-flat
+contents:
+  - id: customer-flat
+    type: local
+    uri: customer-flat/
+    description: Flat per-document PDF example (Marsian Habitats)

@@ -6,6 +6,7 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
+| **v2.3.0** | 2026-02-08 | `v2.3.0` | [v2.3.0](v2.3.0.md) — „Pfadtreu": Auto-Detect rename-skip für source_type=file, gitbook_rename Key |
 | **v2.2.1** | 2026-02-08 | `v2.2.1` | [v2.2.1](v2.2.1.md) — „Einheitlich": publish.yml-Versionskonsistenz über alle Dateien |
 | v2.2.0 | 2026-02-08 | `release-v.2.2.0` | [v2.2.0](v2.2.0.md) — „Lückenlos": Config-Completeness-Policy, per-file config docs, audit backlog, sample strategy |
 | v2.1.0 | 2026-02-07 | `release-v.2.1.0` | [v2.1.0](v2.1.0.md) — Font attribution generator, example content, project version on PDF title page |

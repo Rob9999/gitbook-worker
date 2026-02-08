@@ -141,6 +141,50 @@ def _validate_manifest_preconditions(manifest: Path) -> None:
         )
 
 
+def _should_skip_rename(manifest: Path) -> bool:
+    """Determine whether gitbook rename should be skipped.
+
+    Returns *True* when:
+    1. The manifest contains an explicit ``gitbook_rename: false``, **or**
+    2. **all** publish entries have ``source_type: file`` (auto-detect).
+
+    When every entry is ``source_type: file`` the user publishes individual
+    documents whose file paths must stay exactly as declared in the manifest.
+    Running the GitBook rename step would lowercase / kebab-case them,
+    breaking the path references and causing FileNotFoundError.
+    """
+    data = _load_manifest_data(manifest)
+
+    # --- 1. explicit key ---
+    explicit = data.get("gitbook_rename")
+    if explicit is not None:
+        # Accept bool or string representations
+        if isinstance(explicit, bool):
+            return not explicit  # gitbook_rename: false → skip=True
+        val = str(explicit).strip().lower()
+        if val in ("false", "no", "n", "0", "off"):
+            return True
+        if val in ("true", "yes", "y", "1", "on"):
+            return False
+
+    # --- 2. auto-detect: all entries are source_type: file ---
+    entries = data.get("publish", [])
+    if isinstance(entries, list) and entries:
+        all_file = all(
+            str(e.get("source_type") or e.get("type") or "").strip().lower() == "file"
+            for e in entries
+            if isinstance(e, Mapping)
+        )
+        if all_file:
+            LOGGER.info(
+                "Auto-detect: alle Publish-Einträge sind source_type=file "
+                "→ GitBook-Rename wird übersprungen"
+            )
+            return True
+
+    return False
+
+
 def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
     repo_root = args.root or detect_repo_root(Path.cwd())
     language_ctx = resolve_language_context(
@@ -157,6 +201,16 @@ def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
     _validate_manifest_preconditions(manifest)
     language_env = build_language_env(language_ctx)
     publisher_args = tuple(args.publisher_args or ())
+
+    # Determine rename: CLI flag (--no-gitbook-rename) takes precedence,
+    # then manifest key / auto-detect.
+    if args.no_gitbook_rename:
+        do_rename = False
+    elif _should_skip_rename(manifest):
+        do_rename = False
+    else:
+        do_rename = True
+
     return PipelineOptions(
         root=language_ctx.root,
         manifest=manifest,
@@ -164,7 +218,7 @@ def _resolve_options(args: argparse.Namespace) -> PipelineOptions:
         base=args.base,
         reset_others=args.reset_others,
         run_set_flag=not args.no_set_flag,
-        run_gitbook_rename=not args.no_gitbook_rename,
+        run_gitbook_rename=do_rename,
         run_gitbook_summary=not args.no_gitbook_summary,
         run_publisher=not args.no_publish,
         gitbook_use_git=not args.gitbook_no_git,
@@ -207,6 +261,11 @@ def _run_gitbook_steps(options: PipelineOptions) -> None:
             _build_python_cmd(script, *rename_args),
             cwd=options.root,
             options=options,
+        )
+    else:
+        LOGGER.info(
+            "GitBook-Rename übersprungen (gitbook_rename=false oder "
+            "alle Einträge sind source_type=file)"
         )
     if options.run_gitbook_summary:
         summary_args = ["summary", "--root", str(options.root)]

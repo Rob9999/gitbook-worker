@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Build All Habitats PDFs (local)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.workflow_orchestrator",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                "run",
+                "--root",
+                "${workspaceFolder}",
+                "--content-config",
+                "customer-flat/content.yaml",
+                "--lang",
+                "customer-flat",
+                "--profile",
+                "local"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Build All Habitats PDFs (manifest direct)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "gitbook_worker.tools.workflow_orchestrator",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}",
+                "PYTHONIOENCODING": "utf-8",
+                "PYTHONUTF8": "1"
+            },
+            "args": [
+                "run",
+                "--root",
+                "${workspaceFolder}",
+                "--manifest",
+                "customer-flat/publish.yml",
+                "--profile",
+                "local"
+            ],
+            "console": "integratedTerminal",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

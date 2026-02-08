@@ -178,7 +178,7 @@ _SEMVER_RE = re.compile(
     r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:[-+][0-9A-Za-z.-]+)?$"
 )
 _MANIFEST_VERSION_MIN = (0, 1, 0)
-_MANIFEST_VERSION_CURRENT = (0, 1, 0)
+_MANIFEST_VERSION_CURRENT = (0, 1, 1)
 
 
 # Helper function to resolve paths relative to this module's directory
