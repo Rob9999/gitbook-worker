@@ -192,6 +192,7 @@ class OrchestratorConfig:
     publisher_args: tuple[str, ...]
     dry_run: bool
     isolated: bool
+    no_gitbook_rename: bool = False
     steps_override: tuple[str, ...] | None = None
 
 
@@ -655,6 +656,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         publisher_args=publisher_args,
         dry_run=args.dry_run,
         isolated=getattr(args, "isolated", False),
+        no_gitbook_rename=getattr(args, "no_gitbook_rename", False),
         steps_override=steps_override,
     )
 
@@ -1257,6 +1259,8 @@ def _step_publisher(ctx: RuntimeContext) -> None:
         "--manifest",
         str(ctx.config.manifest),
     ]
+    if ctx.config.no_gitbook_rename:
+        cmd.append("--no-gitbook-rename")
     if ctx.config.dry_run:
         cmd.append("--dry-run")
     if ctx.config.commit:
@@ -1363,6 +1367,11 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         action="append",
         dest="publisher_arg",
         help="Zusätzliche Argumente für pipeline.py (mehrfach möglich)",
+    )
+    run_parser.add_argument(
+        "--no-gitbook-rename",
+        action="store_true",
+        help="GitBook-Rename-Schritt überspringen (wird an pipeline.py weitergereicht)",
     )
     run_parser.add_argument(
         "--dry-run",
