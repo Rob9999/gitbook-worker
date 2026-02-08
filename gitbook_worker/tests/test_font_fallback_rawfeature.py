@@ -26,7 +26,9 @@ def _temp_dir():
 class TestRawFeatureRespectsFallbackFlag:
     """Ensure RawFeature={fallback=mainfont} is only emitted when lua fallback is enabled."""
 
-    def _build(self, *, enable_flag: str, manual_fallback: str | None, temp_dir: str) -> str:
+    def _build(
+        self, *, enable_flag: str, manual_fallback: str | None, temp_dir: str
+    ) -> str:
         return _build_font_header(
             main_font="DejaVu Serif",
             sans_font="DejaVu Sans",
@@ -49,9 +51,9 @@ class TestRawFeatureRespectsFallbackFlag:
             manual_fallback="Twemoji Mozilla",
             temp_dir=_temp_dir,
         )
-        assert "RawFeature" not in header, (
-            "RawFeature must not appear when ERDA_ENABLE_LUA_FALLBACK=0"
-        )
+        assert (
+            "RawFeature" not in header
+        ), "RawFeature must not appear when ERDA_ENABLE_LUA_FALLBACK=0"
 
     def test_no_rawfeature_when_fallback_off(
         self, monkeypatch: pytest.MonkeyPatch, _temp_dir: str
