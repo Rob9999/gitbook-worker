@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.2.0 „Lückenlos"** · [Release Notes](docs/releases/v2.2.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
+**v2.2.1 „Einheitlich"** · [Release Notes](docs/releases/v2.2.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.2.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.2.1-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -185,7 +185,7 @@ contents:
 **3. `publish.yml`** – steuert Profile, Fonts und PDF-Optionen:
 
 ```yaml
-version: 0.1.0
+version: 0.1.1
 profiles:
   local:
     steps: [converter, generate_attribution, publisher]
@@ -313,6 +313,12 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release-Verlauf</summary>
+
+#### 🔧 v2.2.1 „Einheitlich" (8. Februar 2026)
+
+- **publish.yml-Versionskonsistenz**: Alle 9 verbleibenden `publish.yml`-Dateien (README-Beispiele, Test-Szenarien, Edge-Cases) von Schema-Version `0.1.0` auf `0.1.1` aktualisiert.
+
+→ [docs/releases/v2.2.1.md](docs/releases/v2.2.1.md)
 
 #### 🎉 v2.2.0 „Lückenlos" (8. Februar 2026)
 
@@ -447,7 +453,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.2.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.2.1-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -570,7 +576,7 @@ contents:
 **3. `publish.yml`** – controls profiles, fonts, and PDF options:
 
 ```yaml
-version: 0.1.0
+version: 0.1.1
 profiles:
   local:
     steps: [converter, generate_attribution, publisher]
@@ -698,6 +704,12 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### 🔧 v2.2.1 "Einheitlich" (February 8, 2026)
+
+- **publish.yml version consistency**: All 9 remaining `publish.yml` files (README examples, test scenarios, edge cases) updated from schema version `0.1.0` to `0.1.1`.
+
+→ [docs/releases/v2.2.1.md](docs/releases/v2.2.1.md)
 
 #### 🎉 v2.2.0 "Lückenlos" (February 8, 2026)
 
