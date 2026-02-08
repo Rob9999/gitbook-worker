@@ -1,7 +1,9 @@
 ---
-version: 1.2.0
-date: 2025-12-07
-history: Added font fallback reporting and abort semantics for PDF builds.
+version: 1.3.0
+date: 2026-02-08
+history:
+  - "1.3.0: 2026-02-08 — pdf_options passthrough, Aliases, publish.yml Konfigurationsanleitung"
+  - "1.2.0: 2025-12-07 — Added font fallback reporting and abort semantics for PDF builds."
 ---
 
 # GitBook Worker Handbook
@@ -74,6 +76,82 @@ a) All fonts, including the primary ones and the `mainfontfallback` ones, shall 
 b) In the unique book project `publish.yml` then is defined which fonts finally shall be used for the book project; e.g. as main font, as, sans font, as ... font, as mainfont fallback. 
 c) The publishing header shall apply the configured fallback stack automatically; individual documents shall not configure their own font fallback behavior.
 
+
+## Configuring `publish.yml` — pdf_options & aliases
+
+Since v2.2.0 the publisher transparently forwards standard Pandoc / LaTeX
+variables from `publish.yml ➜ pdf_options` to the Pandoc command line.
+You no longer need to use custom `header-includes` hacks for common knobs.
+
+### Minimal example
+
+```yaml
+project:
+  name: "My Book"
+  author: "Jane Doe"           # singular alias for authors:[]
+  version: "1.0.0"
+  license: "CC-BY-SA-4.0"
+
+publish:
+  - out_format: pdf             # aliases: format, target_format
+    source_dir: content/
+    pdf_options:
+      documentclass: book
+      fontsize: 12pt
+      geometry: "margin=2.5cm"
+      toc: true
+      toc-depth: 2
+      numbersections: true
+      colorlinks: true
+      linkcolor: blue
+      urlcolor: blue
+      lang: de-DE
+      mainfont: "DejaVu Serif"
+      sansfont: "DejaVu Sans"
+      monofont: "DejaVu Sans Mono"
+```
+
+### Supported pdf_options keys
+
+| Key | Type | Effect |
+|-----|------|--------|
+| `documentclass` | string | LaTeX document class (`article`, `report`, `book`, …) |
+| `fontsize` | string | Font size (`10pt`, `11pt`, `12pt`) |
+| `geometry` | string | Page geometry (`margin=1in`, `a4paper,margin=2.5cm`, …) |
+| `toc` | bool | Generate table of contents (overrides default: folder→true, file→false) |
+| `toc-depth` | int | Depth of the TOC (1–6) |
+| `numbersections` | bool | Number headings |
+| `colorlinks` | bool | Coloured hyperlinks |
+| `linkcolor` | string | Internal link colour |
+| `urlcolor` | string | External URL colour |
+| `citecolor` | string | Citation link colour |
+| `toccolor` | string | TOC link colour |
+| `lang` | string | Pandoc/Babel language tag (e.g. `de-DE`, `en-US`) |
+| `header-includes` | string/list | Raw LaTeX injected into the preamble |
+| `classoption` | string | Additional LaTeX class options |
+| `papersize` | string | Paper size (`a4`, `letter`, …) |
+| `linestretch` | string | Line spacing factor |
+| `mainfont` | string | Main font (Pandoc-native, preferred over `main_font`) |
+| `sansfont` | string | Sans font (Pandoc-native, preferred over `sans_font`) |
+| `monofont` | string | Mono font (Pandoc-native, preferred over `mono_font`) |
+| `main_font` | string | Legacy key for main font (backwards-compatible) |
+| `sans_font` | string | Legacy key for sans font (backwards-compatible) |
+| `mono_font` | string | Legacy key for mono font (backwards-compatible) |
+| `mainfont_fallback` | string | LuaTeX fallback chain (`;`-separated) |
+| `abort_if_missing_glyph` | bool | Abort on missing glyphs (default: `true`) |
+
+All keys not explicitly handled (fonts, toc, lang, header-includes) are passed
+through as Pandoc `-V key=value` arguments, so any valid Pandoc/LaTeX variable
+works.
+
+### Aliases recognised in `publish.yml`
+
+| What | Aliases accepted | Canonical key |
+|------|-----------------|---------------|
+| Output format | `format`, `target_format` | `out_format` |
+| Author(s) | `author` (string) | `authors` (list) |
+
+Full reference: see [`docs/configuration-reference.md`](configuration-reference.md).
 
 ## Docker usage paths
 - Prefer the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI and local runs—it keeps font and LaTeX packages aligned with the publishing defaults.

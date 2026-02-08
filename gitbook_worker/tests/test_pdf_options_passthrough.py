@@ -170,10 +170,12 @@ class TestBuildVariableOverrides:
         assert overrides["sansfont"] == "Bar"
 
     def test_pandoc_native_font_keys_override_legacy(self) -> None:
-        overrides = _build_variable_overrides({
-            "main_font": "Legacy",
-            "mainfont": "Modern",
-        })
+        overrides = _build_variable_overrides(
+            {
+                "main_font": "Legacy",
+                "mainfont": "Modern",
+            }
+        )
         # Pandoc-native key wins (applied after legacy).
         assert overrides["mainfont"] == "Modern"
 
@@ -215,14 +217,16 @@ class TestGetPublishListFormatAlias:
 
         manifest = tmp_path / "publish.yml"
         manifest.write_text(
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 version: 0.1.0
                 publish:
                   - build: true
                     path: content/
                     out: publish/test.pdf
                     format: pdf
-            """),
+            """
+            ),
             encoding="utf-8",
         )
         (tmp_path / "content").mkdir()
@@ -235,14 +239,16 @@ class TestGetPublishListFormatAlias:
 
         manifest = tmp_path / "publish.yml"
         manifest.write_text(
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 version: 0.1.0
                 publish:
                   - build: true
                     path: content/
                     out: publish/test.pdf
                     target_format: pdf
-            """),
+            """
+            ),
             encoding="utf-8",
         )
         (tmp_path / "content").mkdir()
@@ -262,14 +268,16 @@ class TestAuthorSingularAlias:
     def test_author_singular_string(self, tmp_path: Path) -> None:
         manifest = tmp_path / "publish.yml"
         manifest.write_text(
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 version: 0.1.0
                 project:
                   name: Test Book
                   license: "CC BY 4.0"
                   author: "Alice Wonderland"
                 publish: []
-            """),
+            """
+            ),
             encoding="utf-8",
         )
         meta = _resolve_project_metadata(manifest)
@@ -278,7 +286,8 @@ class TestAuthorSingularAlias:
     def test_authors_plural_still_works(self, tmp_path: Path) -> None:
         manifest = tmp_path / "publish.yml"
         manifest.write_text(
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 version: 0.1.0
                 project:
                   name: Test Book
@@ -287,7 +296,8 @@ class TestAuthorSingularAlias:
                     - Alice
                     - Bob
                 publish: []
-            """),
+            """
+            ),
             encoding="utf-8",
         )
         meta = _resolve_project_metadata(manifest)
@@ -298,7 +308,8 @@ class TestAuthorSingularAlias:
         """When both author and authors are set, authors wins."""
         manifest = tmp_path / "publish.yml"
         manifest.write_text(
-            textwrap.dedent("""\
+            textwrap.dedent(
+                """\
                 version: 0.1.0
                 project:
                   name: Test Book
@@ -307,7 +318,8 @@ class TestAuthorSingularAlias:
                     - From-Authors
                   author: From-Author
                 publish: []
-            """),
+            """
+            ),
             encoding="utf-8",
         )
         meta = _resolve_project_metadata(manifest)

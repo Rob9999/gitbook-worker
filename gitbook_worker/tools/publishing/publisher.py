@@ -2246,7 +2246,11 @@ def _build_variable_overrides(pdf_options: Mapping[str, Any]) -> Dict[str, str]:
     for key in _PDF_OPTIONS_PASSTHROUGH_VARS:
         value = pdf_options.get(key)
         if value is not None:
-            variables[key] = str(value).strip() if not isinstance(value, bool) else ("true" if value else "false")
+            variables[key] = (
+                str(value).strip()
+                if not isinstance(value, bool)
+                else ("true" if value else "false")
+            )
 
     return variables
 
@@ -4085,7 +4089,9 @@ def main() -> None:
         abort_missing_glyph = pdf_options.get("abort_if_missing_glyph", True)
 
         # -- toc / toc-depth from pdf_options ------------------------------ #
-        toc_override: bool | None = pdf_options.get("toc") if "toc" in pdf_options else None
+        toc_override: bool | None = (
+            pdf_options.get("toc") if "toc" in pdf_options else None
+        )
         toc_depth: int | None = pdf_options.get("toc_depth")
 
         # -- lang override from pdf_options (→ Pandoc metadata) ------------ #
