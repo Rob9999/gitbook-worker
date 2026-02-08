@@ -1,4 +1,6 @@
-# GitBook Worker (v2.1.0)
+# GitBook Worker
+
+**v2.1.0** · [Release Notes](docs/releases/v2.1.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -6,79 +8,145 @@
 
 ## 🇩🇪 Deutsch
 
-**Aktuelles Release**: v2.1.0 (7. Februar 2026) – [Release Notes](docs/releases/v2.1.0.md)
+### Was ist GitBook Worker?
 
-GitBook Worker liefert die mehrsprachige 2.x-Linie. Das Python-Paket wird über
-`pip install -e .` installiert, und die Publishing-Pipeline wird durch `content.yaml`
-gesteuert, die jeden Sprachbaum auflistet (z. B. `de/`, `en/`). Das CLI wählt eine
-Sprache über `--lang` und führt die Orchestrierungs-/Publishing-Schritte für diesen
-Inhaltsbaum aus.
+GitBook Worker ist ein Python-basiertes CLI-Toolkit, das **Markdown-Inhalte in
+druckfertige PDF-Bücher** umwandelt. Es übernimmt den gesamten Weg von der
+GitBook-kompatiblen Ordnerstruktur bis zum fertigen PDF – inklusive
+Inhaltsverzeichnis, Titelseite, Emoji-Rendering, Font-Management und
+Lizenz-Attribution.
 
-> Kundenguide (Installation & Start): siehe [docs/customer-installation.md](docs/customer-installation.md).
+Die Pipeline besteht aus aufeinander abgestimmten Schritten:
 
-### 🎉 Neu in v2.1.0
+| Schritt | Aufgabe |
+|---|---|
+| **Converter** | Konvertiert und normalisiert Markdown-Quellen |
+| **Engineering Formatter** | Formatiert technische Dokumente einheitlich |
+| **Attribution Generator** | Erzeugt `ATTRIBUTION.md` und `LICENSE-*` aus der Font-Konfiguration |
+| **Publisher** | Baut das PDF via Pandoc + LuaLaTeX mit konfigurierten Fonts und Fallbacks |
 
-- **Font-Attribution-Generator**: Neuer `generate_attribution`-Workflow-Schritt erzeugt automatisch `ATTRIBUTION.md` und `LICENSE-*`-Dateien aus `fonts.yml` für lizenzkonformes Publizieren.
-- **Projektversion auf Titelseite**: Optionales `project.version` in `publish.yml` (oder `"version"` in `book.json`) wird auf der PDF-Titelseite neben dem Datum angezeigt, z. B. *2026-01-08 · Version 1.0.0*.
-- **Umfangreicher Beispielinhalt**: 50+ mehrsprachige Beispieldateien (Zitate, erweitertes Markdown, 100+ Sprachproben, Emoji-Kategorien, Bildtests) für `de` und `en`.
-- Release-Tag: `release-v.2.1.0`; Paketversion: 2.1.0.
+Ein einziger CLI-Befehl orchestriert alle Schritte – lokal, in Docker oder in
+GitHub Actions.
 
-Siehe [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md) für das vollständige Changelog.
+### Warum und wann GitBook Worker einsetzen?
 
-### 🔧 Änderungen in v2.0.6 (Hotfix)
+GitBook Worker ist das richtige Werkzeug, wenn du:
 
-- Heading-Normalizer folgt nun der `SUMMARY.md`-Tiefe und behält dokumentinterne Kaskaden bei – behebt PDF-ToC-Versatz.
-- `ProjectMetadata` toleriert fehlende Daten (Standard `None`) und behält den Policy-Standard bei.
-- `pypdf` zu Laufzeitabhängigkeiten hinzugefügt für CLI-Tools, die PDF-Hilfsmittel importieren.
-- Release-Prozedur dokumentiert in `gitbook_worker/docs/how-to-release/release-procedure.md`.
-- Release-Tag: `release-v.2.0.6-hotfix`; Paketversion: 2.0.6.post1.
+- **Markdown-Bücher als PDF publizieren** willst, ohne manuell LaTeX schreiben
+  zu müssen.
+- **Mehrsprachige Buchprojekte** aus einer einzigen Repository-Struktur
+  verwalten und bauen möchtest (z. B. `de/`, `en/`, `ua/`).
+- **Reproduzierbare Builds** brauchst – ob lokal, in CI/CD oder im
+  Docker-Container, das Ergebnis ist identisch.
+- **Farb-Emojis im PDF** benötigst (Twemoji Mozilla COLR/CPAL).
+- **Lückenlose Font-Lizenz-Compliance** sicherstellen musst: Jede Schriftart
+  wird in `fonts.yml` deklariert, Attribution wird automatisch generiert.
+- **Bestehende GitBook-Projekte** (mit `SUMMARY.md` und `book.json`) offline
+  in hochwertige PDFs überführen willst.
 
-Siehe [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md) für Details.
+> **Nicht geeignet für**: reine HTML/Web-Ausgabe (dafür GitBook selbst nutzen),
+> Projekte ohne Markdown-Quellen oder Einzeldatei-Konvertierungen (einzelne Markdown ginge, wenn der Aufwand das rechtfertigt, ansonsten dafür
+> Pandoc direkt nutzen).
 
-<details>
-<summary>🔙 Highlights aus v2.0.5 und v2.0.0</summary>
+### Wie GitBook Worker einsetzen?
 
-#### v2.0.5 (Hotfix)
-- Publisher gibt relevanten TeX-`.log`-Ausschnitt bei Pandoc/LuaLaTeX-Fehler aus.
-- Orchestrator erhielt `--isolated` und `--logs-dir`, wählt automatisch `<root>/content.yaml`.
-- Emoji-Überschriften: LaTeX-Makro-Behandlung gehärtet, um Bookmark-Abstürze mit `hyperref` zu vermeiden.
+#### Voraussetzungen
 
-#### v2.0.0
-**Kritischer Fix**: Farb-Emoji-Rendering mit **Twemoji Mozilla v0.7.0** (COLR/CPAL).
+- Python ≥ 3.10
+- Pandoc und TeX Live (LuaLaTeX) – für PDF-Erzeugung
+- Optional: Docker Desktop – für isolierte Builds
 
-**Docker-Architektur**: Volume-Mount-Font-Verwaltung statt statischem COPY.
-
-**Lizenz-Compliance**: Alle Fonts erzwungen über `gitbook_worker/defaults/fonts.yml`.
-
-**Wichtige Änderungen**:
-- ✅ Farb-Emojis rendern korrekt in PDF-Ausgabe (🎨 🌈 ✨)
-- ✅ Docker Volume-Mount-Architektur für Fonts (keine Rebuilds nötig)
-- ✅ Explizite Font-Konfigurationserzwingung via `fonts.yml`
-- ✅ Windows/Linux Pfadkompatibilität für Docker Desktop
-- ⚠️ Breaking: Docker-Font-Verwaltung geändert (siehe Release Notes)
-
-Siehe [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md) · [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
-</details>
-
-### Schnellstart
-
-### Schnellstart
+#### Installation
 
 ```bash
 python -m pip install --upgrade pip
-pip install -e .
-
-# Orchestrator für das deutsche Buch ausführen
-gitbook-worker run --lang de --profile default
-
-# Manifest validieren ohne Pipeline-Lauf
-gitbook-worker validate --lang de
-
-# Andere Sprache wählen (sofern in content.yaml definiert)
-gitbook-worker run --lang en --step publisher
+pip install -e .          # Entwicklermodus (empfohlen)
+# oder
+pip install dist/gitbook_worker-2.1.0-py3-none-any.whl   # fertige Distribution
 ```
 
-`content.yaml` ist die zentrale Quelle für verfügbare Sprachen:
+#### Schnellstart
+
+```bash
+# Gesamte Pipeline für das deutsche Buch ausführen
+gitbook-worker run --lang de --profile local
+
+# Nur den Publisher-Schritt ausführen
+gitbook-worker run --lang de --step publisher
+
+# Manifest validieren, ohne die Pipeline zu starten
+gitbook-worker validate --lang de
+```
+
+#### Wichtige CLI-Optionen
+
+| Option | Beschreibung |
+|---|---|
+| `--lang <id>` | Sprache wählen (muss in `content.yaml` definiert sein) |
+| `--profile <name>` | Profilname aus `publish.yml` (`default`, `local`, `publisher`) |
+| `--step <name>` | Einzelnen Schritt ausführen statt der ganzen Pipeline |
+| `--root <path>` | Projekt-Wurzelverzeichnis (Standard: aktuelles Verzeichnis) |
+| `--dry-run` | Pipeline simulieren, ohne Artefakte zu erzeugen |
+| `--isolated` | Isolierten Lauf ohne Seiteneffekte erzwingen |
+
+#### Docker-Builds
+
+Für reproduzierbare Builds in einem isolierten Container:
+
+```bash
+# Docker-Image bauen und Orchestrator im Container ausführen
+python -m gitbook_worker.tools.docker.run_docker orchestrator \
+  --profile default --use-dynamic --rebuild
+
+# Oder das Convenience-Skript verwenden
+./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
+```
+
+> **Hinweis**: `--profile docker` im Orchestrator ist lediglich ein Profilname und
+> löst *keine* Docker-Ausführung aus. Für echte Container-Läufe immer
+> `run_docker.py` verwenden.
+
+#### Remote-Inhaltsquellen
+
+Einträge mit `type: git` in `content.yaml` werden automatisch nach
+`.gitbook-content/<lang-id>` geklont. Zugangsdaten konfigurierst du über die in
+`credentialRef` benannte Umgebungsvariable (SSH-Key-Pfad oder -Inhalt). Fehlt
+der Zugang, bricht das CLI mit einer klaren Fehlermeldung ab. Für CI-Caches
+setze `GITBOOK_CONTENT_ROOT` auf den vorbereiteten Sprachbaum.
+
+### Wie das eigene Projekt für optimale Ergebnisse strukturieren?
+
+GitBook Worker erwartet eine klar definierte Verzeichnisstruktur. Je genauer du
+dieser Konvention folgst, desto reibungsloser läuft die Pipeline.
+
+#### Empfohlene Projektstruktur
+
+```
+mein-buch/
+├── content.yaml              # Zentrale Sprachkonfiguration
+├── de/                       # Sprachbaum (beliebig viele)
+│   ├── book.json             # Buch-Metadaten (Titel, Autor, Sprache)
+│   ├── publish.yml           # Build-Profile, Fonts, PDF-Optionen
+│   ├── CITATION.cff          # Zitationsmetadaten (optional)
+│   ├── LICENSE               # Lizenz des Buchinhalts
+│   ├── content/              # Markdown-Inhalte
+│   │   ├── README.md         # Bucheinleitung (Cover/Intro)
+│   │   ├── SUMMARY.md        # Inhaltsverzeichnis / Kapitelreihenfolge
+│   │   ├── kapitel-1/
+│   │   │   └── README.md
+│   │   ├── kapitel-2/
+│   │   │   └── README.md
+│   │   └── anhang-a.md
+│   └── publish/              # Ausgabeverzeichnis (PDFs landen hier)
+├── en/                       # Weiterer Sprachbaum
+│   └── ...
+├── fonts-storage/            # Lokaler Font-Cache (wird automatisch befüllt)
+└── gitbook_worker/           # Das Toolkit (als Paket oder Submodul)
+```
+
+#### Die drei Schlüsseldateien
+
+**1. `content.yaml`** – listet alle Sprachen und ihre Quellen:
 
 ```yaml
 version: 1.0.0
@@ -88,187 +156,319 @@ contents:
     type: local
     uri: de/
     description: Deutscher Basisinhalt
+  - id: en
+    type: local
+    uri: en/
+    description: Englischer Inhalt
   - id: ua
     type: git
     uri: github.com:rob9999@democratic-social-wins
     credentialRef: GITBOOK_CONTENT_UA_DEPLOY_KEY
 ```
 
-Der Orchestrator liest diese Datei automatisch; Remote-Einträge nutzen künftig
-`credentialRef` zum Abrufen privater Inhalte über Umgebungsgeheimnisse oder CI-Secrets.
+**2. `book.json`** – Buch-Metadaten im GitBook-Format:
 
-### Remote-Inhaltsquellen
+```json
+{
+  "title": "Mein Buch",
+  "author": "Autorenname",
+  "language": "de",
+  "description": "Kurze Beschreibung des Buchs.",
+  "root": "content/",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  }
+}
+```
 
-- Einträge mit `type: git` werden automatisch nach `.gitbook-content/<lang-id>` geklont,
-  sobald `gitbook-worker ... --lang <id>` ausgeführt wird.
-- Zugangsdaten werden über die in `credentialRef` benannte Umgebungsvariable bereitgestellt.
-  Die Variable kann einen absoluten Pfad zu einem SSH-Privatschlüssel oder den Schlüsselinhalt
-  selbst enthalten. Inline-Schlüssel werden mit restriktiven Berechtigungen nach
-  `.gitbook-content/keys/<lang>.key` geschrieben und über `GIT_SSH_COMMAND` verwendet.
-- Fehlt der Zugang, bricht das CLI mit einer klaren Fehlermeldung ab, damit Geheimnisse
-  niemals in Manifeste gelangen.
-- Um einen bestehenden Checkout wiederzuverwenden (z. B. CI-Cache), setze `GITBOOK_CONTENT_ROOT`
-  auf den Pfad des vorbereiteten Sprachbaums; das CLI überspringt dann das Klonen.
+**3. `publish.yml`** – steuert Profile, Fonts und PDF-Optionen:
 
-### Weiteren Sprachbaum hinzufügen
+```yaml
+version: 0.1.0
+profiles:
+  local:
+    steps: [converter, generate_attribution, publisher]
+    registry: null
+  default:
+    steps: [check_if_to_publish, ensure_readme, update_citation,
+            converter, engineering-document-formatter,
+            generate_attribution, publisher]
 
-1. Struktur von `de/` duplizieren (oder von einem leeren Remote-Repo starten), damit die neue
-   Sprache `content/`, `book.json`, `publish/` und optionale Assets hat.
-2. Eintrag in `content.yaml` mit neuer Sprach-`id`, `type` und `uri` ergänzen. Für Remote-Quellen
-   `credentialRef` definieren und Secret außerhalb von Git speichern.
-3. Gemeinsame Defaults (Front Matter, Fonts, README-Snippets) aus `gitbook_worker/defaults/`
-   synchronisieren, damit PDF/HTML-Ausgabe den anderen Sprachen entspricht.
-4. `gitbook-worker validate --lang <id>` (oder `run`) ausführen, um sicherzustellen, dass
-   Manifeste und Publish-Targets aufgelöst werden.
-5. Besonderheiten in `docs/contributor-new-language.md` dokumentieren, damit das Team die
-   Einrichtung nachvollziehen kann.
+project:
+  name: "Mein Buch"
+  version: "1.0.0"
+  license: "CC BY-SA 4.0"
 
-Die vollständige Anleitung für Beitragende steht in `docs/contributor-new-language.md`.
+publish:
+  - build: true
+    format: pdf
+    source_type: folder
+    source_format: markdown
+    target_style: gitbook
+    pdf_options:
+      mainfont: "DejaVu Serif"
+      sansfont: "DejaVu Sans"
+      monofont: "DejaVu Sans Mono"
+      mainfontfallback:
+        - "Twemoji Mozilla"
+        - "ERDA CC-BY CJK"
+```
+
+#### Tipps für optimale Ergebnisse
+
+- **`SUMMARY.md` pflegen**: Diese Datei definiert die Kapitelreihenfolge und
+  Hierarchie im PDF. Jeder Eintrag verweist auf eine Markdown-Datei.
+- **Bilder unter `content/assets/`** oder `.gitbook/assets/` ablegen – der
+  Publisher löst diese Pfade automatisch auf.
+- **Ein Kapitel pro Ordner**: Lege für jedes Kapitel einen Unterordner mit
+  `README.md` an. Das hält die Struktur übersichtlich und erlaubt
+  kapitelspezifische Assets.
+- **Frontmatter nutzen**: Setze `doc_type` in YAML-Frontmatter, um die
+  Dokumentklassifikation zu steuern (z. B. `chapter`, `appendix`, `cover`).
+  Ohne Frontmatter greift eine Pfad-Heuristik.
+- **Fonts nur über `fonts.yml` konfigurieren**: Nie Systemfonts direkt
+  referenzieren. Alle Schriftarten müssen in
+  `gitbook_worker/defaults/fonts.yml` registriert sein.
+- **Emojis verwenden**: Farb-Emojis (🎨 🌈 ✨) werden nativ in PDF gerendert.
+  Der Publisher erkennt und konvertiert sie automatisch.
+
+#### Weitere Sprache hinzufügen
+
+1. Struktur von `de/` duplizieren (`content/`, `book.json`, `publish.yml`,
+   `publish/`).
+2. Eintrag in `content.yaml` ergänzen.
+3. Gemeinsame Defaults aus `gitbook_worker/defaults/` synchronisieren.
+4. `gitbook-worker validate --lang <id>` ausführen.
+5. Besonderheiten in `docs/contributor-new-language.md` dokumentieren.
+
+Ausführliche Anleitung: [docs/contributor-new-language.md](docs/contributor-new-language.md).
 
 ### Repository-Aufbau
 
-- `content.yaml` – listet jede Sprache/Inhaltsquelle samt Credential-Handles.
-- `<lang>/` (z. B. `de/`, `en/`) – eigenständige GitBook-Bäume mit `content/`,
-  `book.json`, `publish/`, `CITATION.cff` usw.
-- `gitbook_worker/` – Python-Paket mit Publishing, Konvertierung, QA und Docker-Helfern.
-- `docs/` – Nutzer-Guides (z. B. `docs/multilingual-content-guide.md`,
-  `docs/contributor-new-language.md`, `docs/releases/v2.1.0.md`).
-- `gitbook_worker/docs/` – Engineering-Dokumente wie Sprintpläne, Migrationen, RFCs und
-  das archivierte Legacy-Paket-Snapshot unter `gitbook_worker/docs/archive/`.
-- `tests/` – pytest-Suiten für Publishing, Orchestrierung und Emoji-QA.
-- `.github/workflows/` – CI-Einstiegspunkte mit dem paketierten CLI.
-- `tools/` – veralteter Import-Shim für Legacy-`tools.*`-Pfade (Kompatibilität).
-
-### GitHub-Actions-Vorlagen
-
-Workflows unter `.github/workflows/` bauen das Docker-Image aus
-`gitbook_worker/tools/docker/Dockerfile.dynamic` und rufen denselben Orchestrator-
-Einstiegspunkt auf, der auch lokal genutzt wird. Diese Workflows kopieren oder
-erweitern, um das Paket in andere Repositories zu integrieren. Das statische Image
-(`gitbook_worker/tools/docker/Dockerfile`) bleibt für Air-Gap-Runner verfügbar;
-die Hilfsskripte verwenden standardmäßig die dynamische Variante, damit Font- und
-LaTeX-Abhängigkeiten mit CI synchron bleiben.
+| Pfad | Inhalt |
+|---|---|
+| `content.yaml` | Zentrale Sprach- und Quellenkonfiguration |
+| `<lang>/` (`de/`, `en/`) | Eigenständige GitBook-Bäume mit Inhalt, Konfiguration und Ausgabe |
+| `gitbook_worker/` | Python-Paket: Publishing, Konvertierung, QA, Docker-Helfer |
+| `gitbook_worker/defaults/` | Gemeinsame Defaults: `fonts.yml`, `frontmatter.yml`, `readme.yml` |
+| `docs/` | Nutzer-Dokumentation, Release Notes, Anleitungen |
+| `gitbook_worker/docs/` | Engineering-Dokumente (Sprints, Architektur, Migrationen) |
+| `tests/` | pytest-Suiten für Publishing, Orchestrierung und Emoji-QA |
+| `.github/workflows/` | CI/CD-Pipelines mit dem paketierten CLI |
+| `fonts-storage/` | Lokaler Font-Cache (nicht in Git, wird automatisch befüllt) |
 
 ### Font-Verwaltung & Lizenz-Compliance
 
-**Kritische Designentscheidung**: Alle vom Publisher genutzten Fonts MÜSSEN explizit in
-`gitbook_worker/defaults/fonts.yml` konfiguriert sein. Keine hardcodierten Font-Fallbacks
-oder automatische Systemfont-Erkennung erlaubt. Dies stellt sicher:
+Alle vom Publisher genutzten Fonts müssen explizit in
+`gitbook_worker/defaults/fonts.yml` konfiguriert sein – keine hardcodierten
+Fallbacks, keine automatische Systemfont-Erkennung. Dies gewährleistet:
 
-- **Lizenz-Compliance**: Jede Font-Lizenz (CC-BY, MIT, OFL etc.) wird nachverfolgt und dokumentiert
-- **Attributionspflichten**: Korrekte Attribution kann jederzeit für alle genutzten Fonts generiert werden
-- **Reproduzierbare Builds**: Identische Font-Konfiguration in lokaler, CI/CD- und Docker-Umgebung
-- **Keine versteckten Abhängigkeiten**: Publisher schlägt explizit fehl, wenn konfigurierte Fonts nicht verfügbar sind
+- **Lizenz-Compliance**: Jede Font-Lizenz wird nachverfolgt und dokumentiert.
+- **Automatische Attribution**: `ATTRIBUTION.md` und `LICENSE-*` werden aus der
+  Konfiguration generiert.
+- **Reproduzierbare Builds**: Identische Fonts in lokaler, CI- und Docker-Umgebung.
+- **Fehlschlag statt Überraschung**: Der Publisher bricht ab, wenn Fonts fehlen,
+  statt leere Kästchen zu erzeugen.
 
-Die `Dockerfile.dynamic` liest `fonts.yml` und installiert nur konfigurierte Fonts. Jeder Font-Eintrag
-benötigt `name`, `license`, `license_url` und entweder `download_url` oder `paths`. Siehe
-`gitbook_worker/defaults/fonts.yml` für das vollständige Font-Register und
-`gitbook_worker/docs/architecture/smart-font-stack.md` für die Architektur.
+Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md).
 
 ### Entwicklung
 
-- Abhängigkeiten in `setup.cfg` ergänzen und `__version__` in `gitbook_worker/__init__.py`
-  synchron zum Release halten (aktuell 2.1.0).
-- Tests lokal mit `pytest -q` aus dem Repository-Root ausführen; sprachspezifische Fixtures
-  liegen unter `de/`, sodass CI jeden Baum unabhängig mounten kann.
-- Bevorzugte Einstiegspunkte: `python -m gitbook_worker.tools.workflow_orchestrator ...` oder
-  das Konsolenskript `gitbook-worker` mit `--lang <id>`.
-- Remote-Sprachen werden unter `.gitbook-content/` gecacht, damit wiederholte Läufe denselben
-  Checkout wiederverwenden und trotzdem Updates ziehen.
-- Repository-weite Konventionen stehen in der Root-`AGENTS.md`; es gibt keine verschachtelten Overrides.
-- Dokumentenablage: Nutzer-Docs in `docs/`, Engineering-Docs in `gitbook_worker/docs/`.
+- Abhängigkeiten in `setup.cfg`, Version in `gitbook_worker/__init__.py`
+  synchron halten (aktuell 2.1.0).
+- Tests: `pytest -q` aus dem Repository-Root.
+- Konventionen: siehe `AGENTS.md` (Formatting, Logging, Commit-Etikette).
+- Docs-Ablage: Nutzer-Docs → `docs/`, Engineering-Docs → `gitbook_worker/docs/`.
 
-#### Docker-Builds
+### Weiterführende Dokumentation
 
-Um Builds in einem isolierten Docker-Container auszuführen (empfohlen für reproduzierbare CI-ähnliche Umgebung):
+| Thema | Dokument |
+|---|---|
+| Installation & Kundenstart | [docs/customer-installation.md](docs/customer-installation.md) |
+| Mehrsprachiger Inhalt | [docs/multilingual-content-guide.md](docs/multilingual-content-guide.md) |
+| Neue Sprache beitragen | [docs/contributor-new-language.md](docs/contributor-new-language.md) |
+| Dokumenttypen konfigurieren | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
+| Handbuch (Referenz) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
+| Font-Architektur | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
 
-```bash
-# Image bauen und Orchestrator im Container ausführen
-python -m gitbook_worker.tools.docker.run_docker orchestrator --profile default --use-dynamic --rebuild
+<details>
+<summary>📋 Release-Verlauf</summary>
 
-# Oder das Convenience-Skript verwenden
-./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
-```
+#### 🎉 v2.1.0 (7. Februar 2026)
 
-**Wichtig**: Die `workflow_orchestrator`-CLI hat eine `--profile docker`-Option, aber dies ist nur ein
-Profilname – es löst KEINE Docker-Ausführung aus. Um innerhalb von Docker auszuführen, nutze das
-`run_docker.py`-Modul, das das Image baut, einen Container startet, den Workspace nach `/workspace`
-mountet und den Orchestrator darin ausführt.
+- **Font-Attribution-Generator**: Neuer Workflow-Schritt erzeugt automatisch `ATTRIBUTION.md` und `LICENSE-*` aus `fonts.yml`.
+- **Projektversion auf Titelseite**: `project.version` in `publish.yml` wird auf der PDF-Titelseite gerendert.
+- **50+ Beispieldateien** für `de` und `en` (Zitate, Sprachproben, Emoji-Kategorien, Bildtests).
+
+→ [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md)
+
+#### 🔧 v2.0.6 (Hotfix)
+
+- Heading-Normalizer folgt `SUMMARY.md`-Tiefe, behebt PDF-ToC-Versatz.
+- `pypdf` als Laufzeitabhängigkeit hinzugefügt.
+
+→ [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md)
+
+#### v2.0.5 (Hotfix)
+
+- TeX-Log-Auszug bei Pandoc/LuaLaTeX-Fehlern.
+- `--isolated` und `--logs-dir` für den Orchestrator.
+
+→ [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md)
+
+#### v2.0.0
+
+- Farb-Emoji-Rendering mit Twemoji Mozilla (COLR/CPAL).
+- Docker-Volume-Mount-Architektur für Fonts.
+- Font-Compliance via `fonts.yml` erzwungen.
+
+→ [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
+
+</details>
 
 ---
 
 ## 🇬🇧 English
 
-**Latest Release**: v2.1.0 (February 7, 2026) – [Release Notes](docs/releases/v2.1.0.md)
+### What Is GitBook Worker?
 
-GitBook Worker ships the multi-language 2.x line. The Python package installs via
-`pip install -e .`, and the publishing pipeline is driven by `content.yaml`, which lists
-every language tree (e.g., `de/`, `en/`). The CLI picks a language via `--lang` and runs
-the orchestration/publishing steps for that content root.
+GitBook Worker is a Python-based CLI toolkit that turns **Markdown content into
+print-ready PDF books**. It handles the entire journey from a
+GitBook-compatible folder structure to a finished PDF – including table of
+contents, title page, emoji rendering, font management, and license
+attribution.
 
-> Customer guide (installation & getting started): see [docs/customer-installation.md](docs/customer-installation.md).
+The pipeline consists of coordinated steps:
 
-### 🎉 What's New in v2.1.0
+| Step | Purpose |
+|---|---|
+| **Converter** | Converts and normalises Markdown sources |
+| **Engineering Formatter** | Applies uniform formatting to technical documents |
+| **Attribution Generator** | Creates `ATTRIBUTION.md` and `LICENSE-*` files from the font configuration |
+| **Publisher** | Builds the PDF via Pandoc + LuaLaTeX with configured fonts and fallbacks |
 
-- **Font Attribution Generator**: New `generate_attribution` workflow step auto-creates `ATTRIBUTION.md` and `LICENSE-*` files from `fonts.yml`, ensuring license compliance without manual effort.
-- **Project Version on Title Page**: New optional `project.version` in `publish.yml` (or `"version"` in `book.json`) is rendered on the PDF title page alongside the date, e.g. *2026-01-08 · Version 1.0.0*.
-- **Comprehensive Example Content**: 50+ multilingual example files (citations, advanced Markdown, 100+ language samples, emoji categories, image tests) for both `de` and `en`.
-- Release tag: `release-v.2.1.0`; packaging version: 2.1.0.
+A single CLI command orchestrates all steps – locally, in Docker, or in
+GitHub Actions.
 
-See [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md) for the full changelog.
+### Why and When to Use GitBook Worker?
 
-### 🔧 What Changed in v2.0.6 (hotfix)
+GitBook Worker is the right tool when you need to:
 
-- Heading normalizer now follows `SUMMARY.md` depth while preserving in-document cascades, fixing PDF ToC misalignment.
-- `ProjectMetadata` tolerates missing dates (default `None`) and retains policy default.
-- Added `pypdf` to runtime dependencies for CLI tools that import PDF utilities.
-- Documented release procedure in `gitbook_worker/docs/how-to-release/release-procedure.md`.
-- Release tag: `release-v.2.0.6-hotfix`; packaging version: 2.0.6.post1.
+- **Publish Markdown books as PDF** without writing LaTeX by hand.
+- **Manage multilingual book projects** from a single repository structure
+  (e.g. `de/`, `en/`, `ua/`).
+- **Ensure reproducible builds** – whether locally, in CI/CD, or inside a
+  Docker container, the output is identical.
+- **Render colour emojis in PDF** (Twemoji Mozilla COLR/CPAL).
+- **Guarantee font license compliance**: every font is declared in `fonts.yml`,
+  attribution is generated automatically.
+- **Convert existing GitBook projects** (with `SUMMARY.md` and `book.json`)
+  into high-quality PDFs offline.
 
-See [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md) for details.
+> **Not suited for**: pure HTML/web output (use GitBook itself), projects
+> without Markdown sources, or single-file conversions (a single Markdown file
+> would work if the overhead is justified, otherwise use Pandoc directly).
 
-<details>
-<summary>🔙 Highlights from v2.0.5 and v2.0.0</summary>
+### How to Use GitBook Worker?
 
-#### v2.0.5 (hotfix)
-- Publisher prints relevant TeX `.log` excerpt on Pandoc/LuaLaTeX failure.
-- Orchestrator gained `--isolated` and `--logs-dir`, auto-picks `<root>/content.yaml`.
-- Emoji headings: hardened LaTeX macro handling to avoid bookmark crashes with `hyperref`.
+#### Prerequisites
 
-#### v2.0.0
-**Critical Fix**: Color emoji rendering using **Twemoji Mozilla v0.7.0** (COLR/CPAL).
+- Python ≥ 3.10
+- Pandoc and TeX Live (LuaLaTeX) – for PDF generation
+- Optional: Docker Desktop – for isolated builds
 
-**Docker Architecture**: Volume-mount font management instead of static COPY.
-
-**License Compliance**: All fonts enforced via `gitbook_worker/defaults/fonts.yml`.
-
-**Key Changes**:
-- ✅ Color emojis render correctly in PDF output (🎨 🌈 ✨)
-- ✅ Docker volume-mount architecture for fonts (no rebuilds needed)
-- ✅ Explicit font configuration enforcement via `fonts.yml`
-- ✅ Windows/Linux path compatibility for Docker Desktop
-- ⚠️ Breaking: Docker font management changed (see release notes)
-
-See [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md) · [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
-</details>
-
-### Quick Start
+#### Installation
 
 ```bash
 python -m pip install --upgrade pip
-pip install -e .
-
-# Run the orchestrator against the German book
-gitbook-worker run --lang de --profile default
-
-# Validate a manifest without running the pipeline
-gitbook-worker validate --lang de
-
-# Pick a different language (if defined in content.yaml)
-gitbook-worker run --lang en --step publisher
+pip install -e .          # editable / dev mode (recommended)
+# or
+pip install dist/gitbook_worker-2.1.0-py3-none-any.whl   # pre-built distribution
 ```
 
-`content.yaml` is the single source of truth for available languages:
+#### Quick Start
+
+```bash
+# Run the full pipeline for the German book
+gitbook-worker run --lang de --profile local
+
+# Run only the publisher step
+gitbook-worker run --lang de --step publisher
+
+# Validate the manifest without running the pipeline
+gitbook-worker validate --lang de
+```
+
+#### Key CLI Options
+
+| Option | Description |
+|---|---|
+| `--lang <id>` | Select language (must be defined in `content.yaml`) |
+| `--profile <name>` | Profile name from `publish.yml` (`default`, `local`, `publisher`) |
+| `--step <name>` | Run a single step instead of the full pipeline |
+| `--root <path>` | Project root directory (default: current directory) |
+| `--dry-run` | Simulate the pipeline without producing artefacts |
+| `--isolated` | Force an isolated run without side effects |
+
+#### Docker Builds
+
+For reproducible builds in an isolated container:
+
+```bash
+# Build Docker image and run orchestrator inside the container
+python -m gitbook_worker.tools.docker.run_docker orchestrator \
+  --profile default --use-dynamic --rebuild
+
+# Or use the convenience script
+./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
+```
+
+> **Note**: `--profile docker` in the orchestrator is merely a profile name and
+> does *not* trigger Docker execution. For actual container runs, always use
+> `run_docker.py`.
+
+#### Remote Content Sources
+
+Entries with `type: git` in `content.yaml` are automatically cloned into
+`.gitbook-content/<lang-id>`. Credentials are configured via the environment
+variable named in `credentialRef` (SSH key path or contents). If the credential
+is missing, the CLI aborts with a clear error. For CI caches, set
+`GITBOOK_CONTENT_ROOT` to the prepared language tree.
+
+### How to Structure Your Project for Optimal Results?
+
+GitBook Worker expects a well-defined directory layout. The closer you follow
+this convention, the smoother the pipeline runs.
+
+#### Recommended Project Structure
+
+```
+my-book/
+├── content.yaml              # Central language configuration
+├── de/                       # Language tree (as many as you need)
+│   ├── book.json             # Book metadata (title, author, language)
+│   ├── publish.yml           # Build profiles, fonts, PDF options
+│   ├── CITATION.cff          # Citation metadata (optional)
+│   ├── LICENSE               # Content license
+│   ├── content/              # Markdown content
+│   │   ├── README.md         # Book introduction (cover/intro)
+│   │   ├── SUMMARY.md        # Table of contents / chapter order
+│   │   ├── chapter-1/
+│   │   │   └── README.md
+│   │   ├── chapter-2/
+│   │   │   └── README.md
+│   │   └── appendix-a.md
+│   └── publish/              # Output directory (PDFs go here)
+├── en/                       # Another language tree
+│   └── ...
+├── fonts-storage/            # Local font cache (auto-populated)
+└── gitbook_worker/           # The toolkit (as package or submodule)
+```
+
+#### The Three Key Files
+
+**1. `content.yaml`** – lists all languages and their sources:
 
 ```yaml
 version: 1.0.0
@@ -278,111 +478,176 @@ contents:
     type: local
     uri: de/
     description: German baseline content
+  - id: en
+    type: local
+    uri: en/
+    description: English content
   - id: ua
     type: git
     uri: github.com:rob9999@democratic-social-wins
     credentialRef: GITBOOK_CONTENT_UA_DEPLOY_KEY
 ```
 
-The orchestrator reads this file automatically; remote entries will later use
-`credentialRef` to fetch private content via env secrets or CI secret stores.
+**2. `book.json`** – book metadata in GitBook format:
 
-### Remote Content Sources
+```json
+{
+  "title": "My Book",
+  "author": "Author Name",
+  "language": "en",
+  "description": "A short description of the book.",
+  "root": "content/",
+  "structure": {
+    "readme": "README.md",
+    "summary": "SUMMARY.md"
+  }
+}
+```
 
-- Entries with `type: git` are cloned automatically into `.gitbook-content/<lang-id>`
-  whenever you run `gitbook-worker ... --lang <id>`.
-- Provide credentials through the environment variable named in `credentialRef`. The
-  variable can contain either an absolute path to an SSH private key or the key contents
-  themselves. Inline keys are written to `.gitbook-content/keys/<lang>.key` with
-  restrictive permissions and used via `GIT_SSH_COMMAND`.
-- If the credential is missing, the CLI aborts with a clear error so secrets never leak
-  into manifests.
-- To reuse an existing checkout (for example a CI cache), set `GITBOOK_CONTENT_ROOT` to
-  the path of the prepared language tree and the CLI will skip cloning.
+**3. `publish.yml`** – controls profiles, fonts, and PDF options:
 
-### Add Another Language Tree
+```yaml
+version: 0.1.0
+profiles:
+  local:
+    steps: [converter, generate_attribution, publisher]
+    registry: null
+  default:
+    steps: [check_if_to_publish, ensure_readme, update_citation,
+            converter, engineering-document-formatter,
+            generate_attribution, publisher]
 
-1. Duplicate the structure from `de/` (or start from an empty remote repo) so the new
-   language has `content/`, `book.json`, `publish/`, and optional assets.
-2. Append an entry to `content.yaml` with the new language `id`, `type`, and `uri`. For
-   remote sources, define a `credentialRef` and store the secret outside git.
-3. Sync shared defaults (front matter, fonts, README snippets) from
-   `gitbook_worker/defaults/` so PDF/HTML output matches the other languages.
-4. Run `gitbook-worker validate --lang <id>` (or `run`) to ensure manifests and publish
-   targets resolve.
-5. Document any special steps in `docs/contributor-new-language.md` so the rest of the
-   team can reproduce the setup.
+project:
+  name: "My Book"
+  version: "1.0.0"
+  license: "CC BY-SA 4.0"
 
-The dedicated contributor walkthrough lives in `docs/contributor-new-language.md`.
+publish:
+  - build: true
+    format: pdf
+    source_type: folder
+    source_format: markdown
+    target_style: gitbook
+    pdf_options:
+      mainfont: "DejaVu Serif"
+      sansfont: "DejaVu Sans"
+      monofont: "DejaVu Sans Mono"
+      mainfontfallback:
+        - "Twemoji Mozilla"
+        - "ERDA CC-BY CJK"
+```
+
+#### Tips for Optimal Results
+
+- **Maintain `SUMMARY.md`**: this file defines chapter order and hierarchy in
+  the PDF. Every entry points to a Markdown file.
+- **Place images in `content/assets/`** or `.gitbook/assets/` – the publisher
+  resolves these paths automatically.
+- **One chapter per folder**: create a subfolder with `README.md` for each
+  chapter. This keeps the structure tidy and allows chapter-specific assets.
+- **Use front matter**: set `doc_type` in YAML front matter to control document
+  classification (e.g. `chapter`, `appendix`, `cover`). Without front matter,
+  a path-based heuristic applies.
+- **Configure fonts only via `fonts.yml`**: never reference system fonts
+  directly. All typefaces must be registered in
+  `gitbook_worker/defaults/fonts.yml`.
+- **Use emojis freely**: colour emojis (🎨 🌈 ✨) are rendered natively in PDF.
+  The publisher detects and converts them automatically.
+
+#### Adding Another Language
+
+1. Duplicate the structure from `de/` (`content/`, `book.json`, `publish.yml`,
+   `publish/`).
+2. Add an entry to `content.yaml`.
+3. Sync shared defaults from `gitbook_worker/defaults/`.
+4. Run `gitbook-worker validate --lang <id>`.
+5. Document any specifics in `docs/contributor-new-language.md`.
+
+Full walkthrough: [docs/contributor-new-language.md](docs/contributor-new-language.md).
 
 ### Repository Layout
 
-- `content.yaml` – lists every language/content source plus credential handles.
-- `<lang>/` (e.g., `de/`, `en/`) – self-contained GitBook trees containing `content/`,
-  `book.json`, `publish/`, `CITATION.cff`, etc.
-- `gitbook_worker/` – Python package with publishing, conversion, QA, and Docker helpers.
-- `docs/` – user-facing guides (e.g., `docs/multilingual-content-guide.md`,
-  `docs/contributor-new-language.md`, `docs/releases/v2.1.0.md`).
-- `gitbook_worker/docs/` – engineering docs such as sprint plans, migrations, RFCs, and
-  the archived legacy package snapshot under `gitbook_worker/docs/archive/`.
-- `tests/` – pytest suites covering publishing, orchestration, and emoji QA.
-- `.github/workflows/` – CI entrypoints using the packaged CLI.
-- `tools/` – deprecated import shim for legacy `tools.*` paths (kept for compatibility).
-
-### GitHub Actions Templates
-
-Workflows under `.github/workflows/` build the Docker image from
-`gitbook_worker/tools/docker/Dockerfile.dynamic` and call the same orchestrator
-entrypoint used locally. Copy or extend these workflows to integrate the package
-into other repositories. The static image (`gitbook_worker/tools/docker/Dockerfile`)
-remains available for air-gapped runners; the helper scripts default to the
-dynamic variant so font and LaTeX dependencies stay in sync with CI.
+| Path | Contents |
+|---|---|
+| `content.yaml` | Central language and source configuration |
+| `<lang>/` (`de/`, `en/`) | Self-contained GitBook trees with content, config, and output |
+| `gitbook_worker/` | Python package: publishing, conversion, QA, Docker helpers |
+| `gitbook_worker/defaults/` | Shared defaults: `fonts.yml`, `frontmatter.yml`, `readme.yml` |
+| `docs/` | User documentation, release notes, guides |
+| `gitbook_worker/docs/` | Engineering docs (sprints, architecture, migrations) |
+| `tests/` | pytest suites for publishing, orchestration, and emoji QA |
+| `.github/workflows/` | CI/CD pipelines using the packaged CLI |
+| `fonts-storage/` | Local font cache (not in Git, auto-populated) |
 
 ### Font Management & License Compliance
 
-**Critical Design Decision**: All fonts used by the publisher MUST be explicitly configured in
-`gitbook_worker/defaults/fonts.yml`. No hardcoded font fallbacks or automatic system font
-discovery is allowed. This ensures:
+All fonts used by the publisher must be explicitly configured in
+`gitbook_worker/defaults/fonts.yml` – no hardcoded fallbacks, no automatic
+system font discovery. This ensures:
 
-- **License Compliance**: Every font's license (CC-BY, MIT, OFL, etc.) is tracked and documented
-- **Attribution Requirements**: We can always generate proper attribution for all fonts used
-- **Reproducible Builds**: Identical font configuration across local, CI/CD, and Docker environments
-- **No Hidden Dependencies**: Publisher fails explicitly if configured fonts are unavailable
+- **License Compliance**: every font license is tracked and documented.
+- **Automatic Attribution**: `ATTRIBUTION.md` and `LICENSE-*` are generated from
+  the configuration.
+- **Reproducible Builds**: identical fonts across local, CI, and Docker
+  environments.
+- **Failure over Surprise**: the publisher aborts when fonts are missing rather
+  than producing empty boxes.
 
-The `Dockerfile.dynamic` reads `fonts.yml` and installs only the configured fonts. Each font entry
-must include `name`, `license`, `license_url`, and either `download_url` or `paths`. See
-`gitbook_worker/defaults/fonts.yml` for the complete font registry and
-`gitbook_worker/docs/architecture/smart-font-stack.md` for the architecture.
+Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md).
 
 ### Development
 
-- Add dependencies to `setup.cfg` and keep `__version__` in `gitbook_worker/__init__.py` in sync
-  with the packaged release (currently 2.1.0).
-- Run tests locally with `pytest -q` from the repository root; language-specific fixtures live
-  under `de/` so CI can mount each tree independently.
-- Preferred entrypoints: `python -m gitbook_worker.tools.workflow_orchestrator ...` or the
-  console script `gitbook-worker` with `--lang <id>`.
-- Remote languages are cached under `.gitbook-content/` so repeated runs reuse the same
-  checkout while still pulling updates.
-- Repository-wide conventions live in the root `AGENTS.md`; there are no nested overrides.
-- Documentation placement: user docs in `docs/`, engineering docs in `gitbook_worker/docs/`.
+- Keep dependencies in `setup.cfg` and version in `gitbook_worker/__init__.py`
+  in sync (currently 2.1.0).
+- Tests: `pytest -q` from the repository root.
+- Conventions: see `AGENTS.md` (formatting, logging, commit etiquette).
+- Documentation: user docs → `docs/`, engineering docs → `gitbook_worker/docs/`.
 
-#### Docker Builds
+### Further Documentation
 
-To run builds in an isolated Docker container (recommended for reproducible CI-like environment):
+| Topic | Document |
+|---|---|
+| Installation & Customer Start | [docs/customer-installation.md](docs/customer-installation.md) |
+| Multilingual Content | [docs/multilingual-content-guide.md](docs/multilingual-content-guide.md) |
+| Contributing a New Language | [docs/contributor-new-language.md](docs/contributor-new-language.md) |
+| Configuring Document Types | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
+| Handbook (Reference) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
+| Font Architecture | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
 
-```bash
-# Build image and run orchestrator inside container
-python -m gitbook_worker.tools.docker.run_docker orchestrator --profile default --use-dynamic --rebuild
+<details>
+<summary>📋 Release History</summary>
 
-# Or use the convenience script
-./gitbook_worker/scripts/run-in-docker.sh --lang de --profile default
-```
+#### 🎉 v2.1.0 (February 7, 2026)
 
-**Important**: The `workflow_orchestrator` CLI has a `--profile docker` option but this is just a
-profile name—it does NOT trigger Docker execution. To run inside Docker, use the `run_docker.py`
-module which builds the image, starts a container, mounts your workspace to `/workspace`, and
-executes the orchestrator inside.
+- **Font Attribution Generator**: new workflow step auto-creates `ATTRIBUTION.md` and `LICENSE-*` from `fonts.yml`.
+- **Project Version on Title Page**: `project.version` in `publish.yml` is rendered on the PDF title page.
+- **50+ example files** for `de` and `en` (citations, language samples, emoji categories, image tests).
+
+→ [docs/releases/v2.1.0.md](docs/releases/v2.1.0.md)
+
+#### 🔧 v2.0.6 (hotfix)
+
+- Heading normaliser follows `SUMMARY.md` depth, fixes PDF ToC misalignment.
+- `pypdf` added as runtime dependency.
+
+→ [docs/releases/v2.0.6.md](docs/releases/v2.0.6.md)
+
+#### v2.0.5 (hotfix)
+
+- TeX log excerpt on Pandoc/LuaLaTeX failure.
+- `--isolated` and `--logs-dir` for the orchestrator.
+
+→ [docs/releases/v2.0.5.md](docs/releases/v2.0.5.md)
+
+#### v2.0.0
+
+- Colour emoji rendering with Twemoji Mozilla (COLR/CPAL).
+- Docker volume-mount architecture for fonts.
+- Font compliance enforced via `fonts.yml`.
+
+→ [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
+
+</details>
 
 ---
 
