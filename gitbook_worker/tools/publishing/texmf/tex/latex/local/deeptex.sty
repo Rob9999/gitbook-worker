@@ -19,9 +19,9 @@
 % crashes. This block is idempotent so that latex-emoji can still redefine the
 % macros later.
 \makeatletter
-\@ifundefined{panEmojiFont}{\newcommand{\panEmojiFont}{}}{\renewcommand{\panEmojiFont}{}}
-\@ifundefined{panEmoji}{\newcommand{\panEmoji}[1]{#1}}{\renewcommand{\panEmoji}[1]{#1}}
-\@ifundefined{coloremoji}{\newcommand{\coloremoji}[1]{#1}}{\renewcommand{\coloremoji}[1]{#1}}
+\DeclareRobustCommand{\panEmojiFont}{}
+\DeclareRobustCommand{\panEmoji}[1]{#1}
+\DeclareRobustCommand{\coloremoji}[1]{#1}
 \pdfstringdefDisableCommands{%%
 	\def\panEmojiFont{}%%
 	\def\panEmoji#1{#1}%%

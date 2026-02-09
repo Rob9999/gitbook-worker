@@ -139,7 +139,7 @@ local function get_prologue()
 %s}
 \ltjsetparameter{jacharrange={-208}}
 \fi
-\newcommand*{\panEmoji}[1]{{\p@emoji@font#1}}
+\DeclareRobustCommand*{\panEmoji}[1]{{\p@emoji@font#1}}
 \makeatother
 ]]):format(fname, fopts, dcrsrc)
 end
@@ -204,17 +204,31 @@ end
 
 --- For Meta elements.
 local function mainproc_Meta(meta)
+  local headers = meta['header-includes']
+  if headers == nil then
+    headers = pandoc.MetaList({})
+  elseif pantype(headers) == 'MetaList' then
+    abort("unexpected metavalue type: header-includes")
+  end
+  local changed = false
+  -- header: bxcoloremoji \usepackage (when enabled)
   local src = get_header()
   if src then
-    local headers = meta['header-includes']
-    if headers == nil then
-      headers = pandoc.MetaList({})
-    elseif pantype(headers) == 'MetaList' then
-      abort("unexpected metavalue type: header-includes")
-    end
     insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', src)})
-    meta['header-includes'] = headers
+    changed = true
     log("header successfully appended")
+  end
+  -- prologue: \panEmoji definition + font setup + codepoint declarations
+  -- MUST go into header-includes (preamble) so that \panEmoji is defined
+  -- BEFORE \tableofcontents reads the .toc file.
+  local prologue_src = get_prologue()
+  if prologue_src then
+    insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', prologue_src)})
+    changed = true
+    log("prologue successfully inserted into header-includes")
+  end
+  if changed then
+    meta['header-includes'] = headers
     return meta
   end
 end
@@ -222,12 +236,6 @@ end
 --- For the whole document.
 local function mainproc_Pandoc(doc)
   log("number of emoji spans: %s", text_count)
-  local src = get_prologue()
-  if src then
-    insert(doc.blocks, 1, pandoc.RawBlock('latex', src))
-    log("prologue successfully inserted")
-    return doc
-  end
 end
 
 ---------------------------------------- the filter

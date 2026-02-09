@@ -163,16 +163,12 @@ local function get_prologue()
 %s}
 \ltjsetparameter{jacharrange={-208}}
 \fi
-\ifcsname panEmoji\endcsname
-  \renewcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
-\else
-  \newcommand*{\panEmoji}[1]{{\panEmojiFont#1}}
-\fi
+\DeclareRobustCommand*{\panEmoji}[1]{{\panEmojiFont#1}}
 ]]):format(fname, fopts, dcrsrc)
   if bxcoloremoji then
     return ([[
 \ifcsname coloremoji\endcsname
-  \providecommand*{\panEmoji}[1]{\coloremoji{#1}}
+  \DeclareRobustCommand*{\panEmoji}[1]{\coloremoji{#1}}
 \else
 %s
 \fi
@@ -241,18 +237,29 @@ end
 
 --- For the whole document.
 local function mainproc_Pandoc(doc)
+  local headers = normalized_headers(doc.meta['header-includes'])
+  local changed = false
+  -- header: bxcoloremoji \usepackage (when enabled)
   local header_src = get_header()
   if header_src then
-    local headers = normalized_headers(doc.meta['header-includes'])
     insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', header_src)})
-    doc.meta['header-includes'] = headers
+    changed = true
     log("header successfully appended")
   end
   log("number of emoji spans: %s", text_count)
+  -- prologue: \panEmoji definition + font setup + codepoint declarations
+  -- MUST go into header-includes (preamble) so that \panEmoji is defined
+  -- BEFORE \tableofcontents reads the .toc file.  Previously this was
+  -- inserted into doc.blocks[1] (body) which comes AFTER \tableofcontents
+  -- in Pandoc's default LaTeX template, causing emoji in TOC to show '??'.
   local src = get_prologue()
   if src then
-    insert(doc.blocks, 1, pandoc.RawBlock('latex', src))
-    log("prologue successfully inserted")
+    insert(headers, pandoc.MetaBlocks{pandoc.RawBlock('latex', src)})
+    changed = true
+    log("prologue successfully inserted into header-includes")
+  end
+  if changed then
+    doc.meta['header-includes'] = headers
     return doc
   end
 end
