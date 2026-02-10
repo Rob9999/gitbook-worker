@@ -356,6 +356,12 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
 
     On Windows a temporary ``fonts.conf`` is generated so fontconfig picks up
     repo fonts (including those declared only in ``fonts.yml`` like ERDA CJK).
+
+    .. note::
+
+       ``luaotfload`` does **not** scan OSFONTDIR entries recursively.
+       We therefore expand top-level font directories to include every
+       subdirectory that actually contains ``.ttf`` / ``.otf`` files.
     """
 
     new_dirs: List[str] = []
@@ -366,15 +372,27 @@ def _configure_osfontdir(additional_dirs: Optional[Sequence[Path]] = None) -> No
     if additional_dirs:
         entries.extend(additional_dirs)
 
-    for directory in entries + _ADDITIONAL_FONT_DIRS:
+    # Expand entries: luaotfload does NOT scan OSFONTDIR recursively,
+    # so we must add every subdirectory that contains font files.
+    expanded: List[Path] = []
+    for entry in entries:
+        try:
+            resolved = Path(entry).resolve()
+        except (OSError, RuntimeError):
+            resolved = Path(entry)
+        if not resolved.is_dir():
+            continue
+        expanded.append(resolved)
+        for sub in resolved.rglob("*"):
+            if sub.is_dir() and (any(sub.glob("*.ttf")) or any(sub.glob("*.otf"))):
+                expanded.append(sub)
+
+    for directory in list(expanded) + list(_ADDITIONAL_FONT_DIRS):
         if not directory:
             continue
-        try:
-            resolved = Path(directory).resolve()
-        except (OSError, RuntimeError):
-            resolved = Path(directory)
-        if resolved.exists():
-            new_dirs.append(str(resolved))
+        dir_str = str(directory)
+        if dir_str not in new_dirs:
+            new_dirs.append(dir_str)
 
     if not new_dirs:
         return
@@ -2671,10 +2689,29 @@ def prepare_publishing(
         logger.warning("⚠ ERDA CJK Font nicht gefunden in: %s", erda_font_locations)
 
     # Register additional fonts from repo .github/fonts directory
+    # Skip build/, __pycache__/ directories and *-test.* files to avoid
+    # registering stale test fonts that share family names with production fonts
+    # (see erda-font-system-analysis.md for background).
+    _SKIP_FONT_DIRS = {"build", "__pycache__", ".git", "node_modules"}
+    _SKIP_FONT_SUFFIXES = {"-test.ttf", "-test.otf", "-draft.ttf", "-draft.otf"}
+
+    def _is_excluded_font(fp: Path) -> bool:
+        """Return True if a font file should be skipped during registration."""
+        # Skip files inside excluded directory names
+        if _SKIP_FONT_DIRS.intersection(p.name for p in fp.parents):
+            return True
+        # Skip files matching test/draft naming patterns
+        if any(fp.name.endswith(suffix) for suffix in _SKIP_FONT_SUFFIXES):
+            return True
+        return False
+
     if repo_font_dir.exists():
         logger.info("✓ Repository-Schriftverzeichnis gefunden: %s", repo_font_dir)
         for pattern in ("*.ttf", "*.otf"):
             for font_path in repo_font_dir.rglob(pattern):
+                if _is_excluded_font(font_path):
+                    logger.debug("⏭ Überspringe ausgeschlossene Font: %s", font_path)
+                    continue
                 logger.info("✓ Registriere Repository-Font: %s", font_path)
                 _register_font(str(font_path))
         _remember_font_dir(repo_font_dir)
@@ -3041,6 +3078,27 @@ def _run_pandoc(
         logger.info(
             "📄 FONT-STACK: pandoc-fonts.tex @ %s\n%s", header_file, font_header_content
         )
+
+        # CRITICAL FIX: When manual Lua fallback is active, do NOT pass
+        # mainfont/sansfont/monofont as Pandoc --variable.  Pandoc's default
+        # template triggers babel's \babelfont{rm}[...]{font} which creates a
+        # SECOND font family without the RawFeature={fallback=mainfont} feature.
+        # That babel-registered font then takes precedence over our
+        # pandoc-fonts.tex \setmainfont for all document text, silently
+        # disabling the luaotfload fallback chain.
+        #
+        # By omitting these variables, the template's $if(mainfont)$ guard
+        # evaluates to false, skipping babel font setup entirely.  Our
+        # pandoc-fonts.tex is then the sole font authority and its
+        # \setmainfont[RawFeature={fallback=mainfont}] is the one that sticks.
+        if manual_fallback_spec:
+            for _font_key in ("mainfont", "sansfont", "monofont"):
+                variable_map.pop(_font_key, None)
+            logger.info(
+                "🔧 FONT-STACK: Removed mainfont/sansfont/monofont from "
+                "variable_map to prevent babel \\babelfont override of "
+                "luaotfload fallback chain"
+            )
 
         # If a title was provided, prefer passing it via Pandoc metadata so the
         # standard template handles \maketitle once. Injecting our own title
