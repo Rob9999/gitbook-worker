@@ -1,7 +1,8 @@
 ---
-version: 1.0.0
-date: 2025-12-26
+version: 1.1.0
+date: 2026-05-04
 history:
+  - 2026-05-04: add AI reference check failure code 44
   - 2025-12-26: initial draft with exit-code policy and publishing expectations
 ---
 
@@ -27,3 +28,9 @@ Document each code with at least the following columns:
 - Keep codes stable once released; only deprecate with a replacement noted.
 - Update this file whenever a new exit reason is added or messaging changes.
 - Ensure automated/help output stays in sync with this table during reviews.
+
+## Current AI/QA-specific codes
+
+| Code | Component | Summary | Healing | Trigger | Observability |
+|------|-----------|---------|---------|---------|---------------|
+| 44 | `ai_references` | AI-Referenzpruefung meldet fehlgeschlagene Eintraege | JSON-Report pruefen, Quellen manuell korrigieren oder Lauf ohne `--fail-on-failed` wiederholen. | Mindestens eine Referenz konnte nicht validiert oder repariert werden. | CLI exit code, Log, JSON-Report unter dem konfigurierten Reportpfad. |

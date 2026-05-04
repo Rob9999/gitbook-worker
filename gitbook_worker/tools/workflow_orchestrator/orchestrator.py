@@ -637,8 +637,9 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
     manifest_data = _load_manifest(manifest)
     profile = _resolve_profile(manifest_data, args.profile, variables)
     repo_visibility = _detect_repo_visibility(args.repo_visibility)
-    publisher_args = _split_publisher_args(args.publisher_arg)
-    steps_override = tuple(args.step) if args.step else None
+    publisher_args = _split_publisher_args(getattr(args, "publisher_arg", None))
+    raw_steps = getattr(args, "step", None)
+    steps_override = tuple(raw_steps) if raw_steps else None
     return OrchestratorConfig(
         root=root,
         manifest=manifest,
@@ -650,11 +651,11 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         profile=profile,
         repo_visibility=repo_visibility,
         repository=repository,
-        commit=args.commit,
-        base=args.base,
-        reset_others=args.reset_others,
+        commit=getattr(args, "commit", None),
+        base=getattr(args, "base", None),
+        reset_others=getattr(args, "reset_others", False),
         publisher_args=publisher_args,
-        dry_run=args.dry_run,
+        dry_run=getattr(args, "dry_run", False),
         isolated=getattr(args, "isolated", False),
         no_gitbook_rename=getattr(args, "no_gitbook_rename", False),
         steps_override=steps_override,
@@ -980,7 +981,8 @@ def _step_ai_reference_check(ctx: RuntimeContext) -> None:
         raise FileNotFoundError(
             f"ai_references.py nicht gefunden unter {script}; bitte Tools-Verzeichnis prüfen"
         )
-    report = ctx.root / ".github" / "reports" / "ai_reference_report.json"
+    report = ctx.language_root / "publish" / "reports" / "ai_reference_report.json"
+    summary = ctx.language_root / "content" / "SUMMARY.md"
     cmd = [
         ctx.python,
         str(script),
@@ -988,10 +990,14 @@ def _step_ai_reference_check(ctx: RuntimeContext) -> None:
         str(ctx.root),
         "--manifest",
         str(ctx.config.manifest),
+        "--language",
+        str(ctx.language_id),
         "--json-report",
         str(report),
         "--no-progress",
     ]
+    if summary.exists():
+        cmd.extend(["--summary", str(summary)])
     ctx.run_command(cmd)
 
 

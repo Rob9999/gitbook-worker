@@ -33,20 +33,35 @@ from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Seque
 import requests
 import tqdm
 
+from gitbook_worker.core.application.ai_reference_check import (
+    AI_REFERENCE_FAILURE_EXIT_CODE,
+    REDACTED_SECRET,
+    RequestThrottle,
+    ThrottleConfig,
+    exit_code_for_summary,
+    redact_secrets,
+    summarize_report,
+)
+from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.logging_config import get_logger
-from gitbook_worker.tools.publishing.gitbook_style import SummaryContext, get_summary_layout
+from gitbook_worker.tools.publishing.gitbook_style import (
+    SummaryContext,
+    get_summary_layout,
+)
 from gitbook_worker.tools.quality.sources import extract_sources
 
 LOGGER = get_logger(__name__)
 
 _JSON_BLOCK_RE = re.compile(r"```json\s*(?P<body>.*?)```", re.DOTALL)
 _SUMMARY_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]*)?\)")
+_SECRET_QUERY_RE = re.compile(r"([?&](?:key|api_key)=)[^&\s]+", re.IGNORECASE)
 
 DEFAULT_PROMPT = "Proof and repair the reference"
 DEFAULT_MODEL = "gpt-4"
+DEFAULT_GENAI_MODEL = "gemini-2.5-flash"
 DEFAULT_PROVIDER = "openai"
 DEFAULT_URL = "https://api.openai.com/v1/chat/completions"
-DEFAULT_TEMPERATURE = 0.7
+DEFAULT_TEMPERATURE = 0.1
 DEFAULT_TIMEOUT = 60.0
 DEFAULT_MAX_RETRIES = 3
 
@@ -55,6 +70,9 @@ ENV_API_KEY = "AI_REFERENCE_API_KEY"
 ENV_PROVIDER = "AI_REFERENCE_PROVIDER"
 ENV_MODEL = "AI_REFERENCE_MODEL"
 ENV_TEMPERATURE = "AI_REFERENCE_TEMPERATURE"
+ENV_REQUESTS_PER_MINUTE = "AI_REFERENCE_REQUESTS_PER_MINUTE"
+ENV_MIN_REQUEST_INTERVAL = "AI_REFERENCE_MIN_REQUEST_INTERVAL"
+ENV_THROTTLE_JITTER = "AI_REFERENCE_THROTTLE_JITTER"
 
 
 @dataclass(frozen=True)
@@ -204,11 +222,19 @@ def discover_markdown_files(
     """Return Markdown files that should be inspected for references."""
 
     if explicit_files:
-        files = [file if file.is_absolute() else (root / file).resolve() for file in explicit_files]
-        return sorted({file for file in files if file.exists() and file.suffix.lower() == ".md"})
+        files = [
+            file if file.is_absolute() else (root / file).resolve()
+            for file in explicit_files
+        ]
+        return sorted(
+            {file for file in files if file.exists() and file.suffix.lower() == ".md"}
+        )
 
-    context = get_summary_layout(root)
-    summary_path = summary or _discover_summary(context)
+    if summary is not None:
+        summary_path = summary
+    else:
+        context = get_summary_layout(root)
+        summary_path = _discover_summary(context)
     files = _extract_markdown_from_summary(summary_path)
     roots = _resolve_manifest_roots(manifest)
     filtered = _filter_files_by_roots(files, roots)
@@ -310,7 +336,9 @@ def _build_prompt(task: ReferenceTask, base_prompt: str) -> str:
     )
 
 
-def call_model(task: ReferenceTask, prompt: str, config: ModelConfig) -> ReferenceResult:
+def call_model(
+    task: ReferenceTask, prompt: str, config: ModelConfig
+) -> ReferenceResult:
     """Send ``task`` to the configured AI backend and return the response."""
 
     provider = (config.provider or DEFAULT_PROVIDER).lower()
@@ -343,12 +371,14 @@ def call_model(task: ReferenceTask, prompt: str, config: ModelConfig) -> Referen
                 )
                 parsed_ok, parsed = _extract_json_from_text(content)
                 if not parsed_ok:
-                    return ReferenceResult(task, False, parsed, "AI response did not return JSON")
+                    return ReferenceResult(
+                        task, False, parsed, "AI response did not return JSON"
+                    )
                 return ReferenceResult(task, True, parsed)
 
             if provider in {"genai", "google-genai"}:
                 payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
-                url = config.base_url or "https://generativelanguage.googleapis.com/v1beta/models"
+                url = _build_genai_url(config)
                 if config.api_key:
                     connector = "&" if "?" in url else "?"
                     url = f"{url}{connector}key={config.api_key}"
@@ -368,7 +398,9 @@ def call_model(task: ReferenceTask, prompt: str, config: ModelConfig) -> Referen
                 )
                 parsed_ok, parsed = _extract_json_from_text(generated)
                 if not parsed_ok:
-                    return ReferenceResult(task, False, parsed, "AI response did not return JSON")
+                    return ReferenceResult(
+                        task, False, parsed, "AI response did not return JSON"
+                    )
                 return ReferenceResult(task, True, parsed)
 
             payload = {
@@ -386,35 +418,82 @@ def call_model(task: ReferenceTask, prompt: str, config: ModelConfig) -> Referen
             try:
                 data = response.json()
             except json.JSONDecodeError as exc:
-                return ReferenceResult(task, False, response.text, f"Invalid JSON response: {exc}")
+                return ReferenceResult(
+                    task, False, response.text, f"Invalid JSON response: {exc}"
+                )
 
             if isinstance(data, Mapping):
                 if {"success", "org", "validation_date", "type"} <= set(data):
                     return ReferenceResult(task, True, data)
-                content = data.get("content") if isinstance(data.get("content"), str) else None
+                content = (
+                    data.get("content")
+                    if isinstance(data.get("content"), str)
+                    else None
+                )
                 if content:
                     parsed_ok, parsed = _extract_json_from_text(content)
                     if parsed_ok:
                         return ReferenceResult(task, True, parsed)
-                    return ReferenceResult(task, False, parsed, "AI content missing JSON")
+                    return ReferenceResult(
+                        task, False, parsed, "AI content missing JSON"
+                    )
             return ReferenceResult(task, False, data, "Unsupported response format")
 
         except requests.HTTPError as exc:
             status = exc.response.status_code if exc.response else None
             if status == 429 and attempt < config.max_retries:
                 wait_time = random.randint(1, 8)
-                LOGGER.warning("Rate limited by provider – retrying in %s seconds", wait_time)
+                LOGGER.warning(
+                    "Rate limited by provider – retrying in %s seconds", wait_time
+                )
                 time.sleep(wait_time)
                 continue
-            return ReferenceResult(task, False, None, f"HTTP error: {exc}")
+            return ReferenceResult(
+                task,
+                False,
+                None,
+                _sanitize_error_message(f"HTTP error: {exc}", config),
+            )
         except requests.RequestException as exc:
             if attempt < config.max_retries:
                 wait_time = random.randint(1, 5)
-                LOGGER.warning("Request failed (%s), retrying in %s seconds", exc, wait_time)
+                LOGGER.warning(
+                    "Request failed (%s), retrying in %s seconds", exc, wait_time
+                )
                 time.sleep(wait_time)
                 continue
-            return ReferenceResult(task, False, None, f"Request error: {exc}")
+            return ReferenceResult(
+                task,
+                False,
+                None,
+                _sanitize_error_message(f"Request error: {exc}", config),
+            )
     return ReferenceResult(task, False, None, "Maximum retries exceeded")
+
+
+def _build_genai_url(config: ModelConfig) -> str:
+    """Return a Gemini generateContent URL from a base URL or full endpoint."""
+
+    base_url = config.base_url or "https://generativelanguage.googleapis.com/v1beta"
+    if ":generateContent" in base_url:
+        return base_url
+
+    clean = base_url.rstrip("/")
+    model = config.model or DEFAULT_GENAI_MODEL
+    if clean.endswith("/models"):
+        return f"{clean}/{model}:generateContent"
+    if "/models/" in clean:
+        return f"{clean}:generateContent"
+    return f"{clean}/models/{model}:generateContent"
+
+
+def _sanitize_error_message(message: str, config: ModelConfig) -> str:
+    """Remove provider secrets from error strings before logging/reporting."""
+
+    sanitized = _SECRET_QUERY_RE.sub(rf"\1{REDACTED_SECRET}", message)
+    if config.api_key:
+        sanitized = sanitized.replace(config.api_key, REDACTED_SECRET)
+    return sanitized
 
 
 def apply_fixes(
@@ -468,7 +547,10 @@ def apply_fixes(
                 continue
             lines[index] = updated
             changed = True
-            LOGGER.info("Repaired reference in %s (line %s)", file, lineno)
+            if write_changes:
+                LOGGER.info("Repaired reference in %s (line %s)", file, lineno)
+            else:
+                LOGGER.info("Prepared reference repair in %s (line %s)", file, lineno)
 
         if changed and write_changes:
             try:
@@ -489,14 +571,40 @@ def _parse_float(value: Optional[str], default: float) -> float:
 
 
 def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
-    base_url = args.ai_url or os.getenv(ENV_URL) or DEFAULT_URL
-    api_key = args.ai_api_key or os.getenv(ENV_API_KEY)
     provider = args.ai_provider or os.getenv(ENV_PROVIDER) or DEFAULT_PROVIDER
-    model = args.model or os.getenv(ENV_MODEL) or DEFAULT_MODEL
+    provider_normalized = provider.lower()
+    raw_base_url = args.ai_url or os.getenv(ENV_URL)
+    if raw_base_url:
+        base_url = raw_base_url
+    elif provider_normalized in {"genai", "google-genai"}:
+        base_url = "https://generativelanguage.googleapis.com/v1beta"
+    else:
+        base_url = DEFAULT_URL
+    api_key = args.ai_api_key or os.getenv(ENV_API_KEY)
+    if not api_key and provider_normalized in {"genai", "google-genai"}:
+        api_key = (
+            os.getenv("GEMINI_API_KEY")
+            or os.getenv("GOOGLE_API_KEY")
+            or os.getenv("GENAI_API_KEY")
+            or os.getenv("GOOGLE_GENAI_API_KEY")
+        )
+    model = args.model or os.getenv(ENV_MODEL)
+    if model is None:
+        model = (
+            DEFAULT_GENAI_MODEL
+            if provider_normalized in {"genai", "google-genai"}
+            else DEFAULT_MODEL
+        )
     temperature_env = os.getenv(ENV_TEMPERATURE)
-    temperature = args.temperature if args.temperature is not None else _parse_float(temperature_env, DEFAULT_TEMPERATURE)
+    temperature = (
+        args.temperature
+        if args.temperature is not None
+        else _parse_float(temperature_env, DEFAULT_TEMPERATURE)
+    )
     timeout = args.timeout if args.timeout is not None else DEFAULT_TIMEOUT
-    max_retries = args.max_retries if args.max_retries is not None else DEFAULT_MAX_RETRIES
+    max_retries = (
+        args.max_retries if args.max_retries is not None else DEFAULT_MAX_RETRIES
+    )
     return ModelConfig(
         base_url=base_url,
         api_key=api_key,
@@ -508,55 +616,158 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
     )
 
 
+def _resolve_throttle_config(args: argparse.Namespace) -> ThrottleConfig:
+    requests_per_minute = (
+        args.requests_per_minute
+        if args.requests_per_minute is not None
+        else _parse_float(os.getenv(ENV_REQUESTS_PER_MINUTE), 0.0)
+    )
+    min_interval = (
+        args.min_request_interval
+        if args.min_request_interval is not None
+        else _parse_float(os.getenv(ENV_MIN_REQUEST_INTERVAL), 0.0)
+    )
+    jitter = (
+        args.throttle_jitter
+        if args.throttle_jitter is not None
+        else _parse_float(os.getenv(ENV_THROTTLE_JITTER), 0.0)
+    )
+    return ThrottleConfig(
+        requests_per_minute=requests_per_minute or None,
+        min_interval_seconds=min_interval,
+        jitter_seconds=jitter,
+    )
+
+
+def _load_env_file(path: Path) -> None:
+    """Load simple KEY=VALUE pairs from ``path`` without overriding env vars."""
+
+    if not path.exists():
+        return
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        LOGGER.warning("Failed to read env file %s: %s", path, exc)
+        return
+
+    for raw_line in lines:
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key:
+            os.environ.setdefault(key, value)
+
+
 def _write_json_report(
     report: List[Mapping[str, Any]],
     destination: Path,
     *,
     prompt: str,
     config: ModelConfig,
+    throttle: ThrottleConfig,
     files: Sequence[Path],
 ) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "prompt": prompt,
-        "model_config": asdict(config),
+        "model_config": redact_secrets(asdict(config)),
+        "throttle": asdict(throttle),
         "files": [str(path) for path in files],
         "results": report,
     }
-    destination.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    destination.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     LOGGER.info("JSON report written to %s", destination)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="AI-assisted reference repair")
+    add_exit_code_help(parser)
     parser.add_argument("--root", type=Path, default=Path.cwd(), help="Repository root")
     parser.add_argument("--manifest", type=Path, help="Path to publish.yml")
     parser.add_argument("--summary", type=Path, help="Path to SUMMARY.md")
-    parser.add_argument("--files", type=Path, nargs="*", help="Explicit Markdown files to process")
-    parser.add_argument("--language", default="de", help="Source section language (default: de)")
-    parser.add_argument("--max-level", type=int, default=6, help="Maximum heading level to inspect for sources")
-    parser.add_argument("--prompt", default=DEFAULT_PROMPT, help="Base prompt for the AI service")
+    parser.add_argument(
+        "--files", type=Path, nargs="*", help="Explicit Markdown files to process"
+    )
+    parser.add_argument(
+        "--language", default="de", help="Source section language (default: de)"
+    )
+    parser.add_argument(
+        "--max-level",
+        type=int,
+        default=6,
+        help="Maximum heading level to inspect for sources",
+    )
+    parser.add_argument(
+        "--prompt", default=DEFAULT_PROMPT, help="Base prompt for the AI service"
+    )
+    parser.add_argument(
+        "--env-file", type=Path, help="Load API settings from this .env file"
+    )
+    parser.add_argument(
+        "--no-env-file", action="store_true", help="Do not auto-load <root>/.env"
+    )
     parser.add_argument("--ai-url", dest="ai_url", help="AI endpoint URL")
-    parser.add_argument("--ai-api-key", dest="ai_api_key", help="API key for the AI provider")
-    parser.add_argument("--ai-provider", dest="ai_provider", help="AI provider identifier")
+    parser.add_argument(
+        "--ai-api-key", dest="ai_api_key", help="API key for the AI provider"
+    )
+    parser.add_argument(
+        "--ai-provider", dest="ai_provider", help="AI provider identifier"
+    )
     parser.add_argument("--model", help="Model name to request from the provider")
     parser.add_argument("--temperature", type=float, help="Sampling temperature")
     parser.add_argument("--timeout", type=float, help="Request timeout in seconds")
-    parser.add_argument("--max-retries", type=int, help="Maximum number of retries for rate limits")
-    parser.add_argument("--json-report", type=Path, help="Write a JSON report to this path")
-    parser.add_argument("--dry-run", action="store_true", help="Do not modify files on disk")
-    parser.add_argument("--no-progress", action="store_true", help="Disable progress bar output")
+    parser.add_argument(
+        "--max-retries", type=int, help="Maximum number of retries for rate limits"
+    )
+    parser.add_argument(
+        "--requests-per-minute", type=float, help="Throttle provider calls to this rate"
+    )
+    parser.add_argument(
+        "--min-request-interval",
+        type=float,
+        help="Minimum seconds between provider calls",
+    )
+    parser.add_argument(
+        "--throttle-jitter", type=float, help="Additional random jitter in seconds"
+    )
+    parser.add_argument(
+        "--json-report", type=Path, help="Write a JSON report to this path"
+    )
+    parser.add_argument(
+        "--apply", action="store_true", help="Apply accepted AI fixes to Markdown files"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Deprecated alias for report-only mode"
+    )
+    parser.add_argument(
+        "--fail-on-failed",
+        action="store_true",
+        help=f"Exit with {AI_REFERENCE_FAILURE_EXIT_CODE} when at least one reference fails",
+    )
+    parser.add_argument(
+        "--no-progress", action="store_true", help="Disable progress bar output"
+    )
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_arg_parser()
     args = parser.parse_args(argv)
+    handle_exit_code_help(args, component="ai_references")
 
     root = args.root.resolve()
     manifest = args.manifest.resolve() if args.manifest else None
     summary = args.summary.resolve() if args.summary else None
+
+    if not args.no_env_file:
+        env_file = args.env_file.resolve() if args.env_file else root / ".env"
+        _load_env_file(env_file)
 
     files = discover_markdown_files(
         root=root,
@@ -568,39 +779,62 @@ def main(argv: Sequence[str] | None = None) -> int:
         LOGGER.info("No Markdown files discovered – exiting")
         return 0
 
-    tasks = load_reference_tasks(files, language=args.language, max_level=args.max_level)
+    tasks = load_reference_tasks(
+        files, language=args.language, max_level=args.max_level
+    )
     if not tasks:
         LOGGER.info("No reference entries found in the selected files")
         return 0
 
     config = _resolve_model_config(args)
-    if not config.api_key and config.provider not in {"local", "custom", "genai", "google-genai"}:
-        LOGGER.warning("No API key provided – requests may fail depending on the provider")
+    throttle_config = _resolve_throttle_config(args)
+    throttle = RequestThrottle(throttle_config)
+    if not config.api_key and config.provider not in {
+        "local",
+        "custom",
+        "genai",
+        "google-genai",
+    }:
+        LOGGER.warning(
+            "No API key provided – requests may fail depending on the provider"
+        )
 
     results: List[ReferenceResult] = []
     progress = not args.no_progress
     iterator = tqdm.tqdm(tasks, desc="References", unit="ref", disable=not progress)
     for task in iterator:
+        throttle.wait()
         result = call_model(task, args.prompt, config)
         results.append(result)
         if result.error:
-            LOGGER.warning("AI validation failed for %s:%s – %s", task.file, task.lineno, result.error)
+            LOGGER.warning(
+                "AI validation failed for %s:%s – %s",
+                task.file,
+                task.lineno,
+                result.error,
+            )
 
-    report = apply_fixes(results, write_changes=not args.dry_run)
+    write_changes = bool(args.apply and not args.dry_run)
+    report = apply_fixes(results, write_changes=write_changes)
 
     if args.json_report:
-        _write_json_report(report, args.json_report.resolve(), prompt=args.prompt, config=config, files=files)
+        _write_json_report(
+            report,
+            args.json_report.resolve(),
+            prompt=args.prompt,
+            config=config,
+            throttle=throttle_config,
+            files=files,
+        )
 
-    repaired = sum(1 for entry in report if entry.get("success") and entry.get("new"))
-    validated = sum(1 for entry in report if entry.get("success") and not entry.get("new"))
-    failed = sum(1 for entry in report if not entry.get("success"))
+    summary_counts = summarize_report(report)
     LOGGER.info(
         "AI reference check finished – %s repaired, %s validated, %s failed",
-        repaired,
-        validated,
-        failed,
+        summary_counts.repaired,
+        summary_counts.validated,
+        summary_counts.failed,
     )
-    return 0
+    return exit_code_for_summary(summary_counts, fail_on_failed=args.fail_on_failed)
 
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry point

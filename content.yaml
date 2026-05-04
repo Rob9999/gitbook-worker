@@ -14,6 +14,11 @@ contents:
     uri: de-edge-cases/
     description: German edge-case samples (font fallbacks, frontmatter, tables)
     build: false
+  - id: de-ref-check
+    type: local
+    uri: de-ref-check/
+    description: German AI reference check samples (good, broken, exotic references)
+    build: false
   - id: en-edge-cases
     type: local
     uri: en-edge-cases/

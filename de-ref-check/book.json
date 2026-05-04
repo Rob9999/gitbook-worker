@@ -1,0 +1,12 @@
+{
+    "schema_version": "1.0.0",
+    "title": "AI Reference Check Testbuch",
+    "author": "GitBook Worker QA",
+    "language": "de",
+    "description": "Isolierter Testbaum fuer AI-gestuetzte Quellenpruefungen.",
+    "root": "content/",
+    "structure": {
+        "readme": "README.md",
+        "summary": "SUMMARY.md"
+    }
+}

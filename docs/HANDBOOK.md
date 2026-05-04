@@ -1,7 +1,8 @@
 ---
-version: 1.3.0
-date: 2026-02-08
+version: 1.3.1
+date: 2026-05-04
 history:
+  - "1.3.1: 2026-05-04 - RUN-Sicherungspunkt vor potenziell destruktiven Laeufen dokumentiert"
   - "1.3.0: 2026-02-08 — pdf_options passthrough, Aliases, publish.yml Konfigurationsanleitung"
   - "1.2.0: 2025-12-07 — Added font fallback reporting and abort semantics for PDF builds."
 ---
@@ -16,12 +17,13 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - `content.yaml` lists all languages (currently `de/` live, `en/` staging, `ua/` remote) and feeds the CLI via `--lang`.
 - Per-language content lives under `<lang>/` (`de/` already contains `content/`, `book.json`, `publish/`, etc.).
 - Python package lives at repository root under `gitbook_worker/` and exposes the `gitbook-worker` console script.
-- Tests reside in `tests/` and cover publishing, orchestrator flows, and emoji/font QA.
+- Tests reside in `gitbook_worker/tests/` and cover publishing, orchestrator flows, and emoji/font QA.
 - CI workflows under `.github/workflows/` mirror local usage by building the Docker image and invoking the same CLI entrypoints.
 - User-facing docs belong in `docs/`, engineering/sprint notes in `gitbook_worker/docs/` (per `AGENTS.md`).
 
 ## Local development essentials
 - Install dependencies with `pip install -r requirements.txt` and run quick checks via `pytest -q` from the repository root.
+- Before potentially destructive RUN/build/smoke/validation steps, create a small Git commit as a recovery point for the intended current changes. If committing is not possible, record the reason and create an equivalent backup branch or patch before running the command.
 - When editing YAML planning docs, keep the front matter (`version`, `date`, `history`) in sync with the change.
 - The deprecated `tools/` shim exists only for legacy imports—prefer `gitbook_worker.*` everywhere else.
 - Remote Sprachbäume mit `type: git` werden automatisch nach `.gitbook-content/<id>` geklont; setze die in `credentialRef` genannte Env-Variable auf einen SSH-Key (Pfad oder Inhalt), sonst schlägt der Build fehl.
@@ -30,7 +32,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - Install in editable mode: `pip install -e .` from the repository root.
 - Validate manifests quickly: `gitbook-worker validate --lang de` (does not run the pipeline).
 - Run a local build: `./gitbook_worker/scripts/build-pdf.sh --profile local --manifest de/publish.yml` or `gitbook-worker run --lang de --profile default`.
-- Execute targeted tests during iterations: `pytest tests/test_publisher.py tests/test_orchestrator_validate.py` (fixtures now resolve the default language via `content.yaml`).
+- Execute targeted tests during iterations: `pytest gitbook_worker/tests/test_publisher.py gitbook_worker/tests/test_orchestrator_validate.py` (fixtures now resolve the default language via `content.yaml`).
 
 ### Adding or updating language trees
 - Copy the structure from `de/` (or an existing language) and adjust `content/`, `book.json`, `publish/`, and attribution/licensing files for the new locale.

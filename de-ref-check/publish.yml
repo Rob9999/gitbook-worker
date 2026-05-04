@@ -1,0 +1,27 @@
+version: 0.1.1
+profiles:
+  local:
+    description: Lokaler AI-Reference-Check fuer Testcontent.
+    steps:
+      - ai-reference-check
+    docker:
+      use_registry: false
+project:
+  name: AI Reference Check Testbuch
+  authors:
+    - GitBook Worker QA
+  version: 1.0.0
+  license: CC BY-SA 4.0
+publish:
+  - path: ./
+    out_format: pdf
+    out_dir: ./publish
+    out: ai-reference-check-testbuch.pdf
+    source_type: folder
+    source_format: markdown
+    use_summary: true
+    use_book_json: true
+    build: false
+    generate_attribution: false
+    reset_build_flag: false
+

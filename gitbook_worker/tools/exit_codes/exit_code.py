@@ -42,6 +42,13 @@ _EXIT_CODES: tuple[ExitCodeInfo, ...] = (
         trigger="Font-Synchronisation fehlgeschlagen (Smart Font Stack)",
     ),
     ExitCodeInfo(
+        code=44,
+        component="ai_references",
+        summary="AI-Referenzprüfung meldet fehlgeschlagene Einträge",
+        healing="JSON-Report prüfen, Quellen manuell korrigieren oder Lauf ohne --fail-on-failed wiederholen.",
+        trigger="Mindestens eine Referenz konnte nicht validiert oder repariert werden",
+    ),
+    ExitCodeInfo(
         code=2,
         component="publisher",
         summary="publish.yml nicht gefunden",
@@ -169,14 +176,12 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Exit-Code Übersicht",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=dedent(
-            """
+        epilog=dedent("""
             Beispiele:
               python -m gitbook_worker.tools.exit_codes --exit-codes
               python -m gitbook_worker.tools.exit_codes --code 43
               python -m gitbook_worker.tools.exit_codes --component publisher
-            """
-        ),
+            """),
     )
     parser.add_argument(
         "--exit-codes",
