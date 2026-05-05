@@ -418,7 +418,7 @@ def test_main_is_report_only_by_default(
     markdown = _write_reference_file(tmp_path)
     report_path = tmp_path / "report.json"
 
-    def fake_call_model(task, prompt, config):  # type: ignore[no-untyped-def]
+    def fake_call_model(task, prompt, config, **kwargs):  # type: ignore[no-untyped-def]
         return ai_references.ReferenceResult(
             task,
             True,
@@ -458,7 +458,7 @@ def test_main_apply_writes_confirmed_fix(
 ) -> None:
     markdown = _write_reference_file(tmp_path)
 
-    def fake_call_model(task, prompt, config):  # type: ignore[no-untyped-def]
+    def fake_call_model(task, prompt, config, **kwargs):  # type: ignore[no-untyped-def]
         return ai_references.ReferenceResult(
             task,
             True,
