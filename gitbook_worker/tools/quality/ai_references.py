@@ -570,7 +570,9 @@ def _build_prompt(
     "validation_date": "__VALIDATION_DATE__",
     "type": "internal reference" | "external url" | "external reference" | "?"
 }
-    """.strip().replace("__VALIDATION_DATE__", validation_date_hint)
+    """.strip().replace(
+        "__VALIDATION_DATE__", validation_date_hint
+    )
 
     if as_of_date:
         date_rule = (
@@ -831,7 +833,9 @@ def apply_fixes(
     """Apply successful fixes to disk and return a structured report."""
 
     grouped: MutableMapping[Path, List[tuple[int, str, str]]] = {}
-    report_by_replacement: MutableMapping[tuple[Path, int, str, str], List[MutableMapping[str, Any]]] = {}
+    report_by_replacement: MutableMapping[
+        tuple[Path, int, str, str], List[MutableMapping[str, Any]]
+    ] = {}
     report: List[Mapping[str, Any]] = []
 
     for result in results:
@@ -850,9 +854,9 @@ def apply_fixes(
 
         replacement = (result.task.lineno, result.task.line, str(new_value))
         grouped.setdefault(result.task.file, []).append(replacement)
-        report_by_replacement.setdefault(
-            (result.task.file, *replacement), []
-        ).append(report_entry)
+        report_by_replacement.setdefault((result.task.file, *replacement), []).append(
+            report_entry
+        )
 
     for file, replacements in grouped.items():
         if not file.exists():
@@ -1022,7 +1026,9 @@ def _merge_precheck_result(
 
 
 def _result_is_rate_limited(result: ReferenceResult) -> bool:
-    return isinstance(result.response, Mapping) and bool(result.response.get("rate_limited"))
+    return isinstance(result.response, Mapping) and bool(
+        result.response.get("rate_limited")
+    )
 
 
 def _clean_url(url: str) -> str:
@@ -1420,11 +1426,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     config = _resolve_model_config(args)
     throttle_config = _resolve_throttle_config(args)
     throttle = RequestThrottle(throttle_config)
-    if not args.precheck_only and not config.api_key and config.provider not in {
-        "local",
-        "custom",
-        *_GENAI_PROVIDERS,
-    }:
+    if (
+        not args.precheck_only
+        and not config.api_key
+        and config.provider
+        not in {
+            "local",
+            "custom",
+            *_GENAI_PROVIDERS,
+        }
+    ):
         LOGGER.warning(
             "No API key provided – requests may fail depending on the provider"
         )
@@ -1455,7 +1466,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             consecutive_rate_limits += 1
         else:
             consecutive_rate_limits = 0
-        if args.max_consecutive_429 and consecutive_rate_limits >= args.max_consecutive_429:
+        if (
+            args.max_consecutive_429
+            and consecutive_rate_limits >= args.max_consecutive_429
+        ):
             LOGGER.error(
                 "Stopping after %s consecutive rate-limited reference task(s)",
                 consecutive_rate_limits,
