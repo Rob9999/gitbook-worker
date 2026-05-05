@@ -227,7 +227,9 @@ def collect_log_files(paths: Iterable[Path | str]) -> list[Path]:
     for raw_path in paths:
         path = Path(raw_path)
         if path.is_dir():
-            files.extend(sorted(child for child in path.rglob("*.log") if child.is_file()))
+            files.extend(
+                sorted(child for child in path.rglob("*.log") if child.is_file())
+            )
         elif path.is_file():
             files.append(path)
     return _dedupe_paths(files)
