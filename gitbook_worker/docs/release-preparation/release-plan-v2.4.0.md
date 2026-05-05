@@ -1,8 +1,11 @@
 ---
-version: 0.8.0
+version: 0.9.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.9.0
+    date: 2026-05-05
+    description: Non-slow Testsuite nach Dockerfix erfolgreich dokumentiert.
   - version: 0.8.0
     date: 2026-05-05
     description: Dockerfile.dynamic gegen CTAN-TeX-Live-Jahreswechsel gehaertet.
@@ -159,7 +162,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] AI-Reference Kundenfeedback v2.0.1 triagiert und erste Must-have-Scheibe umgesetzt.
 - [x] AI-Reference Vorpruefung oder Cache mindestens als erste Scheibe umgesetzt
       oder bewusst auf v2.4.x verschoben.
-- [ ] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
+- [x] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
 - [x] Lokaler PDF-Build fuer `de` erfolgreich.
 - [x] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
 - [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
@@ -177,3 +180,5 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
   und `en` erfolgreich geprueft.
 - Die naechste technische Arbeit ist die AI-Reference-Vorpruefung/Cache-Scheibe
   oder die Integration des PDF-Gates in CI/Workflow-Orchestrator-Profile.
+- Non-slow Testsuite nach Dockerfix: 513 passed, 11 skipped, 10 deselected,
+  4 warnings.
