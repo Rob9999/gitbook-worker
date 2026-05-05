@@ -221,15 +221,13 @@ def count_unicode_ranges(
 
 
 def collect_log_files(paths: Iterable[Path | str]) -> list[Path]:
-    """Collect log files from explicit file or directory paths."""
+    """Collect log files from explicit files or the newest log set in directories."""
 
     files: list[Path] = []
     for raw_path in paths:
         path = Path(raw_path)
         if path.is_dir():
-            files.extend(
-                sorted(child for child in path.rglob("*.log") if child.is_file())
-            )
+            files.extend(_collect_directory_logs(path))
         elif path.is_file():
             files.append(path)
     return _dedupe_paths(files)
@@ -477,6 +475,25 @@ def _dedupe_paths(paths: Iterable[Path]) -> list[Path]:
             seen.add(resolved)
             unique.append(path)
     return unique
+
+
+def _collect_directory_logs(directory: Path) -> list[Path]:
+    direct_logs = sorted(child for child in directory.glob("*.log") if child.is_file())
+    if direct_logs:
+        return direct_logs
+
+    grouped_logs: dict[Path, list[Path]] = {}
+    for log_file in directory.rglob("*.log"):
+        if log_file.is_file():
+            grouped_logs.setdefault(log_file.parent, []).append(log_file)
+    if not grouped_logs:
+        return []
+
+    newest_directory = max(
+        grouped_logs,
+        key=lambda parent: max(log_file.stat().st_mtime for log_file in grouped_logs[parent]),
+    )
+    return sorted(grouped_logs[newest_directory])
 
 
 def _font_object_is_embedded(font_obj: object) -> bool:

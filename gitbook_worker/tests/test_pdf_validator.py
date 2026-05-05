@@ -217,3 +217,31 @@ def test_scan_forbidden_log_patterns_collects_directory_logs(tmp_path: Path) -> 
 
     assert len(matches) == 1
     assert matches[0].pattern == r"\.notdef\b"
+
+
+def test_scan_forbidden_log_patterns_uses_newest_nested_log_set(
+    tmp_path: Path,
+) -> None:
+    log_dir = tmp_path / "_latex-debug"
+    old_dir = log_dir / "old"
+    new_dir = log_dir / "new"
+    old_dir.mkdir(parents=True)
+    new_dir.mkdir(parents=True)
+    old_log = old_dir / "input.log"
+    new_log = new_dir / "input.log"
+    old_log.write_text("Missing character: stale build\n", encoding="utf-8")
+    new_log.write_text("Clean current build\n", encoding="utf-8")
+    old_time = 1_700_000_000
+    new_time = old_time + 60
+    old_log.touch()
+    new_log.touch()
+    old_log.stat()
+    new_log.stat()
+    import os
+
+    os.utime(old_log, (old_time, old_time))
+    os.utime(new_log, (new_time, new_time))
+
+    matches = scan_forbidden_log_patterns((log_dir,))
+
+    assert matches == []

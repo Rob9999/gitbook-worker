@@ -5,7 +5,7 @@ status: draft
 history:
   - version: 0.4.0
     date: 2026-05-05
-    description: PDF-Gate um optionale Missing-Glyph-/notdef-Logpruefung erweitert
+    description: PDF-Gate um optionale Missing-Glyph-/notdef-Logpruefung erweitert; Verzeichnisse pruefen den neuesten Log-Satz
   - version: 0.3.0
     date: 2026-05-05
     description: Englischen PDF-Build und Font-Gate als erfolgreich verifiziert dokumentiert
