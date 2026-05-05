@@ -1,8 +1,11 @@
 ---
-version: 0.7.0
+version: 0.8.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.8.0
+    date: 2026-05-05
+    description: Dockerfile.dynamic gegen CTAN-TeX-Live-Jahreswechsel gehaertet.
   - version: 0.7.0
     date: 2026-05-05
     description: AI-Reference Inline-Erkennung, Precheck, Batch/Resume, Ergebnisstatus und PDF-JSON-Fix in v2.4.0 aufgenommen.
@@ -132,6 +135,15 @@ Naechste Scheibe nach P0/P1:
 - Versionierungsquelle klaeren.
 - Package-Data fuer Defaults/Lua/Templates absichern.
 - Wheel-Smoke in CI vorbereiten.
+
+### P1: Docker-Image gegen TeX-Live-Jahreswechsel haerten
+
+Quelle: Non-slow-Testlauf am 2026-05-05
+
+- [x] `Dockerfile.dynamic` loest den installierten TeX-Live-Pfad dynamisch auf.
+- [x] Stabiler Symlink `/usr/local/texlive/current` ersetzt harte
+  Jahrespfade wie `/usr/local/texlive/2025`.
+- [x] Statischer Regressionstest verhindert neue hartcodierte TeX-Live-Jahre.
 
 ### P2: Font-Storage-Dynamik
 

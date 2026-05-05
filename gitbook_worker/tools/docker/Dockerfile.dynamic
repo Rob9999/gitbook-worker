@@ -101,9 +101,9 @@ RUN cd /tmp \
     && rm -rf pandoc-* \
     && pandoc --version
 
-# --- Install TeX Live 2025 from CTAN (scheme-basic for stability) ---
+# --- Install current TeX Live from CTAN (scheme-basic for stability) ---
 # Ubuntu 22.04 ships with TeX Live 2021/2022 which has UTF-8 issues in LuaLaTeX
-# Solution: Install TeX Live 2025 scheme-basic + selective packages (faster than full, stable)
+# Solution: Install current TeX Live scheme-basic + selective packages (faster than full, stable)
 RUN cd /tmp \
     && wget -q https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz \
     && tar -xzf install-tl-unx.tar.gz \
@@ -114,8 +114,12 @@ RUN cd /tmp \
     --repository=https://ftp.tu-chemnitz.de/pub/tex/systems/texlive/tlnet/ \
     && cd / \
     && rm -rf /tmp/install-tl-* \
-    # Create initial symlinks in /usr/local/bin for TeX Live binaries (hardcode 2025)
-    && ln -s /usr/local/texlive/2025/bin/x86_64-linux/* /usr/local/bin/ || true \
+    # Create initial symlinks in /usr/local/bin for the installed TeX Live binaries
+    && TEXLIVE_BIN="$(find /usr/local/texlive -path '*/bin/x86_64-linux' -type d | sort | tail -n 1)" \
+    && test -n "$TEXLIVE_BIN" \
+    && TEXLIVE_ROOT="$(dirname "$(dirname "$TEXLIVE_BIN")")" \
+    && ln -sfn "$TEXLIVE_ROOT" /usr/local/texlive/current \
+    && ln -sf "$TEXLIVE_BIN"/* /usr/local/bin/ \
     # Configure tlmgr to use stable mirror
     && tlmgr option repository https://ftp.tu-chemnitz.de/pub/tex/systems/texlive/tlnet/ \
     # Install XeTeX engine and required LaTeX packages
@@ -141,14 +145,18 @@ RUN cd /tmp \
     infwarerr kvoptions kvsetkeys ltxcmds pdftexcmds || true) \
     # Recreate symlinks after installing xetex (to pick up new binaries)
     && rm -f /usr/local/bin/xelatex /usr/local/bin/xetex \
-    && ln -sf /usr/local/texlive/2025/bin/x86_64-linux/* /usr/local/bin/ \
+    && TEXLIVE_BIN="$(find /usr/local/texlive -path '*/bin/x86_64-linux' -type d | sort | tail -n 1)" \
+    && test -n "$TEXLIVE_BIN" \
+    && TEXLIVE_ROOT="$(dirname "$(dirname "$TEXLIVE_BIN")")" \
+    && ln -sfn "$TEXLIVE_ROOT" /usr/local/texlive/current \
+    && ln -sf "$TEXLIVE_BIN"/* /usr/local/bin/ \
     # Verify installation
     && lualatex --version \
     && xelatex --version
-# Add TeX Live paths to environment (use 2025 as that's what CTAN installs)
-ENV PATH="/usr/local/texlive/2025/bin/x86_64-linux:$PATH" \
-    MANPATH="/usr/local/texlive/2025/texmf-dist/doc/man" \
-    INFOPATH="/usr/local/texlive/2025/texmf-dist/doc/info"
+# Add TeX Live paths to environment via stable symlink created during install
+ENV PATH="/usr/local/texlive/current/bin/x86_64-linux:$PATH" \
+    MANPATH="/usr/local/texlive/current/texmf-dist/doc/man" \
+    INFOPATH="/usr/local/texlive/current/texmf-dist/doc/info"
 
 # --- Font Configuration: Remove conflicting emoji fonts ---
 # Remove Noto Color Emoji if installed (system emoji fonts may conflict with Twemoji)

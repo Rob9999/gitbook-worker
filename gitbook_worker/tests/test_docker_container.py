@@ -27,6 +27,15 @@ IMAGE_NAME = "erda-smart-worker-test"
 CONTAINER_NAME = "erda-smart-worker-test-container"
 
 
+def test_dynamic_dockerfile_does_not_hardcode_texlive_year():
+    dockerfile = REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.dynamic"
+    text = dockerfile.read_text(encoding="utf-8")
+
+    assert "/usr/local/texlive/2025" not in text
+    assert "/usr/local/texlive/current" in text
+    assert "find /usr/local/texlive" in text
+
+
 def log_to_logger(logger, message, stdout=None, stderr=None):
     """Write a message and optional command output to the logger."""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
