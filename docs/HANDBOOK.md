@@ -1,7 +1,8 @@
 ---
-version: 1.3.1
-date: 2026-05-04
+version: 1.3.2
+date: 2026-05-05
 history:
+  - "1.3.2: 2026-05-05 - Dockerfile.dynamic als Release-Pfad und legacy Dockerfile als deprecated dokumentiert"
   - "1.3.1: 2026-05-04 - RUN-Sicherungspunkt vor potenziell destruktiven Laeufen dokumentiert"
   - "1.3.0: 2026-02-08 — pdf_options passthrough, Aliases, publish.yml Konfigurationsanleitung"
   - "1.2.0: 2025-12-07 — Added font fallback reporting and abort semantics for PDF builds."
@@ -156,8 +157,9 @@ works.
 Full reference: see [`docs/configuration-reference.md`](configuration-reference.md).
 
 ## Docker usage paths
-- Prefer the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI and local runs—it keeps font and LaTeX packages aligned with the publishing defaults.
-- The static image (`gitbook_worker/tools/docker/Dockerfile`) remains available for air-gapped hosts; pass `--no-build` to wrapper scripts only when the desired image tag already exists.
+- Use the dynamic image (`gitbook_worker/tools/docker/Dockerfile.dynamic`) for CI, release validation, and local customer-like runs. It keeps font and LaTeX packages aligned with the publishing defaults and resolves TeX Live through `/usr/local/texlive/current`.
+- Treat the static image (`gitbook_worker/tools/docker/Dockerfile`) as deprecated legacy material. Do not use it for new release validation or customer onboarding.
+- Use `Dockerfile.python` only for lightweight Python test containers; it intentionally does not install Pandoc or TeX Live.
 
 ### Running builds in Docker
 **Local execution (NO Docker)**:

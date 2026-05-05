@@ -1,8 +1,9 @@
 ---
-version: 1.1.0
-date: 2026-02-08
+version: 1.2.0
+date: 2026-05-05
 status: draft
 history:
+  - "1.2.0: 2026-05-05 - Dockerfile.dynamic als Kundenpfad, AI-Reference-Schutz und v2.4.0-Verifikation ergaenzt"
   - "1.1.0: 2026-02-08 — publish.yml-Konfiguration und pdf_options-Anleitung ergänzt"
   - "1.0.0: 2025-12-31 — init"
 ---
@@ -71,11 +72,14 @@ Common variants:
 ## 4) Docker run (optional, if Docker Desktop is available)
 
 ```powershell
-python -m gitbook_worker.tools.docker.run_docker orchestrator --profile local --use-dynamic --lang <lang> --root <PROJECT_ROOT>
+python -m gitbook_worker.tools.docker.run_docker orchestrator --profile local --use-dynamic --rebuild --lang <lang> --root <PROJECT_ROOT>
 ```
 
 Notes:
 
+* `--use-dynamic` is the release path. It uses `gitbook_worker/tools/docker/Dockerfile.dynamic`, which resolves the current CTAN TeX Live installation via `/usr/local/texlive/current` instead of a hardcoded year.
+* Use `--rebuild` after upgrading GitBook Worker or changing font configuration.
+* The legacy `gitbook_worker/tools/docker/Dockerfile` is deprecated and should not be used for new customer builds.
 * Fonts are injected at runtime via volume mounts; `fonts-storage/` and `.github/fonts/` must exist.
 * On Windows, path translation is handled automatically by Docker Desktop.
 
@@ -137,7 +141,34 @@ publish:
 * **Missing LuaTeX / fonts:** Ensure `luaotfload-tool --update --force` has been run at least once (handled in test fixtures, but may be required locally).
 * **`project.license` missing in the manifest:** Set a license under `project.license` in `<lang>/publish.yml` (e.g., `CC-BY-SA-4.0`), otherwise the publisher fails with `project.license fehlt`.
 
-## 7) Quick support checklist
+## 7) AI reference QA and privacy guardrails
+
+The AI reference checker is report-first by default. It writes proposed changes
+to the JSON report and only modifies Markdown when `--apply` is passed.
+
+Recommended customer smoke command:
+
+```powershell
+python -m gitbook_worker.tools.quality.ai_references --root <PROJECT_ROOT> --provider genai --as-of-date 2026-05-05 --json-report logs/ai-reference-report.json --precheck-only
+```
+
+Privacy and compliance notes:
+
+* API keys and token-like fields are redacted in JSON reports.
+* Provider error messages also redact raw API keys and `?key=` / `api_key=` query values.
+* This is a technical secret-protection sanitizer. It is not a legal EU/GDPR conformity audit; customer-specific legal review remains outside the tool.
+
+## 8) Release verification checklist
+
+For v2.4.0 the release candidate was checked with:
+
+* non-slow pytest suite
+* clean wheel build and fresh-venv wheel smoke test
+* German and English PDF builds
+* PDF font gate for Twemoji and ERDA CC-BY CJK embedding
+* positive CJK text extraction signal in both sample PDFs
+
+## 9) Quick support checklist
 
 * `.venv` active? (`where python` points to the project `.venv`)
 * `gitbook_worker.__version__` matches the delivered release?

@@ -1,5 +1,6 @@
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import time
@@ -33,9 +34,28 @@ def test_dynamic_dockerfile_does_not_hardcode_texlive_year():
     )
     text = dockerfile.read_text(encoding="utf-8")
 
-    assert "/usr/local/texlive/2025" not in text
+    assert not re.search(r"/usr/local/texlive/20\d{2}\b", text)
     assert "/usr/local/texlive/current" in text
     assert "find /usr/local/texlive" in text
+
+
+def test_legacy_dockerfile_is_explicitly_deprecated():
+    dockerfile = REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile"
+    text = dockerfile.read_text(encoding="utf-8")
+
+    assert "DEPRECATED" in text
+    assert "DO NOT USE FOR NEW PROJECTS" in text
+    assert "Dockerfile.dynamic" in text
+
+
+def test_python_dockerfile_stays_lightweight():
+    dockerfile = (
+        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.python"
+    )
+    text = dockerfile.read_text(encoding="utf-8")
+
+    assert "texlive" not in text.lower()
+    assert "pandoc" not in text.lower()
 
 
 def log_to_logger(logger, message, stdout=None, stderr=None):
