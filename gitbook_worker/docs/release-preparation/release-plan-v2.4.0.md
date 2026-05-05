@@ -1,8 +1,11 @@
 ---
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 1.2.0
+    date: 2026-05-05
+    description: Anwenderanleitung v2.4.0 als review-ready Release-Artefakt und finale Testzahlen dokumentiert.
   - version: 1.1.0
     date: 2026-05-05
     description: Paket-Hygiene, sauberer Wheel-Inhalt und Wheel-Smoke fuer v2.4.0 dokumentiert.
@@ -187,8 +190,11 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
 - [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
 - [x] Release Notes `docs/releases/v2.4.0.md` erstellt.
+- [x] Zentrale Anwenderanleitung `docs/customer-installation.md` fuer v2.4.0
+  auf `review-ready` ausgebaut.
 - [x] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
 - [x] Sauberer Package-Build und Wheel-Smoke fuer `2.4.0` erfolgreich.
+- [x] Docker-Tests inklusive `Dockerfile.dynamic` Build/Run erfolgreich.
 
 ## Aktueller Stand am 2026-05-05
 
@@ -201,9 +207,12 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
   und `en` erfolgreich geprueft.
 - Die naechste technische Arbeit ist die AI-Reference-Vorpruefung/Cache-Scheibe
   oder die Integration des PDF-Gates in CI/Workflow-Orchestrator-Profile.
-- Non-slow Testsuite nach Dockerfix: 513 passed, 11 skipped, 10 deselected,
+- Non-slow Testsuite nach Dockerfix: 515 passed, 11 skipped, 10 deselected,
   4 warnings.
+- Docker-Tests inklusive echtem `Dockerfile.dynamic` Build/Run: 4 passed.
 - Finale DE/EN PDF-Font-Gates: Twemoji und ERDA-CJK eingebettet, positiver
   CJK-Textscan in beiden PDFs.
 - Sauberer v2.4.0-Paketbuild: Wheel enthaelt keine Tests und keine
   `__pycache__`-Eintraege; Wheel-Smoke in frischem Temp-Venv erfolgreich.
+- Zentrale Anwenderanleitung fuer v2.4.0 ist in
+  `docs/customer-installation.md` review-ready und im Docs-Index verlinkt.
