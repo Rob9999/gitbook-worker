@@ -28,7 +28,9 @@ CONTAINER_NAME = "erda-smart-worker-test-container"
 
 
 def test_dynamic_dockerfile_does_not_hardcode_texlive_year():
-    dockerfile = REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.dynamic"
+    dockerfile = (
+        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.dynamic"
+    )
     text = dockerfile.read_text(encoding="utf-8")
 
     assert "/usr/local/texlive/2025" not in text
