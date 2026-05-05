@@ -1,8 +1,11 @@
 ---
-version: 1.0.0
+version: 1.0.1
 date: 2026-05-05
 status: draft
 history:
+  - version: 1.0.1
+    date: 2026-05-05
+    description: Finale PDF-Gate-Dokumentation auf robuste CJK-Signalformulierung umgestellt.
   - version: 1.0.0
     date: 2026-05-05
     description: Version-Bump auf 2.4.0 und finale DE/EN PDF-Gates dokumentiert.
@@ -185,5 +188,5 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
   oder die Integration des PDF-Gates in CI/Workflow-Orchestrator-Profile.
 - Non-slow Testsuite nach Dockerfix: 513 passed, 11 skipped, 10 deselected,
   4 warnings.
-- Finale DE/EN PDF-Font-Gates: Twemoji und ERDA-CJK eingebettet, CJK-Textscan
-  jeweils 55.
+- Finale DE/EN PDF-Font-Gates: Twemoji und ERDA-CJK eingebettet, positiver
+  CJK-Textscan in beiden PDFs.
