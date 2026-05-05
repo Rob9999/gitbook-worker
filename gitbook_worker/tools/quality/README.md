@@ -9,7 +9,7 @@ produce reports for editors.
 | --- | --- |
 | `python -m gitbook_worker.tools.quality.link_audit` | Validates external links, image references, heading collisions and TODO markers. Outputs logs or CSV reports depending on flags. |
 | `python -m gitbook_worker.tools.quality.sources` | Extracts "Quellen"/"Sources" sections into a CSV file to simplify bibliography reviews. |
-| `python -m gitbook_worker.tools.quality.ai_references` | Uses AI assistance to validate bibliography entries referenced in `SUMMARY.md`. Writes a redacted JSON report by default; applies accepted updates only with `--apply`. Supports provider throttling via `--requests-per-minute`, `--min-request-interval` and `--throttle-jitter`. |
+| `python -m gitbook_worker.tools.quality.ai_references` | Uses AI assistance to validate bibliography entries referenced in `SUMMARY.md`. Writes a redacted JSON report by default; applies accepted updates only with `--apply`. Supports provider throttling via `--requests-per-minute`, `--min-request-interval` and `--throttle-jitter`, plus adaptive 429 retry backoff using `Retry-After` headers. |
 | `python -m gitbook_worker.tools.quality.staatenprofil_links` | Scans Markdown files matching `*staatenprofil*.md` and emits a CSV report with failing HTTP checks. |
 
 Pass `--help` to any command for detailed arguments.

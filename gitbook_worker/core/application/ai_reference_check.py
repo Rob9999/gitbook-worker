@@ -10,6 +10,8 @@ from __future__ import annotations
 import random
 import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any, Callable, Mapping, MutableMapping, Sequence
 
 AI_REFERENCE_FAILURE_EXIT_CODE = 44
@@ -77,6 +79,71 @@ class RequestThrottle:
 
         self._last_request_at = now
         return delay
+
+
+@dataclass(frozen=True)
+class RetryBackoffConfig:
+    """Retry delay policy for provider rate limits and transient errors."""
+
+    base_delay_seconds: float = 2.0
+    max_delay_seconds: float = 120.0
+    jitter_seconds: float = 0.0
+
+
+def parse_retry_after_header(
+    value: str | None,
+    *,
+    now: datetime | None = None,
+) -> float | None:
+    """Parse a Retry-After header as seconds or HTTP-date."""
+
+    if not value:
+        return None
+
+    cleaned = value.strip()
+    if not cleaned:
+        return None
+
+    try:
+        seconds = float(cleaned)
+    except ValueError:
+        seconds = None
+    if seconds is not None:
+        return max(0.0, seconds)
+
+    try:
+        retry_at = parsedate_to_datetime(cleaned)
+    except (TypeError, ValueError, IndexError, OverflowError):
+        return None
+
+    if retry_at.tzinfo is None:
+        retry_at = retry_at.replace(tzinfo=timezone.utc)
+    reference = now or datetime.now(timezone.utc)
+    if reference.tzinfo is None:
+        reference = reference.replace(tzinfo=timezone.utc)
+    return max(0.0, (retry_at - reference).total_seconds())
+
+
+def retry_delay_seconds(
+    *,
+    attempt: int,
+    retry_after: str | None,
+    config: RetryBackoffConfig,
+    now: datetime | None = None,
+    jitter: Callable[[float, float], float] = random.uniform,
+) -> float:
+    """Return the next retry delay, preferring provider Retry-After hints."""
+
+    provider_delay = parse_retry_after_header(retry_after, now=now)
+    if provider_delay is None:
+        delay = max(config.base_delay_seconds, 0.0) * (2 ** max(attempt, 0))
+    else:
+        delay = provider_delay
+
+    capped = min(max(delay, 0.0), max(config.max_delay_seconds, 0.0))
+    if capped > 0 and config.jitter_seconds > 0:
+        capped += jitter(0.0, config.jitter_seconds)
+    return capped
 
 
 def _is_secret_field(name: str) -> bool:

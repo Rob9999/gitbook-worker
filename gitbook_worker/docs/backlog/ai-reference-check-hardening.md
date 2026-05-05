@@ -39,6 +39,8 @@ Technisch fehlten aber wichtige Sicherheits- und Betriebsleitplanken:
   JSON-Report und schreibt Aenderungen nur noch mit `--apply`.
 - [x] CLI-Throttling ueber `--requests-per-minute`, `--min-request-interval`
   und `--throttle-jitter` plus Env-Fallbacks.
+- [x] Adaptiver 429-Backoff mit `Retry-After`-Headern und begrenztem
+  Exponential-Fallback.
 - [x] GenAI-Default auf `gemini-2.5-flash` und robuste
   `models/<model>:generateContent`-URL-Ableitung.
 - [x] Optionaler CI-Hard-Fail mit `--fail-on-failed` und Exit-Code 44.

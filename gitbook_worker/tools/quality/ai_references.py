@@ -37,9 +37,11 @@ from gitbook_worker.core.application.ai_reference_check import (
     AI_REFERENCE_FAILURE_EXIT_CODE,
     REDACTED_SECRET,
     RequestThrottle,
+    RetryBackoffConfig,
     ThrottleConfig,
     exit_code_for_summary,
     redact_secrets,
+    retry_delay_seconds,
     summarize_report,
 )
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
@@ -64,6 +66,9 @@ DEFAULT_URL = "https://api.openai.com/v1/chat/completions"
 DEFAULT_TEMPERATURE = 0.1
 DEFAULT_TIMEOUT = 60.0
 DEFAULT_MAX_RETRIES = 3
+DEFAULT_RETRY_BACKOFF_BASE = 2.0
+DEFAULT_RETRY_BACKOFF_MAX = 120.0
+DEFAULT_RETRY_BACKOFF_JITTER = 0.0
 
 ENV_URL = "AI_REFERENCE_URL"
 ENV_API_KEY = "AI_REFERENCE_API_KEY"
@@ -73,6 +78,9 @@ ENV_TEMPERATURE = "AI_REFERENCE_TEMPERATURE"
 ENV_REQUESTS_PER_MINUTE = "AI_REFERENCE_REQUESTS_PER_MINUTE"
 ENV_MIN_REQUEST_INTERVAL = "AI_REFERENCE_MIN_REQUEST_INTERVAL"
 ENV_THROTTLE_JITTER = "AI_REFERENCE_THROTTLE_JITTER"
+ENV_RETRY_BACKOFF_BASE = "AI_REFERENCE_RETRY_BACKOFF_BASE"
+ENV_RETRY_BACKOFF_MAX = "AI_REFERENCE_RETRY_BACKOFF_MAX"
+ENV_RETRY_BACKOFF_JITTER = "AI_REFERENCE_RETRY_BACKOFF_JITTER"
 
 
 @dataclass(frozen=True)
@@ -111,6 +119,9 @@ class ModelConfig:
     temperature: float = DEFAULT_TEMPERATURE
     timeout: float = DEFAULT_TIMEOUT
     max_retries: int = DEFAULT_MAX_RETRIES
+    retry_backoff_base_seconds: float = DEFAULT_RETRY_BACKOFF_BASE
+    retry_backoff_max_seconds: float = DEFAULT_RETRY_BACKOFF_MAX
+    retry_backoff_jitter_seconds: float = DEFAULT_RETRY_BACKOFF_JITTER
 
 
 @dataclass
@@ -442,9 +453,21 @@ def call_model(
         except requests.HTTPError as exc:
             status = exc.response.status_code if exc.response else None
             if status == 429 and attempt < config.max_retries:
-                wait_time = random.randint(1, 8)
+                retry_after = (
+                    exc.response.headers.get("Retry-After")
+                    if exc.response is not None
+                    else None
+                )
+                wait_time = retry_delay_seconds(
+                    attempt=attempt,
+                    retry_after=retry_after,
+                    config=_retry_backoff_config(config),
+                )
+                source = "Retry-After" if retry_after else "exponential backoff"
                 LOGGER.warning(
-                    "Rate limited by provider – retrying in %s seconds", wait_time
+                    "Rate limited by provider – retrying in %.2f seconds (%s)",
+                    wait_time,
+                    source,
                 )
                 time.sleep(wait_time)
                 continue
@@ -494,6 +517,14 @@ def _sanitize_error_message(message: str, config: ModelConfig) -> str:
     if config.api_key:
         sanitized = sanitized.replace(config.api_key, REDACTED_SECRET)
     return sanitized
+
+
+def _retry_backoff_config(config: ModelConfig) -> RetryBackoffConfig:
+    return RetryBackoffConfig(
+        base_delay_seconds=config.retry_backoff_base_seconds,
+        max_delay_seconds=config.retry_backoff_max_seconds,
+        jitter_seconds=config.retry_backoff_jitter_seconds,
+    )
 
 
 def apply_fixes(
@@ -605,6 +636,23 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
     max_retries = (
         args.max_retries if args.max_retries is not None else DEFAULT_MAX_RETRIES
     )
+    retry_backoff_base = (
+        args.retry_backoff_base
+        if args.retry_backoff_base is not None
+        else _parse_float(os.getenv(ENV_RETRY_BACKOFF_BASE), DEFAULT_RETRY_BACKOFF_BASE)
+    )
+    retry_backoff_max = (
+        args.retry_backoff_max
+        if args.retry_backoff_max is not None
+        else _parse_float(os.getenv(ENV_RETRY_BACKOFF_MAX), DEFAULT_RETRY_BACKOFF_MAX)
+    )
+    retry_backoff_jitter = (
+        args.retry_backoff_jitter
+        if args.retry_backoff_jitter is not None
+        else _parse_float(
+            os.getenv(ENV_RETRY_BACKOFF_JITTER), DEFAULT_RETRY_BACKOFF_JITTER
+        )
+    )
     return ModelConfig(
         base_url=base_url,
         api_key=api_key,
@@ -613,6 +661,9 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
         temperature=temperature,
         timeout=timeout,
         max_retries=max_retries,
+        retry_backoff_base_seconds=retry_backoff_base,
+        retry_backoff_max_seconds=retry_backoff_max,
+        retry_backoff_jitter_seconds=retry_backoff_jitter,
     )
 
 
@@ -724,6 +775,21 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeout", type=float, help="Request timeout in seconds")
     parser.add_argument(
         "--max-retries", type=int, help="Maximum number of retries for rate limits"
+    )
+    parser.add_argument(
+        "--retry-backoff-base",
+        type=float,
+        help="Base seconds for exponential retry backoff when no Retry-After header is sent",
+    )
+    parser.add_argument(
+        "--retry-backoff-max",
+        type=float,
+        help="Maximum seconds to wait for provider retry backoff",
+    )
+    parser.add_argument(
+        "--retry-backoff-jitter",
+        type=float,
+        help="Additional random jitter in seconds for retry backoff",
     )
     parser.add_argument(
         "--requests-per-minute", type=float, help="Throttle provider calls to this rate"

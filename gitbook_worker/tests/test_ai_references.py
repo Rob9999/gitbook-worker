@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta, timezone
+from email.utils import format_datetime
 from pathlib import Path
 
 import pytest
+import requests
 
 from gitbook_worker.core.application.ai_reference_check import (
     AI_REFERENCE_FAILURE_EXIT_CODE,
     RequestThrottle,
+    RetryBackoffConfig,
     ThrottleConfig,
     exit_code_for_summary,
+    parse_retry_after_header,
     redact_secrets,
+    retry_delay_seconds,
     summarize_report,
 )
 from gitbook_worker.tools.quality import ai_references
@@ -56,6 +62,29 @@ def test_redact_secrets_masks_api_key() -> None:
     assert redacted["model_config"]["provider"] == "genai"
 
 
+def test_retry_after_header_accepts_seconds() -> None:
+    assert parse_retry_after_header("7") == pytest.approx(7.0)
+
+
+def test_retry_after_header_accepts_http_date() -> None:
+    now = datetime(2026, 5, 5, 12, 0, tzinfo=timezone.utc)
+    retry_at = format_datetime(now + timedelta(seconds=11), usegmt=True)
+
+    assert parse_retry_after_header(retry_at, now=now) == pytest.approx(11.0)
+
+
+def test_retry_delay_uses_header_before_exponential_backoff() -> None:
+    config = RetryBackoffConfig(base_delay_seconds=2, max_delay_seconds=60)
+
+    assert retry_delay_seconds(attempt=3, retry_after="9", config=config) == 9
+
+
+def test_retry_delay_caps_exponential_backoff() -> None:
+    config = RetryBackoffConfig(base_delay_seconds=2, max_delay_seconds=5)
+
+    assert retry_delay_seconds(attempt=4, retry_after=None, config=config) == 5
+
+
 def test_genai_url_uses_current_model() -> None:
     config = ai_references.ModelConfig(
         base_url="https://generativelanguage.googleapis.com/v1beta",
@@ -93,6 +122,72 @@ def test_provider_error_messages_are_redacted() -> None:
     message = "403 for url: https://example.test?key=secret-token"
 
     assert "secret-token" not in ai_references._sanitize_error_message(message, config)
+
+
+def test_call_model_waits_for_retry_after_on_429(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task = ai_references.ReferenceTask(
+        file=Path("refs.md"),
+        title="Quelle",
+        line="1. Quelle. https://example.com",
+        lineno=1,
+        numbering="1",
+    )
+    config = ai_references.ModelConfig(
+        base_url="https://api.example.test/chat",
+        api_key="secret-token",
+        provider="openai",
+        model="test-model",
+        max_retries=1,
+        retry_backoff_base_seconds=2,
+        retry_backoff_max_seconds=60,
+    )
+    calls = 0
+    slept: list[float] = []
+
+    class FakeResponse:
+        def __init__(
+            self, status_code: int, payload: dict, headers: dict | None = None
+        ):
+            self.status_code = status_code
+            self._payload = payload
+            self.headers = headers or {}
+            self.text = json.dumps(payload)
+
+        def raise_for_status(self) -> None:
+            if self.status_code >= 400:
+                raise requests.HTTPError("rate limited", response=self)
+
+        def json(self) -> dict:
+            return self._payload
+
+    def fake_post(*args, **kwargs):  # type: ignore[no-untyped-def]
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return FakeResponse(429, {}, {"Retry-After": "6"})
+        return FakeResponse(
+            200,
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"success": true, "org": "x", "validation_date": "2026-05-05", "type": "external url"}'
+                        }
+                    }
+                ]
+            },
+        )
+
+    monkeypatch.setattr(ai_references.requests, "post", fake_post)
+    monkeypatch.setattr(ai_references.time, "sleep", slept.append)
+
+    result = ai_references.call_model(task, "Prompt", config)
+
+    assert result.success is True
+    assert calls == 2
+    assert slept == [pytest.approx(6.0)]
 
 
 def test_env_file_is_loaded_without_overriding_existing(
