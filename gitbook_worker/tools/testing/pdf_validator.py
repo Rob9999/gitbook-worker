@@ -251,7 +251,9 @@ def validate_pdf_font_gate(
         )
         required_checks.append(check)
         if match is None:
-            errors.append(f"Configured font {font_key}={expected_name!r} not found in PDF")
+            errors.append(
+                f"Configured font {font_key}={expected_name!r} not found in PDF"
+            )
         elif not match.embedded:
             errors.append(
                 f"Configured font {font_key}={expected_name!r} found as {match.name!r}, "
@@ -260,7 +262,9 @@ def validate_pdf_font_gate(
 
     for range_name in required_text_ranges:
         if text_ranges.get(range_name, 0) <= 0:
-            errors.append(f"Required Unicode range {range_name!r} not found in PDF text")
+            errors.append(
+                f"Required Unicode range {range_name!r} not found in PDF text"
+            )
 
     if not extracted_fonts:
         warnings.append("No fonts could be extracted from PDF")

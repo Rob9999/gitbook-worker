@@ -80,7 +80,9 @@ def test_load_expected_fonts_reads_configured_names(tmp_path: Path) -> None:
     assert expected == {"EMOJI": "Custom Emoji", "CJK": "Custom CJK"}
 
 
-def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(tmp_path: Path) -> None:
+def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(
+    tmp_path: Path,
+) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
         textwrap.dedent(
@@ -118,7 +120,9 @@ def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(tmp_path: Pa
     assert not result.errors
 
 
-def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(tmp_path: Path) -> None:
+def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
+    tmp_path: Path,
+) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
         textwrap.dedent(
