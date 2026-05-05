@@ -117,18 +117,25 @@ def parse_pdffonts_output(output: str) -> list[FontInfo]:
         if not in_table:
             continue
 
-        columns = re.split(r"\s{2,}", line)
-        if len(columns) < 6:
+        parts = line.split()
+        if len(parts) < 8:
             continue
+
+        font_name = parts[0]
+        encoding = parts[-6]
+        embedded = parts[-5]
+        subset = parts[-4]
+        unicode_map = parts[-3]
+        font_type = " ".join(parts[1:-6])
 
         fonts.append(
             FontInfo(
-                name=columns[0],
-                font_type=columns[1],
-                encoding=columns[2] or None,
-                embedded=columns[3].lower() == "yes",
-                subset=columns[4].lower() == "yes",
-                unicode_map=columns[5].lower() == "yes",
+                name=font_name,
+                font_type=font_type,
+                encoding=encoding or None,
+                embedded=embedded.lower() == "yes",
+                subset=subset.lower() == "yes",
+                unicode_map=unicode_map.lower() == "yes",
                 source="pdffonts",
             )
         )
