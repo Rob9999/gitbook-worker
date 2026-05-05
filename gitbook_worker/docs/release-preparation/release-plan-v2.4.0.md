@@ -1,8 +1,11 @@
 ---
-version: 1.0.1
+version: 1.1.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 1.1.0
+    date: 2026-05-05
+    description: Paket-Hygiene, sauberer Wheel-Inhalt und Wheel-Smoke fuer v2.4.0 dokumentiert.
   - version: 1.0.1
     date: 2026-05-05
     description: Finale PDF-Gate-Dokumentation auf robuste CJK-Signalformulierung umgestellt.
@@ -139,10 +142,21 @@ Naechste Scheibe:
 
 Quelle: `gitbook_worker/docs/backlog/pip-install-roadmap.md`
 
-Naechste Scheibe nach P0/P1:
+Bereits fuer v2.4.0 erledigt:
 
 - Versionierungsquelle klaeren.
-- Package-Data fuer Defaults/Lua/Templates absichern.
+- `gitbook_worker.tests` aus der Paket-Discovery ausschliessen.
+- `MANIFEST.in` prune fuer Testfixtures und Cache-Artefakte ergaenzen.
+- Sauberen lokalen Wheel-Build aus leerem `build/`/`dist/` pruefen.
+- Wheel-Inhalt verifizieren: keine Tests, keine `__pycache__`-Eintraege;
+  TeXMF-Daten inklusive `deeptex.sty` weiterhin enthalten.
+- Wheel-Smoke in frischem temporaerem Venv: Installation, Version `2.4.0`,
+  `workflow_orchestrator --help`.
+
+Naechste Scheibe nach v2.4.0:
+
+- Package-Data fuer Archiv-/Engineering-Dokumente weiter verkleinern, falls das
+  Distributionsartefakt schlanker werden soll.
 - Wheel-Smoke in CI vorbereiten.
 
 ### P1: Docker-Image gegen TeX-Live-Jahreswechsel haerten
@@ -174,6 +188,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
 - [x] Release Notes `docs/releases/v2.4.0.md` erstellt.
 - [x] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
+- [x] Sauberer Package-Build und Wheel-Smoke fuer `2.4.0` erfolgreich.
 
 ## Aktueller Stand am 2026-05-05
 
@@ -190,3 +205,5 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
   4 warnings.
 - Finale DE/EN PDF-Font-Gates: Twemoji und ERDA-CJK eingebettet, positiver
   CJK-Textscan in beiden PDFs.
+- Sauberer v2.4.0-Paketbuild: Wheel enthaelt keine Tests und keine
+  `__pycache__`-Eintraege; Wheel-Smoke in frischem Temp-Venv erfolgreich.
