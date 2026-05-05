@@ -1,8 +1,9 @@
 ---
-version: 2.0.0
+version: 2.0.1
 date: 2026-05-05
-status: review-ready
+status: stable
 history:
+  - "2.0.1: 2026-05-05 - Anwenderanleitung fuer v2.4.0 zur Kundenauslieferung auf stable gesetzt"
   - "2.0.0: 2026-05-05 - Zur zentralen Anwenderanleitung fuer GitBook Worker v2.4.0 ausgebaut"
   - "1.2.0: 2026-05-05 - Dockerfile.dynamic als Kundenpfad, AI-Reference-Schutz und v2.4.0-Verifikation ergaenzt"
   - "1.1.0: 2026-02-08 - publish.yml-Konfiguration und pdf_options-Anleitung ergaenzt"
@@ -16,10 +17,9 @@ GitBook Worker v2.4.0. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
-Der Dokumentstatus `review-ready` bedeutet: Die Anleitung ist als
-User-Manual-Fassung fuer v2.4.0 ausgearbeitet, soll aber vor dem Entfernen des
-Review-Status mit der Checkliste am Ende gegen eine echte Lieferung oder ein
-Kundenprojekt gegengeprueft werden.
+Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
+fuer v2.4.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
 

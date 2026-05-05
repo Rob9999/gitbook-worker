@@ -1,8 +1,11 @@
 ---
-version: 1.2.0
+version: 1.3.0
 date: 2026-05-05
-status: draft
+status: released
 history:
+  - version: 1.3.0
+    date: 2026-05-05
+    description: Release-Plan fuer v2.4.0 formal auf released gesetzt.
   - version: 1.2.0
     date: 2026-05-05
     description: Anwenderanleitung v2.4.0 als review-ready Release-Artefakt und finale Testzahlen dokumentiert.
@@ -191,7 +194,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
 - [x] Release Notes `docs/releases/v2.4.0.md` erstellt.
 - [x] Zentrale Anwenderanleitung `docs/customer-installation.md` fuer v2.4.0
-  auf `review-ready` ausgebaut.
+  auf `stable` gesetzt.
 - [x] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
 - [x] Sauberer Package-Build und Wheel-Smoke fuer `2.4.0` erfolgreich.
 - [x] Docker-Tests inklusive `Dockerfile.dynamic` Build/Run erfolgreich.
@@ -215,4 +218,4 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - Sauberer v2.4.0-Paketbuild: Wheel enthaelt keine Tests und keine
   `__pycache__`-Eintraege; Wheel-Smoke in frischem Temp-Venv erfolgreich.
 - Zentrale Anwenderanleitung fuer v2.4.0 ist in
-  `docs/customer-installation.md` review-ready und im Docs-Index verlinkt.
+  `docs/customer-installation.md` stable und im Docs-Index verlinkt.
