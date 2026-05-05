@@ -234,11 +234,7 @@ def test_call_model_forces_as_of_date_in_response(
                 '{"success": true, "org": "x", '
                 '"validation_date": "YYYY-MM-DD", "type": "external url"}'
             )
-            return {
-                "choices": [
-                    {"message": {"content": content}}
-                ]
-            }
+            return {"choices": [{"message": {"content": content}}]}
 
     monkeypatch.setattr(
         ai_references.requests, "post", lambda *args, **kwargs: FakeResponse()

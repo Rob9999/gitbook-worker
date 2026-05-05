@@ -356,7 +356,9 @@ def _build_prompt(
     "validation_date": "__VALIDATION_DATE__",
     "type": "internal reference" | "external url" | "external reference" | "?"
 }
-    """.strip().replace("__VALIDATION_DATE__", validation_date_hint)
+    """.strip().replace(
+        "__VALIDATION_DATE__", validation_date_hint
+    )
 
     if as_of_date:
         date_rule = (
@@ -720,16 +722,24 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
     retry_backoff_base = (
         args.retry_backoff_base
         if args.retry_backoff_base is not None
-        else cooldown_on_429
-        if cooldown_on_429 is not None
-        else _parse_float(os.getenv(ENV_RETRY_BACKOFF_BASE), DEFAULT_RETRY_BACKOFF_BASE)
+        else (
+            cooldown_on_429
+            if cooldown_on_429 is not None
+            else _parse_float(
+                os.getenv(ENV_RETRY_BACKOFF_BASE), DEFAULT_RETRY_BACKOFF_BASE
+            )
+        )
     )
     retry_backoff_max = (
         args.retry_backoff_max
         if args.retry_backoff_max is not None
-        else cooldown_on_429
-        if cooldown_on_429 is not None
-        else _parse_float(os.getenv(ENV_RETRY_BACKOFF_MAX), DEFAULT_RETRY_BACKOFF_MAX)
+        else (
+            cooldown_on_429
+            if cooldown_on_429 is not None
+            else _parse_float(
+                os.getenv(ENV_RETRY_BACKOFF_MAX), DEFAULT_RETRY_BACKOFF_MAX
+            )
+        )
     )
     retry_backoff_jitter = (
         args.retry_backoff_jitter
