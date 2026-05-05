@@ -378,7 +378,7 @@ def _extract_inline_reference_tasks(
 ) -> List[ReferenceTask]:
     tasks: List[ReferenceTask] = []
     in_code_block = False
-    frontmatter_end = _frontmatter_end_line(lines) if include_frontmatter_dois else 0
+    frontmatter_end = _frontmatter_end_line(lines)
     previous_text = ""
     previous_lineno = 0
 
@@ -390,9 +390,8 @@ def _extract_inline_reference_tasks(
         if in_code_block:
             continue
 
-        if include_frontmatter_dois and 1 < index < frontmatter_end:
-            doi_match = _DOI_RE.search(stripped)
-            if doi_match:
+        if 1 < index < frontmatter_end:
+            if include_frontmatter_dois and _DOI_RE.search(stripped):
                 tasks.append(
                     ReferenceTask(
                         file=file,
