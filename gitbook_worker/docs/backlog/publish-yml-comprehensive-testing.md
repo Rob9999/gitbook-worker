@@ -1,7 +1,12 @@
 ---
-version: 0.2.0
-date: 2025-12-04
+version: 0.3.0
+date: 2026-05-05
 history:
+    - version: 0.3.0
+        date: 2026-05-05
+        description: |
+            Started P0 implementation with gitbook_worker.tools.testing.pdf_validator.
+            The first slice validates configured emoji and CJK font embedding plus CJK text extraction.
   - version: 0.2.0
     date: 2025-12-04
     description: |
@@ -15,6 +20,15 @@ history:
 ---
 
 # Comprehensive Testing for publish.yml Options and PDF Content Validation
+
+## 0. Implementation Status
+
+- 2026-05-05: First P0 slice implemented in `gitbook_worker/tools/testing/pdf_validator.py`.
+- The validator reads expected font names from `fonts.yml`, tolerates PDF subset names
+    such as `IRPKLE+TwemojiMozilla`, checks embedded status, and can require Unicode
+    text-range signals such as CJK extraction.
+- Still open: page-size validation, combined-Markdown validation, per-`publish.yml`
+    option coverage, and full integration into release/CI gates.
 
 ## 1. Motivation & Problem Statement
 
