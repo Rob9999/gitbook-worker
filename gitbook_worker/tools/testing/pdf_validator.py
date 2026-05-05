@@ -284,6 +284,7 @@ def validate_pdf_font_gate(
     text: str | None = None,
     log_paths: Sequence[Path | str] | None = None,
     forbidden_log_patterns: Sequence[str] = DEFAULT_FORBIDDEN_LOG_PATTERNS,
+    fail_on_log_pattern: bool = False,
 ) -> PDFValidationResult:
     """Validate that configured fonts and text ranges are visible in a PDF."""
 
@@ -335,10 +336,14 @@ def validate_pdf_font_gate(
         warnings.append("No fonts could be extracted from PDF")
 
     for match in forbidden_log_matches:
-        errors.append(
+        message = (
             f"Forbidden log pattern {match.pattern!r} in {match.path}:{match.line_number}: "
             f"{match.line}"
         )
+        if fail_on_log_pattern:
+            errors.append(message)
+        else:
+            warnings.append(message)
 
     return PDFValidationResult(
         pdf_path=path,
@@ -404,6 +409,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "Defaults to Missing character and .notdef checks when --log is used"
         ),
     )
+    parser.add_argument(
+        "--fail-on-log-pattern",
+        action="store_true",
+        help="Return a failing exit code when forbidden log patterns are found",
+    )
     return parser
 
 
@@ -420,6 +430,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         forbidden_log_patterns=tuple(
             args.forbidden_log_patterns or DEFAULT_FORBIDDEN_LOG_PATTERNS
         ),
+        fail_on_log_pattern=args.fail_on_log_pattern,
     )
     if args.json:
         print(json.dumps(result_to_dict(result), ensure_ascii=False, indent=2))

@@ -1,8 +1,11 @@
 ---
-version: 0.4.0
+version: 0.5.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.5.0
+    date: 2026-05-05
+    description: Log-Gate auf warnenden Default mit explizitem --fail-on-log-pattern-Ratchet umgestellt
   - version: 0.4.0
     date: 2026-05-05
     description: PDF-Gate um optionale Missing-Glyph-/notdef-Logpruefung erweitert; Verzeichnisse pruefen den neuesten Log-Satz
@@ -66,6 +69,10 @@ python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample
 python -m gitbook_worker.tools.testing.pdf_validator --pdf en/publish/the-sample-book.pdf
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf --log de/publish/_latex-debug
 ```
+
+`--log` meldet bekannte Missing-Glyph-Signale zunaechst als Warnung. Sobald eine
+saubere oder akzeptierte Baseline vorliegt, kann `--fail-on-log-pattern` als
+harter Ratchet aktiviert werden.
 
 ### P1: AI-Reference-Check Provider- und Kostenhaertung
 

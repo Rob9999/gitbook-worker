@@ -50,8 +50,9 @@ This guide describes the release workflow for feature releases (e.g. `v2.2.0`) a
      `python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf`
      and
      `python -m gitbook_worker.tools.testing.pdf_validator --pdf en/publish/the-sample-book.pdf`
-   * If LaTeX debug logs are retained, include them in the gate to fail on missing-glyph signals. Directory inputs use the newest log set below that directory:
+   * If LaTeX debug logs are retained, include them in the gate to report missing-glyph signals. Directory inputs use the newest log set below that directory:
      `python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf --log de/publish/_latex-debug`
+     Add `--fail-on-log-pattern` once the known baseline is clean or explicitly ratcheted.
    * Human verification: If a PDF was generated, open and review it manually to confirm quality and uncover any unknown issues.
    * Fix blockers, address simple bugs, or create a backlog entry in `gitbook_worker/docs/backlog/` → involve the PO.
 

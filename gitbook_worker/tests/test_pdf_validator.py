@@ -121,7 +121,9 @@ def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(
     assert not result.errors
 
 
-def test_validate_pdf_font_gate_reports_forbidden_log_patterns(tmp_path: Path) -> None:
+def test_validate_pdf_font_gate_warns_for_forbidden_log_patterns(
+    tmp_path: Path,
+) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
         textwrap.dedent(
@@ -160,8 +162,51 @@ def test_validate_pdf_font_gate_reports_forbidden_log_patterns(tmp_path: Path) -
         log_paths=(log_file,),
     )
 
-    assert not result.passed
+    assert result.passed
     assert result.forbidden_log_matches[0].line_number == 1
+    assert "Forbidden log pattern" in result.warnings[0]
+
+
+def test_validate_pdf_font_gate_can_fail_on_forbidden_log_patterns(
+    tmp_path: Path,
+) -> None:
+    config = tmp_path / "fonts.yml"
+    config.write_text(
+        textwrap.dedent(
+            """
+            version: 1.0.0
+            fonts:
+              EMOJI:
+                name: Twemoji Mozilla
+                paths: []
+                license: CC BY 4.0
+                license_url: https://creativecommons.org/licenses/by/4.0/
+              CJK:
+                name: ERDA CC-BY CJK
+                paths: []
+                license: CC BY 4.0
+                license_url: https://creativecommons.org/licenses/by/4.0/
+            """
+        ),
+        encoding="utf-8",
+    )
+    log_file = tmp_path / "input.log"
+    log_file.write_text("glyph .notdef seen\n", encoding="utf-8")
+    fonts = [
+        FontInfo("IRPKLE+TwemojiMozilla", "CID TrueType", embedded=True),
+        FontInfo("DNMTDM+ERDACCbyCJK-Regular", "CID TrueType", embedded=True),
+    ]
+
+    result = validate_pdf_font_gate(
+        tmp_path / "sample.pdf",
+        fonts_config_path=config,
+        fonts=fonts,
+        text="Hallo 你好世界",
+        log_paths=(log_file,),
+        fail_on_log_pattern=True,
+    )
+
+    assert not result.passed
     assert "Forbidden log pattern" in result.errors[0]
 
 
