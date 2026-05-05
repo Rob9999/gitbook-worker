@@ -111,6 +111,35 @@ def test_genai_provider_uses_gemini_defaults(monkeypatch: pytest.MonkeyPatch) ->
     assert config.model == "gemini-2.5-flash"
 
 
+def test_mistral_provider_uses_mistral_defaults(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AI_REFERENCE_URL", raising=False)
+    monkeypatch.delenv("AI_REFERENCE_MODEL", raising=False)
+    args = ai_references.build_arg_parser().parse_args(
+        ["--ai-provider", "mistral", "--no-env-file"]
+    )
+
+    config = ai_references._resolve_model_config(args)
+
+    assert config.base_url == "https://api.mistral.ai/v1/chat/completions"
+    assert config.model == "mistral-small-latest"
+
+
+def test_mistral_provider_uses_mistral_api_key_env(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AI_REFERENCE_API_KEY", raising=False)
+    monkeypatch.setenv("MISTRAL_API_KEY", "mistral-secret")
+    args = ai_references.build_arg_parser().parse_args(
+        ["--ai-provider", "mistral", "--no-env-file"]
+    )
+
+    config = ai_references._resolve_model_config(args)
+
+    assert config.api_key == "mistral-secret"
+
+
 def test_provider_error_messages_are_redacted() -> None:
     config = ai_references.ModelConfig(
         base_url="https://generativelanguage.googleapis.com/v1beta",
@@ -188,6 +217,61 @@ def test_call_model_waits_for_retry_after_on_429(
     assert result.success is True
     assert calls == 2
     assert slept == [pytest.approx(6.0)]
+
+
+def test_call_model_sends_mistral_chat_completion_request(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task = ai_references.ReferenceTask(
+        file=Path("refs.md"),
+        title="Quelle",
+        line="1. Quelle. https://example.com",
+        lineno=1,
+        numbering="1",
+    )
+    config = ai_references.ModelConfig(
+        base_url="https://api.mistral.ai/v1/chat/completions",
+        api_key="mistral-secret",
+        provider="mistral",
+        model="mistral-small-latest",
+    )
+    captured: dict[str, object] = {}
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict:
+            return {
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"success": true, "org": "x", "validation_date": "2026-05-05", "type": "external url"}'
+                        }
+                    }
+                ]
+            }
+
+    def fake_post(url, headers, json, timeout):  # type: ignore[no-untyped-def]
+        captured["url"] = url
+        captured["headers"] = headers
+        captured["payload"] = json
+        captured["timeout"] = timeout
+        return FakeResponse()
+
+    monkeypatch.setattr(ai_references.requests, "post", fake_post)
+
+    result = ai_references.call_model(task, "Prompt", config)
+
+    assert result.success is True
+    assert captured["url"] == "https://api.mistral.ai/v1/chat/completions"
+    assert captured["headers"] == {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer mistral-secret",
+    }
+    payload = captured["payload"]
+    assert isinstance(payload, dict)
+    assert payload["model"] == "mistral-small-latest"
 
 
 def test_env_file_is_loaded_without_overriding_existing(

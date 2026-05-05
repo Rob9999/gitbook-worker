@@ -61,8 +61,10 @@ _SECRET_QUERY_RE = re.compile(r"([?&](?:key|api_key)=)[^&\s]+", re.IGNORECASE)
 DEFAULT_PROMPT = "Proof and repair the reference"
 DEFAULT_MODEL = "gpt-4"
 DEFAULT_GENAI_MODEL = "gemini-2.5-flash"
+DEFAULT_MISTRAL_MODEL = "mistral-small-latest"
 DEFAULT_PROVIDER = "openai"
 DEFAULT_URL = "https://api.openai.com/v1/chat/completions"
+DEFAULT_MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions"
 DEFAULT_TEMPERATURE = 0.1
 DEFAULT_TIMEOUT = 60.0
 DEFAULT_MAX_RETRIES = 3
@@ -81,6 +83,15 @@ ENV_THROTTLE_JITTER = "AI_REFERENCE_THROTTLE_JITTER"
 ENV_RETRY_BACKOFF_BASE = "AI_REFERENCE_RETRY_BACKOFF_BASE"
 ENV_RETRY_BACKOFF_MAX = "AI_REFERENCE_RETRY_BACKOFF_MAX"
 ENV_RETRY_BACKOFF_JITTER = "AI_REFERENCE_RETRY_BACKOFF_JITTER"
+
+_GENAI_PROVIDERS = {"genai", "google-genai"}
+_MISTRAL_PROVIDERS = {"mistral", "mistral-ai"}
+_CHAT_COMPLETIONS_PROVIDERS = {
+    "openai",
+    "openai-compatible",
+    "azure-openai",
+    *_MISTRAL_PROVIDERS,
+}
 
 
 @dataclass(frozen=True)
@@ -355,12 +366,12 @@ def call_model(
     provider = (config.provider or DEFAULT_PROVIDER).lower()
     prompt_text = _build_prompt(task, prompt)
     headers = {"Content-Type": "application/json"}
-    if config.api_key and provider not in {"genai", "google-genai"}:
+    if config.api_key and provider not in _GENAI_PROVIDERS:
         headers["Authorization"] = f"Bearer {config.api_key}"
 
     for attempt in range(config.max_retries + 1):
         try:
-            if provider in {"openai", "openai-compatible", "azure-openai"}:
+            if provider in _CHAT_COMPLETIONS_PROVIDERS:
                 payload = {
                     "model": config.model or DEFAULT_MODEL,
                     "messages": [{"role": "user", "content": prompt_text}],
@@ -387,7 +398,7 @@ def call_model(
                     )
                 return ReferenceResult(task, True, parsed)
 
-            if provider in {"genai", "google-genai"}:
+            if provider in _GENAI_PROVIDERS:
                 payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
                 url = _build_genai_url(config)
                 if config.api_key:
@@ -607,25 +618,30 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
     raw_base_url = args.ai_url or os.getenv(ENV_URL)
     if raw_base_url:
         base_url = raw_base_url
-    elif provider_normalized in {"genai", "google-genai"}:
+    elif provider_normalized in _GENAI_PROVIDERS:
         base_url = "https://generativelanguage.googleapis.com/v1beta"
+    elif provider_normalized in _MISTRAL_PROVIDERS:
+        base_url = DEFAULT_MISTRAL_URL
     else:
         base_url = DEFAULT_URL
     api_key = args.ai_api_key or os.getenv(ENV_API_KEY)
-    if not api_key and provider_normalized in {"genai", "google-genai"}:
+    if not api_key and provider_normalized in _GENAI_PROVIDERS:
         api_key = (
             os.getenv("GEMINI_API_KEY")
             or os.getenv("GOOGLE_API_KEY")
             or os.getenv("GENAI_API_KEY")
             or os.getenv("GOOGLE_GENAI_API_KEY")
         )
+    if not api_key and provider_normalized in _MISTRAL_PROVIDERS:
+        api_key = os.getenv("MISTRAL_API_KEY") or os.getenv("MISTRAL_KEY")
     model = args.model or os.getenv(ENV_MODEL)
     if model is None:
-        model = (
-            DEFAULT_GENAI_MODEL
-            if provider_normalized in {"genai", "google-genai"}
-            else DEFAULT_MODEL
-        )
+        if provider_normalized in _GENAI_PROVIDERS:
+            model = DEFAULT_GENAI_MODEL
+        elif provider_normalized in _MISTRAL_PROVIDERS:
+            model = DEFAULT_MISTRAL_MODEL
+        else:
+            model = DEFAULT_MODEL
     temperature_env = os.getenv(ENV_TEMPERATURE)
     temperature = (
         args.temperature
@@ -858,8 +874,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not config.api_key and config.provider not in {
         "local",
         "custom",
-        "genai",
-        "google-genai",
+        *_GENAI_PROVIDERS,
     }:
         LOGGER.warning(
             "No API key provided – requests may fail depending on the provider"

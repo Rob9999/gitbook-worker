@@ -41,6 +41,9 @@ Technisch fehlten aber wichtige Sicherheits- und Betriebsleitplanken:
   und `--throttle-jitter` plus Env-Fallbacks.
 - [x] Adaptiver 429-Backoff mit `Retry-After`-Headern und begrenztem
   Exponential-Fallback.
+- [x] Mistral-API-Adapter mit `MISTRAL_API_KEY`/`MISTRAL_KEY`, Default-Endpoint
+  `https://api.mistral.ai/v1/chat/completions` und Default-Modell
+  `mistral-small-latest`.
 - [x] GenAI-Default auf `gemini-2.5-flash` und robuste
   `models/<model>:generateContent`-URL-Ableitung.
 - [x] Optionaler CI-Hard-Fail mit `--fail-on-failed` und Exit-Code 44.
@@ -56,8 +59,8 @@ Technisch fehlten aber wichtige Sicherheits- und Betriebsleitplanken:
 - [ ] Deterministische Vorpruefungen fuer URL, DOI, ISBN, arXiv und interne
   Markdown-Links vor jedem LLM-Aufruf einbauen.
 - [ ] Optional SARIF oder GitHub-Step-Summary aus dem JSON-Report erzeugen.
-- [ ] Provider-Adapter weiter entkoppeln, falls neben OpenAI/Gemini weitere
-  Backends produktiv genutzt werden.
+- [ ] Provider-Adapter weiter entkoppeln, falls weitere Backends produktiv
+  genutzt werden.
 - [ ] Cache fuer identische Referenzzeilen einfuehren, um Kosten und Rate-Limits
   weiter zu senken.
 
