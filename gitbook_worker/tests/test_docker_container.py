@@ -49,9 +49,7 @@ def test_legacy_dockerfile_is_explicitly_deprecated():
 
 
 def test_python_dockerfile_stays_lightweight():
-    dockerfile = (
-        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.python"
-    )
+    dockerfile = REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.python"
     text = dockerfile.read_text(encoding="utf-8")
 
     assert "texlive" not in text.lower()
