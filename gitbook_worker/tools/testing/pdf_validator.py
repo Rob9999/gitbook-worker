@@ -335,10 +335,12 @@ def validate_pdf_font_gate(
     if not extracted_fonts:
         warnings.append("No fonts could be extracted from PDF")
 
-    for match in forbidden_log_matches:
+    if forbidden_log_matches:
+        first_match = forbidden_log_matches[0]
         message = (
-            f"Forbidden log pattern {match.pattern!r} in {match.path}:{match.line_number}: "
-            f"{match.line}"
+            f"{len(forbidden_log_matches)} forbidden log pattern match(es) found; "
+            f"first match {first_match.pattern!r} in "
+            f"{first_match.path}:{first_match.line_number}: {first_match.line}"
         )
         if fail_on_log_pattern:
             errors.append(message)
@@ -452,6 +454,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(f"  Forbidden matches: {len(result.forbidden_log_matches)}")
             for match in result.forbidden_log_matches[:10]:
                 print(f"  {match.path}:{match.line_number}: {match.line}")
+            if len(result.forbidden_log_matches) > 10:
+                remaining = len(result.forbidden_log_matches) - 10
+                print(f"  ... {remaining} more match(es); use --json for full detail")
         for warning in result.warnings:
             print(f"WARNING: {warning}")
         for error in result.errors:

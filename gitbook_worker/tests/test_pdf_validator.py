@@ -164,7 +164,7 @@ def test_validate_pdf_font_gate_warns_for_forbidden_log_patterns(
 
     assert result.passed
     assert result.forbidden_log_matches[0].line_number == 1
-    assert "Forbidden log pattern" in result.warnings[0]
+    assert "1 forbidden log pattern match" in result.warnings[0]
 
 
 def test_validate_pdf_font_gate_can_fail_on_forbidden_log_patterns(
@@ -207,7 +207,7 @@ def test_validate_pdf_font_gate_can_fail_on_forbidden_log_patterns(
     )
 
     assert not result.passed
-    assert "Forbidden log pattern" in result.errors[0]
+    assert "1 forbidden log pattern match" in result.errors[0]
 
 
 def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
