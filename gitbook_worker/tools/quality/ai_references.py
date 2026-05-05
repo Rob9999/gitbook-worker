@@ -569,9 +569,7 @@ def _build_prompt(
     "validation_date": "__VALIDATION_DATE__",
     "type": "internal reference" | "external url" | "external reference" | "?"
 }
-    """.strip().replace(
-        "__VALIDATION_DATE__", validation_date_hint
-    )
+    """.strip().replace("__VALIDATION_DATE__", validation_date_hint)
 
     if as_of_date:
         date_rule = (
