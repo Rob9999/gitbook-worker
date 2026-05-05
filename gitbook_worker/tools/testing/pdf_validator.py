@@ -21,6 +21,7 @@ from gitbook_worker.tools.publishing.font_config import FontConfigLoader
 
 DEFAULT_REQUIRED_FONT_KEYS = ("EMOJI", "CJK")
 DEFAULT_REQUIRED_TEXT_RANGES = ("CJK",)
+DEFAULT_FORBIDDEN_LOG_PATTERNS = ("Missing character", r"\.notdef\b")
 
 UNICODE_RANGES = {
     "CJK": ("\u4e00", "\u9fff"),
@@ -68,6 +69,16 @@ class RequiredFontCheck:
 
 
 @dataclass(frozen=True)
+class LogPatternMatch:
+    """A forbidden pattern match in a build log."""
+
+    path: Path
+    line_number: int
+    pattern: str
+    line: str
+
+
+@dataclass(frozen=True)
 class PDFValidationResult:
     """Result of a PDF font/text smoke validation."""
 
@@ -75,6 +86,7 @@ class PDFValidationResult:
     fonts: tuple[FontInfo, ...]
     required_fonts: tuple[RequiredFontCheck, ...]
     text_ranges: Mapping[str, int]
+    forbidden_log_matches: tuple[LogPatternMatch, ...]
     errors: tuple[str, ...]
     warnings: tuple[str, ...]
 
@@ -208,6 +220,46 @@ def count_unicode_ranges(
     return counts
 
 
+def collect_log_files(paths: Iterable[Path | str]) -> list[Path]:
+    """Collect log files from explicit file or directory paths."""
+
+    files: list[Path] = []
+    for raw_path in paths:
+        path = Path(raw_path)
+        if path.is_dir():
+            files.extend(sorted(child for child in path.rglob("*.log") if child.is_file()))
+        elif path.is_file():
+            files.append(path)
+    return _dedupe_paths(files)
+
+
+def scan_forbidden_log_patterns(
+    paths: Iterable[Path | str],
+    patterns: Sequence[str] = DEFAULT_FORBIDDEN_LOG_PATTERNS,
+) -> list[LogPatternMatch]:
+    """Scan log files for forbidden font/missing-glyph patterns."""
+
+    compiled_patterns = [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
+    matches: list[LogPatternMatch] = []
+    for path in collect_log_files(paths):
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            for pattern, compiled in zip(patterns, compiled_patterns):
+                if compiled.search(line):
+                    matches.append(
+                        LogPatternMatch(
+                            path=path,
+                            line_number=line_number,
+                            pattern=pattern,
+                            line=line.strip(),
+                        )
+                    )
+    return matches
+
+
 def load_expected_fonts(
     fonts_config_path: Path | None = None,
     font_keys: Sequence[str] = DEFAULT_REQUIRED_FONT_KEYS,
@@ -230,6 +282,8 @@ def validate_pdf_font_gate(
     required_text_ranges: Sequence[str] = DEFAULT_REQUIRED_TEXT_RANGES,
     fonts: Sequence[FontInfo] | None = None,
     text: str | None = None,
+    log_paths: Sequence[Path | str] | None = None,
+    forbidden_log_patterns: Sequence[str] = DEFAULT_FORBIDDEN_LOG_PATTERNS,
 ) -> PDFValidationResult:
     """Validate that configured fonts and text ranges are visible in a PDF."""
 
@@ -238,6 +292,11 @@ def validate_pdf_font_gate(
     extracted_fonts = tuple(fonts if fonts is not None else extract_pdf_fonts(path))
     extracted_text = text if text is not None else extract_pdf_text(path)
     text_ranges = count_unicode_ranges(extracted_text, required_text_ranges)
+    forbidden_log_matches = tuple(
+        scan_forbidden_log_patterns(log_paths, forbidden_log_patterns)
+        if log_paths
+        else ()
+    )
 
     errors: list[str] = []
     warnings: list[str] = []
@@ -275,11 +334,18 @@ def validate_pdf_font_gate(
     if not extracted_fonts:
         warnings.append("No fonts could be extracted from PDF")
 
+    for match in forbidden_log_matches:
+        errors.append(
+            f"Forbidden log pattern {match.pattern!r} in {match.path}:{match.line_number}: "
+            f"{match.line}"
+        )
+
     return PDFValidationResult(
         pdf_path=path,
         fonts=extracted_fonts,
         required_fonts=tuple(required_checks),
         text_ranges=text_ranges,
+        forbidden_log_matches=forbidden_log_matches,
         errors=tuple(errors),
         warnings=tuple(warnings),
     )
@@ -320,6 +386,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Required Unicode text range; repeatable. Defaults to CJK",
     )
     parser.add_argument("--json", action="store_true", help="Print JSON output")
+    parser.add_argument(
+        "--log",
+        action="append",
+        dest="log_paths",
+        default=None,
+        type=Path,
+        help="LaTeX/build log file or directory to scan; repeatable",
+    )
+    parser.add_argument(
+        "--forbid-log-pattern",
+        action="append",
+        dest="forbidden_log_patterns",
+        default=None,
+        help=(
+            "Regex pattern that must not appear in supplied logs; repeatable. "
+            "Defaults to Missing character and .notdef checks when --log is used"
+        ),
+    )
     return parser
 
 
@@ -332,6 +416,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         fonts_config_path=args.fonts_config,
         required_font_keys=tuple(args.font_keys or DEFAULT_REQUIRED_FONT_KEYS),
         required_text_ranges=tuple(args.text_ranges or DEFAULT_REQUIRED_TEXT_RANGES),
+        log_paths=tuple(args.log_paths or ()),
+        forbidden_log_patterns=tuple(
+            args.forbidden_log_patterns or DEFAULT_FORBIDDEN_LOG_PATTERNS
+        ),
     )
     if args.json:
         print(json.dumps(result_to_dict(result), ensure_ascii=False, indent=2))
@@ -348,6 +436,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         print("Text ranges:")
         for range_name, count in result.text_ranges.items():
             print(f"  {range_name}: {count}")
+        if args.log_paths:
+            print("Log scan:")
+            print(f"  Forbidden matches: {len(result.forbidden_log_matches)}")
+            for match in result.forbidden_log_matches[:10]:
+                print(f"  {match.path}:{match.line_number}: {match.line}")
         for warning in result.warnings:
             print(f"WARNING: {warning}")
         for error in result.errors:
@@ -370,6 +463,17 @@ def _dedupe_fonts(fonts: Iterable[FontInfo]) -> list[FontInfo]:
         if key not in seen:
             seen.add(key)
             unique.append(font)
+    return unique
+
+
+def _dedupe_paths(paths: Iterable[Path]) -> list[Path]:
+    unique: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        resolved = path.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            unique.append(path)
     return unique
 
 

@@ -10,6 +10,7 @@ from gitbook_worker.tools.testing.pdf_validator import (
     load_expected_fonts,
     normalize_font_name,
     parse_pdffonts_output,
+    scan_forbidden_log_patterns,
     validate_pdf_font_gate,
 )
 
@@ -114,6 +115,48 @@ def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(
     assert not result.errors
 
 
+def test_validate_pdf_font_gate_reports_forbidden_log_patterns(tmp_path: Path) -> None:
+    config = tmp_path / "fonts.yml"
+    config.write_text(
+        textwrap.dedent("""
+            version: 1.0.0
+            fonts:
+              EMOJI:
+                name: Twemoji Mozilla
+                paths: []
+                license: CC BY 4.0
+                license_url: https://creativecommons.org/licenses/by/4.0/
+              CJK:
+                name: ERDA CC-BY CJK
+                paths: []
+                license: CC BY 4.0
+                license_url: https://creativecommons.org/licenses/by/4.0/
+            """),
+        encoding="utf-8",
+    )
+    log_file = tmp_path / "input.log"
+    log_file.write_text(
+        "Missing character: There is no 😀 (U+1F600) in font nullfont!\n",
+        encoding="utf-8",
+    )
+    fonts = [
+        FontInfo("IRPKLE+TwemojiMozilla", "CID TrueType", embedded=True),
+        FontInfo("DNMTDM+ERDACCbyCJK-Regular", "CID TrueType", embedded=True),
+    ]
+
+    result = validate_pdf_font_gate(
+        tmp_path / "sample.pdf",
+        fonts_config_path=config,
+        fonts=fonts,
+        text="Hallo 你好世界",
+        log_paths=(log_file,),
+    )
+
+    assert not result.passed
+    assert result.forbidden_log_matches[0].line_number == 1
+    assert "Forbidden log pattern" in result.errors[0]
+
+
 def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
     tmp_path: Path,
 ) -> None:
@@ -151,3 +194,16 @@ def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
 
 def test_count_unicode_ranges_ignores_unknown_ranges() -> None:
     assert count_unicode_ranges("abc 你好", ["CJK", "Unknown"]) == {"CJK": 2}
+
+
+def test_scan_forbidden_log_patterns_collects_directory_logs(tmp_path: Path) -> None:
+    log_dir = tmp_path / "logs"
+    nested = log_dir / "nested"
+    nested.mkdir(parents=True)
+    (nested / "input.log").write_text("glyph .notdef seen\n", encoding="utf-8")
+    (nested / "ignore.txt").write_text("Missing character\n", encoding="utf-8")
+
+    matches = scan_forbidden_log_patterns((log_dir,))
+
+    assert len(matches) == 1
+    assert matches[0].pattern == r"\.notdef\b"

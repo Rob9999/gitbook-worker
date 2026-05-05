@@ -1,8 +1,11 @@
 ---
-version: 0.3.0
+version: 0.4.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.4.0
+    date: 2026-05-05
+    description: PDF-Gate um optionale Missing-Glyph-/notdef-Logpruefung erweitert
   - version: 0.3.0
     date: 2026-05-05
     description: Englischen PDF-Build und Font-Gate als erfolgreich verifiziert dokumentiert
@@ -61,6 +64,7 @@ Release-Run-Kommando:
 ```powershell
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf
 python -m gitbook_worker.tools.testing.pdf_validator --pdf en/publish/the-sample-book.pdf
+python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf --log de/publish/_latex-debug
 ```
 
 ### P1: AI-Reference-Check Provider- und Kostenhaertung
@@ -133,4 +137,4 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - Das P0-PDF-Regressionsgate ist als erste Scheibe implementiert und fuer `de`
   und `en` erfolgreich geprueft.
 - Die naechste technische Arbeit ist die AI-Reference-Vorpruefung/Cache-Scheibe
-  oder die Erweiterung des PDF-Gates um Missing-Glyph-Logauswertung.
+  oder die Integration des PDF-Gates in CI/Workflow-Orchestrator-Profile.
