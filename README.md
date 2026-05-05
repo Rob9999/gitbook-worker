@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.3.0 „Pfadtreu"** · [Release Notes](docs/releases/v2.3.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.4.0 "Pruefsicher"** · [Release Notes](docs/releases/v2.4.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.3.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.4.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -314,6 +314,17 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.4.0 "Pruefsicher" (5. Mai 2026)
+
+- **PDF-Regressionsgate**: Prueft Emoji- und ERDA-CJK-Font-Einbettung sowie CJK-Textsignal in den Sample-PDFs.
+- **AI-Reference-Check gehaertet**: Report-only Default, Secret-Redaction, Provider-Backoff, `--as-of-date`, GenAI/Gemini und Mistral.
+- **Batch/Resume fuer Kunden-Workflows**: `--files-list`, `--max-tasks`, `--resume-from-report`, 429-Abbruch und klare Statuswerte `suggested`, `validated`, `failed`, `rate_limited`.
+- **Inline- und Precheck-Schicht**: Bare URLs/DOIs, optionale Markdown-Links/Frontmatter-DOIs und no-network Prechecks fuer URL, DOI, arXiv, ISBN und interne Markdown-Links.
+- **Docker-Image robuster**: `Dockerfile.dynamic` verwendet den aktuellen CTAN-TeX-Live-Pfad ueber `/usr/local/texlive/current` statt hartem Jahrespfad.
+- **Teststand**: 513 passed, 11 skipped, 10 deselected; DE/EN PDF-Font-Gates gruen.
+
+→ [docs/releases/v2.4.0.md](docs/releases/v2.4.0.md)
+
 #### 🎉 v2.3.0 „Pfadtreu" (8. Februar 2026)
 
 - **Auto-Detect: GitBook-Rename-Skip**: Wenn alle Publish-Einträge `source_type: file` sind, wird der destruktive Rename-Schritt automatisch übersprungen — keine `FileNotFoundError` mehr bei Flat-File-Szenarien.
@@ -465,7 +476,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.3.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.4.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -716,6 +727,17 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.4.0 "Pruefsicher" (May 5, 2026)
+
+- **PDF regression gate**: Validates emoji and ERDA-CJK font embedding plus CJK text signals in sample PDFs.
+- **Hardened AI reference check**: Report-only default, secret redaction, provider backoff, `--as-of-date`, GenAI/Gemini, and Mistral.
+- **Batch/resume for customer workflows**: `--files-list`, `--max-tasks`, `--resume-from-report`, 429 stop policy, and clear `suggested`, `validated`, `failed`, `rate_limited` statuses.
+- **Inline and precheck layer**: Bare URLs/DOIs, optional Markdown links/frontmatter DOIs, and no-network checks for URL, DOI, arXiv, ISBN, and internal Markdown links.
+- **More robust Docker image**: `Dockerfile.dynamic` uses the current CTAN TeX Live path via `/usr/local/texlive/current` instead of a hardcoded year.
+- **Test status**: 513 passed, 11 skipped, 10 deselected; DE/EN PDF font gates green.
+
+→ [docs/releases/v2.4.0.md](docs/releases/v2.4.0.md)
 
 #### 🎉 v2.3.0 "Pfadtreu" (February 8, 2026)
 

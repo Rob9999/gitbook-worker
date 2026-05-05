@@ -1,6 +1,6 @@
 # GitBook Worker package
 
-GitBook Worker (v2.3.0 „Pfadtreu") is a standalone Python package for automating PDF
+GitBook Worker (v2.4.0 "Pruefsicher") is a standalone Python package for automating PDF
 publishing, conversion utilities, and QA checks for GitBook projects. Install it
 from the repository root and use the CLI locally or in CI.
 

@@ -1,8 +1,11 @@
 ---
-version: 0.9.0
+version: 1.0.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 1.0.0
+    date: 2026-05-05
+    description: Version-Bump auf 2.4.0 und finale DE/EN PDF-Gates dokumentiert.
   - version: 0.9.0
     date: 2026-05-05
     description: Non-slow Testsuite nach Dockerfix erfolgreich dokumentiert.
@@ -166,8 +169,8 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] Lokaler PDF-Build fuer `de` erfolgreich.
 - [x] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
 - [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
-- [ ] Release Notes `docs/releases/v2.4.0.md` erstellt.
-- [ ] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
+- [x] Release Notes `docs/releases/v2.4.0.md` erstellt.
+- [x] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
 
 ## Aktueller Stand am 2026-05-05
 
@@ -182,3 +185,5 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
   oder die Integration des PDF-Gates in CI/Workflow-Orchestrator-Profile.
 - Non-slow Testsuite nach Dockerfix: 513 passed, 11 skipped, 10 deselected,
   4 warnings.
+- Finale DE/EN PDF-Font-Gates: Twemoji und ERDA-CJK eingebettet, CJK-Textscan
+  jeweils 55.
