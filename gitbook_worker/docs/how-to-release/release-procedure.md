@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
-date: 2026-02-08
+version: 1.2.0
+date: 2026-05-05
 history:
+  - "1.2.0: 2026-05-05 — PDF-Font-/Emoji-Gate mit pdf_validator in lokale Release-Runs aufgenommen"
   - "1.1.0: 2026-02-08 — Docs-Update-Schritt, GitHub-Release-Schritt, annotated-Tag-Hinweis, Tag-Format modernisiert"
   - "1.0.0: 2026-01-10 — init: add release procedure"
 ---
@@ -41,8 +42,14 @@ This guide describes the release workflow for feature releases (e.g. `v2.2.0`) a
      `python -m gitbook_worker.tools.workflow_orchestrator run --root <repo> --content-config content.yaml --lang de --profile local`
      and
      `python -m gitbook_worker.tools.workflow_orchestrator run --root <repo> --content-config content.yaml --lang en --profile local`
-   * May verify the TOC using:
-     `python -m gitbook_worker.tools.utils.pdf_toc_extractor --pdf [de|en|...]/publish/das-erda-buch.pdf --format text`
+   * Verify the TOC using the generated PDF path from `publish.yml`, for example:
+     `python -m gitbook_worker.tools.utils.pdf_toc_extractor --pdf de/publish/das-sample-buch.pdf --format text`
+     and
+     `python -m gitbook_worker.tools.utils.pdf_toc_extractor --pdf en/publish/the-sample-book.pdf --format text`
+   * Verify configured emoji/CJK font embedding and CJK text extraction:
+     `python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf`
+     and
+     `python -m gitbook_worker.tools.testing.pdf_validator --pdf en/publish/the-sample-book.pdf`
    * Human verification: If a PDF was generated, open and review it manually to confirm quality and uncover any unknown issues.
    * Fix blockers, address simple bugs, or create a backlog entry in `gitbook_worker/docs/backlog/` → involve the PO.
 

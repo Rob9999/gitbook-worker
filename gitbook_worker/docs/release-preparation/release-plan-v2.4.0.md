@@ -1,8 +1,11 @@
 ---
-version: 0.1.0
+version: 0.2.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.2.0
+    date: 2026-05-05
+    description: PDF-Font-Gate als implementierte P0-Scheibe und Release-Run-Kommando dokumentiert
   - version: 0.1.0
     date: 2026-05-05
     description: Initialer Release- und Backlog-Arbeitsplan fuer v2.4.0 mit PDF-Font-/Emoji-Gates
@@ -43,12 +46,19 @@ Quelle: `gitbook_worker/docs/backlog/publish-yml-comprehensive-testing.md`
 
 Erste umsetzbare Scheibe:
 
-- PDF-Font-Validator als kleines Testing-Utility erstellen.
-- Fonts aus der aktuellen Konfiguration ableiten, nicht hart auf konkrete Namen
+- [x] PDF-Font-Validator als kleines Testing-Utility erstellen.
+- [x] Fonts aus der aktuellen Konfiguration ableiten, nicht hart auf konkrete Namen
   in Tests verdrahten.
-- Test fuer `TwemojiMozilla`/konfigurierten Emoji-Font und ERDA-CJK-Einbettung
+- [x] Test fuer `TwemojiMozilla`/konfigurierten Emoji-Font und ERDA-CJK-Einbettung
   an den bestehenden Sample-PDFs oder einem fokussierten Smoke-PDF aufsetzen.
-- Ergebnis als Release-Gate dokumentieren.
+- [x] Ergebnis als Release-Gate dokumentieren.
+
+Release-Run-Kommando:
+
+```powershell
+python -m gitbook_worker.tools.testing.pdf_validator --pdf de/publish/das-sample-buch.pdf
+python -m gitbook_worker.tools.testing.pdf_validator --pdf en/publish/the-sample-book.pdf
+```
 
 ### P1: AI-Reference-Check Provider- und Kostenhaertung
 
@@ -102,13 +112,13 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 
 ## Release-Kandidaten-Checkliste
 
-- [ ] P0 PDF-Font-/Emoji-Gate implementiert.
-- [ ] AI-Reference Mistral-Provider dokumentiert und getestet.
+- [x] P0 PDF-Font-/Emoji-Gate implementiert.
+- [x] AI-Reference Mistral-Provider dokumentiert und getestet.
 - [ ] AI-Reference Vorpruefung oder Cache mindestens als erste Scheibe umgesetzt
       oder bewusst auf v2.4.x verschoben.
 - [ ] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
-- [ ] Lokaler PDF-Build fuer `de` erfolgreich.
-- [ ] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
+- [x] Lokaler PDF-Build fuer `de` erfolgreich.
+- [x] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
 - [ ] Optional lokaler PDF-Build fuer `en` erfolgreich.
 - [ ] Release Notes `docs/releases/v2.4.0.md` erstellt.
 - [ ] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
@@ -116,5 +126,8 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 ## Aktueller Stand am 2026-05-05
 
 - Kein bestehender v2.4.0-Release-Plan gefunden.
-- Mistral-Provider wurde als erster Provider-Backlog-Schritt gestartet.
-- Die wichtigste naechste technische Arbeit ist das P0-PDF-Regressionsgate.
+- Mistral-Provider ist implementiert und gezielt getestet.
+- Das P0-PDF-Regressionsgate ist als erste Scheibe implementiert und fuer `de`
+  erfolgreich geprueft.
+- Die naechste technische Arbeit ist entweder `en`-PDF-Gate-Verifikation oder die
+  AI-Reference-Vorpruefung/Cache-Scheibe.

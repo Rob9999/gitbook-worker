@@ -9,9 +9,23 @@
 				"-m",
 				"gitbook_worker.tools.utils.pdf_toc_extractor",
 				"--pdf",
-				"de/publish/das-erda-buch.pdf",
+				"de/publish/das-sample-buch.pdf",
 				"--format",
 				"text"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Check de PDF Fonts",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.testing.pdf_validator",
+				"--pdf",
+				"de/publish/das-sample-buch.pdf"
 			],
 			"isBackground": false,
 			"problemMatcher": [],
@@ -46,9 +60,23 @@
 				"-m",
 				"gitbook_worker.tools.utils.pdf_toc_extractor",
 				"--pdf",
-				"en/publish/the-erda-book.pdf",
+				"en/publish/the-sample-book.pdf",
 				"--format",
 				"text"
+			],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "test"
+		},
+		{
+			"label": "Check en PDF Fonts",
+			"type": "shell",
+			"command": "C:/gitbook-worker/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"gitbook_worker.tools.testing.pdf_validator",
+				"--pdf",
+				"en/publish/the-sample-book.pdf"
 			],
 			"isBackground": false,
 			"problemMatcher": [],
