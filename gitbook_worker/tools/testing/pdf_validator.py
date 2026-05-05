@@ -491,7 +491,9 @@ def _collect_directory_logs(directory: Path) -> list[Path]:
 
     newest_directory = max(
         grouped_logs,
-        key=lambda parent: max(log_file.stat().st_mtime for log_file in grouped_logs[parent]),
+        key=lambda parent: max(
+            log_file.stat().st_mtime for log_file in grouped_logs[parent]
+        ),
     )
     return sorted(grouped_logs[newest_directory])
 
