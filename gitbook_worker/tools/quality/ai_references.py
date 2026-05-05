@@ -26,7 +26,7 @@ import random
 import re
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Sequence
 
@@ -83,6 +83,9 @@ ENV_THROTTLE_JITTER = "AI_REFERENCE_THROTTLE_JITTER"
 ENV_RETRY_BACKOFF_BASE = "AI_REFERENCE_RETRY_BACKOFF_BASE"
 ENV_RETRY_BACKOFF_MAX = "AI_REFERENCE_RETRY_BACKOFF_MAX"
 ENV_RETRY_BACKOFF_JITTER = "AI_REFERENCE_RETRY_BACKOFF_JITTER"
+ENV_URL_ALIASES = (ENV_URL, "AI_URL")
+ENV_API_KEY_ALIASES = (ENV_API_KEY, "AI_API_KEY")
+ENV_PROVIDER_ALIASES = (ENV_PROVIDER, "AI_PROVIDER")
 
 _GENAI_PROVIDERS = {"genai", "google-genai"}
 _MISTRAL_PROVIDERS = {"mistral", "mistral-ai"}
@@ -336,7 +339,13 @@ def _extract_json_from_text(generated_text: str) -> tuple[bool, Any]:
         return False, generated_text
 
 
-def _build_prompt(task: ReferenceTask, base_prompt: str) -> str:
+def _build_prompt(
+    task: ReferenceTask,
+    base_prompt: str,
+    *,
+    as_of_date: str | None = None,
+) -> str:
+    validation_date_hint = as_of_date or "YYYY-MM-DD"
     json_hint = """
 {
     "success": true|false,
@@ -344,27 +353,44 @@ def _build_prompt(task: ReferenceTask, base_prompt: str) -> str:
     "new": "<neue Zitationszeile oder null>",
     "error": "<Fehlermeldung oder null>",
     "hint": "<Hinweis oder null>",
-    "validation_date": "YYYY-MM-DD",
+    "validation_date": "__VALIDATION_DATE__",
     "type": "internal reference" | "external url" | "external reference" | "?"
 }
-    """.strip()
+    """.strip().replace("__VALIDATION_DATE__", validation_date_hint)
+
+    if as_of_date:
+        date_rule = (
+            f"Use validation_date exactly as {as_of_date}. Do not invent access dates, "
+            "publication dates, publishers, titles, or authors. If uncertain, set "
+            "success=false and add a manual-review hint."
+        )
+    else:
+        date_rule = (
+            "Do not invent access dates, publication dates, publishers, titles, or "
+            "authors. If uncertain, set success=false and add a manual-review hint."
+        )
 
     index = task.footnote_index
     reference_label = f"Quelle [{index}]" if index is not None else "Quelle"
     return (
         f"{base_prompt}\n\n"
+        f"{date_rule}\n\n"
         f"{reference_label}: {task.line}\n\n"
         f"Generate a structured JSON according to:\n{json_hint}"
     )
 
 
 def call_model(
-    task: ReferenceTask, prompt: str, config: ModelConfig
+    task: ReferenceTask,
+    prompt: str,
+    config: ModelConfig,
+    *,
+    as_of_date: str | None = None,
 ) -> ReferenceResult:
     """Send ``task`` to the configured AI backend and return the response."""
 
     provider = (config.provider or DEFAULT_PROVIDER).lower()
-    prompt_text = _build_prompt(task, prompt)
+    prompt_text = _build_prompt(task, prompt, as_of_date=as_of_date)
     headers = {"Content-Type": "application/json"}
     if config.api_key and provider not in _GENAI_PROVIDERS:
         headers["Authorization"] = f"Bearer {config.api_key}"
@@ -396,7 +422,9 @@ def call_model(
                     return ReferenceResult(
                         task, False, parsed, "AI response did not return JSON"
                     )
-                return ReferenceResult(task, True, parsed)
+                return ReferenceResult(
+                    task, True, _normalize_reference_response(parsed, as_of_date)
+                )
 
             if provider in _GENAI_PROVIDERS:
                 payload = {"contents": [{"parts": [{"text": prompt_text}]}]}
@@ -423,7 +451,9 @@ def call_model(
                     return ReferenceResult(
                         task, False, parsed, "AI response did not return JSON"
                     )
-                return ReferenceResult(task, True, parsed)
+                return ReferenceResult(
+                    task, True, _normalize_reference_response(parsed, as_of_date)
+                )
 
             payload = {
                 "prompt": prompt_text,
@@ -446,7 +476,9 @@ def call_model(
 
             if isinstance(data, Mapping):
                 if {"success", "org", "validation_date", "type"} <= set(data):
-                    return ReferenceResult(task, True, data)
+                    return ReferenceResult(
+                        task, True, _normalize_reference_response(data, as_of_date)
+                    )
                 content = (
                     data.get("content")
                     if isinstance(data.get("content"), str)
@@ -455,7 +487,11 @@ def call_model(
                 if content:
                     parsed_ok, parsed = _extract_json_from_text(content)
                     if parsed_ok:
-                        return ReferenceResult(task, True, parsed)
+                        return ReferenceResult(
+                            task,
+                            True,
+                            _normalize_reference_response(parsed, as_of_date),
+                        )
                     return ReferenceResult(
                         task, False, parsed, "AI content missing JSON"
                     )
@@ -519,6 +555,14 @@ def _build_genai_url(config: ModelConfig) -> str:
     if "/models/" in clean:
         return f"{clean}:generateContent"
     return f"{clean}/models/{model}:generateContent"
+
+
+def _normalize_reference_response(response: Any, as_of_date: str | None) -> Any:
+    if not as_of_date or not isinstance(response, Mapping):
+        return response
+    normalized = dict(response)
+    normalized["validation_date"] = as_of_date
+    return normalized
 
 
 def _sanitize_error_message(message: str, config: ModelConfig) -> str:
@@ -612,10 +656,27 @@ def _parse_float(value: Optional[str], default: float) -> float:
         return default
 
 
+def _first_env(*names: str) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
+
+
+def _resolve_as_of_date(value: str | None) -> str:
+    if value is None:
+        return datetime.now(timezone.utc).date().isoformat()
+    try:
+        return date.fromisoformat(value).isoformat()
+    except ValueError as exc:
+        raise ValueError("--as-of-date must use YYYY-MM-DD") from exc
+
+
 def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
-    provider = args.ai_provider or os.getenv(ENV_PROVIDER) or DEFAULT_PROVIDER
+    provider = args.ai_provider or _first_env(*ENV_PROVIDER_ALIASES) or DEFAULT_PROVIDER
     provider_normalized = provider.lower()
-    raw_base_url = args.ai_url or os.getenv(ENV_URL)
+    raw_base_url = args.ai_url or _first_env(*ENV_URL_ALIASES)
     if raw_base_url:
         base_url = raw_base_url
     elif provider_normalized in _GENAI_PROVIDERS:
@@ -624,7 +685,7 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
         base_url = DEFAULT_MISTRAL_URL
     else:
         base_url = DEFAULT_URL
-    api_key = args.ai_api_key or os.getenv(ENV_API_KEY)
+    api_key = args.ai_api_key or _first_env(*ENV_API_KEY_ALIASES)
     if not api_key and provider_normalized in _GENAI_PROVIDERS:
         api_key = (
             os.getenv("GEMINI_API_KEY")
@@ -649,17 +710,25 @@ def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
         else _parse_float(temperature_env, DEFAULT_TEMPERATURE)
     )
     timeout = args.timeout if args.timeout is not None else DEFAULT_TIMEOUT
-    max_retries = (
-        args.max_retries if args.max_retries is not None else DEFAULT_MAX_RETRIES
-    )
+    if args.max_consecutive_429 is not None:
+        max_retries = args.max_consecutive_429
+    elif args.max_retries is not None:
+        max_retries = args.max_retries
+    else:
+        max_retries = DEFAULT_MAX_RETRIES
+    cooldown_on_429 = args.cooldown_on_429_seconds
     retry_backoff_base = (
         args.retry_backoff_base
         if args.retry_backoff_base is not None
+        else cooldown_on_429
+        if cooldown_on_429 is not None
         else _parse_float(os.getenv(ENV_RETRY_BACKOFF_BASE), DEFAULT_RETRY_BACKOFF_BASE)
     )
     retry_backoff_max = (
         args.retry_backoff_max
         if args.retry_backoff_max is not None
+        else cooldown_on_429
+        if cooldown_on_429 is not None
         else _parse_float(os.getenv(ENV_RETRY_BACKOFF_MAX), DEFAULT_RETRY_BACKOFF_MAX)
     )
     retry_backoff_jitter = (
@@ -733,6 +802,7 @@ def _write_json_report(
     destination: Path,
     *,
     prompt: str,
+    as_of_date: str,
     config: ModelConfig,
     throttle: ThrottleConfig,
     files: Sequence[Path],
@@ -740,6 +810,7 @@ def _write_json_report(
     destination.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "as_of_date": as_of_date,
         "prompt": prompt,
         "model_config": redact_secrets(asdict(config)),
         "throttle": asdict(throttle),
@@ -787,10 +858,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--ai-provider", dest="ai_provider", help="AI provider identifier"
     )
     parser.add_argument("--model", help="Model name to request from the provider")
+    parser.add_argument(
+        "--as-of-date",
+        help="Validation date for prompts and reports (YYYY-MM-DD; default: today)",
+    )
     parser.add_argument("--temperature", type=float, help="Sampling temperature")
     parser.add_argument("--timeout", type=float, help="Request timeout in seconds")
     parser.add_argument(
         "--max-retries", type=int, help="Maximum number of retries for rate limits"
+    )
+    parser.add_argument(
+        "--max-consecutive-429",
+        type=int,
+        help="Alias for --max-retries when handling consecutive 429 responses",
+    )
+    parser.add_argument(
+        "--cooldown-on-429-seconds",
+        type=float,
+        help="Fixed fallback cooldown for 429 responses when Retry-After is absent",
     )
     parser.add_argument(
         "--retry-backoff-base",
@@ -816,7 +901,19 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Minimum seconds between provider calls",
     )
     parser.add_argument(
+        "--delay-seconds",
+        dest="min_request_interval",
+        type=float,
+        help="Alias for --min-request-interval",
+    )
+    parser.add_argument(
         "--throttle-jitter", type=float, help="Additional random jitter in seconds"
+    )
+    parser.add_argument(
+        "--jitter-seconds",
+        dest="throttle_jitter",
+        type=float,
+        help="Alias for --throttle-jitter",
     )
     parser.add_argument(
         "--json-report", type=Path, help="Write a JSON report to this path"
@@ -844,8 +941,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     handle_exit_code_help(args, component="ai_references")
 
     root = args.root.resolve()
+    LOGGER.info("AI reference project root: %s", root)
     manifest = args.manifest.resolve() if args.manifest else None
     summary = args.summary.resolve() if args.summary else None
+    try:
+        as_of_date = _resolve_as_of_date(args.as_of_date)
+    except ValueError as exc:
+        parser.error(str(exc))
 
     if not args.no_env_file:
         env_file = args.env_file.resolve() if args.env_file else root / ".env"
@@ -885,7 +987,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     iterator = tqdm.tqdm(tasks, desc="References", unit="ref", disable=not progress)
     for task in iterator:
         throttle.wait()
-        result = call_model(task, args.prompt, config)
+        result = call_model(task, args.prompt, config, as_of_date=as_of_date)
         results.append(result)
         if result.error:
             LOGGER.warning(
@@ -903,6 +1005,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             report,
             args.json_report.resolve(),
             prompt=args.prompt,
+            as_of_date=as_of_date,
             config=config,
             throttle=throttle_config,
             files=files,

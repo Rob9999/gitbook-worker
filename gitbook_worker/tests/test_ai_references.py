@@ -140,6 +140,122 @@ def test_mistral_provider_uses_mistral_api_key_env(
     assert config.api_key == "mistral-secret"
 
 
+def test_customer_env_aliases_are_used(monkeypatch: pytest.MonkeyPatch) -> None:
+    for name in (
+        "AI_REFERENCE_API_KEY",
+        "AI_REFERENCE_PROVIDER",
+        "AI_REFERENCE_URL",
+        "AI_API_KEY",
+        "AI_PROVIDER",
+        "AI_URL",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("AI_API_KEY", "alias-secret")
+    monkeypatch.setenv("AI_PROVIDER", "openai-compatible")
+    monkeypatch.setenv("AI_URL", "https://api.example.test/chat")
+    args = ai_references.build_arg_parser().parse_args(["--no-env-file"])
+
+    config = ai_references._resolve_model_config(args)
+
+    assert config.api_key == "alias-secret"
+    assert config.provider == "openai-compatible"
+    assert config.base_url == "https://api.example.test/chat"
+
+
+def test_customer_throttle_and_429_aliases_are_used() -> None:
+    args = ai_references.build_arg_parser().parse_args(
+        [
+            "--delay-seconds",
+            "3",
+            "--jitter-seconds",
+            "0.5",
+            "--cooldown-on-429-seconds",
+            "9",
+            "--max-consecutive-429",
+            "2",
+            "--no-env-file",
+        ]
+    )
+
+    throttle = ai_references._resolve_throttle_config(args)
+    config = ai_references._resolve_model_config(args)
+
+    assert throttle.min_interval_seconds == pytest.approx(3.0)
+    assert throttle.jitter_seconds == pytest.approx(0.5)
+    assert config.max_retries == 2
+    assert config.retry_backoff_base_seconds == pytest.approx(9.0)
+    assert config.retry_backoff_max_seconds == pytest.approx(9.0)
+
+
+def test_build_prompt_uses_as_of_date_and_uncertainty_rule() -> None:
+    task = ai_references.ReferenceTask(
+        file=Path("refs.md"),
+        title="Quelle",
+        line="1. Quelle ohne Datum",
+        lineno=1,
+        numbering="1",
+    )
+
+    prompt = ai_references._build_prompt(
+        task,
+        "Proof and repair the reference",
+        as_of_date="2026-05-05",
+    )
+
+    assert "Use validation_date exactly as 2026-05-05" in prompt
+    assert '"validation_date": "2026-05-05"' in prompt
+    assert "Do not invent access dates" in prompt
+    assert "success=false" in prompt
+
+
+def test_call_model_forces_as_of_date_in_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    task = ai_references.ReferenceTask(
+        file=Path("refs.md"),
+        title="Quelle",
+        line="1. Quelle. https://example.com",
+        lineno=1,
+        numbering="1",
+    )
+    config = ai_references.ModelConfig(
+        base_url="https://api.example.test/chat",
+        api_key="secret-token",
+        provider="openai",
+        model="test-model",
+    )
+
+    class FakeResponse:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict:
+            content = (
+                '{"success": true, "org": "x", '
+                '"validation_date": "YYYY-MM-DD", "type": "external url"}'
+            )
+            return {
+                "choices": [
+                    {"message": {"content": content}}
+                ]
+            }
+
+    monkeypatch.setattr(
+        ai_references.requests, "post", lambda *args, **kwargs: FakeResponse()
+    )
+
+    result = ai_references.call_model(
+        task,
+        "Prompt",
+        config,
+        as_of_date="2026-05-05",
+    )
+
+    assert result.success is True
+    assert isinstance(result.response, dict)
+    assert result.response["validation_date"] == "2026-05-05"
+
+
 def test_provider_error_messages_are_redacted() -> None:
     config = ai_references.ModelConfig(
         base_url="https://generativelanguage.googleapis.com/v1beta",

@@ -1,8 +1,11 @@
 ---
-version: 0.5.0
+version: 0.6.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.6.0
+    date: 2026-05-05
+    description: Kundenfeedback aus v2.0.1-Nutzung aufgenommen; as-of-date und AI_* Kompatibilitaet als v2.4.0-Scheibe markiert.
   - version: 0.5.0
     date: 2026-05-05
     description: Log-Gate auf warnenden Default mit explizitem --fail-on-log-pattern-Ratchet umgestellt
@@ -86,6 +89,10 @@ Bereits fuer v2.4.0 erledigt:
 - Adaptiver 429-Backoff ueber `Retry-After`.
 - Gemini/GenAI Default `gemini-2.5-flash`.
 - Mistral-Provider ueber `mistral`/`mistral-ai`.
+- Kundenkompatible Aliase fuer Throttling/429: `--delay-seconds`,
+  `--jitter-seconds`, `--cooldown-on-429-seconds`, `--max-consecutive-429`.
+- `--as-of-date YYYY-MM-DD` mit erzwungenem `validation_date` im Ergebnis.
+- Env-Aliase `AI_API_KEY`, `AI_URL`, `AI_PROVIDER`.
 
 Naechste Scheibe:
 
@@ -128,6 +135,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 
 - [x] P0 PDF-Font-/Emoji-Gate implementiert.
 - [x] AI-Reference Mistral-Provider dokumentiert und getestet.
+- [x] AI-Reference Kundenfeedback v2.0.1 triagiert und erste Must-have-Scheibe umgesetzt.
 - [ ] AI-Reference Vorpruefung oder Cache mindestens als erste Scheibe umgesetzt
       oder bewusst auf v2.4.x verschoben.
 - [ ] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
@@ -141,6 +149,9 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 
 - Kein bestehender v2.4.0-Release-Plan gefunden.
 - Mistral-Provider ist implementiert und gezielt getestet.
+- Kundenfeedback aus produktiver v2.0.1-Nutzung ist in
+  `gitbook_worker/docs/backlog/customer-v2-0-1-ai-reference-feedback.md`
+  triagiert.
 - Das P0-PDF-Regressionsgate ist als erste Scheibe implementiert und fuer `de`
   und `en` erfolgreich geprueft.
 - Die naechste technische Arbeit ist die AI-Reference-Vorpruefung/Cache-Scheibe
