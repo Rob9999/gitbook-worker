@@ -252,6 +252,120 @@ def test_call_model_forces_as_of_date_in_response(
     assert result.response["validation_date"] == "2026-05-05"
 
 
+def test_placeholder_validation_date_requires_manual_review() -> None:
+    response = ai_references._normalize_reference_response(
+        {"success": True, "validation_date": "YYYY-MM-DD", "type": "external url"},
+        None,
+    )
+
+    assert response["success"] is False
+    assert response["requires_manual_review"] is True
+    assert response["reason"] == "placeholder_validation_date"
+
+
+def test_inline_reference_extraction_merges_wrapped_bare_url(tmp_path: Path) -> None:
+    markdown = tmp_path / "refs.md"
+    markdown.write_text(
+        "# Text\n\n[1] Quelle Titel\n<https://example.com/source>\n",
+        encoding="utf-8",
+    )
+
+    tasks = ai_references.load_inline_reference_tasks([markdown])
+
+    assert len(tasks) == 1
+    assert tasks[0].lineno == 3
+    assert tasks[0].numbering == "1"
+    assert tasks[0].line == "[1] Quelle Titel <https://example.com/source>"
+
+
+def test_markdown_links_are_optional_for_inline_reference_extraction(
+    tmp_path: Path,
+) -> None:
+    markdown = tmp_path / "refs.md"
+    markdown.write_text("Ein [Link](https://example.com/source).\n", encoding="utf-8")
+
+    assert ai_references.load_inline_reference_tasks([markdown]) == []
+
+    tasks = ai_references.load_inline_reference_tasks(
+        [markdown], include_markdown_links=True
+    )
+    assert len(tasks) == 1
+    assert tasks[0].title == "Markdown link: Link"
+
+
+def test_frontmatter_dois_are_optional_for_inline_reference_extraction(
+    tmp_path: Path,
+) -> None:
+    markdown = tmp_path / "refs.md"
+    markdown.write_text(
+        "---\ntitle: Test\ndoi: 10.1234/example.1\n---\n\n# Text\n",
+        encoding="utf-8",
+    )
+
+    assert ai_references.load_inline_reference_tasks([markdown]) == []
+
+    tasks = ai_references.load_inline_reference_tasks(
+        [markdown], include_frontmatter_dois=True
+    )
+    assert len(tasks) == 1
+    assert tasks[0].title == "Frontmatter DOI"
+
+
+def test_deterministic_precheck_detects_doi_and_confidence(tmp_path: Path) -> None:
+    task = ai_references.ReferenceTask(
+        file=tmp_path / "refs.md",
+        title="Quelle",
+        line="Quelle https://doi.org/10.1234/example.1",
+        lineno=1,
+        numbering=None,
+    )
+
+    precheck = ai_references.deterministic_precheck(
+        task, root=tmp_path, as_of_date="2026-05-05"
+    )
+
+    assert precheck["success"] is True
+    assert precheck["type"] == "external reference"
+    assert precheck["evidence_url_status"] == "doi_syntax_valid"
+    assert precheck["confidence"] == 0.85
+
+
+def test_files_list_and_resume_success_keys(tmp_path: Path) -> None:
+    markdown = tmp_path / "refs.md"
+    markdown.write_text("# Text\n", encoding="utf-8")
+    files_list = tmp_path / "files.txt"
+    files_list.write_text("# comment\nrefs.md\n", encoding="utf-8")
+    report = tmp_path / "report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "results": [
+                    {
+                        "file": str(markdown),
+                        "lineno": 7,
+                        "orig": "Quelle",
+                        "success": True,
+                        "status": "validated",
+                    },
+                    {
+                        "file": str(markdown),
+                        "lineno": 8,
+                        "orig": "Rate Limit",
+                        "success": False,
+                        "status": "rate_limited",
+                    },
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert ai_references.load_files_list(tmp_path, files_list) == [markdown.resolve()]
+    keys = ai_references.load_resume_success_keys(report)
+    assert (str(markdown.resolve()), 7, "Quelle") in keys
+    assert (str(markdown.resolve()), 8, "Rate Limit") not in keys
+
+
 def test_provider_error_messages_are_redacted() -> None:
     config = ai_references.ModelConfig(
         base_url="https://generativelanguage.googleapis.com/v1beta",
@@ -450,7 +564,45 @@ def test_main_is_report_only_by_default(
     assert "Kaputte Quelle" in markdown.read_text(encoding="utf-8")
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["model_config"]["api_key"] == "<redacted>"
-    assert report["results"][0]["action"] == "link_repaired"
+    assert report["results"][0]["status"] == "suggested"
+    assert report["results"][0]["action"] == "link_repair_suggested"
+
+
+def test_main_precheck_only_skips_ai_calls(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    markdown = tmp_path / "refs.md"
+    markdown.write_text(
+        "# Quellen-Test\n\n## Quellen\n\n1. Quelle. https://example.com/ref\n",
+        encoding="utf-8",
+    )
+    report_path = tmp_path / "report.json"
+
+    def fail_call_model(*args, **kwargs):  # type: ignore[no-untyped-def]
+        raise AssertionError("AI call should not run in precheck-only mode")
+
+    monkeypatch.setattr(ai_references, "call_model", fail_call_model)
+
+    exit_code = ai_references.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--files",
+            str(markdown),
+            "--precheck-only",
+            "--json-report",
+            str(report_path),
+            "--as-of-date",
+            "2026-05-05",
+            "--no-progress",
+        ]
+    )
+
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert report["as_of_date"] == "2026-05-05"
+    assert report["results"][0]["status"] == "validated"
+    assert report["results"][0]["evidence_url_status"] == "url_syntax_valid"
 
 
 def test_main_apply_writes_confirmed_fix(
@@ -496,3 +648,23 @@ def test_fail_on_failed_returns_dedicated_exit_code() -> None:
         == AI_REFERENCE_FAILURE_EXIT_CODE
     )
     assert exit_code_for_summary(summary, fail_on_failed=False) == 0
+
+
+def test_summary_distinguishes_suggested_and_rate_limited() -> None:
+    summary = summarize_report(
+        [
+            {"success": True, "status": "suggested", "new": "x"},
+            {"success": True, "status": "validated"},
+            {"success": False, "status": "rate_limited", "rate_limited": True},
+        ]
+    )
+
+    assert summary.repaired == 0
+    assert summary.suggested == 1
+    assert summary.validated == 1
+    assert summary.rate_limited == 1
+    assert summary.failed == 0
+    assert (
+        exit_code_for_summary(summary, fail_on_failed=True)
+        == AI_REFERENCE_FAILURE_EXIT_CODE
+    )

@@ -361,10 +361,21 @@ def validate_pdf_font_gate(
 def result_to_dict(result: PDFValidationResult) -> dict[str, object]:
     """Convert a validation result into JSON-serializable data."""
 
-    data = asdict(result)
-    data["pdf_path"] = str(result.pdf_path)
+    data = _json_ready(asdict(result))
     data["passed"] = result.passed
     return data
+
+
+def _json_ready(value: object) -> object:
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(key): _json_ready(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_ready(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_ready(item) for item in value]
+    return value
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

@@ -175,23 +175,51 @@ class ReferenceReportSummary:
     """Aggregate counts for an AI reference check report."""
 
     repaired: int
+    suggested: int
     validated: int
     failed: int
+    rate_limited: int
 
     @property
     def total(self) -> int:
-        return self.repaired + self.validated + self.failed
+        return (
+            self.repaired
+            + self.suggested
+            + self.validated
+            + self.failed
+            + self.rate_limited
+        )
 
 
 def summarize_report(report: Sequence[Mapping[str, Any]]) -> ReferenceReportSummary:
     """Return stable counts for report entries."""
 
-    repaired = sum(1 for entry in report if entry.get("success") and entry.get("new"))
-    validated = sum(
-        1 for entry in report if entry.get("success") and not entry.get("new")
+    repaired = 0
+    suggested = 0
+    validated = 0
+    failed = 0
+    rate_limited = 0
+    for entry in report:
+        status = str(entry.get("status") or "").lower()
+        action = str(entry.get("action") or "").lower()
+        success = bool(entry.get("success"))
+        if status == "rate_limited" or entry.get("rate_limited"):
+            rate_limited += 1
+        elif status == "repaired" or action == "link_repaired":
+            repaired += 1
+        elif status == "suggested" or (success and entry.get("new")):
+            suggested += 1
+        elif success:
+            validated += 1
+        else:
+            failed += 1
+    return ReferenceReportSummary(
+        repaired=repaired,
+        suggested=suggested,
+        validated=validated,
+        failed=failed,
+        rate_limited=rate_limited,
     )
-    failed = sum(1 for entry in report if not entry.get("success"))
-    return ReferenceReportSummary(repaired=repaired, validated=validated, failed=failed)
 
 
 def exit_code_for_summary(
@@ -201,6 +229,6 @@ def exit_code_for_summary(
 ) -> int:
     """Return the process exit code implied by the selected failure policy."""
 
-    if fail_on_failed and summary.failed > 0:
+    if fail_on_failed and (summary.failed > 0 or summary.rate_limited > 0):
         return AI_REFERENCE_FAILURE_EXIT_CODE
     return 0

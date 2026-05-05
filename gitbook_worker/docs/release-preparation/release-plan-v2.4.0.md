@@ -1,8 +1,11 @@
 ---
-version: 0.6.0
+version: 0.7.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.7.0
+    date: 2026-05-05
+    description: AI-Reference Inline-Erkennung, Precheck, Batch/Resume, Ergebnisstatus und PDF-JSON-Fix in v2.4.0 aufgenommen.
   - version: 0.6.0
     date: 2026-05-05
     description: Kundenfeedback aus v2.0.1-Nutzung aufgenommen; as-of-date und AI_* Kompatibilitaet als v2.4.0-Scheibe markiert.
@@ -93,11 +96,17 @@ Bereits fuer v2.4.0 erledigt:
   `--jitter-seconds`, `--cooldown-on-429-seconds`, `--max-consecutive-429`.
 - `--as-of-date YYYY-MM-DD` mit erzwungenem `validation_date` im Ergebnis.
 - Env-Aliase `AI_API_KEY`, `AI_URL`, `AI_PROVIDER`.
+- Inline-Erkennung fuer Bare URLs/DOIs, optionale Markdown-Links und optionale
+  Frontmatter-DOIs.
+- No-network Precheck fuer URL-/DOI-/arXiv-/ISBN-Syntax und interne
+  Markdown-Links.
+- Batch/Resume: `--files-list`, `--max-tasks`, `--resume-from-report`.
+- Berichtszustaende `suggested`, `validated`, `failed`, `rate_limited`; ein
+  Vorschlag wird nicht mehr als Reparatur gezaehlt, solange `--apply` ihn nicht
+  schreibt.
 
 Naechste Scheibe:
 
-- Deterministische Vorpruefung fuer URL, DOI, ISBN, arXiv und interne Markdown-
-  Links, damit LLM-Calls nur fuer unklare Faelle genutzt werden.
 - Cache fuer identische Referenzzeilen.
 - Optional GitHub-Step-Summary oder SARIF.
 
@@ -136,7 +145,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [x] P0 PDF-Font-/Emoji-Gate implementiert.
 - [x] AI-Reference Mistral-Provider dokumentiert und getestet.
 - [x] AI-Reference Kundenfeedback v2.0.1 triagiert und erste Must-have-Scheibe umgesetzt.
-- [ ] AI-Reference Vorpruefung oder Cache mindestens als erste Scheibe umgesetzt
+- [x] AI-Reference Vorpruefung oder Cache mindestens als erste Scheibe umgesetzt
       oder bewusst auf v2.4.x verschoben.
 - [ ] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
 - [x] Lokaler PDF-Build fuer `de` erfolgreich.

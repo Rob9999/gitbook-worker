@@ -1,10 +1,13 @@
 ---
-version: 0.1.0
+version: 0.2.0
 date: 2026-05-05
 status: triaged
 priority: high
 labels: [customer-feedback, ai-reference-check, v2.0.1, release-2.4]
 history:
+  - version: 0.2.0
+    date: 2026-05-05
+    description: Inline-Erkennung, Precheck, Batch/Resume und Ergebnisstatus als v2.4.0-Scheibe umgesetzt.
   - version: 0.1.0
     date: 2026-05-05
     description: Kundenwunschliste aus produktiver v2.0.1-Nutzung aufgenommen und gegen v2.4.0-Stand gemappt.
@@ -30,7 +33,7 @@ Haertungen.
   JSON-Reports redigiert.
 - [x] Aktuelles Pruefdatum: `--as-of-date YYYY-MM-DD` setzt Prompt-Regel und
   erzwingt `validation_date` im Ergebnis auf dieses Datum.
-- [ ] Inline-Links/DOIs erkennen: Bare URLs, Markdown-Links und Frontmatter-DOIs
+- [x] Inline-Links/DOIs erkennen: Bare URLs, Markdown-Links und Frontmatter-DOIs
   muessen ueber die Quellenblock-Extraktion hinaus erfasst werden.
 
 ## Should Have
@@ -41,20 +44,20 @@ Haertungen.
   `AI_REFERENCE_*`.
 - [x] Dry-Run/Report-first: Ohne `--apply` werden keine Markdown-Dateien
   veraendert.
-- [ ] Ergebnissemantik weiter schaerfen: `confidence`,
+- [x] Ergebnissemantik weiter schaerfen: `confidence`,
   `requires_manual_review`, `reason`, `evidence_url_status`, `rate_limited`.
-- [ ] Resume-/Batch-Modus: `--files-list`, `--max-tasks`,
+- [x] Resume-/Batch-Modus: `--files-list`, `--max-tasks`,
   `--resume-from-report`, Teilreports pro Batch.
 
 ## Nice To Have
 
-- [ ] Technischer Link-/DOI-Check vor LLM-Aufruf.
-- [ ] DOI-Handle/API speziell behandeln.
+- [x] Technischer Link-/DOI-Check vor LLM-Aufruf.
+- [x] DOI-Handle/API speziell behandeln.
 - [x] Projektroot-Log ergaenzt: das Tool loggt den effektiven `--root` separat
   als `AI reference project root`, auch wenn Paketpfad-Logs anders lauten.
 
 ## Naechste Scheibe
 
-Die naechste technische Scheibe sollte Inline-Link-/DOI-Extraktion plus eine
-deterministische Vorpruefung sein. Das reduziert LLM-Aufrufe und legt die Basis
-fuer Batch/Resume, ohne die bestehende Report-first-Semantik zu brechen.
+Die naechste technische Scheibe sollte echte HTTP-Statuspruefung fuer URLs/DOIs
+und ein persistenter Cache fuer identische Referenzzeilen sein. Die lokale
+Vorpruefung ist bewusst no-network und damit CI-stabil.

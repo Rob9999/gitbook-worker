@@ -5,11 +5,14 @@ from pathlib import Path
 
 from gitbook_worker.tools.testing.pdf_validator import (
     FontInfo,
+    LogPatternMatch,
+    PDFValidationResult,
     count_unicode_ranges,
     font_name_matches,
     load_expected_fonts,
     normalize_font_name,
     parse_pdffonts_output,
+    result_to_dict,
     scan_forbidden_log_patterns,
     validate_pdf_font_gate,
 )
@@ -29,16 +32,14 @@ def test_font_name_matches_configured_twemoji_subset() -> None:
 
 
 def test_parse_pdffonts_output_handles_multiword_types() -> None:
-    output = textwrap.dedent(
-        """
+    output = textwrap.dedent("""
         Syntax Error: No display font for 'ArialUnicode'
         name                                 type              encoding         emb sub uni object ID
         ------------------------------------ ----------------- ---------------- --- --- --- ---------
         IRPKLE+TwemojiMozilla                CID TrueType      Identity-H       yes yes yes    353  0
         DNMTDM+ERDACCbyCJK-Regular           CID TrueType      Identity-H       yes yes yes    469  0
         Times-Roman                          Type 1            WinAnsi          no  no  no    1423  0
-        """
-    )
+        """)
 
     fonts = parse_pdffonts_output(output)
 
@@ -57,8 +58,7 @@ def test_parse_pdffonts_output_handles_multiword_types() -> None:
 def test_load_expected_fonts_reads_configured_names(tmp_path: Path) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             fonts:
               EMOJI:
@@ -71,8 +71,7 @@ def test_load_expected_fonts_reads_configured_names(tmp_path: Path) -> None:
                 paths: []
                 license: Test
                 license_url: https://example.invalid/license
-            """
-        ),
+            """),
         encoding="utf-8",
     )
 
@@ -86,8 +85,7 @@ def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(
 ) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             fonts:
               EMOJI:
@@ -100,8 +98,7 @@ def test_validate_pdf_font_gate_accepts_required_fonts_and_cjk_text(
                 paths: []
                 license: CC BY 4.0
                 license_url: https://creativecommons.org/licenses/by/4.0/
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     fonts = [
@@ -126,8 +123,7 @@ def test_validate_pdf_font_gate_warns_for_forbidden_log_patterns(
 ) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             fonts:
               EMOJI:
@@ -140,8 +136,7 @@ def test_validate_pdf_font_gate_warns_for_forbidden_log_patterns(
                 paths: []
                 license: CC BY 4.0
                 license_url: https://creativecommons.org/licenses/by/4.0/
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     log_file = tmp_path / "input.log"
@@ -172,8 +167,7 @@ def test_validate_pdf_font_gate_can_fail_on_forbidden_log_patterns(
 ) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             fonts:
               EMOJI:
@@ -186,8 +180,7 @@ def test_validate_pdf_font_gate_can_fail_on_forbidden_log_patterns(
                 paths: []
                 license: CC BY 4.0
                 license_url: https://creativecommons.org/licenses/by/4.0/
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     log_file = tmp_path / "input.log"
@@ -215,8 +208,7 @@ def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
 ) -> None:
     config = tmp_path / "fonts.yml"
     config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             fonts:
               EMOJI:
@@ -229,8 +221,7 @@ def test_validate_pdf_font_gate_reports_missing_or_unembedded_fonts(
                 paths: []
                 license: CC BY 4.0
                 license_url: https://creativecommons.org/licenses/by/4.0/
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     fonts = [FontInfo("IRPKLE+TwemojiMozilla", "CID TrueType", embedded=False)]
@@ -290,3 +281,23 @@ def test_scan_forbidden_log_patterns_uses_newest_nested_log_set(
     matches = scan_forbidden_log_patterns((log_dir,))
 
     assert matches == []
+
+
+def test_result_to_dict_serializes_nested_paths(tmp_path: Path) -> None:
+    log_path = tmp_path / "input.log"
+    result = PDFValidationResult(
+        pdf_path=tmp_path / "sample.pdf",
+        fonts=(),
+        required_fonts=(),
+        text_ranges={},
+        forbidden_log_matches=(
+            LogPatternMatch(log_path, 3, "Missing character", "Missing character"),
+        ),
+        errors=(),
+        warnings=(),
+    )
+
+    data = result_to_dict(result)
+
+    assert data["pdf_path"] == str(tmp_path / "sample.pdf")
+    assert data["forbidden_log_matches"][0]["path"] == str(log_path)

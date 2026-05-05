@@ -29,6 +29,7 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, List, Mapping, MutableMapping, Optional, Sequence
+from urllib.parse import urlparse
 
 import requests
 import tqdm
@@ -57,6 +58,30 @@ LOGGER = get_logger(__name__)
 _JSON_BLOCK_RE = re.compile(r"```json\s*(?P<body>.*?)```", re.DOTALL)
 _SUMMARY_LINK_RE = re.compile(r"\[[^\]]+\]\(([^)]+\.md)(?:#[^)]*)?\)")
 _SECRET_QUERY_RE = re.compile(r"([?&](?:key|api_key)=)[^&\s]+", re.IGNORECASE)
+_BARE_URL_RE = re.compile(r"<?(?P<url>https?://[^\s<>)\]]+)>?", re.IGNORECASE)
+_DOI_RE = re.compile(
+    r"\b(?:doi:\s*|https?://(?:dx\.)?doi\.org/)?"
+    r"(?P<doi>10\.\d{4,9}/[-._;()/:A-Z0-9]+)",
+    re.IGNORECASE,
+)
+_ARXIV_RE = re.compile(
+    r"\b(?:arXiv:|https?://arxiv\.org/(?:abs|pdf)/)"
+    r"(?P<arxiv>\d{4}\.\d{4,5}(?:v\d+)?)\b",
+    re.IGNORECASE,
+)
+_ISBN_RE = re.compile(
+    r"\bISBN(?:-1[03])?:?\s*(?P<isbn>(?:97[89][- ]?)?\d[- 0-9]{9,16}[0-9X])\b",
+    re.IGNORECASE,
+)
+_MARKDOWN_URL_LINK_RE = re.compile(
+    r"\[(?P<label>[^\]]+)\]\((?P<target>https?://[^)\s]+|doi:[^)\s]+)\)",
+    re.IGNORECASE,
+)
+_MARKDOWN_INTERNAL_LINK_RE = re.compile(
+    r"\[[^\]]+\]\((?P<target>[^)]+\.md(?:#[^)]*)?)\)",
+    re.IGNORECASE,
+)
+_FRONTMATTER_BOUNDARY_RE = re.compile(r"^---\s*$")
 
 DEFAULT_PROMPT = "Proof and repair the reference"
 DEFAULT_MODEL = "gpt-4"
@@ -161,11 +186,20 @@ class ReferenceResult:
         if self.error:
             data["error"] = self.error
         data["success"] = bool(data.get("success")) and self.success
-        if data["success"] and data.get("new"):
-            data["action"] = "link_repaired"
+        if data.get("rate_limited"):
+            data["success"] = False
+            data.setdefault("requires_manual_review", True)
+            data.setdefault("status", "rate_limited")
+            data["action"] = "rate_limited"
+        elif data["success"] and data.get("new"):
+            data.setdefault("status", "suggested")
+            data["action"] = "link_repair_suggested"
         elif data["success"]:
+            data.setdefault("status", "validated")
             data["action"] = "link_check_succeeded"
         else:
+            data.setdefault("status", "failed")
+            data.setdefault("requires_manual_review", True)
             data["action"] = "link_repair_failed"
         return data
 
@@ -309,6 +343,186 @@ def load_reference_tasks(
     return tasks
 
 
+def load_inline_reference_tasks(
+    md_files: Iterable[Path],
+    *,
+    include_markdown_links: bool = False,
+    include_frontmatter_dois: bool = False,
+) -> List[ReferenceTask]:
+    """Extract inline URL/DOI-like references outside dedicated source blocks."""
+
+    tasks: List[ReferenceTask] = []
+    for file in md_files:
+        try:
+            lines = file.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            LOGGER.warning("Failed to read inline references from %s: %s", file, exc)
+            continue
+        tasks.extend(
+            _extract_inline_reference_tasks(
+                file,
+                lines,
+                include_markdown_links=include_markdown_links,
+                include_frontmatter_dois=include_frontmatter_dois,
+            )
+        )
+    return _dedupe_tasks(tasks)
+
+
+def _extract_inline_reference_tasks(
+    file: Path,
+    lines: Sequence[str],
+    *,
+    include_markdown_links: bool,
+    include_frontmatter_dois: bool,
+) -> List[ReferenceTask]:
+    tasks: List[ReferenceTask] = []
+    in_code_block = False
+    frontmatter_end = _frontmatter_end_line(lines) if include_frontmatter_dois else 0
+    previous_text = ""
+    previous_lineno = 0
+
+    for index, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            in_code_block = not in_code_block
+            continue
+        if in_code_block:
+            continue
+
+        if include_frontmatter_dois and 1 < index < frontmatter_end:
+            doi_match = _DOI_RE.search(stripped)
+            if doi_match:
+                tasks.append(
+                    ReferenceTask(
+                        file=file,
+                        title="Frontmatter DOI",
+                        line=stripped,
+                        lineno=index,
+                        numbering=None,
+                    )
+                )
+            continue
+
+        if include_markdown_links:
+            for match in _MARKDOWN_URL_LINK_RE.finditer(raw_line):
+                tasks.append(
+                    ReferenceTask(
+                        file=file,
+                        title=f"Markdown link: {match.group('label')}",
+                        line=match.group(0).strip(),
+                        lineno=index,
+                        numbering=None,
+                    )
+                )
+
+        evidence_line = _MARKDOWN_URL_LINK_RE.sub("", raw_line)
+        has_inline_evidence = bool(
+            _BARE_URL_RE.search(evidence_line) or _DOI_RE.search(evidence_line)
+        )
+        if has_inline_evidence:
+            line_text = stripped
+            lineno = index
+            numbering = _extract_numbering(stripped)
+            if _line_is_wrapped_url(stripped) and previous_text:
+                line_text = f"{previous_text} {stripped}"
+                lineno = previous_lineno or index
+                numbering = _extract_numbering(previous_text) or numbering
+            tasks.append(
+                ReferenceTask(
+                    file=file,
+                    title="Inline reference",
+                    line=line_text,
+                    lineno=lineno,
+                    numbering=numbering,
+                )
+            )
+
+        if stripped:
+            previous_text = stripped
+            previous_lineno = index
+
+    return tasks
+
+
+def _frontmatter_end_line(lines: Sequence[str]) -> int:
+    if not lines or not _FRONTMATTER_BOUNDARY_RE.match(lines[0].strip()):
+        return 0
+    for index, line in enumerate(lines[1:], start=2):
+        if _FRONTMATTER_BOUNDARY_RE.match(line.strip()):
+            return index
+    return 0
+
+
+def _line_is_wrapped_url(line: str) -> bool:
+    return bool(re.fullmatch(r"<?https?://[^\s<>]+>?", line.strip(), re.IGNORECASE))
+
+
+def _extract_numbering(line: str) -> str | None:
+    match = re.match(r"\s*(?:\[(?P<bracket>\d+)\]|(?P<plain>\d+)[.)])", line)
+    if not match:
+        return None
+    return match.group("bracket") or match.group("plain")
+
+
+def _dedupe_tasks(tasks: Iterable[ReferenceTask]) -> List[ReferenceTask]:
+    unique: list[ReferenceTask] = []
+    seen: set[tuple[str, int, str]] = set()
+    for task in tasks:
+        key = (str(task.file.resolve()), task.lineno, task.line.strip())
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(task)
+    return unique
+
+
+def load_files_list(root: Path, files_list: Path) -> List[Path]:
+    """Read newline-separated Markdown file paths, allowing comments."""
+
+    paths: list[Path] = []
+    for raw_line in files_list.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        path = Path(line)
+        paths.append(path if path.is_absolute() else (root / path).resolve())
+    return paths
+
+
+def _task_key(task: ReferenceTask) -> tuple[str, int, str]:
+    return (str(task.file.resolve()), task.lineno, task.line.strip())
+
+
+def load_resume_success_keys(report_path: Path) -> set[tuple[str, int, str]]:
+    """Return task keys that were completed successfully in a previous report."""
+
+    try:
+        payload = json.loads(report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        LOGGER.warning("Cannot load resume report %s: %s", report_path, exc)
+        return set()
+
+    results = payload.get("results", payload) if isinstance(payload, Mapping) else []
+    if not isinstance(results, list):
+        return set()
+
+    keys: set[tuple[str, int, str]] = set()
+    for entry in results:
+        if not isinstance(entry, Mapping):
+            continue
+        status = str(entry.get("status") or "").lower()
+        if not entry.get("success") or status == "rate_limited":
+            continue
+        file_value = entry.get("file")
+        orig = entry.get("orig")
+        lineno = entry.get("lineno")
+        if file_value is None or orig is None or lineno is None:
+            continue
+        keys.add((str(Path(str(file_value)).resolve()), int(lineno), str(orig).strip()))
+    return keys
+
+
 def _extract_json_from_text(generated_text: str) -> tuple[bool, Any]:
     text = (generated_text or "").strip()
     if not text:
@@ -356,9 +570,7 @@ def _build_prompt(
     "validation_date": "__VALIDATION_DATE__",
     "type": "internal reference" | "external url" | "external reference" | "?"
 }
-    """.strip().replace(
-        "__VALIDATION_DATE__", validation_date_hint
-    )
+    """.strip().replace("__VALIDATION_DATE__", validation_date_hint)
 
     if as_of_date:
         date_rule = (
@@ -520,6 +732,25 @@ def call_model(
                 )
                 time.sleep(wait_time)
                 continue
+            if status == 429:
+                return ReferenceResult(
+                    task,
+                    False,
+                    {
+                        "success": False,
+                        "org": task.line,
+                        "new": None,
+                        "validation_date": as_of_date or "YYYY-MM-DD",
+                        "type": "?",
+                        "rate_limited": True,
+                        "requires_manual_review": True,
+                        "reason": "provider_rate_limited",
+                    },
+                    _sanitize_error_message(
+                        f"Rate limited by provider after {attempt + 1} attempt(s): {exc}",
+                        config,
+                    ),
+                )
             return ReferenceResult(
                 task,
                 False,
@@ -560,10 +791,18 @@ def _build_genai_url(config: ModelConfig) -> str:
 
 
 def _normalize_reference_response(response: Any, as_of_date: str | None) -> Any:
-    if not as_of_date or not isinstance(response, Mapping):
+    if not isinstance(response, Mapping):
         return response
     normalized = dict(response)
-    normalized["validation_date"] = as_of_date
+    if as_of_date:
+        normalized["validation_date"] = as_of_date
+    elif str(normalized.get("validation_date") or "").strip() == "YYYY-MM-DD":
+        normalized["success"] = False
+        normalized["requires_manual_review"] = True
+        normalized.setdefault("reason", "placeholder_validation_date")
+        normalized.setdefault(
+            "hint", "AI response returned a placeholder validation_date"
+        )
     return normalized
 
 
@@ -592,10 +831,11 @@ def apply_fixes(
     """Apply successful fixes to disk and return a structured report."""
 
     grouped: MutableMapping[Path, List[tuple[int, str, str]]] = {}
+    report_by_replacement: MutableMapping[tuple[Path, int, str, str], List[MutableMapping[str, Any]]] = {}
     report: List[Mapping[str, Any]] = []
 
     for result in results:
-        report_entry = result.to_report_entry()
+        report_entry = dict(result.to_report_entry())
         report.append(report_entry)
 
         if not result.success or not isinstance(result.response, Mapping):
@@ -608,9 +848,11 @@ def apply_fixes(
         if not new_value:
             continue
 
-        grouped.setdefault(result.task.file, []).append(
-            (result.task.lineno, result.task.line, str(new_value))
-        )
+        replacement = (result.task.lineno, result.task.line, str(new_value))
+        grouped.setdefault(result.task.file, []).append(replacement)
+        report_by_replacement.setdefault(
+            (result.task.file, *replacement), []
+        ).append(report_entry)
 
     for file, replacements in grouped.items():
         if not file.exists():
@@ -636,6 +878,9 @@ def apply_fixes(
             lines[index] = updated
             changed = True
             if write_changes:
+                for entry in report_by_replacement.get((file, lineno, old, new), []):
+                    entry["status"] = "repaired"
+                    entry["action"] = "link_repaired"
                 LOGGER.info("Repaired reference in %s (line %s)", file, lineno)
             else:
                 LOGGER.info("Prepared reference repair in %s (line %s)", file, lineno)
@@ -673,6 +918,129 @@ def _resolve_as_of_date(value: str | None) -> str:
         return date.fromisoformat(value).isoformat()
     except ValueError as exc:
         raise ValueError("--as-of-date must use YYYY-MM-DD") from exc
+
+
+def deterministic_precheck(
+    task: ReferenceTask,
+    *,
+    root: Path,
+    as_of_date: str,
+) -> Mapping[str, Any]:
+    """Return local, no-network evidence for a reference task."""
+
+    line = task.line
+    evidence: list[str] = []
+    reasons: list[str] = []
+    confidence = 0.0
+    success = False
+    reference_type = "?"
+    evidence_url_status = "not_found"
+
+    urls = [_clean_url(match.group("url")) for match in _BARE_URL_RE.finditer(line)]
+    valid_urls = [url for url in urls if _url_syntax_is_valid(url)]
+    if valid_urls:
+        success = True
+        reference_type = "external url"
+        evidence_url_status = "url_syntax_valid"
+        confidence = max(confidence, 0.65)
+        evidence.extend(valid_urls)
+
+    dois = [match.group("doi").rstrip(".,;)") for match in _DOI_RE.finditer(line)]
+    if dois:
+        success = True
+        reference_type = "external reference"
+        evidence_url_status = "doi_syntax_valid"
+        confidence = max(confidence, 0.85)
+        evidence.extend(f"doi:{doi}" for doi in dois)
+
+    arxiv_ids = [match.group("arxiv") for match in _ARXIV_RE.finditer(line)]
+    if arxiv_ids:
+        success = True
+        reference_type = "external reference"
+        evidence_url_status = "arxiv_syntax_valid"
+        confidence = max(confidence, 0.8)
+        evidence.extend(f"arxiv:{arxiv_id}" for arxiv_id in arxiv_ids)
+
+    isbn_values = [match.group("isbn") for match in _ISBN_RE.finditer(line)]
+    if isbn_values:
+        success = True
+        reference_type = "external reference"
+        evidence_url_status = "isbn_syntax_valid"
+        confidence = max(confidence, 0.75)
+        evidence.extend(f"isbn:{isbn}" for isbn in isbn_values)
+
+    internal_targets = list(_MARKDOWN_INTERNAL_LINK_RE.finditer(line))
+    if internal_targets:
+        reference_type = "internal reference"
+        missing_targets = []
+        for match in internal_targets:
+            target = match.group("target")
+            target_path = _resolve_internal_link(task.file, root, target)
+            if target_path.exists():
+                success = True
+                confidence = max(confidence, 0.9)
+                evidence.append(str(target_path))
+            else:
+                missing_targets.append(target)
+        if missing_targets:
+            reasons.append("internal_link_missing:" + ",".join(missing_targets))
+            evidence_url_status = "internal_link_missing"
+        elif success:
+            evidence_url_status = "internal_link_exists"
+
+    if not evidence and not reasons:
+        reasons.append("no_deterministic_evidence")
+
+    requires_manual_review = not success
+    return {
+        "success": success,
+        "org": task.line,
+        "new": None,
+        "validation_date": as_of_date,
+        "type": reference_type,
+        "confidence": round(confidence, 2),
+        "requires_manual_review": requires_manual_review,
+        "reason": "; ".join(reasons) if reasons else None,
+        "evidence_url_status": evidence_url_status,
+        "evidence": evidence,
+        "precheck": True,
+    }
+
+
+def _merge_precheck_result(
+    result: ReferenceResult,
+    precheck: Mapping[str, Any],
+) -> ReferenceResult:
+    if not isinstance(result.response, Mapping):
+        return result
+    merged = dict(precheck)
+    merged.update(result.response)
+    for field in ("confidence", "evidence_url_status", "evidence"):
+        if field not in result.response and field in precheck:
+            merged[field] = precheck[field]
+    return ReferenceResult(result.task, result.success, merged, result.error)
+
+
+def _result_is_rate_limited(result: ReferenceResult) -> bool:
+    return isinstance(result.response, Mapping) and bool(result.response.get("rate_limited"))
+
+
+def _clean_url(url: str) -> str:
+    return url.strip().strip("<>").rstrip(".,;)")
+
+
+def _url_syntax_is_valid(url: str) -> bool:
+    parsed = urlparse(url)
+    return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+
+
+def _resolve_internal_link(source_file: Path, root: Path, target: str) -> Path:
+    path_part = target.split("#", 1)[0].replace("\\", "/")
+    raw_path = Path(path_part)
+    if raw_path.is_absolute():
+        return raw_path
+    source_parent = source_file.parent if source_file.is_absolute() else root
+    return (source_parent / raw_path).resolve()
 
 
 def _resolve_model_config(args: argparse.Namespace) -> ModelConfig:
@@ -843,6 +1211,46 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--files", type=Path, nargs="*", help="Explicit Markdown files to process"
     )
     parser.add_argument(
+        "--files-list",
+        type=Path,
+        help="Newline-separated Markdown file list; supports # comments",
+    )
+    parser.add_argument(
+        "--max-tasks",
+        type=int,
+        help="Process at most this many reference tasks after resume filtering",
+    )
+    parser.add_argument(
+        "--resume-from-report",
+        type=Path,
+        help="Skip tasks already completed successfully in a previous JSON report",
+    )
+    parser.add_argument(
+        "--include-inline-references",
+        action="store_true",
+        help="Also extract bare URLs and DOI-like inline references",
+    )
+    parser.add_argument(
+        "--include-markdown-links",
+        action="store_true",
+        help="Include Markdown links with URL/DOI targets as reference tasks",
+    )
+    parser.add_argument(
+        "--include-frontmatter-dois",
+        action="store_true",
+        help="Include DOI values found in YAML frontmatter",
+    )
+    parser.add_argument(
+        "--precheck-only",
+        action="store_true",
+        help="Run deterministic URL/DOI/internal-link prechecks without AI calls",
+    )
+    parser.add_argument(
+        "--skip-ai-on-precheck-success",
+        action="store_true",
+        help="Avoid AI calls when deterministic prechecks can validate a reference",
+    )
+    parser.add_argument(
         "--language", default="de", help="Source section language (default: de)"
     )
     parser.add_argument(
@@ -963,11 +1371,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         env_file = args.env_file.resolve() if args.env_file else root / ".env"
         _load_env_file(env_file)
 
+    explicit_files = list(args.files or [])
+    if args.files_list:
+        explicit_files.extend(load_files_list(root, args.files_list.resolve()))
+
     files = discover_markdown_files(
         root=root,
         manifest=manifest,
         summary=summary,
-        explicit_files=args.files,
+        explicit_files=explicit_files or None,
     )
     if not files:
         LOGGER.info("No Markdown files discovered – exiting")
@@ -976,6 +1388,31 @@ def main(argv: Sequence[str] | None = None) -> int:
     tasks = load_reference_tasks(
         files, language=args.language, max_level=args.max_level
     )
+    if (
+        args.include_inline_references
+        or args.include_markdown_links
+        or args.include_frontmatter_dois
+    ):
+        inline_tasks = load_inline_reference_tasks(
+            files,
+            include_markdown_links=args.include_markdown_links,
+            include_frontmatter_dois=args.include_frontmatter_dois,
+        )
+        tasks = _dedupe_tasks([*tasks, *inline_tasks])
+
+    if args.resume_from_report:
+        completed_keys = load_resume_success_keys(args.resume_from_report.resolve())
+        if completed_keys:
+            before_count = len(tasks)
+            tasks = [task for task in tasks if _task_key(task) not in completed_keys]
+            LOGGER.info(
+                "Resume skipped %s completed reference task(s)",
+                before_count - len(tasks),
+            )
+
+    if args.max_tasks is not None:
+        tasks = tasks[: max(args.max_tasks, 0)]
+
     if not tasks:
         LOGGER.info("No reference entries found in the selected files")
         return 0
@@ -983,7 +1420,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     config = _resolve_model_config(args)
     throttle_config = _resolve_throttle_config(args)
     throttle = RequestThrottle(throttle_config)
-    if not config.api_key and config.provider not in {
+    if not args.precheck_only and not config.api_key and config.provider not in {
         "local",
         "custom",
         *_GENAI_PROVIDERS,
@@ -993,11 +1430,19 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     results: List[ReferenceResult] = []
+    consecutive_rate_limits = 0
     progress = not args.no_progress
     iterator = tqdm.tqdm(tasks, desc="References", unit="ref", disable=not progress)
     for task in iterator:
-        throttle.wait()
-        result = call_model(task, args.prompt, config, as_of_date=as_of_date)
+        precheck = deterministic_precheck(task, root=root, as_of_date=as_of_date)
+        if args.precheck_only or (
+            args.skip_ai_on_precheck_success and precheck.get("success")
+        ):
+            result = ReferenceResult(task, bool(precheck.get("success")), precheck)
+        else:
+            throttle.wait()
+            result = call_model(task, args.prompt, config, as_of_date=as_of_date)
+            result = _merge_precheck_result(result, precheck)
         results.append(result)
         if result.error:
             LOGGER.warning(
@@ -1006,6 +1451,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 task.lineno,
                 result.error,
             )
+        if _result_is_rate_limited(result):
+            consecutive_rate_limits += 1
+        else:
+            consecutive_rate_limits = 0
+        if args.max_consecutive_429 and consecutive_rate_limits >= args.max_consecutive_429:
+            LOGGER.error(
+                "Stopping after %s consecutive rate-limited reference task(s)",
+                consecutive_rate_limits,
+            )
+            break
 
     write_changes = bool(args.apply and not args.dry_run)
     report = apply_fixes(results, write_changes=write_changes)
@@ -1023,10 +1478,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     summary_counts = summarize_report(report)
     LOGGER.info(
-        "AI reference check finished – %s repaired, %s validated, %s failed",
+        "AI reference check finished – %s repaired, %s suggested, %s validated, %s failed, %s rate-limited",
         summary_counts.repaired,
+        summary_counts.suggested,
         summary_counts.validated,
         summary_counts.failed,
+        summary_counts.rate_limited,
     )
     return exit_code_for_summary(summary_counts, fail_on_failed=args.fail_on_failed)
 
