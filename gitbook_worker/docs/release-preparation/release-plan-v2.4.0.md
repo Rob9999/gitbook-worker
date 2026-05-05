@@ -1,8 +1,11 @@
 ---
-version: 0.2.0
+version: 0.3.0
 date: 2026-05-05
 status: draft
 history:
+  - version: 0.3.0
+    date: 2026-05-05
+    description: Englischen PDF-Build und Font-Gate als erfolgreich verifiziert dokumentiert
   - version: 0.2.0
     date: 2026-05-05
     description: PDF-Font-Gate als implementierte P0-Scheibe und Release-Run-Kommando dokumentiert
@@ -119,7 +122,7 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - [ ] `python -m pytest gitbook_worker/tests -m "not slow"` dokumentiert.
 - [x] Lokaler PDF-Build fuer `de` erfolgreich.
 - [x] Font-Auswertung fuer `de/publish/das-sample-buch.pdf` dokumentiert.
-- [ ] Optional lokaler PDF-Build fuer `en` erfolgreich.
+- [x] Optional lokaler PDF-Build fuer `en` erfolgreich.
 - [ ] Release Notes `docs/releases/v2.4.0.md` erstellt.
 - [ ] Version-Bump in `setup.cfg` und `gitbook_worker/__init__.py` entschieden.
 
@@ -128,6 +131,6 @@ Font-Pfade und darf nur mit enger PDF-Pruefschleife umgesetzt werden.
 - Kein bestehender v2.4.0-Release-Plan gefunden.
 - Mistral-Provider ist implementiert und gezielt getestet.
 - Das P0-PDF-Regressionsgate ist als erste Scheibe implementiert und fuer `de`
-  erfolgreich geprueft.
-- Die naechste technische Arbeit ist entweder `en`-PDF-Gate-Verifikation oder die
-  AI-Reference-Vorpruefung/Cache-Scheibe.
+  und `en` erfolgreich geprueft.
+- Die naechste technische Arbeit ist die AI-Reference-Vorpruefung/Cache-Scheibe
+  oder die Erweiterung des PDF-Gates um Missing-Glyph-Logauswertung.
