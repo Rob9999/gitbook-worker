@@ -19,7 +19,6 @@ from pypdf import PdfReader
 
 from gitbook_worker.tools.publishing.font_config import FontConfigLoader
 
-
 DEFAULT_REQUIRED_FONT_KEYS = ("EMOJI", "CJK")
 DEFAULT_REQUIRED_TEXT_RANGES = ("CJK",)
 
