@@ -286,7 +286,7 @@ def _get_default_variables() -> Dict[str, str]:
 
     # Add CC BY fallback chain if available
     fallback_chain = [
-        name for name in [cjk_font_name, indic_font_name, ethiopic_font_name] if name
+        name for name in [indic_font_name, ethiopic_font_name, cjk_font_name] if name
     ]
     if fallback_chain:
         variables["mainfontfallback"] = "; ".join(

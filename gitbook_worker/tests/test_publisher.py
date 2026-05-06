@@ -126,6 +126,33 @@ def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
     assert "setmainjfont" not in header
 
 
+def test_default_fallback_order_prefers_specific_erda_fonts(monkeypatch):
+    class DummyFontConfig:
+        def get_default_fonts(self):
+            return {
+                "serif": "DejaVu Serif",
+                "sans": "DejaVu Sans",
+                "mono": "DejaVu Sans Mono",
+            }
+
+        def get_font_name(self, key, default=None):
+            return {
+                "CJK": "ERDA CC-BY CJK",
+                "INDIC": "ERDA CC-BY Indic",
+                "ETHIOPIC": "ERDA CC-BY Ethiopic",
+            }.get(key, default)
+
+    monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+
+    fallback = publisher._get_default_variables()["mainfontfallback"]
+
+    assert fallback == (
+        "ERDA CC-BY Indic:mode=harf; "
+        "ERDA CC-BY Ethiopic:mode=harf; "
+        "ERDA CC-BY CJK:mode=harf"
+    )
+
+
 def test_select_emoji_font_raises_when_twemoji_missing(monkeypatch, caplog):
     caplog.set_level("ERROR")
     monkeypatch.setattr(publisher, "_font_available", lambda name: False)
