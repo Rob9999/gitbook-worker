@@ -201,6 +201,7 @@ def _resolve_module_path(relative_path: str) -> str:
 _DEFAULT_LUA_FILTERS: List[str] = [
     _resolve_module_path("lua/image-path-resolver.lua"),
     _resolve_module_path("lua/emoji-span.lua"),
+    _resolve_module_path("lua/erda-script-fonts.lua"),
     _resolve_module_path("lua/cjk-linebreak.lua"),
     _resolve_module_path("lua/latex-emoji.lua"),
 ]
@@ -286,7 +287,7 @@ def _get_default_variables() -> Dict[str, str]:
 
     # Add CC BY fallback chain if available
     fallback_chain = [
-        name for name in [indic_font_name, ethiopic_font_name, cjk_font_name] if name
+        name for name in [cjk_font_name, indic_font_name, ethiopic_font_name] if name
     ]
     if fallback_chain:
         variables["mainfontfallback"] = "; ".join(
@@ -1269,6 +1270,32 @@ def _normalize_fallback_spec(
     return final_spec
 
 
+def _configured_font_name(font_key: str) -> Optional[str]:
+    try:
+        return get_font_config().get_font_name(font_key)
+    except Exception as exc:
+        logger.debug("Konnte Font-Konfiguration fuer %s nicht laden: %s", font_key, exc)
+        return None
+
+
+def _script_font_macro_lines(
+    font_key: str, command_name: str, family_command: str
+) -> List[str]:
+    font_name = _configured_font_name(font_key)
+    lines = [f"\\newcommand{{\\{command_name}}}[1]{{#1}}"]
+    if not font_name:
+        return lines
+    lines.extend(
+        [
+            f"\\IfFontExistsTF{{{font_name}}}{{",
+            f"  \\newfontfamily\\{family_command}[Renderer=HarfBuzz]{{{font_name}}}",
+            f"  \\renewcommand{{\\{command_name}}}[1]{{{{\\{family_command} #1}}}}",
+            "}{}",
+        ]
+    )
+    return lines
+
+
 def _build_font_header(
     *,
     main_font: str,
@@ -1293,6 +1320,10 @@ def _build_font_header(
     logger.info("📄 FONT-STACK:   include_mainfont = %s", include_mainfont)
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
+    lines.extend(_script_font_macro_lines("INDIC", "erdaIndic", "ERDAIndicFont"))
+    lines.extend(
+        _script_font_macro_lines("ETHIOPIC", "erdaEthiopic", "ERDAEthiopicFont")
+    )
 
     # Step 1: Collect available fallbacks
     available_fallbacks: List[str] = []

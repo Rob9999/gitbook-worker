@@ -119,8 +119,8 @@ publish:
     main_font: DejaVu Serif
     sans_font: DejaVu Sans
     mono_font: DejaVu Sans Mono
-    mainfont_fallback: Twemoji Mozilla:mode=harf; ERDA CC-BY Indic:mode=harf; ERDA CC-BY
-      Ethiopic:mode=harf; ERDA CC-BY CJK:mode=harf
+    mainfont_fallback: Twemoji Mozilla:mode=harf; ERDA CC-BY CJK:mode=harf; ERDA CC-BY
+      Indic:mode=harf; ERDA CC-BY Ethiopic:mode=harf
     abort_if_missing_glyph: false
   assets:
   - path: content/.gitbook/assets

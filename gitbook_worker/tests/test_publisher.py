@@ -104,6 +104,10 @@ def test_default_filters_include_cjk_linebreak_filter():
         str(path).endswith("cjk-linebreak.lua")
         for path in publisher._DEFAULT_LUA_FILTERS
     )
+    assert any(
+        str(path).endswith("erda-script-fonts.lua")
+        for path in publisher._DEFAULT_LUA_FILTERS
+    )
 
 
 def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
@@ -126,7 +130,44 @@ def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
     assert "setmainjfont" not in header
 
 
-def test_default_fallback_order_prefers_specific_erda_fonts(monkeypatch):
+def test_font_header_defines_erda_script_macros(monkeypatch):
+    class DummyFontConfig:
+        def get_font_name(self, key, default=None):
+            return {
+                "INDIC": "ERDA CC-BY Indic",
+                "ETHIOPIC": "ERDA CC-BY Ethiopic",
+            }.get(key, default)
+
+    monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+    monkeypatch.setattr(publisher, "_check_luaotfload_has_font", lambda name: True)
+    monkeypatch.setattr(publisher, "_font_available", lambda name: True)
+
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font="Twemoji Mozilla",
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec="ERDA CC-BY CJK:mode=harf",
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "\\IfFontExistsTF{ERDA CC-BY Indic}" in header
+    assert (
+        "\\newfontfamily\\ERDAIndicFont[Renderer=HarfBuzz]{ERDA CC-BY Indic}" in header
+    )
+    assert "\\renewcommand{\\erdaIndic}[1]{{\\ERDAIndicFont #1}}" in header
+    assert "\\IfFontExistsTF{ERDA CC-BY Ethiopic}" in header
+    assert (
+        "\\newfontfamily\\ERDAEthiopicFont[Renderer=HarfBuzz]{ERDA CC-BY Ethiopic}"
+        in header
+    )
+    assert "\\renewcommand{\\erdaEthiopic}[1]{{\\ERDAEthiopicFont #1}}" in header
+
+
+def test_default_fallback_order_keeps_cjk_first(monkeypatch):
     class DummyFontConfig:
         def get_default_fonts(self):
             return {
@@ -147,9 +188,9 @@ def test_default_fallback_order_prefers_specific_erda_fonts(monkeypatch):
     fallback = publisher._get_default_variables()["mainfontfallback"]
 
     assert fallback == (
+        "ERDA CC-BY CJK:mode=harf; "
         "ERDA CC-BY Indic:mode=harf; "
-        "ERDA CC-BY Ethiopic:mode=harf; "
-        "ERDA CC-BY CJK:mode=harf"
+        "ERDA CC-BY Ethiopic:mode=harf"
     )
 
 
