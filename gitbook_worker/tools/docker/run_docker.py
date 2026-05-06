@@ -26,6 +26,16 @@ import shlex
 import sys
 from pathlib import Path
 
+from gitbook_worker.tools.utils.docker_runner import main as docker_runner_main
+
+
+def _normalize_repo_root(candidate: Path) -> Path:
+    if (candidate / "gitbook_worker" / "tools").exists():
+        return candidate
+    if candidate.name == "gitbook_worker" and (candidate / "tools").exists():
+        return candidate.parent
+    return candidate
+
 
 def _detect_repo_root(start: Path) -> Path:
     """Best-effort repository root detection.
@@ -41,7 +51,9 @@ def _detect_repo_root(start: Path) -> Path:
         )
         from gitbook_worker.core.application.repo_root import resolve_repo_root
 
-        return resolve_repo_root(start=start, resolver=DefaultRepoRootResolver())
+        return _normalize_repo_root(
+            resolve_repo_root(start=start, resolver=DefaultRepoRootResolver())
+        )
     except Exception:
         # Fallback: assume the repo root is three levels up (gitbook_worker/../..)
         return start.parents[3]
@@ -53,8 +65,6 @@ DOCKER_DIR = _THIS_FILE.parent
 TOOLS_PATH = REPO_ROOT / "gitbook_worker" / "tools"
 if str(TOOLS_PATH) not in sys.path:
     sys.path.insert(0, str(TOOLS_PATH))
-
-from utils.docker_runner import main as docker_runner_main
 
 
 def _dockerfile_name(use_dynamic: bool) -> str:

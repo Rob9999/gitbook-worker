@@ -60,6 +60,7 @@ def test_python_dockerfile_stays_lightweight():
 def test_run_docker_build_uses_packaged_dockerfile_path():
     dockerfile = run_docker._dockerfile_path(use_dynamic=True)
 
+    assert run_docker.REPO_ROOT == REPO_ROOT
     assert dockerfile.name == "Dockerfile.dynamic"
     assert dockerfile.exists()
     assert ".github" not in dockerfile.parts
