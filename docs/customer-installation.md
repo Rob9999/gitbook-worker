@@ -545,9 +545,9 @@ Empfohlene Reihenfolge:
 
 ## 19. Release-Verifikation v2.4.2
 
-Der v2.4.2-Releasekandidat wird lokal mit diesen Signalen geprueft:
+Der v2.4.2-Releasekandidat wurde lokal mit diesen Signalen geprueft:
 
-- Non-slow Test-Suite aus `gitbook_worker/tests`.
+- Non-slow Test-Suite: `524 passed, 11 skipped, 10 deselected, 4 warnings`.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.4.2`.
 - Wheel-Smoke in frischer virtueller Umgebung.
 - Deutscher und englischer PDF-Build.
