@@ -201,6 +201,7 @@ def _resolve_module_path(relative_path: str) -> str:
 _DEFAULT_LUA_FILTERS: List[str] = [
     _resolve_module_path("lua/image-path-resolver.lua"),
     _resolve_module_path("lua/emoji-span.lua"),
+    _resolve_module_path("lua/cjk-linebreak.lua"),
     _resolve_module_path("lua/latex-emoji.lua"),
 ]
 _DEFAULT_HEADER_PATH = _resolve_module_path("texmf/tex/latex/local/deeptex.sty")
@@ -1268,40 +1269,6 @@ def _normalize_fallback_spec(
     return final_spec
 
 
-def _configured_font_name(font_key: str) -> Optional[str]:
-    try:
-        font_config = get_font_config()
-        return font_config.get_font_name(font_key)
-    except Exception as exc:
-        logger.debug("Konnte Font-Konfiguration fuer %s nicht laden: %s", font_key, exc)
-        return None
-
-
-def _cjk_linebreak_header(cjk_font_name: Optional[str]) -> List[str]:
-    """Return optional LuaTeX-ja setup for CJK-aware line breaking."""
-
-    if not cjk_font_name:
-        return []
-
-    return [
-        "% CJK-aware line breaking for mixed Latin/CJK paragraphs.",
-        "\\ifdefined\\directlua",
-        "  \\IfFileExists{luatexja.sty}{%",
-        "    \\usepackage{luatexja}%",
-        "    \\IfFileExists{luatexja-fontspec.sty}{\\usepackage{luatexja-fontspec}}{}%",
-        "    \\ltjsetparameter{autospacing=true,autoxspacing=true}%",
-        "    \\ltjsetparameter{kanjiskip={0pt plus .4pt minus .1pt},xkanjiskip={.25em plus .15em minus .06em}}%",
-        "  }{}%",
-        "  \\ifdefined\\setmainjfont",
-        f"    \\IfFontExistsTF{{{cjk_font_name}}}{{%",
-        f"      \\setmainjfont[Renderer=HarfBuzz]{{{cjk_font_name}}}%",
-        f"      \\setsansjfont[Renderer=HarfBuzz]{{{cjk_font_name}}}%",
-        "    }{}%",
-        "  \\fi",
-        "\\fi",
-    ]
-
-
 def _build_font_header(
     *,
     main_font: str,
@@ -1326,7 +1293,6 @@ def _build_font_header(
     logger.info("📄 FONT-STACK:   include_mainfont = %s", include_mainfont)
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
-    lines.extend(_cjk_linebreak_header(_configured_font_name("CJK")))
 
     # Step 1: Collect available fallbacks
     available_fallbacks: List[str] = []

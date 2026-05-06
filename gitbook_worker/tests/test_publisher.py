@@ -99,14 +99,14 @@ def test_font_header_includes_manual_fallback_block():
     assert "Fallback:mode=harf" in header
 
 
-def test_font_header_enables_configured_luatexja_cjk_linebreaking(monkeypatch):
-    class DummyFontConfig:
-        def get_font_name(self, key, default=None):
-            if key == "CJK":
-                return "ERDA CC-BY CJK"
-            return default
+def test_default_filters_include_cjk_linebreak_filter():
+    assert any(
+        str(path).endswith("cjk-linebreak.lua")
+        for path in publisher._DEFAULT_LUA_FILTERS
+    )
 
-    monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+
+def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
     monkeypatch.setattr(publisher, "_check_luaotfload_has_font", lambda name: True)
     monkeypatch.setattr(publisher, "_font_available", lambda name: True)
 
@@ -122,12 +122,8 @@ def test_font_header_enables_configured_luatexja_cjk_linebreaking(monkeypatch):
         temp_dir="/tmp/test-font-cache",
     )
 
-    assert "\\IfFileExists{luatexja.sty}" in header
-    assert "\\usepackage{luatexja}" in header
-    assert "\\usepackage{luatexja-fontspec}" in header
-    assert "\\ltjsetparameter{autospacing=true,autoxspacing=true}" in header
-    assert "\\setmainjfont[Renderer=HarfBuzz]{ERDA CC-BY CJK}" in header
-    assert "\\setsansjfont[Renderer=HarfBuzz]{ERDA CC-BY CJK}" in header
+    assert "luatexja" not in header
+    assert "setmainjfont" not in header
 
 
 def test_select_emoji_font_raises_when_twemoji_missing(monkeypatch, caplog):

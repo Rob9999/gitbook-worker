@@ -3,6 +3,9 @@ title: CJK linebreaking and ERDA font metrics
 version: 0.1.0
 date: 2026-05-06
 history:
+  - version: 0.2.0
+    date: 2026-05-06
+    description: Switched implemented mitigation from LuaTeX-ja JFont setup to LaTeX-only CJK breakpoints via Pandoc Lua filter.
   - version: 0.1.0
     date: 2026-05-06
     description: Captured customer finding for Traditional Chinese PDF overflow and first LuaTeX-ja mitigation slice.
@@ -37,13 +40,14 @@ Anonymisierter Repro-Text:
 
 # Umgesetzter P0-Slice
 
-- `pandoc-fonts.tex` aktiviert optional LuaTeX-ja, wenn `luatexja.sty` vorhanden
-  ist.
-- Der konfigurierte `CJK`-Font aus `fonts.yml` wird fuer `\setmainjfont` und
-  `\setsansjfont` genutzt. Es wird kein unkonfigurierter Systemfont verwendet.
-- `Dockerfile.dynamic` installiert das TeX-Live-Paket `luatexja`, damit lokale
-  und Docker-Builds denselben CJK-Linebreaking-Pfad nutzen koennen.
-- Regressionstests pruefen Header-Erzeugung und Dockerfile-Abhaengigkeit.
+- `cjk-linebreak.lua` fuegt fuer LaTeX-Ausgabe Breakpoints nach CJK-Zeichen ein.
+- Die Fontbehandlung bleibt bei den vorhandenen, konfigurierten
+  `luaotfload`-Fallbacks aus `fonts.yml`. Es wird kein unkonfigurierter
+  Systemfont und kein instabiler `\setmainjfont`-Pfad verwendet.
+- `Dockerfile.dynamic` braucht dadurch kein zusaetzliches LuaTeX-ja-Paket fuer
+  diesen P0-Slice.
+- Regressionstests pruefen Default-Filter, Header-Erzeugung ohne LuaTeX-ja-JFont
+  und Dockerfile-Abhaengigkeit.
 
 # Offene Punkte
 
