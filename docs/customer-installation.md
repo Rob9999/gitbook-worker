@@ -549,7 +549,8 @@ Der v2.4.2-Releasekandidat wurde lokal mit diesen Signalen geprueft:
 
 - Non-slow Test-Suite: `524 passed, 11 skipped, 10 deselected, 4 warnings`.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.4.2`.
-- Wheel-Smoke in frischer virtueller Umgebung.
+- Wheel-Smoke in frischer virtueller Umgebung: Import aus `site-packages`,
+  Version `2.4.2`, Orchestrator-Hilfe erfolgreich.
 - Deutscher und englischer PDF-Build.
 - PDF-Font-Gates fuer Twemoji und ERDA CC-BY CJK.
 - Direkte PDF-Fontliste mit ERDA CC-BY CJK, Indic und Ethiopic.
