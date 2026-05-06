@@ -1454,11 +1454,14 @@ Hier ist ein vollständiges Beispiel, das mehrere Features kombiniert:
 title: Sprachproben – 100 Sprachen
 description: Neutrale kurze und lange Beispielsätze in vielen Sprachen für Font-/Rendering-Tests.
 date: 2026-01-10
-version: 1.1.0
+version: 1.1.1
 doc_type: example
 category: "language-test"
 show_in_summary: true
 history:
+  - version: 1.1.1
+    date: 2026-05-06
+    description: CJK-Langzeilen mit Flagge, Sprachcode und Sprachname beschriftet.
   - version: 1.1.0
     date: 2026-05-06
     description: Lange ERDA-Font-Sichtprüfungstexte für CJK, Indic und Ethiopic ergänzt.
@@ -2018,16 +2021,18 @@ Diese synthetischen Abschnitte dienen der manuellen PDF-Sichtprüfung. Sie sind 
 
 ### ERDA CC-BY CJK
 
-1. 繁體中文排版測試段落一在同一行保留很長的連續文字並加入 AI、PDF、ERDA 2.4.0 與 CC BY-SA 4.0 作為拉丁字母片段以觀察換行。
-2. 繁體中文排版測試段落二描述中立的文件流程、版本記錄、授權資訊、審核標記與公開知識管理，句子刻意延長以觸發 CJK 斷行。
-3. 繁體中文排版測試段落三把資料來源、摘要、註解、表格、腳註、索引與圖像說明放在同一視覺區域中檢查字距與行距。
-4. 繁體中文排版測試段落四包含 English terms like workflow, release, checksum, font cache and fallback chain，確認拉丁文字夾雜時仍能自然換行。
-5. 日本語の長い確認文では公開資料、版管理、校正記録、PDF 出力、AI 参照確認、ERDA フォントという語を並べて折り返しを観察します。
-6. 日本語の追加確認文では句読点と漢字かな交じり文を続け、長い見出し風の内容が本文幅を越えずに収まるかを確認します。
-7. 한국어 긴 확인 문장은 문서 흐름, 공개 라이선스, PDF 빌드, AI 검토, 글꼴 대체, 표지와 목차를 함께 다루며 줄바꿈을 확인합니다.
-8. 한국어 추가 확인 문장은 공백이 있는 음절 조합과 라틴 조각 ERDA, CJK, PDF, QA 를 섞어 글꼴 전환과 행간을 살펴봅니다.
-9. 繁體中文排版測試段落九使用多個標點符號、括號（測試）、冒號：說明、分號；延伸內容，檢查標點前後的間距與折行。
-10. 繁體中文排版測試段落十結束此組樣本，目標是讓人工檢視者在單頁中看到足夠長度的 CJK 文字與拉丁片段混排效果。
+Zuordnung der zehn Langzeilen: 🇹🇼 ZH-Hant - Traditionelles Chinesisch (Zeilen 1-4, 9-10), 🇯🇵 JA - Japanisch (Zeilen 5-6), 🇰🇷 KO - Koreanisch (Zeilen 7-8).
+
+1. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落一在同一行保留很長的連續文字並加入 AI、PDF、ERDA 2.4.0 與 CC BY-SA 4.0 作為拉丁字母片段以觀察換行。
+2. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落二描述中立的文件流程、版本記錄、授權資訊、審核標記與公開知識管理，句子刻意延長以觸發 CJK 斷行。
+3. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落三把資料來源、摘要、註解、表格、腳註、索引與圖像說明放在同一視覺區域中檢查字距與行距。
+4. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落四包含 English terms like workflow, release, checksum, font cache and fallback chain，確認拉丁文字夾雜時仍能自然換行。
+5. 🇯🇵 JA - Japanisch (日本語): 日本語の長い確認文では公開資料、版管理、校正記録、PDF 出力、AI 参照確認、ERDA フォントという語を並べて折り返しを観察します。
+6. 🇯🇵 JA - Japanisch (日本語): 日本語の追加確認文では句読点と漢字かな交じり文を続け、長い見出し風の内容が本文幅を越えずに収まるかを確認します。
+7. 🇰🇷 KO - Koreanisch (한국어): 한국어 긴 확인 문장은 문서 흐름, 공개 라이선스, PDF 빌드, AI 검토, 글꼴 대체, 표지와 목차를 함께 다루며 줄바꿈을 확인합니다.
+8. 🇰🇷 KO - Koreanisch (한국어): 한국어 추가 확인 문장은 공백이 있는 음절 조합과 라틴 조각 ERDA, CJK, PDF, QA 를 섞어 글꼴 전환과 행간을 살펴봅니다.
+9. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落九使用多個標點符號、括號（測試）、冒號：說明、分號；延伸內容，檢查標點前後的間距與折行。
+10. 🇹🇼 ZH-Hant - Traditionelles Chinesisch (繁體中文): 繁體中文排版測試段落十結束此組樣本，目標是讓人工檢視者在單頁中看到足夠長度的 CJK 文字與拉丁片段混排效果。
 
 ### ERDA CC-BY Indic
 
