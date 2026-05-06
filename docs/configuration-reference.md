@@ -1,7 +1,8 @@
 ---
-version: 1.2.0
-date: 2026-02-08
+version: 1.2.1
+date: 2026-05-06
 history:
+  - "1.2.1: 2026-05-06 — Release reference refreshed for v2.4.2; no configuration schema changes"
   - "1.2.0: 2026-02-08 — pdf_options passthrough, author singular alias, format alias"
   - "1.1.0: 2026-02-08 — Added per-file docs references and config versioning table"
   - "1.0.0: 2026-02-08 — Initial configuration reference from code audit"
@@ -12,6 +13,10 @@ history:
 Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
+
+Hinweis fuer v2.4.2: Der PDF-Font-Hotfix aendert keine Konfigurationsschluessel;
+die CJK-Linebreak- und ERDA-Script-Font-Filter werden intern durch den Publisher
+aktiviert.
 
 > **Ausführliche Per-File-Dokumentation** mit Versionshistorie:
 > [docs/configs/](configs/README.md)

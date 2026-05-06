@@ -6,6 +6,7 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
+| **v2.4.2** | 2026-05-06 | `v2.4.2` | [v2.4.2](v2.4.2.md) - PDF font and line-breaking hotfix for CJK overflow and ERDA script samples |
 | **v2.4.1** | 2026-05-06 | `v2.4.1` | [v2.4.1](v2.4.1.md) - Docker packaging hotfix for sdist/Wheel and package-local Dockerfile paths |
 | **v2.4.0** | 2026-05-05 | `v2.4.0` | [v2.4.0](v2.4.0.md) - "Pruefsicher": PDF gates, AI-reference hardening, batch/resume workflows |
 | **v2.3.0** | 2026-02-08 | `v2.3.0` | [v2.3.0](v2.3.0.md) — „Pfadtreu": Auto-Detect rename-skip für source_type=file, gitbook_rename Key |

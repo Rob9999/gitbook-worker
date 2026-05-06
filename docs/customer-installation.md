@@ -1,8 +1,9 @@
 ---
-version: 2.0.1
-date: 2026-05-05
+version: 2.0.2
+date: 2026-05-06
 status: stable
 history:
+  - "2.0.2: 2026-05-06 - Anwenderanleitung fuer v2.4.2 Font-Hotfix, CJK-Linebreak und ERDA-Script-Sichtpruefung aktualisiert"
   - "2.0.1: 2026-05-05 - Anwenderanleitung fuer v2.4.0 zur Kundenauslieferung auf stable gesetzt"
   - "2.0.0: 2026-05-05 - Zur zentralen Anwenderanleitung fuer GitBook Worker v2.4.0 ausgebaut"
   - "1.2.0: 2026-05-05 - Dockerfile.dynamic als Kundenpfad, AI-Reference-Schutz und v2.4.0-Verifikation ergaenzt"
@@ -10,15 +11,15 @@ history:
   - "1.0.0: 2025-12-31 - init"
 ---
 
-# GitBook Worker Anwenderanleitung v2.4.0
+# GitBook Worker Anwenderanleitung v2.4.2
 
 Diese Anleitung ist der zentrale Einstieg fuer Anwenderinnen und Anwender von
-GitBook Worker v2.4.0. Sie beschreibt Installation, Projektstruktur,
+GitBook Worker v2.4.2. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
 Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
-fuer v2.4.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+fuer v2.4.2 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
 Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
@@ -63,7 +64,7 @@ bleiben beim jeweiligen Projektteam.
 ### Lokal
 
 - Windows, Linux oder macOS.
-- Python 3.10 oder neuer; fuer v2.4.0 ist Python 3.11/3.12 empfohlen.
+- Python 3.10 oder neuer; fuer v2.4.2 ist Python 3.11/3.12 empfohlen.
 - Pandoc.
 - TeX Live mit LuaLaTeX.
 - Zugriff auf die konfigurierten Fonts oder einen erlaubten Downloadpfad.
@@ -100,7 +101,7 @@ python -m pip uninstall -y gitbook-worker tools
 Installation aus einem gelieferten Wheel:
 
 ```powershell
-python -m pip install --force-reinstall dist\gitbook_worker-2.4.0-py3-none-any.whl
+python -m pip install --force-reinstall dist\gitbook_worker-2.4.2-py3-none-any.whl
 ```
 
 Installation direkt aus dem Repository:
@@ -117,7 +118,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip uninstall -y gitbook-worker tools
-python -m pip install --force-reinstall dist/gitbook_worker-2.4.0-py3-none-any.whl
+python -m pip install --force-reinstall dist/gitbook_worker-2.4.2-py3-none-any.whl
 ```
 
 ## 5. Installation pruefen
@@ -131,7 +132,7 @@ python -c "import gitbook_worker, tools; print('version:', gitbook_worker.__vers
 
 Erwartung:
 
-- `version:` zeigt `2.4.0`.
+- `version:` zeigt `2.4.2`.
 - `gitbook_worker:` zeigt in die aktive `.venv` oder in das bewusst installierte
   Repository.
 - `tools shim:` zeigt auf den Kompatibilitaets-Shim aus `gitbook_worker`, nicht
@@ -362,9 +363,10 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.4.1` verwenden. `2.4.1`
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.4.2` verwenden. `2.4.1`
   stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
-  im Lieferpaket enthalten sind.
+  im Lieferpaket enthalten sind; `2.4.2` ergaenzt den PDF-Font-Hotfix fuer
+  CJK-Linebreak und ERDA-Script-Sichtpruefung.
 - `--use-dynamic` ist der v2.4.x-Release-Pfad.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
@@ -423,10 +425,12 @@ Als JSON fuer CI oder Support:
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de\publish\das-sample-buch.pdf --json
 ```
 
-Erwartete Signale fuer v2.4.0:
+Erwartete Signale fuer v2.4.2:
 
 - Der konfigurierte Emoji-Font `Twemoji Mozilla` ist eingebettet.
 - Der konfigurierte CJK-Font `ERDA CC-BY CJK` ist eingebettet.
+- Bei Sample-PDFs sind zusaetzlich `ERDA CC-BY Indic` und
+  `ERDA CC-BY Ethiopic` in der direkten Fontliste sichtbar.
 - Der PDF-Textscan findet ein positives CJK-Signal.
 - Neue Missing-Glyph- oder `.notdef`-Signale werden als Warnung oder, mit
   `--fail-on-log-pattern`, als Fehler sichtbar.
@@ -528,7 +532,7 @@ Mehr konkrete Fehlerbilder stehen in den [FAQs](FAQs.md).
 
 Empfohlene Reihenfolge:
 
-1. Release Notes lesen: [v2.4.0 Release Notes](releases/v2.4.0.md).
+1. Release Notes lesen: [v2.4.2 Release Notes](releases/v2.4.2.md).
 2. Recovery-Punkt im Projekt setzen, bevor Build- oder Migrationslaeufe starten.
 3. Neue Version in einer sauberen `.venv` installieren.
 4. Importpfade und Version pruefen.
@@ -539,18 +543,18 @@ Empfohlene Reihenfolge:
 9. Optional Docker-Build mit `Dockerfile.dynamic` ausfuehren.
 10. AI-Reference-QA zuerst report-only testen.
 
-## 19. Release-Verifikation v2.4.0
+## 19. Release-Verifikation v2.4.2
 
-Der v2.4.0-Releasekandidat wurde lokal mit diesen Signalen geprueft:
+Der v2.4.2-Releasekandidat wird lokal mit diesen Signalen geprueft:
 
-- Non-slow Test-Suite: `515 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Docker-Tests inklusive echtem `Dockerfile.dynamic` Build/Run: `4 passed`.
-- Sauberer Wheel- und sdist-Build.
+- Non-slow Test-Suite aus `gitbook_worker/tests`.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.4.2`.
 - Wheel-Smoke in frischer virtueller Umgebung.
 - Deutscher und englischer PDF-Build.
 - PDF-Font-Gates fuer Twemoji und ERDA CC-BY CJK.
+- Direkte PDF-Fontliste mit ERDA CC-BY CJK, Indic und Ethiopic.
 - Positives CJK-Textsignal in beiden Sample-PDFs.
-- AI-Reference-Secret-Redaction und Provider-Fehler-Redaction.
+- TOC-Pruefung der langen ERDA-Font-Sichtpruefungsabschnitte.
 
 ## 20. Review- und Smoke-Checkliste fuer diese Anleitung
 

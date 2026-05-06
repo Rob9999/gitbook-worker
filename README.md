@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.4.1 "Pruefsicher Docker Hotfix"** · [Release Notes](docs/releases/v2.4.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.4.2 "Pruefsicher Font Hotfix"** · [Release Notes](docs/releases/v2.4.2.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.4.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.4.2-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -314,6 +314,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.4.2 "Pruefsicher Font Hotfix" (6. Mai 2026)
+
+- **CJK-Randueberlauf behoben**: Lange CJK-Passagen erhalten sichere LaTeX-Breakpoints und laufen nicht mehr in den Seitenrand.
+- **ERDA-Script-Fonts gezielt genutzt**: Devanagari und Ethiopic werden fuer Sichtproben explizit ueber `ERDA CC-BY Indic` und `ERDA CC-BY Ethiopic` geroutet.
+- **Sichtpruefung klarer**: DE/EN Sample-PDFs enthalten lange CJK-, Indic- und Ethiopic-Abschnitte mit Flagge, Sprachcode und Sprachname je Zeile.
+
+→ [docs/releases/v2.4.2.md](docs/releases/v2.4.2.md)
+
 #### v2.4.1 "Pruefsicher Docker Hotfix" (6. Mai 2026)
 
 - **Docker-Paket-Hotfix**: `Dockerfile`, `Dockerfile.dynamic`, `Dockerfile.python` und `gitbook_worker/tools/requirements.txt` sind wieder in sdist/Wheel enthalten.
@@ -484,7 +492,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.4.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.4.2-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -735,6 +743,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.4.2 "Pruefsicher Font Hotfix" (May 6, 2026)
+
+- **CJK margin overflow fixed**: Long CJK passages receive safe LaTeX breakpoints and no longer run into the page margin.
+- **Targeted ERDA script fonts**: Devanagari and Ethiopic visual samples are explicitly routed through `ERDA CC-BY Indic` and `ERDA CC-BY Ethiopic`.
+- **Clearer visual inspection**: DE/EN sample PDFs include long CJK, Indic, and Ethiopic sections with flag, language code, and language name per line.
+
+→ [docs/releases/v2.4.2.md](docs/releases/v2.4.2.md)
 
 #### v2.4.1 "Pruefsicher Docker Hotfix" (May 6, 2026)
 

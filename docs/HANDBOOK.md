@@ -1,7 +1,8 @@
 ---
-version: 1.3.2
-date: 2026-05-05
+version: 1.3.3
+date: 2026-05-06
 history:
+  - "1.3.3: 2026-05-06 - CJK-Linebreak und ERDA-Script-Font-Routing fuer v2.4.2 dokumentiert"
   - "1.3.2: 2026-05-05 - Dockerfile.dynamic als Release-Pfad und legacy Dockerfile als deprecated dokumentiert"
   - "1.3.1: 2026-05-04 - RUN-Sicherungspunkt vor potenziell destruktiven Laeufen dokumentiert"
   - "1.3.0: 2026-02-08 — pdf_options passthrough, Aliases, publish.yml Konfigurationsanleitung"
@@ -56,6 +57,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - The dynamic Docker build installs TeX Live and Pandoc, then applies font setup driven by repository configuration rather than hardcoded fonts.
 - If integration tests report missing emoji or CJK fonts, ensure Twemoji and ERDA CC-BY CJK are available in the runner or rebuild the Docker image so the font check passes.
 - Repository builds now keep vendor fonts out of git: `fonts-storage/` (ignored) is populated automatically by `gitbook_worker.tools.publishing.font_storage.FontStorageBootstrapper` during `fonts sync` and orchestrator runs. Delete the folder to force a refresh or set `GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP=1` when developing offline.
+- v2.4.2 keeps the global fallback stack CJK-first for stability. Long Devanagari and Ethiopic samples are routed through explicit ERDA script helpers instead of moving Indic/Ethiopic ahead of CJK globally.
 
 ### PDF font fallback behavior
 
@@ -68,6 +70,8 @@ This report shall be written to the build log for troubleshooting.
 
 2. Use of the mainfontfallback stack
 The `mainfontfallback` stack exists to prevent missing-glyph boxes, not just to check font availability. For every glyph that the primary fonts cannot render, the PDF build shall try each font in the `mainfontfallback` stack in order and use the first fallback font that can provide a proper glyph (e.g. a regular text glyph, emoji glyph, etc.). As long as every required glyph can be rendered either by a primary font or by at least one font in the `mainfontfallback` stack, the PDF build shall succeed and no .notdef / empty box glyphs shall appear in the output.
+
+For CJK-heavy PDFs, `cjk-linebreak.lua` adds safe breakpoints after CJK characters so long Traditional Chinese, Japanese, and Korean passages can wrap before the page margin.
 
 3. Abort condition
 The PDF build shall abort only if, after trying all configured primary fonts and all fonts in the `mainfontfallback` stack, there remains at least one required glyph that would still be rendered as a missing-glyph box (.notdef). In that case, the pipeline shall fail and emit the detailed missing-glyph report described in (1), instead of silently producing a PDF with empty boxes.
