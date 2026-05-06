@@ -1,4 +1,8 @@
 include README.md LICENSE LICENSE-CODE LICENSE-FONTS
+include gitbook_worker/tools/docker/Dockerfile
+include gitbook_worker/tools/docker/Dockerfile.dynamic
+include gitbook_worker/tools/docker/Dockerfile.python
+include gitbook_worker/tools/requirements.txt
 recursive-include gitbook_worker *.yml *.yaml *.json *.lua *.ttf *.otf *.sty *.tex *.js *.ps1 *.sh *.md *.svg *.csv *.png
 prune gitbook_worker/tests
 global-exclude *.py[cod]

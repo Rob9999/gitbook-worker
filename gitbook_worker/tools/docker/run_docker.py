@@ -49,11 +49,22 @@ def _detect_repo_root(start: Path) -> Path:
 
 _THIS_FILE = Path(__file__).resolve()
 REPO_ROOT = _detect_repo_root(_THIS_FILE)
+DOCKER_DIR = _THIS_FILE.parent
 TOOLS_PATH = REPO_ROOT / "gitbook_worker" / "tools"
 if str(TOOLS_PATH) not in sys.path:
     sys.path.insert(0, str(TOOLS_PATH))
 
 from utils.docker_runner import main as docker_runner_main
+
+
+def _dockerfile_name(use_dynamic: bool) -> str:
+    return "Dockerfile.dynamic" if use_dynamic else "Dockerfile"
+
+
+def _dockerfile_path(use_dynamic: bool) -> Path:
+    """Return the Dockerfile path from the package-first docker directory."""
+
+    return DOCKER_DIR / _dockerfile_name(use_dynamic)
 
 
 def _windows_path_to_docker(path: Path) -> str:
@@ -89,10 +100,7 @@ def build_docker_args(
     """Erstelle die Argumentliste für docker_runner."""
 
     # Wähle Dockerfile basierend auf --use-dynamic Flag
-    dockerfile_name = "Dockerfile.dynamic" if use_dynamic else "Dockerfile"
-    dockerfile = str(
-        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / dockerfile_name
-    )
+    dockerfile = str(_dockerfile_path(use_dynamic))
     # "ERDA Smart Worker" für dynamisches Image, Legacy für statisches
     tag = "erda-smart-worker" if use_dynamic else "erda-workflow-tools"
     context = str(REPO_ROOT)
@@ -320,7 +328,7 @@ Beispiele:
     args = parser.parse_args()
 
     # Wähle Dockerfile
-    dockerfile_name = "Dockerfile.dynamic" if args.use_dynamic else "Dockerfile"
+    dockerfile_name = _dockerfile_name(args.use_dynamic)
     tag_name = "erda-smart-worker" if args.use_dynamic else "erda-workflow-tools"
 
     if args.use_dynamic and args.verbose:
@@ -332,14 +340,7 @@ Beispiele:
         print(f"Building Docker image ({image_type}) using {dockerfile_name}...")
         docker_args = [
             "--dockerfile",
-            str(
-                REPO_ROOT
-                / ".github"
-                / "gitbook_worker"
-                / "tools"
-                / "docker"
-                / dockerfile_name
-            ),
+            str(_dockerfile_path(args.use_dynamic)),
             "--tag",
             tag_name,
             "--context",

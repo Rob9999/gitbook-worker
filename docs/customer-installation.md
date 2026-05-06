@@ -362,7 +362,10 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- `--use-dynamic` ist der v2.4.0-Release-Pfad.
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.4.1` verwenden. `2.4.1`
+  stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
+  im Lieferpaket enthalten sind.
+- `--use-dynamic` ist der v2.4.x-Release-Pfad.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
 - Das legacy `Dockerfile` ist deprecated und nicht fuer neue Anwenderlaeufe

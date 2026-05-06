@@ -21,3 +21,12 @@ def test_manifest_prunes_release_noise():
     assert "prune gitbook_worker/tests" in manifest
     assert "global-exclude *.py[cod]" in manifest
     assert "global-exclude __pycache__/*" in manifest
+
+
+def test_manifest_includes_docker_build_inputs():
+    manifest = (REPO_ROOT / "MANIFEST.in").read_text(encoding="utf-8")
+
+    assert "include gitbook_worker/tools/docker/Dockerfile" in manifest
+    assert "include gitbook_worker/tools/docker/Dockerfile.dynamic" in manifest
+    assert "include gitbook_worker/tools/docker/Dockerfile.python" in manifest
+    assert "include gitbook_worker/tools/requirements.txt" in manifest

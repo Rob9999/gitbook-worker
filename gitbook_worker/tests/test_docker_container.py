@@ -3,12 +3,13 @@ import pathlib
 import re
 import shutil
 import subprocess
-import time
 import datetime
+import sys
+import time
 
 import pytest
 
-import sys
+from gitbook_worker.tools.docker import run_docker
 
 try:
     from gitbook_worker.gh_paths import GH_DOCKER_DIR, GH_TOOLS_DIR, REPO_ROOT
@@ -54,6 +55,14 @@ def test_python_dockerfile_stays_lightweight():
 
     assert "texlive" not in text.lower()
     assert "pandoc" not in text.lower()
+
+
+def test_run_docker_build_uses_packaged_dockerfile_path():
+    dockerfile = run_docker._dockerfile_path(use_dynamic=True)
+
+    assert dockerfile.name == "Dockerfile.dynamic"
+    assert dockerfile.exists()
+    assert ".github" not in dockerfile.parts
 
 
 def log_to_logger(logger, message, stdout=None, stderr=None):

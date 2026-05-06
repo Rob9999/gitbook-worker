@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.4.0 "Pruefsicher"** · [Release Notes](docs/releases/v2.4.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.4.1 "Pruefsicher Docker Hotfix"** · [Release Notes](docs/releases/v2.4.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -314,6 +314,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.4.1 "Pruefsicher Docker Hotfix" (6. Mai 2026)
+
+- **Docker-Paket-Hotfix**: `Dockerfile`, `Dockerfile.dynamic`, `Dockerfile.python` und `gitbook_worker/tools/requirements.txt` sind wieder in sdist/Wheel enthalten.
+- **Paketlayoutfaehiger Docker-Build**: `run_docker.py build --use-dynamic` nutzt den Dockerfile-Pfad aus dem installierten Paket statt eines alten `.github`-Pfads.
+- **Kunden-CI**: Workflows koennen den Docker-Buildpfad aus dem entpackten Worker-Archiv oder aus dem installierten Paket ableiten.
+
+→ [docs/releases/v2.4.1.md](docs/releases/v2.4.1.md)
+
 #### v2.4.0 "Pruefsicher" (5. Mai 2026)
 
 - **PDF-Regressionsgate**: Prueft Emoji- und ERDA-CJK-Font-Einbettung sowie CJK-Textsignal in den Sample-PDFs.
@@ -321,7 +329,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 - **Batch/Resume fuer Kunden-Workflows**: `--files-list`, `--max-tasks`, `--resume-from-report`, 429-Abbruch und klare Statuswerte `suggested`, `validated`, `failed`, `rate_limited`.
 - **Inline- und Precheck-Schicht**: Bare URLs/DOIs, optionale Markdown-Links/Frontmatter-DOIs und no-network Prechecks fuer URL, DOI, arXiv, ISBN und interne Markdown-Links.
 - **Docker-Image robuster**: `Dockerfile.dynamic` verwendet den aktuellen CTAN-TeX-Live-Pfad ueber `/usr/local/texlive/current` statt hartem Jahrespfad.
-- **Teststand**: 513 passed, 11 skipped, 10 deselected; DE/EN PDF-Font-Gates gruen.
+- **Teststand**: 515 passed, 11 skipped, 10 deselected; DE/EN PDF-Font-Gates gruen.
 
 → [docs/releases/v2.4.0.md](docs/releases/v2.4.0.md)
 
@@ -728,6 +736,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release History</summary>
 
+#### v2.4.1 "Pruefsicher Docker Hotfix" (May 6, 2026)
+
+- **Docker package hotfix**: `Dockerfile`, `Dockerfile.dynamic`, `Dockerfile.python`, and `gitbook_worker/tools/requirements.txt` are included in sdist/Wheel again.
+- **Package-layout Docker build**: `run_docker.py build --use-dynamic` now uses the Dockerfile path from the installed package instead of the old `.github` path.
+- **Customer CI**: Workflows can derive the Docker build path from the extracted Worker archive or installed package.
+
+→ [docs/releases/v2.4.1.md](docs/releases/v2.4.1.md)
+
 #### v2.4.0 "Pruefsicher" (May 5, 2026)
 
 - **PDF regression gate**: Validates emoji and ERDA-CJK font embedding plus CJK text signals in sample PDFs.
@@ -735,7 +751,7 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 - **Batch/resume for customer workflows**: `--files-list`, `--max-tasks`, `--resume-from-report`, 429 stop policy, and clear `suggested`, `validated`, `failed`, `rate_limited` statuses.
 - **Inline and precheck layer**: Bare URLs/DOIs, optional Markdown links/frontmatter DOIs, and no-network checks for URL, DOI, arXiv, ISBN, and internal Markdown links.
 - **More robust Docker image**: `Dockerfile.dynamic` uses the current CTAN TeX Live path via `/usr/local/texlive/current` instead of a hardcoded year.
-- **Test status**: 513 passed, 11 skipped, 10 deselected; DE/EN PDF font gates green.
+- **Test status**: 515 passed, 11 skipped, 10 deselected; DE/EN PDF font gates green.
 
 → [docs/releases/v2.4.0.md](docs/releases/v2.4.0.md)
 
