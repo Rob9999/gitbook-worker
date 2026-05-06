@@ -127,6 +127,7 @@ RUN cd /tmp \
     && (tlmgr install \
     xetex luatex lualatex-math luatexbase luaotfload \
     fontspec polyglossia unicode-math \
+    luatexja \
     babel-german hyphen-german selnolig \
     fancyvrb mdwtools \
     enumitem geometry \

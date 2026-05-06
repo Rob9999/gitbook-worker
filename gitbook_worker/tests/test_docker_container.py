@@ -40,6 +40,15 @@ def test_dynamic_dockerfile_does_not_hardcode_texlive_year():
     assert "find /usr/local/texlive" in text
 
 
+def test_dynamic_dockerfile_installs_luatexja_for_cjk_linebreaking():
+    dockerfile = (
+        REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile.dynamic"
+    )
+    text = dockerfile.read_text(encoding="utf-8")
+
+    assert "luatexja" in text
+
+
 def test_legacy_dockerfile_is_explicitly_deprecated():
     dockerfile = REPO_ROOT / "gitbook_worker" / "tools" / "docker" / "Dockerfile"
     text = dockerfile.read_text(encoding="utf-8")

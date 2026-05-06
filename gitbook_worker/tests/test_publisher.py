@@ -5,7 +5,6 @@ import pytest
 import yaml
 from gitbook_worker.tools.publishing import publisher
 
-
 FONT_CACHE_MISSING = pytest.mark.skip(
     reason=(
         "LuaTeX font cache fehlt; siehe gitbook_worker/docs/attentions/lua-font-cache.md"
@@ -98,6 +97,37 @@ def test_font_header_includes_manual_fallback_block():
 
     assert "luaotfload.add_fallback" in header
     assert "Fallback:mode=harf" in header
+
+
+def test_font_header_enables_configured_luatexja_cjk_linebreaking(monkeypatch):
+    class DummyFontConfig:
+        def get_font_name(self, key, default=None):
+            if key == "CJK":
+                return "ERDA CC-BY CJK"
+            return default
+
+    monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+    monkeypatch.setattr(publisher, "_check_luaotfload_has_font", lambda name: True)
+    monkeypatch.setattr(publisher, "_font_available", lambda name: True)
+
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font="Twemoji Mozilla",
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec="ERDA CC-BY CJK:mode=harf",
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "\\IfFileExists{luatexja.sty}" in header
+    assert "\\usepackage{luatexja}" in header
+    assert "\\usepackage{luatexja-fontspec}" in header
+    assert "\\ltjsetparameter{autospacing=true,autoxspacing=true}" in header
+    assert "\\setmainjfont[Renderer=HarfBuzz]{ERDA CC-BY CJK}" in header
+    assert "\\setsansjfont[Renderer=HarfBuzz]{ERDA CC-BY CJK}" in header
 
 
 def test_select_emoji_font_raises_when_twemoji_missing(monkeypatch, caplog):
