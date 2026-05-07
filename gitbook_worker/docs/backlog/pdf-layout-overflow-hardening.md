@@ -1,11 +1,14 @@
 ---
 title: General PDF overflow hardening for URLs, tables, and code-like lines
-version: 0.3.0
+version: 0.3.1
 date: 2026-05-07
 status: partial
 priority: P2
 labels: [pdf, layout, urls, tables, code]
 history:
+  - version: 0.3.1
+    date: 2026-05-07
+    description: Routed Pandoc token macro arguments through fvextra break insertion so URL-like code tokens wrap instead of clipping.
   - version: 0.3.0
     date: 2026-05-07
     description: Hardened fvextra code-fence wrapping for Pandoc token groups such as highlighted URL lines.
@@ -52,8 +55,12 @@ remain relevant for print-quality PDFs.
 
 - `pdf_options.code_block_wrap` enables `fvextra`-based wrapping for Pandoc
   `Highlighting` and plain `verbatim` code environments.
-- Highlighted Pandoc token groups such as `\NormalTok{...}` are wrapped with
-  `breaknonspaceingroup=true` when the installed `fvextra` version supports it.
+- Highlighted Pandoc token macros such as `\NormalTok{...}` route their
+  arguments through `fvextra` break insertion when supported, so URL-like code
+  tokens can wrap inside the PDF text block.
+- `breaknonspaceingroup=true` is enabled when the installed `fvextra` version
+  supports it, and visible break-anywhere symbols are cleared to keep copied
+  PDF text clean.
 - Default is `true`; entries can opt out with `code_block_wrap: false`.
 - DE/EN sample content now includes one semantically wrapped folded YAML scalar
   and one deliberately unwrapped long code-fence line as a regression sample.

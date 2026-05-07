@@ -1405,42 +1405,105 @@ def _block_heading_layout_lines() -> List[str]:
 def _code_block_wrap_lines(enabled: bool) -> List[str]:
     if not enabled:
         return []
+
+    pandoc_token_macros = [
+        "AlertTok",
+        "AnnotationTok",
+        "AttributeTok",
+        "BaseNTok",
+        "BuiltInTok",
+        "CharTok",
+        "CommentTok",
+        "CommentVarTok",
+        "ConstantTok",
+        "ControlFlowTok",
+        "DataTypeTok",
+        "DecValTok",
+        "DocumentationTok",
+        "ErrorTok",
+        "ExtensionTok",
+        "FloatTok",
+        "FunctionTok",
+        "ImportTok",
+        "InformationTok",
+        "KeywordTok",
+        "NormalTok",
+        "OperatorTok",
+        "OtherTok",
+        "PreprocessorTok",
+        "RegionMarkerTok",
+        "SpecialCharTok",
+        "SpecialStringTok",
+        "StringTok",
+        "VariableTok",
+        "VerbatimStringTok",
+        "WarningTok",
+    ]
+
+    token_wrap_lines = [
+        r"  \@ifundefined{FV@InsertBreaks}{}{%",
+        r"    \@ifundefined{FancyVerbBreakAnywhereSymbolPre}{}{%",
+        r"      \def\FancyVerbBreakAnywhereSymbolPre{}",
+        r"      \def\FancyVerbBreakAnywhereSymbolPost{}",
+        r"    }",
+    ]
+    for token_macro in pandoc_token_macros:
+        token_wrap_lines.extend(
+            [
+                f"    \\@ifundefined{{{token_macro}}}{{}}{{%",
+                f"      \\let\\GBW@Orig{token_macro}\\{token_macro}",
+                (
+                    f"      \\renewcommand{{\\{token_macro}}}[1]"
+                    f"{{\\FV@InsertBreaks{{\\GBW@Orig{token_macro}}}{{##1}}}}"
+                ),
+                r"    }",
+            ]
+        )
+    token_wrap_lines.append(r"  }")
+
     return [
+        r"\makeatletter",
         r"\IfFileExists{fvextra.sty}{%",
+        r"  \makeatother",
         r"  \usepackage{fvextra}",
         r"  \makeatletter",
         r"  \@ifundefined{KV@FV@breaknonspaceingroup}{%",
         (
             r"    \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
             r"{commandchars=\\\{\},breaklines=true,breakanywhere=true,"
-            r"breaksymbolleft={},breaksymbolsepleft=0pt}"
+            r"breaksymbolleft={},breaksymbolright={},"
+            r"breaksymbolsepleft=0pt,breaksymbolsepright=0pt}"
         ),
         (
             r"    \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
             r"{breaklines=true,breakanywhere=true,breaksymbolleft={},"
-            r"breaksymbolsepleft=0pt}"
+            r"breaksymbolright={},breaksymbolsepleft=0pt,"
+            r"breaksymbolsepright=0pt}"
         ),
         r"  }{%",
         (
             r"    \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
             r"{commandchars=\\\{\},breaklines=true,breakanywhere=true,"
             r"breaknonspaceingroup=true,breaksymbolleft={},"
-            r"breaksymbolsepleft=0pt}"
+            r"breaksymbolright={},breaksymbolsepleft=0pt,"
+            r"breaksymbolsepright=0pt}"
         ),
         (
             r"    \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
             r"{breaklines=true,breakanywhere=true,"
             r"breaknonspaceingroup=true,breaksymbolleft={},"
-            r"breaksymbolsepleft=0pt}"
+            r"breaksymbolright={},breaksymbolsepleft=0pt,"
+            r"breaksymbolsepright=0pt}"
         ),
         r"  }",
-        r"  \makeatother",
+        *token_wrap_lines,
         r"}{%",
         (
             "  \\PackageWarning{gitbook-worker}{fvextra.sty not found; "
             "code block wrapping disabled}"
         ),
         "}",
+        r"\makeatother",
     ]
 
 

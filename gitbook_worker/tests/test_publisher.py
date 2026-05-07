@@ -277,6 +277,11 @@ def test_font_header_enables_code_block_wrapping_by_default():
     assert "KV@FV@breaknonspaceingroup" in header
     assert "breaknonspaceingroup=true" in header
     assert "breaksymbolleft={}" in header
+    assert "breaksymbolright={}" in header
+    assert "FV@InsertBreaks" in header
+    assert "FancyVerbBreakAnywhereSymbolPre" in header
+    assert "\\renewcommand{\\NormalTok}[1]" in header
+    assert "{\\FV@InsertBreaks{\\GBW@OrigNormalTok}{##1}}" in header
     assert "\\RecustomVerbatimEnvironment{verbatim}{Verbatim}" in header
 
 
