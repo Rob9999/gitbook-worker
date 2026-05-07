@@ -4,7 +4,7 @@ This file is generated from the configured fonts registry.
 
 - Source: `C:/gitbook-worker/gitbook_worker/defaults/fonts.yml`
 - Fonts config version: `1.0.0`
-- Generated (UTC): `2026-05-07T16:26:16+00:00Z`
+- Generated (UTC): `2026-05-07T17:15:57+00:00Z`
 
 | Asset | Version | License | Copyright | Source | Notes |
 |---|---:|---|---|---|---|
