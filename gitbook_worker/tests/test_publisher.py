@@ -125,13 +125,16 @@ def test_luaotfload_rejects_invalid_resolved_font_file(monkeypatch, tmp_path):
     def fake_run(*args, **kwargs):
         return DummyResult()
 
-    publisher._check_luaotfload_has_font.cache_clear()
+    cache_clear = getattr(publisher._check_luaotfload_has_font, "cache_clear", None)
+    if cache_clear:
+        cache_clear()
     monkeypatch.setattr(publisher.shutil, "which", lambda name: "luaotfload-tool")
     monkeypatch.setattr(publisher.subprocess, "run", fake_run)
     try:
         assert not publisher._check_luaotfload_has_font("ERDA CC-BY Indic")
     finally:
-        publisher._check_luaotfload_has_font.cache_clear()
+        if cache_clear:
+            cache_clear()
 
 
 def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
