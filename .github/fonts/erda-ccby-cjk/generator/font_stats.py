@@ -13,6 +13,7 @@ from fontTools.ttLib import TTFont
 from coverage_targets import (
     STAT_RANGES,
     TARGET_REQUIREMENTS,
+    target_cjk_long_section_chars,
     target_cjk_long_sample_chars,
 )
 
@@ -88,6 +89,17 @@ def inspect_font(font_path: Path) -> FontStats:
                     actual=actual_sample_codes,
                     minimum=len(sample_codes),
                     passed=actual_sample_codes == len(sample_codes),
+                )
+            )
+        section_codes = {ord(char) for char in target_cjk_long_section_chars()}
+        if section_codes:
+            actual_section_codes = len(section_codes.intersection(codes))
+            target_results.append(
+                TargetResult(
+                    range_name="cjk_long_text_section",
+                    actual=actual_section_codes,
+                    minimum=len(section_codes),
+                    passed=actual_section_codes == len(section_codes),
                 )
             )
 

@@ -61,6 +61,7 @@ EM = CONFIG.grid.em
 PIXELS = CONFIG.grid.pixels
 CELL = CONFIG.grid.cell
 MARGIN = CONFIG.grid.margin
+GENERATED_INK_SCALE = 0.70
 
 
 def _glyph_from_bitmap(bitmap: List[str], ink_scale: float = 1.0) -> Tuple[object, int]:
@@ -350,7 +351,7 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
             name = f"uni{ord(char):04X}"
             if name in glyphs:
                 return
-            ink_scale = 0.45 if source == "generated" else 1.0
+            ink_scale = GENERATED_INK_SCALE if source == "generated" else 1.0
             glyph, width = _glyph_from_bitmap(bitmap, ink_scale=ink_scale)
             glyph_order.append(name)
             glyphs[name] = glyph

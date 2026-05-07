@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import datetime as _datetime
 
-ERDA_FONT_VERSION = "1.3.0"
+ERDA_FONT_VERSION = "1.4.0"
 ERDA_FONT_VERSION_DATE = "2026-05-07"
 
 

@@ -17,6 +17,7 @@ from coverage_targets import (  # noqa: E402
     CJK_HAN_TARGET,
     CJK_HANGUL_TARGET,
     TARGET_REQUIREMENTS,
+    target_cjk_long_section_chars,
     target_cjk_long_sample_chars,
     target_devanagari_chars,
     target_ethiopic_chars,
@@ -41,6 +42,7 @@ def test_release_targets_do_not_claim_impossible_indic_or_ethiopic_counts() -> N
     assert CJK_HAN_TARGET == 3000
     assert CJK_HANGUL_TARGET == 3000
     assert len(target_cjk_long_sample_chars()) > 0
+    assert len(target_cjk_long_section_chars()) > len(target_cjk_long_sample_chars())
     assert len(target_devanagari_chars()) < 3000
     assert len(target_ethiopic_chars()) < 3000
 

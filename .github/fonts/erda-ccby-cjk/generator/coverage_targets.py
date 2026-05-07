@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import unicodedata
-from pathlib import Path
 from collections.abc import Iterable
+from pathlib import Path
 
 CodepointRange = tuple[int, int]
 
@@ -29,6 +29,10 @@ CJK_LONG_SAMPLE_MARKERS: tuple[str, ...] = ("ZH-HANT", "JA", "KO")
 CJK_LONG_SAMPLE_CONTENT_PATHS: tuple[Path, ...] = (
     Path("de/content/examples/language-samples-100.md"),
     Path("en/content/examples/language-samples-100.md"),
+)
+CJK_LONG_SAMPLE_SECTION_HEADINGS: tuple[str, ...] = (
+    "## Sehr lange Texte - mindestens 3000 Zeichen je Sprache",
+    "## Very Long Texts - At Least 3000 Characters per Language",
 )
 
 DEVANAGARI_MAIN_RANGES: tuple[CodepointRange, ...] = ((0x0900, 0x097F),)
@@ -103,6 +107,19 @@ def _marked_block(text: str, marker: str) -> str:
     return text.split(start, 1)[1].split(end, 1)[0]
 
 
+def _section_after_heading(text: str, headings: Iterable[str]) -> str:
+    start_positions = [text.find(heading) for heading in headings]
+    start_positions = [position for position in start_positions if position >= 0]
+    if not start_positions:
+        return ""
+
+    start = min(start_positions)
+    next_heading = text.find("\n## ", start + 1)
+    if next_heading < 0:
+        return text[start:]
+    return text[start:next_heading]
+
+
 def target_cjk_long_sample_chars() -> list[str]:
     """Return CJK-family chars used by the 3000-character sample blocks."""
 
@@ -117,6 +134,25 @@ def target_cjk_long_sample_chars() -> list[str]:
             target.update(
                 chars_in_ranges(_marked_block(text, marker), CJK_TARGET_RANGES)
             )
+    return sorted(target)
+
+
+def target_cjk_long_section_chars() -> list[str]:
+    """Return CJK-family chars used by the complete long-text section."""
+
+    root = _repo_root()
+    target: set[str] = set()
+    for relative_path in CJK_LONG_SAMPLE_CONTENT_PATHS:
+        path = root / relative_path
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        target.update(
+            chars_in_ranges(
+                _section_after_heading(text, CJK_LONG_SAMPLE_SECTION_HEADINGS),
+                CJK_TARGET_RANGES,
+            )
+        )
     return sorted(target)
 
 
@@ -136,6 +172,7 @@ def target_cjk_chars() -> list[str]:
     target.update(assigned_chars(CJK_PUNCTUATION_RANGES))
     target.update(assigned_chars(FULLWIDTH_RANGES))
     target.update(target_cjk_long_sample_chars())
+    target.update(target_cjk_long_section_chars())
     return sorted(target)
 
 
