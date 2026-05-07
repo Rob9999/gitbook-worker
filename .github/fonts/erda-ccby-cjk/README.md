@@ -11,8 +11,8 @@ Dieser Font ist eine minimalistische CC BY 4.0-lizenzierte Fallback-Schrift für
 
 **Lizenz**: CC BY 4.0 (Creative Commons Attribution 4.0 International)  
 **Design**: 8×8 Pixel Monospace Bitmaps  
-**Dateigröße**: ~141 KB  
-**Zeichenabdeckung**: 543 Glyphen (inkl. Devanagari/Hindi)
+**Dateigröße**: CJK ~2.8 MB, Indic ~72 KB, Ethiopic ~280 KB  
+**Zeichenabdeckung v2.5.0**: echte TTF-Zielpruefung via `font_cli.py stats`
 
 ---
 
@@ -26,8 +26,11 @@ erda-ccby-cjk/
 │   ├── build_ccby_cjk_font.py      # Haupt-Build-Skript
 │   ├── build_ccby_indic_font.py    # Devanagari/Hindi Subfont
 │   ├── build_ccby_ethiopic_font.py # Ethiopic Mini-Fallback
+│   ├── coverage_targets.py         # v2.5.0 Release-Zielbereiche
+│   ├── font_stats.py               # TTF-Statistik und Zielpruefung
 │   ├── font_family_builder.py      # Gemeinsamer Bitmap-Builder
 │   ├── font_logger.py              # Logging und Metriken
+│   ├── synthetic_bitmap.py         # deterministische Coverage-Marker
 │   ├── katakana.py                 # Katakana Zeichen (84)
 │   ├── hiragana.py                 # Hiragana Zeichen (35)
 │   ├── hangul.py                   # Hangul Jamo-Muster (11.172 Silben)
@@ -45,7 +48,7 @@ erda-ccby-cjk/
 │   └── ethiopic.md                 # Ethiopic Mini-Datensatz
 │
 ├── true-type/                # Build-Output
-│   ├── erda-ccby-cjk.ttf           # Generierter CJK-Font (90 KB)
+│   ├── erda-ccby-cjk.ttf           # Generierter CJK-Font
 │   ├── erda-ccby-indic.ttf         # Devanagari/Hindi Subfont
 │   └── erda-ccby-ethiopic.ttf      # Ethiopic Mini-Fallback
 │
@@ -121,6 +124,12 @@ python build_ccby_ethiopic_font.py
 - `../true-type/erda-ccby-indic.ttf`
 - `../true-type/erda-ccby-ethiopic.ttf`
 
+### Alle ERDA-Fonts bauen
+
+```bash
+python build_all.py
+```
+
 ### Mit Font-Cache-Refresh (empfohlen)
 
 ```bash
@@ -167,27 +176,31 @@ python build_ccby_cjk_font.py --install --refresh-cache
 
 ### Statistik (aktueller Build)
 
-| Kategorie      | Anzahl | Prozent | Beschreibung                          |
-|----------------|--------|---------|---------------------------------------|
-| Hanzi/Kanji    | 206    | 37.9%   | Handgefertigte 8×8 Bitmaps           |
-| Hangul         | 124    | 22.8%   | Algorithmisch generiert (11.172 möglich) |
-| Katakana       | 84     | 15.5%   | Basis + Klein + Dakuten-Varianten    |
-| Interpunktion  | 46     | 8.5%    | CJK + Fullwidth-Formen               |
-| Hiragana       | 35     | 6.4%    | Explizit definiert                   |
-| Devanagari     | 38     | 7.0%    | Hindi Basis + Erweitert              |
-| Fallback       | 10     | 1.8%    | ASCII + Platzhalter                  |
+| Font | maxp.numGlyphs | cmap-Codepoints | Release-Ziele |
+|---|---:|---:|---|
+| `erda-ccby-cjk.ttf` | 6824 | 6823 | PASS: 3156 Han, 3103 Hangul, 93 Hiragana, 96 Katakana |
+| `erda-ccby-indic.ttf` | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
+| `erda-ccby-ethiopic.ttf` | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
 
-**Gesamt**: 543 Zeichen ✅  
-**Dateigröße**: 141 KB
+Die Statistik stammt direkt aus den TTFs:
+
+```bash
+cd generator
+python font_cli.py stats --fail-on-targets
+```
+
+Wichtig: Die synthetischen Coverage-Marker sind lizenziert und sichtbar, aber
+kein Ersatz fuer ein vollwertiges CJK-/Indic-/Ethiopic-Schriftdesign.
 
 ### Unterstützte Zeichenbereiche
 
-- **Katakana**: U+30A0 - U+30FF (Base + Small + Dakuten)
-- **Hiragana**: U+3040 - U+309F (35 definierte Zeichen)
-- **Hangul**: U+AC00 - U+D7A3 (11.172 Silben algorithmisch)
-- **CJK Unified Ideographs**: U+4E00 - U+9FFF (206 handgefertigte + Fallback)
-- **Devanagari**: U+0900 - U+097F (38 Hindi-Zeichen: Basis + Erweitert)
-- **Interpunktion**: Diverse CJK + Fullwidth-Formen
+- **Katakana**: U+30A0 - U+30FF (vollstaendige zugeordnete Standardblock-Ziele)
+- **Hiragana**: U+3040 - U+309F (vollstaendige zugeordnete Standardblock-Ziele)
+- **Hangul**: U+AC00 - U+D7A3 (gestuftes 3000+-Ziel im CJK-Font)
+- **CJK Unified Ideographs**: U+4E00 - U+9FFF (gestuftes 3000+-Ziel im CJK-Font)
+- **Devanagari**: U+0900 - U+097F und U+A8E0 - U+A8FF (vollstaendige zugeordnete Blockziele)
+- **Ethiopic**: U+1200 - U+137F, U+1380 - U+139F, U+2D80 - U+2DDF, U+AB00 - U+AB2F, U+1E7E0 - U+1E7FF
+- **Interpunktion**: CJK-Symbole/Interpunktion und Fullwidth-Formen
 
 ---
 

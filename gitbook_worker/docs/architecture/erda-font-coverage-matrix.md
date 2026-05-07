@@ -38,6 +38,17 @@ Indic or Ethiopic typeface. A future full text-quality font would still need
 proper glyph design, metrics, hinting, kerning, shaping validation and wider
 linebreaking regression coverage.
 
+## v2.5.0 Build Statistics
+
+The rebuilt v2.5.0 TTF artifacts report these values through
+`font_cli.py stats --fail-on-targets`:
+
+| Font | maxp.numGlyphs | cmap codepoints | Release status |
+|---|---:|---:|---|
+| `erda-ccby-cjk.ttf` | 6824 | 6823 | PASS: 3156 Han, 3103 Hangul, 93 Hiragana, 96 Katakana |
+| `erda-ccby-indic.ttf` | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
+| `erda-ccby-ethiopic.ttf` | 525 | 524 | PASS: 358 main, 26 supplement, 79 extended, 32 extended-A, 28 extended-B |
+
 ## Verification Commands
 
 From `.github/fonts/erda-ccby-cjk/generator`:
