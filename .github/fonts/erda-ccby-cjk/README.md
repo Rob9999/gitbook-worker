@@ -181,9 +181,9 @@ python build_ccby_cjk_font.py --install --refresh-cache
 
 | Font | ERDA-Font-Version | maxp.numGlyphs | cmap-Codepoints | Release-Ziele |
 |---|---|---:|---:|---|
-| `erda-ccby-cjk.ttf` | 1.3.0 | pending rebuild | pending rebuild | PASS after rebuild: Han, Hangul, Hiragana, Katakana, long sample blocks |
-| `erda-ccby-indic.ttf` | 1.3.0 | pending rebuild | pending rebuild | PASS after rebuild: Devanagari main, Devanagari Extended |
-| `erda-ccby-ethiopic.ttf` | 1.3.0 | pending rebuild | pending rebuild | PASS after rebuild: Ethiopic main/supplement/extended/extended-A/extended-B |
+| `erda-ccby-cjk.ttf` | 1.3.0 | 6877 | 6876 | PASS: 3194 Han, 3118 Hangul, 93 Hiragana, 96 Katakana, 141/141 long sample chars |
+| `erda-ccby-indic.ttf` | 1.3.0 | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
+| `erda-ccby-ethiopic.ttf` | 1.3.0 | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
 
 Die Statistik stammt direkt aus den TTFs:
 

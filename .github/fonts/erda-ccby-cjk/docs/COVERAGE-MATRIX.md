@@ -21,11 +21,11 @@ statistics from the finished `.ttf` files, not on sample text length.
 
 | Font | Required target | v1.3.0 measured result |
 |---|---:|---:|
-| `erda-ccby-cjk.ttf` | >= 3000 CJK Unified Ideographs | 3156 |
-| `erda-ccby-cjk.ttf` | >= 3000 Hangul syllables | 3103 |
+| `erda-ccby-cjk.ttf` | >= 3000 CJK Unified Ideographs | 3194 |
+| `erda-ccby-cjk.ttf` | >= 3000 Hangul syllables | 3118 |
 | `erda-ccby-cjk.ttf` | all assigned Hiragana in U+3040-U+309F | 93/93 |
 | `erda-ccby-cjk.ttf` | all assigned Katakana in U+30A0-U+30FF | 96/96 |
-| `erda-ccby-cjk.ttf` | all CJK-family codepoints in ZH-Hant/JA/KO long sample blocks | pending rebuild |
+| `erda-ccby-cjk.ttf` | all CJK-family codepoints in ZH-Hant/JA/KO long sample blocks | 141/141 |
 | `erda-ccby-indic.ttf` | all assigned Devanagari main codepoints | 128/128 |
 | `erda-ccby-indic.ttf` | all assigned Devanagari Extended codepoints | 32/32 |
 | `erda-ccby-ethiopic.ttf` | all assigned Ethiopic main codepoints | 358/358 |
@@ -38,9 +38,9 @@ statistics from the finished `.ttf` files, not on sample text length.
 
 | Font | ERDA font version | maxp.numGlyphs | cmap codepoints |
 |---|---|---:|---:|
-| `erda-ccby-cjk.ttf` | `1.3.0` | pending rebuild | pending rebuild |
-| `erda-ccby-indic.ttf` | `1.3.0` | pending rebuild | pending rebuild |
-| `erda-ccby-ethiopic.ttf` | `1.3.0` | pending rebuild | pending rebuild |
+| `erda-ccby-cjk.ttf` | `1.3.0` | 6877 | 6876 |
+| `erda-ccby-indic.ttf` | `1.3.0` | 162 | 161 |
+| `erda-ccby-ethiopic.ttf` | `1.3.0` | 525 | 524 |
 
 ## Quality Boundary
 
