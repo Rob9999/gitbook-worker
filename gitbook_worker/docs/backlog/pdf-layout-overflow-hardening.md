@@ -1,11 +1,14 @@
 ---
 title: General PDF overflow hardening for URLs, tables, and code-like lines
-version: 0.2.1
+version: 0.3.0
 date: 2026-05-07
 status: partial
 priority: P2
 labels: [pdf, layout, urls, tables, code]
 history:
+  - version: 0.3.0
+    date: 2026-05-07
+    description: Hardened fvextra code-fence wrapping for Pandoc token groups such as highlighted URL lines.
   - version: 0.2.1
     date: 2026-05-07
     description: Added DE/EN URL-in-code-fence stress samples for PDF wrapping investigation.
@@ -49,6 +52,8 @@ remain relevant for print-quality PDFs.
 
 - `pdf_options.code_block_wrap` enables `fvextra`-based wrapping for Pandoc
   `Highlighting` and plain `verbatim` code environments.
+- Highlighted Pandoc token groups such as `\NormalTok{...}` are wrapped with
+  `breaknonspaceingroup=true` when the installed `fvextra` version supports it.
 - Default is `true`; entries can opt out with `code_block_wrap: false`.
 - DE/EN sample content now includes one semantically wrapped folded YAML scalar
   and one deliberately unwrapped long code-fence line as a regression sample.

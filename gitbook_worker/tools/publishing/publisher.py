@@ -1408,16 +1408,33 @@ def _code_block_wrap_lines(enabled: bool) -> List[str]:
     return [
         r"\IfFileExists{fvextra.sty}{%",
         r"  \usepackage{fvextra}",
+        r"  \makeatletter",
+        r"  \@ifundefined{KV@FV@breaknonspaceingroup}{%",
         (
-            r"  \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
+            r"    \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
             r"{commandchars=\\\{\},breaklines=true,breakanywhere=true,"
             r"breaksymbolleft={},breaksymbolsepleft=0pt}"
         ),
         (
-            r"  \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
+            r"    \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
             r"{breaklines=true,breakanywhere=true,breaksymbolleft={},"
             r"breaksymbolsepleft=0pt}"
         ),
+        r"  }{%",
+        (
+            r"    \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
+            r"{commandchars=\\\{\},breaklines=true,breakanywhere=true,"
+            r"breaknonspaceingroup=true,breaksymbolleft={},"
+            r"breaksymbolsepleft=0pt}"
+        ),
+        (
+            r"    \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
+            r"{breaklines=true,breakanywhere=true,"
+            r"breaknonspaceingroup=true,breaksymbolleft={},"
+            r"breaksymbolsepleft=0pt}"
+        ),
+        r"  }",
+        r"  \makeatother",
         r"}{%",
         (
             "  \\PackageWarning{gitbook-worker}{fvextra.sty not found; "
