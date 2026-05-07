@@ -203,6 +203,10 @@ description: >-
 UNWRAPPED-CODE-FENCE-STRESS: state={{country-code}}; date={{YYYY-MM-dd}}; responsible-editorial-desk={{author}}; legally-accountable-office={{official}}; publication-channel={{distribution-channel}}; review-state={{quality-gate-status}}; checksum={{content-package-sha256}}; distribution-target={{long-form-customer-publication-profile}}
 ```
 
+```text
+URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024/downloads/long-code-fence-url?scenario=stated-policies&region=european-union&format=pdf&checksum={{content-package-sha256}}#executive-summary
+```
+
 ## Tables with Alignment
 
 ### Complex Table

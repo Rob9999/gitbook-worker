@@ -203,6 +203,10 @@ description: >-
 UNWRAPPED-CODE-FENCE-STRESS: staat={{country-code}}; datum={{YYYY-MM-dd}}; verantwortliche-redaktion={{author}}; rechtlich-verantwortliche-stelle={{official}}; ausgabekanal={{distribution-channel}}; pruefstatus={{quality-gate-status}}; pruefsumme={{content-package-sha256}}; zielprofil={{long-form-customer-publication-profile}}
 ```
 
+```text
+URL-CODE-FENCE-STRESS: https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Bevoelkerungsvorausberechnung/_inhalt.html?nn=208696&jahr=2060&variante=moderate-entwicklung&region=deutschland#tabellen-und-grafiken
+```
+
 ## Tabellen mit Ausrichtung
 
 ### Komplexe Tabelle

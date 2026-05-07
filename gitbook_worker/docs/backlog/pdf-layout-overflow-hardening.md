@@ -1,11 +1,14 @@
 ---
 title: General PDF overflow hardening for URLs, tables, and code-like lines
-version: 0.2.0
+version: 0.2.1
 date: 2026-05-07
 status: partial
 priority: P2
 labels: [pdf, layout, urls, tables, code]
 history:
+  - version: 0.2.1
+    date: 2026-05-07
+    description: Added DE/EN URL-in-code-fence stress samples for PDF wrapping investigation.
   - version: 0.2.0
     date: 2026-05-07
     description: Implemented global PDF code-fence wrapping via pdf_options.code_block_wrap; URLs and wide tables remain open.
@@ -49,6 +52,8 @@ remain relevant for print-quality PDFs.
 - Default is `true`; entries can opt out with `code_block_wrap: false`.
 - DE/EN sample content now includes one semantically wrapped folded YAML scalar
   and one deliberately unwrapped long code-fence line as a regression sample.
+- DE/EN sample content also includes one deliberately long URL inside a text
+  code fence to study URL-token behavior without changing customer content.
 
 ## Verification
 
