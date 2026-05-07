@@ -253,9 +253,10 @@ def test_font_header_makes_pandoc_h4_h5_block_headings():
         temp_dir="/tmp/test-font-cache",
     )
 
-    assert "\\titleformat{\\paragraph}[block]" in header
-    assert "\\titlespacing*{\\paragraph}" in header
-    assert "\\titleformat{\\subparagraph}[block]" in header
+    assert "\\renewcommand\\paragraph{\\@startsection{paragraph}{4}" in header
+    assert "{1.5ex \\@plus .2ex}" in header
+    assert "\\renewcommand\\subparagraph{\\@startsection{subparagraph}{5}" in header
+    assert "titlesec" not in header
 
 
 def test_default_fallback_order_keeps_cjk_first(monkeypatch):

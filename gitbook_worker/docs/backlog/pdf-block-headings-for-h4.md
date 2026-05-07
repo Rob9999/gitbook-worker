@@ -11,7 +11,7 @@ history:
     description: Initial anonymized P1 backlog for Pandoc H4 run-in heading behavior.
   - version: 0.2.0
     date: 2026-05-07
-    description: Implemented publisher-generated titlesec block layout for LaTeX paragraph and subparagraph headings.
+    description: Implemented publisher-generated package-free block layout for LaTeX paragraph and subparagraph headings.
 ---
 
 # PDF Block Headings for Markdown H4 and Deeper
@@ -42,9 +42,9 @@ PDF heading layout, not remove source content.
 
 ## Implementation Notes
 
-- Implemented in the publisher-generated LaTeX header with `titlesec` rules for
-  `\paragraph` and `\subparagraph` using block layout and standard bold section
-  styling.
+- Implemented in the publisher-generated LaTeX header with package-free
+  `\@startsection` redefinitions for `\paragraph` and `\subparagraph`, using
+  positive after-skip values so H4/H5 render as block headings.
 - Add a LaTeX header snippet in the publisher-generated header layer.
 - Prefer a minimal `titlesec`-based configuration if compatible with existing
   templates; otherwise use a local `\makeatletter` sectioning redefinition.

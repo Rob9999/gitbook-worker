@@ -1387,11 +1387,18 @@ def _script_font_macro_lines(
 
 def _block_heading_layout_lines() -> List[str]:
     return [
-        "\\usepackage{titlesec}",
-        "\\titleformat{\\paragraph}[block]{\\normalfont\\normalsize\\bfseries}{\\theparagraph}{1em}{}",
-        "\\titlespacing*{\\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}",
-        "\\titleformat{\\subparagraph}[block]{\\normalfont\\normalsize\\bfseries}{\\thesubparagraph}{1em}{}",
-        "\\titlespacing*{\\subparagraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}",
+        "\\makeatletter",
+        (
+            "\\renewcommand\\paragraph{\\@startsection{paragraph}{4}{\\z@}"
+            "{3.25ex \\@plus 1ex \\@minus .2ex}{1.5ex \\@plus .2ex}"
+            "{\\normalfont\\normalsize\\bfseries}}"
+        ),
+        (
+            "\\renewcommand\\subparagraph{\\@startsection{subparagraph}{5}{\\z@}"
+            "{3.25ex \\@plus 1ex \\@minus .2ex}{1.5ex \\@plus .2ex}"
+            "{\\normalfont\\normalsize\\bfseries}}"
+        ),
+        "\\makeatother",
     ]
 
 
