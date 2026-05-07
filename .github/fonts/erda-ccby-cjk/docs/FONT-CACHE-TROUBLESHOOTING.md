@@ -3,9 +3,9 @@ title: ERDA font cache troubleshooting
 version: 1.4.0
 date: 2026-05-07
 history:
-   - version: 1.4.0
-      date: 2026-05-07
-      description: Updated cache-busting examples for ERDA font-family version 1.4.1.
+  - version: 1.4.0
+    date: 2026-05-07
+    description: Updated cache-busting examples for ERDA font-family version 1.4.1.
   - version: 1.3.0
     date: 2026-05-07
     description: Updated cache-busting examples for ERDA font-family version 1.4.0.
