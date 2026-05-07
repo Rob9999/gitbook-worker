@@ -371,6 +371,14 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
             if 0x3040 <= code <= 0x309F:
                 add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
+            # CJK Symbols and Punctuation (U+3000 - U+303F)
+            if 0x3000 <= code <= 0x303F:
+                add_char(char, codepoint_marker_bitmap(char), "generated")
+                continue
+            # Katakana range fallback (U+30A0 - U+30FF)
+            if 0x30A0 <= code <= 0x30FF:
+                add_char(char, codepoint_marker_bitmap(char), "generated")
+                continue
             # CJK Unified Ideographs (U+4E00 - U+9FFF) - common Kanji/Hanzi range
             # This MUST come AFTER the HANZI_KANJI check!
             if 0x4E00 <= code <= 0x9FFF:
