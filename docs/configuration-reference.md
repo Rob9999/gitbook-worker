@@ -1,7 +1,8 @@
 ---
-version: 1.3.0
+version: 1.3.1
 date: 2026-05-07
 history:
+  - "1.3.1: 2026-05-07 — Release reference fuer v2.6.0 Code-Fence-Wrapping aktualisiert"
   - "1.3.0: 2026-05-07 — pdf_options.code_block_wrap fuer PDF-Code-Fence-Wrapping ergaenzt"
   - "1.2.2: 2026-05-07 — Release reference refreshed for v2.4.3; no configuration schema changes"
   - "1.2.1: 2026-05-06 — Release reference refreshed for v2.4.2; no configuration schema changes"
@@ -16,7 +17,7 @@ Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
 
-Hinweis fuer v2.5.x: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
+Hinweis fuer v2.6.0: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das
 LaTeX-Paket in der Umgebung vorhanden ist.
 

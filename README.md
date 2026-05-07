@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.5.0 "Pruefsicher Font Coverage"** · [Release Notes](docs/releases/v2.5.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.6.0 "Zeilenfest"** · [Release Notes](docs/releases/v2.6.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.5.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.6.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -222,6 +222,7 @@ publish:
       toc: true                     # Inhaltsverzeichnis
       toc-depth: 3
       numbersections: true
+      code_block_wrap: true          # lange Code-Fence-Zeilen im PDF umbrechen
       # Hyperlinks
       colorlinks: true
       linkcolor: blue
@@ -315,6 +316,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release-Verlauf</summary>
+
+#### v2.6.0 "Zeilenfest" (7. Mai 2026)
+
+- **Code-Fence-Wrapping im PDF**: `pdf_options.code_block_wrap` bricht lange Codeblock-Zeilen mit `fvextra` um und ist standardmaessig aktiv.
+- **Saubere Sample-Abdeckung**: Deutsche und englische Beispiele enthalten gewrappte und bewusst lange Code-Fence-Stresszeilen.
+- **Repository-Aufraeumung**: Bestandsaufnahme und Kunden-QA-Artefakte liegen in der Engineering-Dokumentation statt im Repo-Root.
+
+→ [docs/releases/v2.6.0.md](docs/releases/v2.6.0.md)
 
 #### v2.5.0 "Pruefsicher Font Coverage" (7. Mai 2026)
 
@@ -510,7 +519,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.5.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.6.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -670,6 +679,7 @@ publish:
       toc: true                     # table of contents
       toc-depth: 3
       numbersections: true
+      code_block_wrap: true          # wrap long code-fence lines in PDFs
       # Hyperlinks
       colorlinks: true
       linkcolor: blue
@@ -763,6 +773,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.6.0 "Zeilenfest" (May 7, 2026)
+
+- **PDF code-fence wrapping**: `pdf_options.code_block_wrap` wraps long code block lines with `fvextra` and is enabled by default.
+- **Sample coverage**: German and English examples now include wrapped and intentionally long code-fence stress lines.
+- **Repository cleanup**: Inventory and customer QA artifacts now live in engineering documentation instead of the repository root.
+
+→ [docs/releases/v2.6.0.md](docs/releases/v2.6.0.md)
 
 #### v2.5.0 "Pruefsicher Font Coverage" (May 7, 2026)
 

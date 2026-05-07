@@ -1,7 +1,8 @@
 ---
-version: 1.3.4
+version: 1.3.5
 date: 2026-05-07
 history:
+  - "1.3.5: 2026-05-07 - PDF-Code-Fence-Wrapping fuer v2.6.0 dokumentiert"
   - "1.3.4: 2026-05-07 - Windows-Font-Stub-Haertung und H4/H5-Blockheadings fuer v2.4.3 dokumentiert"
   - "1.3.3: 2026-05-06 - CJK-Linebreak und ERDA-Script-Font-Routing fuer v2.4.2 dokumentiert"
   - "1.3.2: 2026-05-05 - Dockerfile.dynamic als Release-Pfad und legacy Dockerfile als deprecated dokumentiert"
@@ -148,6 +149,7 @@ publish:
 | `mono_font` | string | Legacy key for mono font (backwards-compatible) |
 | `mainfont_fallback` | string | LuaTeX fallback chain (`;`-separated) |
 | `abort_if_missing_glyph` | bool | Abort on missing glyphs (default: `true`) |
+| `code_block_wrap` | bool | Wrap long PDF code-fence lines via `fvextra` when available (default: `true`) |
 
 All keys not explicitly handled (fonts, toc, lang, header-includes) are passed
 through as Pandoc `-V key=value` arguments, so any valid Pandoc/LaTeX variable

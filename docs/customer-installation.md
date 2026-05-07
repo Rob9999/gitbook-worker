@@ -1,8 +1,9 @@
 ---
-version: 2.0.4
+version: 2.1.0
 date: 2026-05-07
 status: stable
 history:
+  - "2.1.0: 2026-05-07 - Anwenderanleitung fuer v2.6.0 Code-Fence-Wrapping und Release-Smoke aktualisiert"
   - "2.0.4: 2026-05-07 - Anwenderanleitung fuer v2.5.0 Font-Coverage und TTF-Stats-Gate aktualisiert"
   - "2.0.3: 2026-05-07 - Anwenderanleitung fuer v2.4.3 Font-Guard- und H4/H5-Heading-Hotfix aktualisiert"
   - "2.0.2: 2026-05-06 - Anwenderanleitung fuer v2.4.2 Font-Hotfix, CJK-Linebreak und ERDA-Script-Sichtpruefung aktualisiert"
@@ -13,15 +14,15 @@ history:
   - "1.0.0: 2025-12-31 - init"
 ---
 
-# GitBook Worker Anwenderanleitung v2.5.0
+# GitBook Worker Anwenderanleitung v2.6.0
 
 Diese Anleitung ist der zentrale Einstieg fuer Anwenderinnen und Anwender von
-GitBook Worker v2.5.0. Sie beschreibt Installation, Projektstruktur,
+GitBook Worker v2.6.0. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
 Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
-fuer v2.5.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+fuer v2.6.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
 Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
@@ -66,7 +67,7 @@ bleiben beim jeweiligen Projektteam.
 ### Lokal
 
 - Windows, Linux oder macOS.
-- Python 3.10 oder neuer; fuer v2.5.0 ist Python 3.11/3.12 empfohlen.
+- Python 3.10 oder neuer; fuer v2.6.0 ist Python 3.11/3.12 empfohlen.
 - Pandoc.
 - TeX Live mit LuaLaTeX.
 - Zugriff auf die konfigurierten Fonts oder einen erlaubten Downloadpfad.
@@ -103,7 +104,7 @@ python -m pip uninstall -y gitbook-worker tools
 Installation aus einem gelieferten Wheel:
 
 ```powershell
-python -m pip install --force-reinstall dist\gitbook_worker-2.5.0-py3-none-any.whl
+python -m pip install --force-reinstall dist\gitbook_worker-2.6.0-py3-none-any.whl
 ```
 
 Installation direkt aus dem Repository:
@@ -120,7 +121,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip uninstall -y gitbook-worker tools
-python -m pip install --force-reinstall dist/gitbook_worker-2.5.0-py3-none-any.whl
+python -m pip install --force-reinstall dist/gitbook_worker-2.6.0-py3-none-any.whl
 ```
 
 ## 5. Installation pruefen
@@ -134,7 +135,7 @@ python -c "import gitbook_worker, tools; print('version:', gitbook_worker.__vers
 
 Erwartung:
 
-- `version:` zeigt `2.5.0`.
+- `version:` zeigt `2.6.0`.
 - `gitbook_worker:` zeigt in die aktive `.venv` oder in das bewusst installierte
   Repository.
 - `tools shim:` zeigt auf den Kompatibilitaets-Shim aus `gitbook_worker`, nicht
@@ -295,6 +296,7 @@ publish:
       monofont: "DejaVu Sans Mono"
       mainfont_fallback: "Twemoji Mozilla;ERDA CC-BY CJK"
       abort_if_missing_glyph: true
+      code_block_wrap: true
 ```
 
 Die vollstaendige Schluesselreferenz steht in der
@@ -365,12 +367,12 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.5.0` verwenden. `2.4.1`
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.6.0` verwenden. `2.4.1`
   stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
   im Lieferpaket enthalten sind; `2.4.2` ergaenzt den PDF-Font-Hotfix fuer
   CJK-Linebreak und ERDA-Script-Sichtpruefung; `2.4.3` haertet Windows-Font-Stubs
   und PDF-H4/H5-Blockheadings; `2.5.0` ergaenzt echte ERDA-TTF-Coverage-Ziele
-  und das `font_cli.py stats`-Gate.
+  und das `font_cli.py stats`-Gate; `2.6.0` ergaenzt PDF-Code-Fence-Wrapping.
 - `--use-dynamic` ist weiterhin der Release-Pfad fuer dynamische Docker-Builds.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
@@ -429,7 +431,7 @@ Als JSON fuer CI oder Support:
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de\publish\das-sample-buch.pdf --json
 ```
 
-Erwartete Signale fuer v2.5.0:
+Erwartete Signale fuer v2.6.0:
 
 - Der konfigurierte Emoji-Font `Twemoji Mozilla` ist eingebettet.
 - Der konfigurierte CJK-Font `ERDA CC-BY CJK` ist eingebettet.
@@ -540,7 +542,7 @@ Mehr konkrete Fehlerbilder stehen in den [FAQs](FAQs.md).
 
 Empfohlene Reihenfolge:
 
-1. Release Notes lesen: [v2.5.0 Release Notes](releases/v2.5.0.md).
+1. Release Notes lesen: [v2.6.0 Release Notes](releases/v2.6.0.md).
 2. Recovery-Punkt im Projekt setzen, bevor Build- oder Migrationslaeufe starten.
 3. Neue Version in einer sauberen `.venv` installieren.
 4. Importpfade und Version pruefen.
@@ -551,9 +553,9 @@ Empfohlene Reihenfolge:
 9. Optional Docker-Build mit `Dockerfile.dynamic` ausfuehren.
 10. AI-Reference-QA zuerst report-only testen.
 
-## 19. Release-Verifikation v2.5.0
+## 19. Release-Verifikation v2.6.0
 
-Der v2.5.0-Releasekandidat wurde lokal mit diesen Signalen geprueft:
+Der v2.6.0-Releasekandidat wird lokal mit diesen Signalen geprueft:
 
 - ERDA-Font-Stats-Gate: `font_cli.py stats --fail-on-targets` bestanden.
 - ERDA CJK: `maxp.numGlyphs=6824`, `cmap=6823`, 3156 Han- und 3103
@@ -564,9 +566,9 @@ Der v2.5.0-Releasekandidat wurde lokal mit diesen Signalen geprueft:
   Main-/Supplement-/Extended-/Extended-A-/Extended-B-Ziele.
 - Gezielte Font- und Sprachproben-Regressionstests: `16 passed`.
 - Non-slow Test-Suite: `543 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.5.0`.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.6.0`.
 - Wheel-Smoke in frischer virtueller Umgebung: Import aus `site-packages`,
-  Version `2.5.0`, Orchestrator-Hilfe erfolgreich.
+  Version `2.6.0`, Orchestrator-Hilfe erfolgreich.
 - Deutscher und englischer PDF-Build.
 - PDF-Font-Gates fuer Twemoji, ERDA CC-BY CJK, ERDA CC-BY Indic und
   ERDA CC-BY Ethiopic.
