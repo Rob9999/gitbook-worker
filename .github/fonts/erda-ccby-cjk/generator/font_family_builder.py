@@ -76,6 +76,7 @@ def build_bitmap_font(
         glyphs[name] = glyph
         advance_widths[name] = (width, 0)
         cmap[ord(char)] = name
+        logger.track_glyph(name, width)
         logger.track_character(char, info.source)
 
     fb = FontBuilder(EM, isTTF=True)
