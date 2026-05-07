@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import unicodedata
+from pathlib import Path
 from collections.abc import Iterable
 
 CodepointRange = tuple[int, int]
@@ -16,6 +17,19 @@ KATAKANA_RANGES: tuple[CodepointRange, ...] = ((0x30A0, 0x30FF),)
 CJK_PUNCTUATION_RANGES: tuple[CodepointRange, ...] = ((0x3000, 0x303F),)
 FULLWIDTH_RANGES: tuple[CodepointRange, ...] = ((0xFF00, 0xFFEF),)
 HANGUL_SYLLABLE_RANGES: tuple[CodepointRange, ...] = ((0xAC00, 0xD7A3),)
+CJK_TARGET_RANGES: tuple[CodepointRange, ...] = (
+    *CJK_UNIFIED_RANGES,
+    *HIRAGANA_RANGES,
+    *KATAKANA_RANGES,
+    *CJK_PUNCTUATION_RANGES,
+    *FULLWIDTH_RANGES,
+    *HANGUL_SYLLABLE_RANGES,
+)
+CJK_LONG_SAMPLE_MARKERS: tuple[str, ...] = ("ZH-HANT", "JA", "KO")
+CJK_LONG_SAMPLE_CONTENT_PATHS: tuple[Path, ...] = (
+    Path("de/content/examples/language-samples-100.md"),
+    Path("en/content/examples/language-samples-100.md"),
+)
 
 DEVANAGARI_MAIN_RANGES: tuple[CodepointRange, ...] = ((0x0900, 0x097F),)
 DEVANAGARI_EXTENDED_RANGES: tuple[CodepointRange, ...] = ((0xA8E0, 0xA8FF),)
@@ -65,6 +79,47 @@ def first_assigned_chars(ranges: Iterable[CodepointRange], limit: int) -> list[s
     return chars
 
 
+def chars_in_ranges(text: str, ranges: Iterable[CodepointRange]) -> list[str]:
+    """Return unique characters from text whose codepoints fall in ranges."""
+
+    return sorted(
+        {
+            char
+            for char in text
+            if any(start <= ord(char) <= end for start, end in ranges)
+        }
+    )
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[4]
+
+
+def _marked_block(text: str, marker: str) -> str:
+    start = f"<!-- ERDA-LONG-SAMPLE: {marker} START -->"
+    end = f"<!-- ERDA-LONG-SAMPLE: {marker} END -->"
+    if start not in text or end not in text:
+        return ""
+    return text.split(start, 1)[1].split(end, 1)[0]
+
+
+def target_cjk_long_sample_chars() -> list[str]:
+    """Return CJK-family chars used by the 3000-character sample blocks."""
+
+    root = _repo_root()
+    target: set[str] = set()
+    for relative_path in CJK_LONG_SAMPLE_CONTENT_PATHS:
+        path = root / relative_path
+        if not path.exists():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for marker in CJK_LONG_SAMPLE_MARKERS:
+            target.update(
+                chars_in_ranges(_marked_block(text, marker), CJK_TARGET_RANGES)
+            )
+    return sorted(target)
+
+
 def target_cjk_chars() -> list[str]:
     """Return staged 2.5.0 CJK-family target characters.
 
@@ -80,6 +135,7 @@ def target_cjk_chars() -> list[str]:
     target.update(assigned_chars(KATAKANA_RANGES))
     target.update(assigned_chars(CJK_PUNCTUATION_RANGES))
     target.update(assigned_chars(FULLWIDTH_RANGES))
+    target.update(target_cjk_long_sample_chars())
     return sorted(target)
 
 

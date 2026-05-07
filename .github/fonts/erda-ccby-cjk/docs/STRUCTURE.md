@@ -3,6 +3,9 @@ title: ERDA CC-BY CJK font project structure
 version: 1.1.0
 date: 2026-05-07
 history:
+  - version: 1.2.0
+    date: 2026-05-07
+    description: Updated versioning conventions for ERDA font-family v1.3.0.
   - version: 1.1.0
     date: 2026-05-07
     description: Updated versioning conventions for ERDA font-family v1.2.0.
@@ -25,7 +28,7 @@ history:
 ├── 📚 docs/                        # Dokumentation
 │   ├── README-fonts.md            # Ausführliche Font-Dokumentation
 │   ├── VERSIONING.md              # Eigene ERDA-Font-Versionierung
-│   ├── COVERAGE-MATRIX.md         # v1.2.0 TTF-Coverage-Matrix
+│   ├── COVERAGE-MATRIX.md         # v1.3.0 TTF-Coverage-Matrix
 │   ├── LICENSE.txt                # CC BY 4.0 Lizenztext
 │   ├── CODE-REVIEW-REPORT.md      # Code-Review-Bericht
 │   └── FONT-CACHE-TROUBLESHOOTING.md  # Cache-Problem-Lösungen
@@ -147,8 +150,8 @@ fonts:
 - **Emoji** für visuelle Orientierung in README
 
 ### Versionierung
-- Font-Family-Version: `1.2.0` in `generator/font_version.py`
-- OpenType-Version: `Version 1.2.0+YYYYMMDD.HHMMSS` (SemVer + Buildtimestamp)
+- Font-Family-Version: `1.3.0` in `generator/font_version.py`
+- OpenType-Version: `Version 1.3.0+YYYYMMDD.HHMMSS` (SemVer + Buildtimestamp)
 - GitBook-Worker-Font-Konfiguration: `gitbook_worker/defaults/fonts.yml`
   spiegelt die Font-Family-Version je Font-Key (`CJK`, `INDIC`, `ETHIOPIC`).
 - Semantic Versioning fuer ERDA-Font-Releases; Details siehe `docs/VERSIONING.md`.

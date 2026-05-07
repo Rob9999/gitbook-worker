@@ -17,11 +17,13 @@ from coverage_targets import (  # noqa: E402
     CJK_HAN_TARGET,
     CJK_HANGUL_TARGET,
     TARGET_REQUIREMENTS,
+    target_cjk_long_sample_chars,
     target_devanagari_chars,
     target_ethiopic_chars,
 )
 from font_version import ERDA_FONT_VERSION  # noqa: E402
 from font_stats import inspect_font  # noqa: E402
+from synthetic_bitmap import codepoint_marker_bitmap  # noqa: E402
 
 
 @pytest.mark.parametrize("font_name", sorted(TARGET_REQUIREMENTS))
@@ -38,5 +40,16 @@ def test_erda_fonts_meet_release_coverage_targets(font_name: str) -> None:
 def test_release_targets_do_not_claim_impossible_indic_or_ethiopic_counts() -> None:
     assert CJK_HAN_TARGET == 3000
     assert CJK_HANGUL_TARGET == 3000
+    assert len(target_cjk_long_sample_chars()) > 0
     assert len(target_devanagari_chars()) < 3000
     assert len(target_ethiopic_chars()) < 3000
+
+
+def test_generated_marker_glyphs_are_not_filled_rectangles() -> None:
+    bitmap = codepoint_marker_bitmap("檢")
+    rows_with_full_width = [row for row in bitmap if row == "########"]
+    filled_cells = sum(row.count("#") for row in bitmap)
+
+    assert not rows_with_full_width
+    assert filled_cells <= 22
+    assert max(row.count("#") for row in bitmap) <= 4

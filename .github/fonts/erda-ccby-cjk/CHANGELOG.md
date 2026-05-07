@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-05-07 - Sample Block Coverage and Light Markers
+
+### Added
+- CJK long-sample block coverage target for the ZH-Hant, JA and KO
+  3000-character PDF inspection blocks.
+- Stats gate result `cjk_long_sample_blocks` for `erda-ccby-cjk.ttf`.
+- Regression test that generated marker glyphs do not collapse into filled
+  missing-glyph-style rectangles.
+
+### Changed
+- Generated fallback markers now use sparse open-corner patterns instead of
+  full black box borders.
+- `fonts.yml` now reports ERDA generated font version `1.3.0` for `CJK`,
+  `INDIC` and `ETHIOPIC`.
+
+### Fixed
+- Missing CJK codepoints in the ZH-Hant, JA and KO 3000-character PDF
+  inspection blocks.
+
+---
+
 ## [1.2.0] - 2026-05-07 - Coverage Stats and Shared Font Version
 
 ### Added

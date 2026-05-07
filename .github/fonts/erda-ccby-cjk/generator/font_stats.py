@@ -10,7 +10,11 @@ from typing import Iterable
 
 from fontTools.ttLib import TTFont
 
-from coverage_targets import STAT_RANGES, TARGET_REQUIREMENTS
+from coverage_targets import (
+    STAT_RANGES,
+    TARGET_REQUIREMENTS,
+    target_cjk_long_sample_chars,
+)
 
 GENERATOR_DIR = Path(__file__).resolve().parent
 DEFAULT_FONT_DIR = GENERATOR_DIR.parent / "true-type"
@@ -74,6 +78,18 @@ def inspect_font(font_path: Path) -> FontStats:
         )
         for range_name, minimum in requirements.items()
     ]
+    if font_path.name == "erda-ccby-cjk.ttf":
+        sample_codes = {ord(char) for char in target_cjk_long_sample_chars()}
+        if sample_codes:
+            actual_sample_codes = len(sample_codes.intersection(codes))
+            target_results.append(
+                TargetResult(
+                    range_name="cjk_long_sample_blocks",
+                    actual=actual_sample_codes,
+                    minimum=len(sample_codes),
+                    passed=actual_sample_codes == len(sample_codes),
+                )
+            )
 
     return FontStats(
         path=str(font_path),

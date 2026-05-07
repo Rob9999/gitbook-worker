@@ -3,6 +3,9 @@ title: ERDA CC-BY font docs index
 version: 1.1.0
 date: 2026-05-07
 history:
+   - version: 1.2.0
+      date: 2026-05-07
+      description: Updated for ERDA font-family version 1.3.0 and lighter generated markers.
    - version: 1.1.0
       date: 2026-05-07
       description: Updated for independent ERDA font-family version 1.2.0 and TTF coverage matrix.
@@ -23,7 +26,7 @@ released under the Creative Commons Attribution 4.0 International Licence (CC BY
   bitmap patterns into TrueType outlines.
 * `FONT-CACHE-TROUBLESHOOTING.md` – comprehensive guide to Windows font caches
 * `VERSIONING.md` – independent ERDA font-family versioning policy
-* `COVERAGE-MATRIX.md` – measured v1.2.0 TTF coverage targets
+* `COVERAGE-MATRIX.md` – measured v1.3.0 TTF coverage targets
 * `CODE-REVIEW-REPORT.md` – detailed code review and cache issues analysis
 * `clear-all-caches.ps1` – PowerShell script for admin-level cache clearing
 * `test-font-version.html` – HTML page to verify font version and rendering
@@ -69,11 +72,11 @@ options:
 ### ERDA Font Versioning
 
 The ERDA generated fonts have a semantic font-family version independent from
-the GitBook Worker package version. Current font version: **1.2.0**.
+the GitBook Worker package version. Current font version: **1.3.0**.
 
 Every build writes a cache-busting OpenType version string:
-- **Format:** `Version 1.2.0+YYYYMMDD.HHMMSS`
-- **Example:** `Version 1.2.0+20260507.135430`
+- **Format:** `Version 1.3.0+YYYYMMDD.HHMMSS`
+- **Example:** `Version 1.3.0+20260507.135430`
 - **Purpose:** keep a stable font release version while forcing font caches to
   notice rebuilt TTF files
 - **Benefit:** CJK, Indic and Ethiopic subfonts now report one shared ERDA font
@@ -102,7 +105,7 @@ The font includes support for:
 - **Punctuation**: CJK and ASCII punctuation marks
 - **ASCII**: Basic Latin characters (fallback placeholders)
 
-For the measured v1.2.0 TTF targets, see [COVERAGE-MATRIX.md](COVERAGE-MATRIX.md).
+For the measured v1.3.0 TTF targets, see [COVERAGE-MATRIX.md](COVERAGE-MATRIX.md).
 
 ### Font Cache Management (Enhanced) 🔧 NEW!
 
