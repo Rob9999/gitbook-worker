@@ -37,6 +37,7 @@ class FontBuildLogger:
                 "hanzi": 0,
                 "punctuation": 0,
                 "fallback": 0,
+                "generated": 0,
                 "devanagari": 0,
                 "ethiopic": 0,
             },

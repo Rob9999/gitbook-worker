@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 from ethiopic import ETHIOPIC
+from coverage_targets import target_ethiopic_chars
 from font_family_builder import build_bitmap_font, resolve_bitmap
 from font_logger import FontBuildLogger
 
@@ -18,6 +19,7 @@ OUTPUT_PATH = ROOT.parent / "true-type" / "erda-ccby-ethiopic.ttf"
 
 def collect_ethiopic_chars() -> list[str]:
     required: set[str] = set(ETHIOPIC.keys())
+    required.update(target_ethiopic_chars())
     for md in DATASET_DIR.glob("*.md"):
         text = md.read_text(encoding="utf-8")
         for ch in text:

@@ -1,8 +1,11 @@
 ---
 title: CJK linebreaking and ERDA font metrics
-version: 0.3.0
+version: 0.4.0
 date: 2026-05-07
 history:
+  - version: 0.4.0
+    date: 2026-05-07
+    description: Connected the v2.5.0 staged font coverage targets and stats gate to this backlog.
   - version: 0.3.0
     date: 2026-05-07
     description: Added anonymized customer verification that v2.4.2 fixes the inspected CJK margin overflow and identified regression-gate follow-up.
@@ -71,5 +74,10 @@ Anonymisierter Repro-Text:
   machbar und ueblich, ersetzt aber fuer Chinesisch/Japanisch/Koreanisch keinen
   vollwertigen Satzfont mit sauberem Kerning, Metriken, Hinting und
   Linebreaking-Testabdeckung.
+- v2.5.0 setzt den ersten gestuften Fallback-Slice um: mindestens 3000
+  CJK-Han-Glyphen, mindestens 3000 Hangul-Glyphen, vollstaendige Kana-Ziele
+  sowie vollstaendige Devanagari-/Ethiopic-Ziele innerhalb der unterstuetzten
+  Unicode-Bloecke. Die Matrix steht in
+  [../architecture/erda-font-coverage-matrix.md](../architecture/erda-font-coverage-matrix.md).
 - Overfull-HBox-Loggate fuer CJK-Abschnitte pruefen, sobald eine stabile
   Baseline existiert.

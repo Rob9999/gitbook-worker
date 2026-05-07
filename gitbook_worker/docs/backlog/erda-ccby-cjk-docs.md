@@ -1,8 +1,11 @@
 ---
 title: ERDA CC-BY CJK Dokumentation & Coverage-Backlog
-version: 0.1.0
-date: 2025-12-25
+version: 0.2.0
+date: 2026-05-07
 history:
+  - version: 0.2.0
+    date: 2026-05-07
+    description: Linked the v2.5.0 coverage matrix and stats command.
   - version: 0.1.0
     date: 2025-12-25
     description: Erstfassung der Doku-Lücken zu ERDA CC-BY CJK und Fallbacknutzung.
@@ -19,7 +22,11 @@ Die Dokumentation der ERDA CC-BY CJK-Schrift so erweitern, dass Lizenz, Beschaff
 - **Known-Limitations Abschnitt**: Klar festhalten, welche Skripte aktuell nicht unterstützt sind, bis ein vollständiger Font vorliegt.
 
 # Maßnahmenvorschläge
-- Coverage-Scan mit `luaotfload-tool --inspect` oder `pyftsubset`/`ttx` fahren und Ergebnis tabellarisch dokumentieren.
-- Falls Coverage unvollständig: neues, lizenziertes Font-File beschaffen (kein Noto), Prüfsumme/Version in docs festhalten und `fonts-storage` aktualisieren.
+- Coverage-Scan mit `font_cli.py stats --fail-on-targets` fahren und Ergebnis
+  tabellarisch dokumentieren; intern nutzt das Tool `fontTools.ttLib.TTFont`.
+- v2.5.0-Matrix pflegen: [../architecture/erda-font-coverage-matrix.md](../architecture/erda-font-coverage-matrix.md).
+- Falls Coverage jenseits der v2.5.0-Fallbackziele unzureichend ist: neues,
+  lizenziertes Font-File beschaffen (kein Noto), Prüfsumme/Version in docs
+  festhalten und `fonts-storage` aktualisieren.
 - README/Howto für ERDA-Fonts ergänzen (Downloadpfad, Konfiguration, Testaufruf `lualatex -halt-on-error the-erda-book-nohyper-nolua.tex`).
 - Regressionstest (Smoke) in CI (PyTest oder minimaler LaTeX-Lauf) ergänzen, der auf fehlende Glyphen prüft und den richtigen Fallback meldet.

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Iterable
 
 from devanagari import DEVANAGARI, DEVANAGARI_EXTENDED
+from coverage_targets import target_devanagari_chars
 from font_family_builder import build_bitmap_font, resolve_bitmap
 from font_logger import FontBuildLogger
 
@@ -26,6 +27,7 @@ def collect_devanagari_chars() -> list[str]:
                 required.add(ch)
     required.update(DEVANAGARI.keys())
     required.update(DEVANAGARI_EXTENDED.keys())
+    required.update(target_devanagari_chars())
     return sorted(required)
 
 

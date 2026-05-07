@@ -1,7 +1,8 @@
 ---
-version: 1.0.2
+version: 1.0.3
 date: 2026-05-07
 history:
+	- "1.0.3: 2026-05-07 - Anwenderdokumentationsindex fuer v2.5.0 Font-Coverage aktualisiert"
 	- "1.0.2: 2026-05-07 - Anwenderdokumentationsindex fuer v2.4.3 aktualisiert"
 	- "1.0.1: 2026-05-06 - Anwenderdokumentationsindex fuer v2.4.2 aktualisiert"
 	- "1.0.0: 2026-05-05 - Anwenderdokumentationsindex fuer v2.4.0 angelegt"
@@ -13,7 +14,7 @@ Diese Seite buendelt die Anwenderdokumentation fuer GitBook Worker.
 
 ## Start Here
 
-- [GitBook Worker Anwenderanleitung v2.4.3](customer-installation.md) - zentrale Installation-, Betriebs- und Supportanleitung.
+- [GitBook Worker Anwenderanleitung v2.5.0](customer-installation.md) - zentrale Installation-, Betriebs- und Supportanleitung.
 - [Configuration Reference](configuration-reference.md) - vollstaendige Referenz der unterstuetzten Konfigurationsschluessel.
 - [Frequently Asked Questions](FAQs.md) - konkrete Fehlerbilder und schnelle Loesungen.
 - [Release Notes](releases/README.md) - versionsbezogene Aenderungen und Upgrade-Hinweise.

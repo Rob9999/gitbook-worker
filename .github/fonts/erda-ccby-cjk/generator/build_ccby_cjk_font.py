@@ -38,7 +38,9 @@ from hanzi import HANZI_KANJI
 from punctuation import PUNCTUATION
 from hiragana import HIRAGANA
 from devanagari import DEVANAGARI, DEVANAGARI_EXTENDED
+from coverage_targets import CJK_HAN_TARGET, CJK_HANGUL_TARGET, target_cjk_chars
 from font_logger import FontBuildLogger
+from synthetic_bitmap import codepoint_marker_bitmap
 
 # Import character index for fast O(1) lookups
 from character_index import get_character_index
@@ -286,6 +288,18 @@ for char in PUNCTUATION.keys():
         punct_added += 1
 print(f"✓ After PUNCTUATION: {len(REQUIRED_CHARS)} characters (+{punct_added})")
 
+# Source 7: staged v2.5.0 fallback coverage targets
+coverage_added = 0
+for char in target_cjk_chars():
+    if char not in REQUIRED_CHARS:
+        REQUIRED_CHARS.append(char)
+        coverage_added += 1
+print(
+    "✓ After staged CJK coverage targets: "
+    f"{len(REQUIRED_CHARS)} characters (+{coverage_added}; "
+    f"Han target={CJK_HAN_TARGET}, Hangul target={CJK_HANGUL_TARGET})"
+)
+
 REQUIRED_CHARS.sort()
 
 print("=" * 70)
@@ -355,77 +369,24 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
 
             # Hiragana range fallback (U+3040 - U+309F)
             if 0x3040 <= code <= 0x309F:
-                # Simple placeholder for Hiragana not explicitly defined
-                hiragana_placeholder = [
-                    "..####..",
-                    ".#....#.",
-                    "#......#",
-                    "#......#",
-                    "#......#",
-                    "#......#",
-                    ".#....#.",
-                    "..####..",
-                ]
-                add_char(char, hiragana_placeholder, "fallback")
+                add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
             # CJK Unified Ideographs (U+4E00 - U+9FFF) - common Kanji/Hanzi range
             # This MUST come AFTER the HANZI_KANJI check!
             if 0x4E00 <= code <= 0x9FFF:
-                # Simple placeholder for CJK Ideographs not explicitly defined
-                cjk_placeholder = [
-                    "########",
-                    "#......#",
-                    "#..##..#",
-                    "#..##..#",
-                    "#..##..#",
-                    "#......#",
-                    "########",
-                    "........",
-                ]
-                add_char(char, cjk_placeholder, "fallback")
+                add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
             # Simple fallback for ASCII and other characters - use a placeholder
             if 0x0021 <= code <= 0x007E:  # ASCII printable range
-                # Simple placeholder for now
-                placeholder = [
-                    "..####..",
-                    ".#....#.",
-                    ".#....#.",
-                    ".#....#.",
-                    ".#....#.",
-                    ".#....#.",
-                    ".#....#.",
-                    "..####..",
-                ]
-                add_char(char, placeholder, "fallback")
+                add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
             # Numbers 0-9
             if 0x0030 <= code <= 0x0039:
-                number_placeholder = [
-                    "..####..",
-                    ".##..##.",
-                    "#....#.#",
-                    "#....#.#",
-                    "#....#.#",
-                    "#....#.#",
-                    ".##..##.",
-                    "..####..",
-                ]
-                add_char(char, number_placeholder, "fallback")
+                add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
             # Fullwidth forms (U+FF00 - U+FFEF) - commonly used in CJK text
             if 0xFF00 <= code <= 0xFFEF:
-                fullwidth_placeholder = [
-                    "..####..",
-                    ".#....#.",
-                    "#......#",
-                    "#......#",
-                    "#......#",
-                    "#......#",
-                    ".#....#.",
-                    "..####..",
-                ]
-                add_char(char, fullwidth_placeholder, "fallback")
+                add_char(char, codepoint_marker_bitmap(char), "generated")
                 continue
             logger.error(f"Unsupported character {char!r} (U+{code:04X})")
             raise ValueError(f"Unsupported character {char!r} (U+{code:04X})")

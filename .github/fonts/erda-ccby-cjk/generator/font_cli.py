@@ -11,6 +11,7 @@ This CLI provides commands for managing the ERDA CJK font development workflow:
 Usage:
     python font_cli.py analyze [--dataset PATH]
     python font_cli.py coverage [--dataset PATH]
+    python font_cli.py stats [--font PATH] [--fail-on-targets]
     python font_cli.py generate [--install] [--refresh-cache]
     python font_cli.py build [--install] [--refresh-cache]  # Alias for generate
 """
@@ -338,6 +339,34 @@ class FontCLI:
             traceback.print_exc()
             return 1
 
+    def stats(
+        self,
+        font_paths: list[Path] | None = None,
+        json_output: bool = False,
+        fail_on_targets: bool = False,
+    ) -> int:
+        """Inspect generated TTF files and print glyph/coverage statistics."""
+
+        import json
+
+        from font_stats import (
+            default_font_paths,
+            format_stats,
+            inspect_font,
+            stats_to_dict,
+        )
+
+        paths = font_paths or default_font_paths()
+        stats_items = [inspect_font(path) for path in paths]
+        if json_output:
+            print(json.dumps([stats_to_dict(stats) for stats in stats_items], indent=2))
+        else:
+            print(format_stats(stats_items))
+
+        if fail_on_targets and not all(stats.passed_targets for stats in stats_items):
+            return 1
+        return 0
+
 
 def main():
     """Main CLI entry point."""
@@ -351,6 +380,9 @@ Examples:
 
   # Check coverage of current font implementation
   python font_cli.py coverage
+
+    # Inspect generated TTF glyph counts and release targets
+    python font_cli.py stats --fail-on-targets
 
   # Generate and install font with cache refresh
   python font_cli.py generate --install --refresh-cache
@@ -381,6 +413,23 @@ Examples:
         "--dataset",
         type=str,
         help="Path to dataset directory (default: ../dataset/)",
+    )
+
+    # Stats command
+    stats_parser = subparsers.add_parser(
+        "stats", help="Inspect generated TTF glyph counts and release targets"
+    )
+    stats_parser.add_argument(
+        "--font",
+        action="append",
+        type=Path,
+        help="TTF path to inspect; repeatable. Defaults to ../true-type/*.ttf",
+    )
+    stats_parser.add_argument("--json", action="store_true", help="Print JSON output")
+    stats_parser.add_argument(
+        "--fail-on-targets",
+        action="store_true",
+        help="Return exit code 1 if a known ERDA font misses release targets",
     )
 
     # Generate command
@@ -422,6 +471,13 @@ Examples:
         elif args.command == "coverage":
             dataset_path = Path(args.dataset) if args.dataset else None
             return cli.coverage(dataset_path)
+
+        elif args.command == "stats":
+            return cli.stats(
+                font_paths=args.font,
+                json_output=args.json,
+                fail_on_targets=args.fail_on_targets,
+            )
 
         elif args.command in ("generate", "build"):
             return cli.generate(install=args.install, refresh_cache=args.refresh_cache)

@@ -1,8 +1,11 @@
 ---
 title: ERDA CC-BY CJK glyph coverage gap
-version: 0.1.0
-date: 2025-12-25
+version: 0.2.0
+date: 2026-05-07
 history:
+  - version: 0.2.0
+    date: 2026-05-07
+    description: Attached the v2.5.0 staged fallback coverage implementation and TTF stats gate.
   - version: 0.1.0
     date: 2025-12-25
     description: Captured missing-glyph findings after LuaLaTeX fallback tests.
@@ -23,6 +26,21 @@ history:
 - Ohne vollwertige Ersatzschrift drohen Workarounds mit ungeprüften Fonts oder Rückfall auf Noto (widerspricht Vorgaben).
 
 # Nächste Schritte
-- Beschaffen/prüfen einer ERDA CC-BY CJK-Version mit voller CJK/RTL/Indic/Abugida-Abdeckung **oder** zugelassene Zusatz-Fallbacks (nicht Noto) definieren.
-- Nach Austausch: `fonts.yml` und LaTeX-Fallbackkette auf neue Datei verweisen; kurze HarfBuzz-Regressionstests (`lualatex` smoke) ergänzen.
-- Dokumentierte Coverage-Matrix (Unicode-Blöcke, Lizenz) in die Schrift-Dokumentation aufnehmen und auf diese Backlog-Notiz verlinken.
+- v2.5.0 setzt gestufte Fallback-Coverage im ERDA-Generator um:
+  `erda-ccby-cjk.ttf` erhaelt Release-Ziele fuer mindestens 3000 Han- und
+  3000 Hangul-Glyphen sowie vollstaendige Kana-Blockabdeckung.
+- `erda-ccby-indic.ttf` und `erda-ccby-ethiopic.ttf` werden nicht kuenstlich
+  auf 3000 behauptete Glyphen gebracht. Stattdessen zaehlen die Release-Ziele
+  alle zugeordneten Codepoints der unterstuetzten Devanagari- bzw. Ethiopic-
+  Unicode-Bloecke; diese Bloecke enthalten weniger als 3000 Zeichen.
+- `font_cli.py stats --fail-on-targets` prueft fertige TTFs ueber
+  `fontTools.ttLib.TTFont` und trennt damit Sample-Textlaenge von echter
+  Font-Coverage.
+- Dokumentierte Coverage-Matrix: [../architecture/erda-font-coverage-matrix.md](../architecture/erda-font-coverage-matrix.md).
+
+# Rest-Risiko
+
+Die v2.5.0-Fallbackglyphen sind sichtbar, lizenziert und maschinell zaehlbar,
+aber noch kein vollwertiger Satzfont. Fuer echte Schriftqualitaet bleiben
+separates Glyphdesign, Metriken, Hinting, Kerning und shaping-spezifische
+Regressionen erforderlich.

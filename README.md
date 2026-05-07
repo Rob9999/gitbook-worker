@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.4.3 "Pruefsicher Font Guard Hotfix"** · [Release Notes](docs/releases/v2.4.3.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.5.0 "Pruefsicher Font Coverage"** · [Release Notes](docs/releases/v2.5.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.4.3-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.5.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -314,6 +314,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.5.0 "Pruefsicher Font Coverage" (7. Mai 2026)
+
+- **Echte TTF-Coverage-Ziele**: ERDA CJK prueft jetzt mindestens 3000 Han- und 3000 Hangul-Glyphen sowie vollstaendige Kana-Ziele.
+- **Indic/Ethiopic sauber abgegrenzt**: Devanagari und Ethiopic werden als vollstaendige unterstuetzte Unicode-Bloecke geprueft, nicht als fachlich falsche 3000-Glyphen-Behauptung.
+- **Font-Stats-Gate**: `font_cli.py stats --fail-on-targets` misst `maxp.numGlyphs`, `cmap`-Codepoints und per-Script-Range-Coverage direkt aus den TTFs.
+
+→ [docs/releases/v2.5.0.md](docs/releases/v2.5.0.md)
+
 #### v2.4.3 "Pruefsicher Font Guard Hotfix" (7. Mai 2026)
 
 - **Windows-Font-Stubs gehaertet**: Defekte lokale ERDA Indic/Ethiopic Font-Stubs werden nicht mehr ueber LaTeX-Family-Probes aktiviert.
@@ -500,7 +508,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.4.3-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.5.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -751,6 +759,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.5.0 "Pruefsicher Font Coverage" (May 7, 2026)
+
+- **Real TTF coverage targets**: ERDA CJK now checks at least 3000 Han and 3000 Hangul glyphs plus complete Kana targets.
+- **Indic/Ethiopic bounded correctly**: Devanagari and Ethiopic are checked as complete supported Unicode blocks, not as a misleading 3000-glyph claim.
+- **Font stats gate**: `font_cli.py stats --fail-on-targets` reads `maxp.numGlyphs`, `cmap` codepoints and per-script range coverage directly from the TTFs.
+
+→ [docs/releases/v2.5.0.md](docs/releases/v2.5.0.md)
 
 #### v2.4.3 "Pruefsicher Font Guard Hotfix" (May 7, 2026)
 

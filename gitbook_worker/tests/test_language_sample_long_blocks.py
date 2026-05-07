@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 MIN_SCRIPT_CHARACTERS = 3000
 
@@ -47,15 +46,22 @@ def _extract_marked_block(sample_text: str, block_id: str) -> str:
     return matches[0]
 
 
-def _count_script_characters(sample_text: str, unicode_ranges: tuple[tuple[int, int], ...]) -> int:
+def _count_script_characters(
+    sample_text: str, unicode_ranges: tuple[tuple[int, int], ...]
+) -> int:
     return sum(
         1
         for character in sample_text
-        if any(range_start <= ord(character) <= range_end for range_start, range_end in unicode_ranges)
+        if any(
+            range_start <= ord(character) <= range_end
+            for range_start, range_end in unicode_ranges
+        )
     )
 
 
-@pytest.mark.parametrize("sample_path", SAMPLE_FILES, ids=lambda sample_path: sample_path.parent.parent.name)
+@pytest.mark.parametrize(
+    "sample_path", SAMPLE_FILES, ids=lambda sample_path: sample_path.parent.parent.name
+)
 @pytest.mark.parametrize("block_id, unicode_ranges", SCRIPT_RANGES.items())
 def test_language_samples_keep_long_erda_font_blocks(
     sample_path: Path,

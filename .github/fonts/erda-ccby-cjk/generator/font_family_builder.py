@@ -12,6 +12,7 @@ from fontTools.ttLib.tables.O_S_2f_2 import Panose
 from character_index import CharacterInfo, get_character_index
 from config import get_config
 from font_logger import FontBuildLogger
+from synthetic_bitmap import codepoint_marker_bitmap
 
 CONFIG = get_config()
 EM = CONFIG.grid.em
@@ -114,4 +115,12 @@ def build_bitmap_font(
 
 def resolve_bitmap(char: str) -> CharacterInfo | None:
     index = get_character_index()
-    return index.lookup(char)
+    info = index.lookup(char)
+    if info is not None:
+        return info
+    return CharacterInfo(
+        char=char,
+        bitmap=codepoint_marker_bitmap(char),
+        source="generated",
+        sub_source="codepoint-marker",
+    )
