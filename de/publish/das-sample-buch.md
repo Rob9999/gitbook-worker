@@ -1274,6 +1274,19 @@ if __name__ == "__main__":
     print(gruesse("Welt"))
 ```
 
+### Lange Code-Fence-Zeilen umbrechen
+
+```yaml
+description: >-
+  Staat: {{country-code}}, Datum: {{YYYY-MM-dd}}, verantwortliche Redaktion:
+  {{author}}, rechtlich verantwortliche Stelle: {{official}}, Ausgabekanal:
+  {{distribution-channel}}, Pruefstatus: {{quality-gate-status}}
+```
+
+```text
+UNWRAPPED-CODE-FENCE-STRESS: staat={{country-code}}; datum={{YYYY-MM-dd}}; verantwortliche-redaktion={{author}}; rechtlich-verantwortliche-stelle={{official}}; ausgabekanal={{distribution-channel}}; pruefstatus={{quality-gate-status}}; pruefsumme={{content-package-sha256}}; zielprofil={{long-form-customer-publication-profile}}
+```
+
 ## Tabellen mit Ausrichtung
 
 ### Komplexe Tabelle
