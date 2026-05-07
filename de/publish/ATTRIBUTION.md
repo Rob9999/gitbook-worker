@@ -4,14 +4,14 @@ This file is generated from the configured fonts registry.
 
 - Source: `C:/gitbook-worker/gitbook_worker/defaults/fonts.yml`
 - Fonts config version: `1.0.0`
-- Generated (UTC): `2026-05-07T15:35:45+00:00Z`
+- Generated (UTC): `2026-05-07T16:10:53+00:00Z`
 
 | Asset | Version | License | Copyright | Source | Notes |
 |---|---:|---|---|---|---|
-| ERDA CC-BY CJK | 1.3.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
+| ERDA CC-BY CJK | 1.4.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
 | Twemoji Mozilla | 0.7.0 | [CC BY 4.0](LICENSE-CC-BY-4.0) |  | https://github.com/mozilla/twemoji-colr | COLR/CPAL color font with native LuaTeX support. Stored locally in fonts-storage/twemoji-colr/. |
-| ERDA CC-BY Ethiopic | 1.3.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
-| ERDA CC-BY Indic | 1.3.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
+| ERDA CC-BY Ethiopic | 1.4.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
+| ERDA CC-BY Indic | 1.4.0 | [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE-CC-BY-4.0) |  |  |  |
 | DejaVu Sans Mono | 2.37 | [Bitstream Vera License + Public Domain](LICENSE-BITSTREAM-VERA) | © 2003 Bitstream, Inc.; DejaVu changes are in public domain | https://dejavu-fonts.github.io/ | Font files may not be sold separately. Embedding in documents (PDF) is unrestricted. |
 | DejaVu Sans | 2.37 | [Bitstream Vera License + Public Domain](LICENSE-BITSTREAM-VERA) | © 2003 Bitstream, Inc.; DejaVu changes are in public domain | https://dejavu-fonts.github.io/ | Font files may not be sold separately. Embedding in documents (PDF) is unrestricted. |
 | DejaVu Serif | 2.37 | [Bitstream Vera License + Public Domain](LICENSE-BITSTREAM-VERA) | © 2003 Bitstream, Inc.; DejaVu changes are in public domain | https://dejavu-fonts.github.io/ | Font files may not be sold separately. Embedding in documents (PDF) is unrestricted. |
