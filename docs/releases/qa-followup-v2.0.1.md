@@ -8,7 +8,7 @@ history:
 
 # QA Follow-up for v2.0.1
 
-**Source report**: [qa-customer-feedback/qa-report-gitbook-worker-2.0.0.md](qa-customer-feedback/qa-report-gitbook-worker-2.0.0.md)
+**Source report**: [gitbook_worker/docs/qa/customer-feedback/customer-001/qa-report-gitbook-worker-2.0.0.md](../../gitbook_worker/docs/qa/customer-feedback/customer-001/qa-report-gitbook-worker-2.0.0.md)
 
 ## Issues reported
 - Orchestrator resolved repo root to site-packages and missed `tools/`/`pipeline.py` → steps skipped.
@@ -23,5 +23,5 @@ history:
 - Release notes updated with pip-only usage and dry-run guidance.
 
 ## Status
-- Addressed in release v2.0.1 (see [docs/releases/v2.0.1.md](docs/releases/v2.0.1.md)).
+- Addressed in release v2.0.1 (see [docs/releases/v2.0.1.md](v2.0.1.md)).
 - Remaining risk: Font cache-dependent pandoc tests are skipped unless LuaTeX cache is populated; see `gitbook_worker/docs/attentions/lua-font-cache.md`.

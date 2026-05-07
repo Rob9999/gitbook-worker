@@ -309,6 +309,8 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 | Dokumenttypen konfigurieren | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
 | Handbuch (Referenz) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
 | Font-Architektur | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
+| Engineering-Bestandsaufnahme | [gitbook_worker/docs/inventory/repository-inventory.md](gitbook_worker/docs/inventory/repository-inventory.md) |
+| Kunden-QA-Archiv | [gitbook_worker/docs/qa/customer-feedback/README.md](gitbook_worker/docs/qa/customer-feedback/README.md) |
 | Konfigurationsreferenz | [docs/configuration-reference.md](docs/configuration-reference.md) |
 
 <details>
@@ -755,6 +757,8 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 | Configuring Document Types | [docs/Configure-Doc-Types.md](docs/Configure-Doc-Types.md) |
 | Handbook (Reference) | [docs/HANDBOOK.md](docs/HANDBOOK.md) |
 | Font Architecture | [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/docs/architecture/smart-font-stack.md) |
+| Engineering Inventory | [gitbook_worker/docs/inventory/repository-inventory.md](gitbook_worker/docs/inventory/repository-inventory.md) |
+| Customer QA Archive | [gitbook_worker/docs/qa/customer-feedback/README.md](gitbook_worker/docs/qa/customer-feedback/README.md) |
 | Configuration Reference | [docs/configuration-reference.md](docs/configuration-reference.md) |
 
 <details>

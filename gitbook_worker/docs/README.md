@@ -6,6 +6,11 @@ history: Documented PDF font fallback reporting/abort semantics for developers.
 
 # Developer Docs
 
+## Navigation
+
+- [Repository inventory and outlook](inventory/repository-inventory.md)
+- [Customer QA feedback archive](qa/customer-feedback/README.md)
+
 ## PDF font fallback behavior
 
 1. Missing glyph detection and reporting

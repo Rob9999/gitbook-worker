@@ -1,8 +1,9 @@
----
-version: 1.0.0
-date: 2026-05-04
+﻿---
+version: 1.1.0
+date: 2026-05-07
 status: inventory
 history:
+  - "1.1.0: 2026-05-07 - Nach v2.5.0 aktualisiert und aus dem Repository-Root in die Engineering-Dokumentation verschoben"
   - "1.0.0: 2026-05-04 - Erste komplette Bestandsaufnahme des Repository-Standes v2.3.0"
 ---
 
@@ -17,34 +18,36 @@ Konfigurationen, automatischer PDF-Erzeugung via Pandoc und LuaLaTeX,
 Font-Lizenz-Compliance, Emoji-/Fallback-Font-Unterstuetzung, Docker-faehigen
 Builds und CI-gestuetzter Qualitaetssicherung.
 
-Der Stand des Repos ist v2.3.0 "Pfadtreu". Die Release-Linie adressiert vor
-allem stabile Pfadauflosung bei Einzeldatei-Publishing, explizite Steuerung des
-GitBook-Rename-Schritts und robustere Font-Fallbacks. Die Codebasis wirkt
-funktional breit, dokumentiert und testnah, hat aber einige sichtbar offene
-Kanten bei CI-Pfaden, Packaging-Metadaten und der weiteren Konsolidierung der
-historisch gewachsenen Dokumentation.
+Der Stand des Repos ist v2.5.0 "Pruefsicher Font Coverage". Die aktuelle
+Release-Linie hat die zuvor offenen Font-Coverage-Themen deutlich nachgezogen:
+ERDA CJK/Indic/Ethiopic besitzen eigene Versionierung, TTF-Statistik-Gates,
+vollstaendige Langtext-Abschnittsabdeckung fuer die PDF-Pruefbloecke und
+sichtbarere generierte Marker-Glyphen. Die Codebasis wirkt funktional breit,
+dokumentiert und testnah; die naechste professionelle Schaerfung liegt weniger
+in neuen Features als in Root-Aufraeumung, konsistenter Doku-Ablage und dem
+Abbau historisch gewachsener Suchtreffer.
 
 ## Datenbasis dieser Aufnahme
 
 Geprueft wurden insbesondere:
 
-- [README.md](README.md)
-- [setup.cfg](setup.cfg)
-- [pyproject.toml](pyproject.toml)
-- [content.yaml](content.yaml)
-- [de/publish.yml](de/publish.yml)
-- [en/publish.yml](en/publish.yml)
-- [docs/HANDBOOK.md](docs/HANDBOOK.md)
-- [docs/configuration-reference.md](docs/configuration-reference.md)
-- [docs/releases/v2.3.0.md](docs/releases/v2.3.0.md)
-- [gitbook_worker/__init__.py](gitbook_worker/__init__.py)
-- [gitbook_worker/defaults/fonts.yml](gitbook_worker/defaults/fonts.yml)
-- [gitbook_worker/defaults/smart.yml](gitbook_worker/defaults/smart.yml)
-- [gitbook_worker/defaults/docker_config.yml](gitbook_worker/defaults/docker_config.yml)
-- [gitbook_worker/tools/workflow_orchestrator/orchestrator.py](gitbook_worker/tools/workflow_orchestrator/orchestrator.py)
-- [gitbook_worker/tools/publishing/fonts_cli.py](gitbook_worker/tools/publishing/fonts_cli.py)
-- [.github/workflows/orchestrator.yml](.github/workflows/orchestrator.yml)
-- [.github/workflows/test.yml](.github/workflows/test.yml)
+- [README.md](../../../README.md)
+- [setup.cfg](../../../setup.cfg)
+- [pyproject.toml](../../../pyproject.toml)
+- [content.yaml](../../../content.yaml)
+- [de/publish.yml](../../../de/publish.yml)
+- [en/publish.yml](../../../en/publish.yml)
+- [docs/HANDBOOK.md](../../../docs/HANDBOOK.md)
+- [docs/configuration-reference.md](../../../docs/configuration-reference.md)
+- [docs/releases/v2.5.0.md](../../../docs/releases/v2.5.0.md)
+- [gitbook_worker/__init__.py](../../../gitbook_worker/__init__.py)
+- [gitbook_worker/defaults/fonts.yml](../../../gitbook_worker/defaults/fonts.yml)
+- [gitbook_worker/defaults/smart.yml](../../../gitbook_worker/defaults/smart.yml)
+- [gitbook_worker/defaults/docker_config.yml](../../../gitbook_worker/defaults/docker_config.yml)
+- [gitbook_worker/tools/workflow_orchestrator/orchestrator.py](../../../gitbook_worker/tools/workflow_orchestrator/orchestrator.py)
+- [gitbook_worker/tools/publishing/fonts_cli.py](../../../gitbook_worker/tools/publishing/fonts_cli.py)
+- [.github/workflows/orchestrator.yml](../../../.github/workflows/orchestrator.yml)
+- [.github/workflows/test.yml](../../../.github/workflows/test.yml)
 
 Zusaetzlich wurde die sichtbare Datei- und Teststruktur ueber die VS-Code-Suche
 inventarisiert. Zum Zeitpunkt dieser Aufnahme waren keine uncommitted Changes im
@@ -98,8 +101,8 @@ Die aktuell verdrahteten Orchestrator-Schritte sind:
 
 ### 3. Profilbasierte Build-Pipeline
 
-Die Sprachmanifeste [de/publish.yml](de/publish.yml) und
-[en/publish.yml](en/publish.yml) definieren drei zentrale Profile:
+Die Sprachmanifeste [de/publish.yml](../../../de/publish.yml) und
+[en/publish.yml](../../../en/publish.yml) definieren drei zentrale Profile:
 
 - `default`: komplette Orchestrator-Pipeline fuer CI-nahe Nutzung
 - `local`: lokaler Lauf ohne Registry-Zugriff, mit Converter, Attribution und Publisher
@@ -112,7 +115,7 @@ Vorschritte aus.
 
 ### 4. Mehrsprachige Inhalte und Remote-Content
 
-[content.yaml](content.yaml) ist die zentrale Sprach- und Quellenkonfiguration.
+[content.yaml](../../../content.yaml) ist die zentrale Sprach- und Quellenkonfiguration.
 Der aktuelle Root-Stand kennt:
 
 - `de`: lokaler deutscher Basisinhalt
@@ -127,7 +130,7 @@ Content-Discovery- und Language-Context-Utilities aufgeloest.
 
 ### 5. Font-Management und Lizenz-Compliance
 
-[gitbook_worker/defaults/fonts.yml](gitbook_worker/defaults/fonts.yml) ist als
+[gitbook_worker/defaults/fonts.yml](../../../gitbook_worker/defaults/fonts.yml) ist als
 Single Source of Truth fuer alle Fonts angelegt. Jeder Font-Eintrag traegt Name,
 Lizenz, Lizenz-URL, Quelle beziehungsweise Download-URL, Version und Pfade.
 Konfigurierte Fonts umfassen aktuell unter anderem:
@@ -217,22 +220,22 @@ englische Artefakte. Die Taskliste enthaelt ausserdem lokale PDF-Builds fuer
 
 Der Docker-Bereich bietet statische und dynamische Dockerfiles. Das dynamische
 Dockerfile ist die zentrale CI-Variante und richtet TeX/Pandoc sowie Fonts aus
-der Konfiguration ein. [gitbook_worker/defaults/docker_config.yml](gitbook_worker/defaults/docker_config.yml)
+der Konfiguration ein. [gitbook_worker/defaults/docker_config.yml](../../../gitbook_worker/defaults/docker_config.yml)
 enthaelt Template-Namen fuer Images und Container.
 
 Die GitHub Actions umfassen:
 
-- [.github/workflows/orchestrator.yml](.github/workflows/orchestrator.yml):
+- [.github/workflows/orchestrator.yml](../../../.github/workflows/orchestrator.yml):
   baut ein GHCR-Publisher-Image oder lokal ein Fallback-Image, startet den
   Orchestrator im Container und committet Publish-Artefakte bei Aenderungen.
-- [.github/workflows/test.yml](.github/workflows/test.yml):
+- [.github/workflows/test.yml](../../../.github/workflows/test.yml):
   definiert Unit-/Integrationstests, Language-Smoke-Validierung, Emoji-Harness,
   QA-Checks und mypy-Type-Check.
 
 ### 11. Testabdeckung
 
 Die sichtbare Teststruktur liegt ueberwiegend unter
-[gitbook_worker/tests](gitbook_worker/tests). Die Suche zeigt 59 Python-Testdateien
+[gitbook_worker/tests](../../../gitbook_worker/tests). Die Suche zeigt 59 Python-Testdateien
 und deckt unter anderem ab:
 
 - Orchestrator und Manifest-Validierung
@@ -245,76 +248,77 @@ und deckt unter anderem ab:
 - Exit-Codes und Konfigurationsvollstaendigkeit
 - Core-Ports fuer SVG-zu-PDF, Repo-Root und PDF-TOC
 
-Die Release Notes fuer v2.3.0 nennen als damaligen Teststand 463 bestandene,
-11 uebersprungene und 0 fehlgeschlagene Tests. Diese Aufnahme hat keinen neuen
-Testlauf ausgefuehrt, weil nur Dokumentation ergaenzt wurde.
+Die Release Notes fuer v2.5.0 nennen als validierten Teststand 544 bestandene,
+11 uebersprungene, 10 abgewählte und 0 fehlgeschlagene non-slow Tests. Die
+zusaetzlichen ERDA-Font-Coverage-Tests liefen als fokussiertes Gate mit 5
+bestandenen Tests.
 
 ## Repository-Bestand nach Bereichen
 
 ### Root und Paketierung
 
-- [README.md](README.md): zweisprachige Projektuebersicht, Schnellstart,
+- [README.md](../../../README.md): zweisprachige Projektuebersicht, Schnellstart,
   Zielgruppen, Installation und Release-Verweise
-- [setup.cfg](setup.cfg): Paketmetadaten, Dependencies, Console Scripts
-- [pyproject.toml](pyproject.toml): setuptools Build-System
-- [pytest.ini](pytest.ini): Testmarker fuer `slow`, `unit`, `integration`, `manual`
-- [content.yaml](content.yaml): zentrale Sprach- und Quellenliste
-- [build-pdf.ps1](build-pdf.ps1) und [build-pdf.sh](build-pdf.sh): Wrapper fuer PDF-Builds
+- [setup.cfg](../../../setup.cfg): Paketmetadaten, Dependencies, Console Scripts
+- [pyproject.toml](../../../pyproject.toml): setuptools Build-System
+- [pytest.ini](../../../pytest.ini): Testmarker fuer `slow`, `unit`, `integration`, `manual`
+- [content.yaml](../../../content.yaml): zentrale Sprach- und Quellenliste
+- [build-pdf.ps1](../../../build-pdf.ps1) und [build-pdf.sh](../../../build-pdf.sh): Wrapper fuer PDF-Builds
 
 ### Sprach- und Kundenbaeume
 
-- [de](de): deutscher Sprachbaum mit `book.json`, `publish.yml`, Content,
+- [de](../../../de): deutscher Sprachbaum mit `book.json`, `publish.yml`, Content,
   Font-Storage und Publish-Artefakten
-- [en](en): englischer Sprachbaum mit analoger Struktur
-- [de-edge-cases](de-edge-cases) und [en-edge-cases](en-edge-cases): isolierte
+- [en](../../../en): englischer Sprachbaum mit analoger Struktur
+- [de-edge-cases](../../../de-edge-cases) und [en-edge-cases](../../../en-edge-cases): isolierte
   Edge-Case-Samples, standardmaessig nicht gebaut
-- [customer-de](customer-de) und [customer-flat](customer-flat): Kunden- und
+- [customer-de](../../../customer-de) und [customer-flat](../../../customer-flat): Kunden- und
   Beispielstrukturen fuer reale oder flachere Projektlayouts
-- [qa-customer-feedback](qa-customer-feedback): dokumentierte Kundenfeedback-/QA-Faelle
+- [gitbook_worker/docs/qa/customer-feedback](../qa/customer-feedback): dokumentierte Kundenfeedback-/QA-Faelle
 
 ### Python-Paket
 
-- [gitbook_worker/core](gitbook_worker/core): application/ports-Schicht fuer
+- [gitbook_worker/core](../../../gitbook_worker/core): application/ports-Schicht fuer
   fachliche Kernoperationen wie PDF-TOC, Repo-Root und SVG-zu-PDF
-- [gitbook_worker/adapters](gitbook_worker/adapters): konkrete Adapter fuer PDF,
+- [gitbook_worker/adapters](../../../gitbook_worker/adapters): konkrete Adapter fuer PDF,
   SVG und Dateisystem
-- [gitbook_worker/tools/workflow_orchestrator](gitbook_worker/tools/workflow_orchestrator):
+- [gitbook_worker/tools/workflow_orchestrator](../../../gitbook_worker/tools/workflow_orchestrator):
   Haupt-CLI und Ablaufsteuerung
-- [gitbook_worker/tools/publishing](gitbook_worker/tools/publishing): Publisher,
+- [gitbook_worker/tools/publishing](../../../gitbook_worker/tools/publishing): Publisher,
   Pipeline, Markdown-Kombination, GitBook-Style, Fonts, Attribution,
   Dokumenttypen und PDF-Vorverarbeitung
-- [gitbook_worker/tools/converter](gitbook_worker/tools/converter): Konverter fuer
+- [gitbook_worker/tools/converter](../../../gitbook_worker/tools/converter): Konverter fuer
   Assets und CSV/Charts
-- [gitbook_worker/tools/quality](gitbook_worker/tools/quality): Link-, Quellen-
+- [gitbook_worker/tools/quality](../../../gitbook_worker/tools/quality): Link-, Quellen-
   und Referenzpruefungen
-- [gitbook_worker/tools/emoji](gitbook_worker/tools/emoji): Emoji-Scans,
+- [gitbook_worker/tools/emoji](../../../gitbook_worker/tools/emoji): Emoji-Scans,
   Reports und Inline-Behandlung
-- [gitbook_worker/tools/docker](gitbook_worker/tools/docker): Dockerfiles,
+- [gitbook_worker/tools/docker](../../../gitbook_worker/tools/docker): Dockerfiles,
   Docker-CLI, Setup und Diagnostik
-- [gitbook_worker/tools/utils](gitbook_worker/tools/utils): Smart-Utilities,
+- [gitbook_worker/tools/utils](../../../gitbook_worker/tools/utils): Smart-Utilities,
   Runner, Git, SemVer, Language Context, Asset Copy, PDF-TOC
-- [gitbook_worker/tools/validators](gitbook_worker/tools/validators):
+- [gitbook_worker/tools/validators](../../../gitbook_worker/tools/validators):
   Frontmatter-Validierung
-- [gitbook_worker/tests](gitbook_worker/tests): Unit-, Integration- und
+- [gitbook_worker/tests](../../../gitbook_worker/tests): Unit-, Integration- und
   Regressionstests
 
 ### Dokumentation
 
-- [docs](docs): nutzer- und kundenseitige Dokumentation, Konfigurationsreferenz,
+- [docs](../../../docs): nutzer- und kundenseitige Dokumentation, Konfigurationsreferenz,
   Handbuch, FAQs, Releases und Features
-- [docs/configs](docs/configs): per-Datei-Konfigurationsdokumentation
-- [docs/releases](docs/releases): Release Notes von v2.0.0 bis v2.3.0
-- [gitbook_worker/docs](gitbook_worker/docs): Engineering-Dokumente, Architektur,
+- [docs/configs](../../../docs/configs): per-Datei-Konfigurationsdokumentation
+- [docs/releases](../../../docs/releases): Release Notes von v2.0.0 bis v2.5.0
+- [gitbook_worker/docs](../../../gitbook_worker/docs): Engineering-Dokumente, Architektur,
   Sprintplaene, Backlog, Release-Prozedur und historische Archive
-- [gitbook_worker/docs/attentions](gitbook_worker/docs/attentions): Diagnose- und
+- [gitbook_worker/docs/attentions](../../../gitbook_worker/docs/attentions): Diagnose- und
   Attention-Dokumente wie Exit-Codes und Lua-Font-Cache
 
 ### Fonts und Assets
 
-- [fonts-storage](fonts-storage): lokaler Font-Storage fuer DejaVu, Twemoji und
+- [fonts-storage](../../../fonts-storage): lokaler Font-Storage fuer DejaVu, Twemoji und
   Fontconfig-Dateien
-- [.github/fonts](.github/fonts): ERDA-Fontquellen, Generator- und Dokuanteile
-- [build/emoji-assets](build/emoji-assets): generierte oder vorbereitete
+- [.github/fonts](../../../.github/fonts): ERDA-Fontquellen, Generator- und Dokuanteile
+- [build/emoji-assets](../../../build/emoji-assets): generierte oder vorbereitete
   Emoji-/Build-Assets
 
 ## Aktuelle Staerken
@@ -337,22 +341,22 @@ Testlauf ausgefuehrt, weil nur Dokumentation ergaenzt wurde.
 
 ### 1. CI-Testpfad pruefen
 
-In [.github/workflows/test.yml](.github/workflows/test.yml) ruft der Unit-Test-Job
+In [.github/workflows/test.yml](../../../.github/workflows/test.yml) ruft der Unit-Test-Job
 `pytest tests -q ...` auf. Die sichtbaren Tests liegen jedoch unter
-[gitbook_worker/tests](gitbook_worker/tests). Das sollte geprueft werden, weil
+[gitbook_worker/tests](../../../gitbook_worker/tests). Das sollte geprueft werden, weil
 ein falscher Pfad im CI entweder Tests ueberspringen oder den Job unerwartet
 scheitern lassen kann.
 
 ### 2. Dokumentation enthaelt teils historische Pfadangaben
 
-[docs/HANDBOOK.md](docs/HANDBOOK.md) spricht im Schnellueberblick ebenfalls von
-Tests unter `tests/`, waehrend die aktuelle Struktur [gitbook_worker/tests](gitbook_worker/tests)
+[docs/HANDBOOK.md](../../../docs/HANDBOOK.md) spricht im Schnellueberblick ebenfalls von
+Tests unter `tests/`, waehrend die aktuelle Struktur [gitbook_worker/tests](../../../gitbook_worker/tests)
 zeigt. Das ist kein Laufzeitfehler, aber ein Onboarding-Risiko.
 
 ### 3. Packaging-Lizenzmetadaten harmonisieren
 
-[setup.cfg](setup.cfg) nennt `license = CC-BY-SA-4.0`, waehrend [LICENSE](LICENSE)
-und [LICENSE-CODE](LICENSE-CODE) MIT ausweisen. Inhalt, Code und Fonts haben
+[setup.cfg](../../../setup.cfg) nennt `license = CC-BY-SA-4.0`, waehrend [LICENSE](../../../LICENSE)
+und [LICENSE-CODE](../../../LICENSE-CODE) MIT ausweisen. Inhalt, Code und Fonts haben
 bewusst getrennte Lizenzdateien; die Paketmetadaten sollten diesen Stand aber
 eindeutig abbilden, damit Distribution und README keine widerspruechlichen
 Signale senden.
@@ -366,10 +370,10 @@ CI-Metadaten kennzeichnen.
 
 ### 5. Historischer Dokumentationsbestand bleibt umfangreich
 
-Das Archiv unter [gitbook_worker/docs/archive](gitbook_worker/docs/archive) ist
+Das Archiv unter [gitbook_worker/docs/archive](../../../gitbook_worker/docs/archive) ist
 wertvoll, kann aber Suchergebnisse und Orientierung verwischen. Fuer neue
-Beitragende sollte klar bleiben: aktuelle Nutzer-Doku liegt unter [docs](docs),
-aktuelle Engineering-Doku unter [gitbook_worker/docs](gitbook_worker/docs),
+Beitragende sollte klar bleiben: aktuelle Nutzer-Doku liegt unter [docs](../../../docs),
+aktuelle Engineering-Doku unter [gitbook_worker/docs](../../../gitbook_worker/docs),
 Archive sind nur Hintergrund.
 
 ### 6. PyPI-/Wheel-Pfad weiter schaerfen
@@ -384,9 +388,9 @@ der naechste logische Schritt.
 
 ### Kurzfristig
 
-- CI-Testpfad und Handbuchpfade auf [gitbook_worker/tests](gitbook_worker/tests)
+- CI-Testpfad und Handbuchpfade auf [gitbook_worker/tests](../../../gitbook_worker/tests)
   harmonisieren.
-- Lizenzmetadaten in [setup.cfg](setup.cfg), [README.md](README.md) und den
+- Lizenzmetadaten in [setup.cfg](../../../setup.cfg), [README.md](../../../README.md) und den
   Lizenzdateien eindeutig ausrichten.
 - Einen schnellen Smoke-Abschnitt fuer `gitbook-worker validate --lang de`,
   `gitbook-worker validate --lang en` und `gitbook-worker-fonts sync` in der
@@ -446,3 +450,4 @@ sauberer von aktueller Doku trennen und den Installations-/Font-Sync-Pfad fuer
 externe Nutzer weiter glaetten. Danach waere das Projekt gut positioniert, um
 als wiederverwendbarer Publishing-Baustein ueber einzelne Buchrepos hinaus zu
 funktionieren.
+
