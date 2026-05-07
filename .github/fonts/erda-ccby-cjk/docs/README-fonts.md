@@ -1,3 +1,16 @@
+---
+title: ERDA CC-BY font docs index
+version: 1.1.0
+date: 2026-05-07
+history:
+   - version: 1.1.0
+      date: 2026-05-07
+      description: Updated for independent ERDA font-family version 1.2.0 and TTF coverage matrix.
+   - version: 1.0.0
+      date: 2025-11-08
+      description: Initial CJK font documentation index.
+---
+
 # ERDA CC-BY CJK Font
 
 This directory contains a minimalist fallback font that covers the characters
@@ -9,6 +22,8 @@ released under the Creative Commons Attribution 4.0 International Licence (CC BY
 * `build_ccby_cjk_font.py` – generator script that converts handcrafted
   bitmap patterns into TrueType outlines.
 * `FONT-CACHE-TROUBLESHOOTING.md` – comprehensive guide to Windows font caches
+* `VERSIONING.md` – independent ERDA font-family versioning policy
+* `COVERAGE-MATRIX.md` – measured v1.2.0 TTF coverage targets
 * `CODE-REVIEW-REPORT.md` – detailed code review and cache issues analysis
 * `clear-all-caches.ps1` – PowerShell script for admin-level cache clearing
 * `test-font-version.html` – HTML page to verify font version and rendering
@@ -51,17 +66,23 @@ options:
 
 ## Features
 
-### Automatic Font Versioning 🎯 NEW!
+### ERDA Font Versioning
 
-Every build generates a unique font version with timestamp:
-- **Format:** `Version 1.0.YYYYMMDD.HHMMSS`
-- **Example:** `Version 1.0.20251104.200610`
-- **Purpose:** Forces Windows to invalidate font cache
-- **Benefit:** Ensures applications load new font version
+The ERDA generated fonts have a semantic font-family version independent from
+the GitBook Worker package version. Current font version: **1.2.0**.
+
+Every build writes a cache-busting OpenType version string:
+- **Format:** `Version 1.2.0+YYYYMMDD.HHMMSS`
+- **Example:** `Version 1.2.0+20260507.135430`
+- **Purpose:** keep a stable font release version while forcing font caches to
+  notice rebuilt TTF files
+- **Benefit:** CJK, Indic and Ethiopic subfonts now report one shared ERDA font
+  family version
 
 **Verify Font Version:**
 - Right-click `erda-ccby-cjk.ttf` → Properties → Details → "Product version"
 - Open `test-font-version.html` in browser (shows loaded version)
+- Run `python font_cli.py stats --fail-on-targets` from `generator/`
 
 ### Platform Support
 
@@ -80,6 +101,8 @@ The font includes support for:
 - **Traditional Chinese**: 100+ handcrafted Hanzi characters + fallback glyphs
 - **Punctuation**: CJK and ASCII punctuation marks
 - **ASCII**: Basic Latin characters (fallback placeholders)
+
+For the measured v1.2.0 TTF targets, see [COVERAGE-MATRIX.md](COVERAGE-MATRIX.md).
 
 ### Font Cache Management (Enhanced) 🔧 NEW!
 

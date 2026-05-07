@@ -39,6 +39,11 @@ from punctuation import PUNCTUATION
 from hiragana import HIRAGANA
 from devanagari import DEVANAGARI, DEVANAGARI_EXTENDED
 from coverage_targets import CJK_HAN_TARGET, CJK_HANGUL_TARGET, target_cjk_chars
+from font_version import (
+    font_build_timestamp,
+    font_version_string,
+    unique_font_identifier,
+)
 from font_logger import FontBuildLogger
 from synthetic_bitmap import codepoint_marker_bitmap
 
@@ -447,11 +452,9 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
             sxHeight=500,
             sCapHeight=700,
         )
-        # Generate version string with timestamp to force cache refresh
-        import datetime
-
-        timestamp = datetime.datetime.now().strftime("%Y%m%d.%H%M%S")
-        version_string = f"Version 1.0.{timestamp}"
+        # Keep a semantic ERDA font version and append a timestamp for cache busting.
+        timestamp = font_build_timestamp()
+        version_string = font_version_string(timestamp)
 
         fb.setupNameTable(
             {
@@ -459,7 +462,9 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
                 "styleName": "Regular",
                 "psName": "ERDACCbyCJK-Regular",
                 "fullName": "ERDA CC-BY CJK Regular",
-                "uniqueFontIdentifier": f"ERDA CC-BY CJK Regular {timestamp}",
+                "uniqueFontIdentifier": unique_font_identifier(
+                    "ERDA CC-BY CJK", timestamp
+                ),
                 "version": version_string,
             }
         )

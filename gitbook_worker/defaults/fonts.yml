@@ -34,7 +34,7 @@ fonts:
     license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: null
-    version: "1.0.0"
+    version: "1.2.0"
 
   INDIC:
     name: "ERDA CC-BY Indic"
@@ -43,7 +43,7 @@ fonts:
     license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: null
-    version: "1.0.0"
+    version: "1.2.0"
 
   ETHIOPIC:
     name: "ERDA CC-BY Ethiopic"
@@ -52,7 +52,7 @@ fonts:
     license: "Creative Commons Attribution 4.0 International (CC BY 4.0)"
     license_url: "https://creativecommons.org/licenses/by/4.0/"
     source_url: null
-    version: "1.0.0"
+    version: "1.2.0"
 
   EMOJI:
     name: "Twemoji Mozilla"

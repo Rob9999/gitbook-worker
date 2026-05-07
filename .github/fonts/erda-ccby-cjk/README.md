@@ -29,6 +29,7 @@ erda-ccby-cjk/
 │   ├── coverage_targets.py         # v2.5.0 Release-Zielbereiche
 │   ├── font_stats.py               # TTF-Statistik und Zielpruefung
 │   ├── font_family_builder.py      # Gemeinsamer Bitmap-Builder
+│   ├── font_version.py             # ERDA Font-Family SemVer + Buildmetadata
 │   ├── font_logger.py              # Logging und Metriken
 │   ├── synthetic_bitmap.py         # deterministische Coverage-Marker
 │   ├── katakana.py                 # Katakana Zeichen (84)
@@ -58,6 +59,8 @@ erda-ccby-cjk/
 │
 ├── docs/                     # Dokumentation
 │   ├── MODULAR-ARCHITECTURE.md     # Architektur-Dokumentation
+│   ├── VERSIONING.md               # Eigene ERDA-Font-Versionierung
+│   ├── COVERAGE-MATRIX.md          # v1.2.0 TTF-Coverage-Matrix
 │   ├── FONT-CACHE-TROUBLESHOOTING.md
 │   └── CODE-REVIEW-REPORT.md
 │
@@ -176,11 +179,11 @@ python build_ccby_cjk_font.py --install --refresh-cache
 
 ### Statistik (aktueller Build)
 
-| Font | maxp.numGlyphs | cmap-Codepoints | Release-Ziele |
-|---|---:|---:|---|
-| `erda-ccby-cjk.ttf` | 6824 | 6823 | PASS: 3156 Han, 3103 Hangul, 93 Hiragana, 96 Katakana |
-| `erda-ccby-indic.ttf` | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
-| `erda-ccby-ethiopic.ttf` | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
+| Font | ERDA-Font-Version | maxp.numGlyphs | cmap-Codepoints | Release-Ziele |
+|---|---|---:|---:|---|
+| `erda-ccby-cjk.ttf` | 1.2.0 | 6824 | 6823 | PASS: 3156 Han, 3103 Hangul, 93 Hiragana, 96 Katakana |
+| `erda-ccby-indic.ttf` | 1.2.0 | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
+| `erda-ccby-ethiopic.ttf` | 1.2.0 | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
 
 Die Statistik stammt direkt aus den TTFs:
 
@@ -475,7 +478,7 @@ Der Font wird als Fallback für CJK-Zeichen in GitBook PDF-Exporten verwendet:
 
 ---
 
-**Letzte Aktualisierung**: 2025-11-08  
-**Font-Version**: 1.1  
-**Build**: font-build-20251108-223605  
-**Status**: ✅ Production Ready (mit Devanagari/Hindi-Unterstützung)
+**Letzte Aktualisierung**: 2026-05-07  
+**Font-Version**: 1.2.0  
+**Build**: v1.2.0 Coverage-Build  
+**Status**: ✅ Production Ready (mit CJK/Indic/Ethiopic Coverage-Gate)

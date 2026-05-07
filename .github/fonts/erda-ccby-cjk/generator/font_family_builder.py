@@ -11,6 +11,11 @@ from fontTools.ttLib.tables.O_S_2f_2 import Panose
 
 from character_index import CharacterInfo, get_character_index
 from config import get_config
+from font_version import (
+    font_build_timestamp,
+    font_version_string,
+    unique_font_identifier,
+)
 from font_logger import FontBuildLogger
 from synthetic_bitmap import codepoint_marker_bitmap
 
@@ -92,17 +97,18 @@ def build_bitmap_font(
         usWinDescent=PIXELS * CELL,
         panose=Panose(bFamilyType=2, bSerifStyle=11, bProportion=9),
     )
+    timestamp = font_build_timestamp()
     fb.setupNameTable(
         {
             "familyName": font_family,
             "styleName": "Regular",
-            "uniqueFontIdentifier": f"{font_family}-Regular",
+            "uniqueFontIdentifier": unique_font_identifier(font_family, timestamp),
             "fullName": f"{font_family} Regular",
             "psName": f"{font_family.replace(' ', '')}-Regular",
             "designer": "Robert Alexander Massinger",
             "designerURL": "https://github.com/rob9999/gitbook-worker",
             "copyright": "Copyright (c) 2025-2026 Robert Alexander Massinger, Munich, Bavaria, Germany.",
-            "version": "Version 1.0",
+            "version": font_version_string(timestamp),
             "manufacturer": "ERDA",
         }
     )

@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-07 - Coverage Stats and Shared Font Version
+
+### Added
+- Shared ERDA font-family version metadata in `generator/font_version.py`.
+- OpenType version format `Version 1.2.0+YYYYMMDD.HHMMSS` for CJK, Indic and
+  Ethiopic generated TTF files.
+- TTF-level stats gate via `font_cli.py stats --fail-on-targets`.
+- Staged 3000+ CJK Han and 3000+ Hangul coverage targets.
+- Full assigned Hiragana/Katakana, Devanagari and Ethiopic supported block
+  coverage targets.
+- Font docs for versioning and measured coverage matrix.
+
+### Changed
+- `fonts.yml` now reports ERDA generated font version `1.2.0` for `CJK`,
+  `INDIC` and `ETHIOPIC`.
+- Indic and Ethiopic subfonts no longer report static `Version 1.0`; all ERDA
+  generated TTFs share the same semantic font-family version.
+
+### Fixed
+- Distinguishes sample text length from real TTF glyph/codepoint coverage.
+
+---
+
 ## [1.1.0] - 2025-11-08 - Devanagari/Hindi Support
 
 ### Added

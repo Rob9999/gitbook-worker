@@ -20,6 +20,7 @@ from coverage_targets import (  # noqa: E402
     target_devanagari_chars,
     target_ethiopic_chars,
 )
+from font_version import ERDA_FONT_VERSION  # noqa: E402
 from font_stats import inspect_font  # noqa: E402
 
 
@@ -29,6 +30,8 @@ def test_erda_fonts_meet_release_coverage_targets(font_name: str) -> None:
     failed_targets = [result for result in stats.target_results if not result.passed]
 
     assert stats.maxp_num_glyphs == stats.glyph_order_count
+    assert stats.version is not None
+    assert stats.version.startswith(f"Version {ERDA_FONT_VERSION}+")
     assert not failed_targets, failed_targets
 
 
