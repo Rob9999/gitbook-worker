@@ -1,14 +1,17 @@
 ---
 title: Windows font stub hardening for optional ERDA script fonts
-version: 0.1.0
+version: 0.2.0
 date: 2026-05-07
-status: backlog
+status: implemented
 priority: P0
 labels: [fonts, windows, pdf, luatex, hardening]
 history:
   - version: 0.1.0
     date: 2026-05-07
     description: Initial anonymized P0 backlog for corrupt user-font stubs breaking optional ERDA script font checks.
+  - version: 0.2.0
+    date: 2026-05-07
+    description: Implemented managed font-file validation and removed unsafe family-name existence checks for ERDA script helpers.
 ---
 
 # Windows Font Stub Hardening for Optional ERDA Script Fonts
@@ -52,6 +55,14 @@ In the affected environment, the existence check itself failed inside
 
 ## Implementation Notes
 
+- Implemented in `gitbook_worker.tools.publishing.publisher` for the generated
+  ERDA script helper macros:
+  - invalid `luaotfload-tool --find` resolved files are rejected when they are
+    too small or do not start with a plausible TTF/OTF/TTC signature,
+  - configured ERDA script fonts are loaded via validated managed font files and
+    explicit fontspec `Path=...` file references,
+  - optional script helpers remain no-op when no valid managed font file exists,
+    instead of probing the family name with `\IfFontExistsTF`.
 - Start with the publisher header path that builds `\erdaIndic{...}` and
   `\erdaEthiopic{...}` helpers.
 - The first safe slice can avoid optional `\IfFontExistsTF` macros unless a valid

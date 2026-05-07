@@ -110,6 +110,30 @@ def test_default_filters_include_cjk_linebreak_filter():
     )
 
 
+def test_luaotfload_rejects_invalid_resolved_font_file(monkeypatch, tmp_path):
+    stub = tmp_path / "erda-ccby-indic.ttf"
+    stub.write_bytes(b"stub!")
+
+    class DummyResult:
+        stdout = (
+            'luaotfload | resolve : Font "ERDA CC-BY Indic" found!\n'
+            f'luaotfload | resolve : Resolved file name "{stub.as_posix()}"'
+        )
+        stderr = ""
+        returncode = 0
+
+    def fake_run(*args, **kwargs):
+        return DummyResult()
+
+    publisher._check_luaotfload_has_font.cache_clear()
+    monkeypatch.setattr(publisher.shutil, "which", lambda name: "luaotfload-tool")
+    monkeypatch.setattr(publisher.subprocess, "run", fake_run)
+    try:
+        assert not publisher._check_luaotfload_has_font("ERDA CC-BY Indic")
+    finally:
+        publisher._check_luaotfload_has_font.cache_clear()
+
+
 def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
     monkeypatch.setattr(publisher, "_check_luaotfload_has_font", lambda name: True)
     monkeypatch.setattr(publisher, "_font_available", lambda name: True)
@@ -130,7 +154,14 @@ def test_font_header_does_not_enable_luatexja_jfont_path(monkeypatch):
     assert "setmainjfont" not in header
 
 
-def test_font_header_defines_erda_script_macros(monkeypatch):
+def test_font_header_defines_erda_script_macros(monkeypatch, tmp_path):
+    font_dir = tmp_path / "fonts"
+    font_dir.mkdir()
+    indic_font = font_dir / "erda-ccby-indic.ttf"
+    ethiopic_font = font_dir / "erda-ccby-ethiopic.ttf"
+    indic_font.write_bytes(b"\x00\x01\x00\x00" + (b"0" * 128))
+    ethiopic_font.write_bytes(b"\x00\x01\x00\x00" + (b"0" * 128))
+
     class DummyFontConfig:
         def get_font_name(self, key, default=None):
             return {
@@ -138,7 +169,11 @@ def test_font_header_defines_erda_script_macros(monkeypatch):
                 "ETHIOPIC": "ERDA CC-BY Ethiopic",
             }.get(key, default)
 
+    def fake_valid_font_file(key):
+        return {"INDIC": indic_font, "ETHIOPIC": ethiopic_font}.get(key)
+
     monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+    monkeypatch.setattr(publisher, "_configured_valid_font_file", fake_valid_font_file)
     monkeypatch.setattr(publisher, "_check_luaotfload_has_font", lambda name: True)
     monkeypatch.setattr(publisher, "_font_available", lambda name: True)
 
@@ -154,17 +189,70 @@ def test_font_header_defines_erda_script_macros(monkeypatch):
         temp_dir="/tmp/test-font-cache",
     )
 
-    assert "\\IfFontExistsTF{ERDA CC-BY Indic}" in header
+    expected_path = font_dir.resolve().as_posix() + "/"
+    assert "\\IfFontExistsTF{ERDA CC-BY Indic}" not in header
+    assert "\\IfFontExistsTF{ERDA CC-BY Ethiopic}" not in header
     assert (
-        "\\newfontfamily\\ERDAIndicFont[Renderer=HarfBuzz]{ERDA CC-BY Indic}" in header
+        "\\newfontfamily\\ERDAIndicFont"
+        f"[Renderer=HarfBuzz,Path={{{expected_path}}}]"
+        "{erda-ccby-indic.ttf}"
+        in header
     )
     assert "\\renewcommand{\\erdaIndic}[1]{{\\ERDAIndicFont #1}}" in header
-    assert "\\IfFontExistsTF{ERDA CC-BY Ethiopic}" in header
     assert (
-        "\\newfontfamily\\ERDAEthiopicFont[Renderer=HarfBuzz]{ERDA CC-BY Ethiopic}"
+        "\\newfontfamily\\ERDAEthiopicFont"
+        f"[Renderer=HarfBuzz,Path={{{expected_path}}}]"
+        "{erda-ccby-ethiopic.ttf}"
         in header
     )
     assert "\\renewcommand{\\erdaEthiopic}[1]{{\\ERDAEthiopicFont #1}}" in header
+
+
+def test_font_header_keeps_script_macros_noop_without_valid_managed_font(monkeypatch):
+    class DummyFontConfig:
+        def get_font_name(self, key, default=None):
+            return {
+                "INDIC": "ERDA CC-BY Indic",
+                "ETHIOPIC": "ERDA CC-BY Ethiopic",
+            }.get(key, default)
+
+    monkeypatch.setattr(publisher, "get_font_config", lambda: DummyFontConfig())
+    monkeypatch.setattr(publisher, "_configured_valid_font_file", lambda key: None)
+
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font=None,
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec=None,
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "\\newcommand{\\erdaIndic}[1]{#1}" in header
+    assert "\\newcommand{\\erdaEthiopic}[1]{#1}" in header
+    assert "\\IfFontExistsTF{ERDA CC-BY Indic}" not in header
+    assert "\\newfontfamily\\ERDAIndicFont" not in header
+
+
+def test_font_header_makes_pandoc_h4_h5_block_headings():
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font=None,
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec=None,
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "\\titleformat{\\paragraph}[block]" in header
+    assert "\\titlespacing*{\\paragraph}" in header
+    assert "\\titleformat{\\subparagraph}[block]" in header
 
 
 def test_default_fallback_order_keeps_cjk_first(monkeypatch):

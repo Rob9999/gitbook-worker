@@ -1,14 +1,17 @@
 ---
 title: PDF block headings for Markdown H4 and deeper
-version: 0.1.0
+version: 0.2.0
 date: 2026-05-07
-status: backlog
+status: implemented
 priority: P1
 labels: [pdf, latex, headings, layout]
 history:
   - version: 0.1.0
     date: 2026-05-07
     description: Initial anonymized P1 backlog for Pandoc H4 run-in heading behavior.
+  - version: 0.2.0
+    date: 2026-05-07
+    description: Implemented publisher-generated titlesec block layout for LaTeX paragraph and subparagraph headings.
 ---
 
 # PDF Block Headings for Markdown H4 and Deeper
@@ -39,6 +42,9 @@ PDF heading layout, not remove source content.
 
 ## Implementation Notes
 
+- Implemented in the publisher-generated LaTeX header with `titlesec` rules for
+  `\paragraph` and `\subparagraph` using block layout and standard bold section
+  styling.
 - Add a LaTeX header snippet in the publisher-generated header layer.
 - Prefer a minimal `titlesec`-based configuration if compatible with existing
   templates; otherwise use a local `\makeatletter` sectioning redefinition.

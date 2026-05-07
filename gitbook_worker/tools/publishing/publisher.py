@@ -308,6 +308,9 @@ EMOJI_RANGES = (
     "2600-26FF, 2700-27BF, 2300-23FF, 2B50, 2B06, 2934-2935, 25A0-25FF"
 )
 
+_FONT_FILE_MIN_BYTES = 64
+_FONT_FILE_SIGNATURES = (b"\x00\x01\x00\x00", b"OTTO", b"true", b"typ1", b"ttcf")
+
 
 @dataclass(frozen=True)
 class EmojiOptions:
@@ -695,10 +698,47 @@ def _check_luaotfload_has_font(font_name: str) -> bool:
             check=False,
             timeout=5,
         )
-        # Returns font path if found, empty if not
-        return bool(result.stdout.strip())
+        stdout = result.stdout.strip()
+        if not stdout:
+            return False
+
+        resolved = _extract_luaotfload_resolved_path(stdout)
+        if resolved and not _is_valid_font_file(resolved):
+            logger.warning(
+                "⚠ LuaTeX cache resolved font '%s' to invalid font file: %s",
+                font_name,
+                resolved,
+            )
+            return False
+
+        return True
     except Exception as exc:
         logger.debug("luaotfload-tool check fehlgeschlagen: %s", exc)
+        return False
+
+
+def _extract_luaotfload_resolved_path(output: str) -> Optional[Path]:
+    match = re.search(r'Resolved file name "([^"]+)"', output)
+    if match:
+        return Path(match.group(1))
+
+    for line in output.splitlines():
+        candidate = line.strip().strip('"')
+        if re.search(r"\.(ttf|otf|ttc)$", candidate, flags=re.IGNORECASE):
+            return Path(candidate)
+    return None
+
+
+def _is_valid_font_file(path: Path) -> bool:
+    try:
+        if not path.is_file():
+            return False
+        if path.stat().st_size < _FONT_FILE_MIN_BYTES:
+            return False
+        with path.open("rb") as handle:
+            signature = handle.read(4)
+        return signature in _FONT_FILE_SIGNATURES
+    except OSError:
         return False
 
 
@@ -1278,22 +1318,81 @@ def _configured_font_name(font_key: str) -> Optional[str]:
         return None
 
 
+def _configured_valid_font_file(font_key: str) -> Optional[Path]:
+    try:
+        font = get_font_config().get_font(font_key)
+    except Exception as exc:
+        logger.debug("Konnte Font-Konfiguration fuer %s nicht laden: %s", font_key, exc)
+        return None
+
+    if not font:
+        return None
+
+    repo_root = _resolve_repo_root()
+    for path_str in font.paths:
+        candidate = Path(path_str)
+        if not candidate.is_absolute():
+            candidate = repo_root / candidate
+        try:
+            candidate = candidate.resolve()
+        except (OSError, RuntimeError):
+            pass
+        if _is_valid_font_file(candidate):
+            return candidate
+        if candidate.exists():
+            logger.warning(
+                "⚠ Konfigurierter Font %s verweist auf ungueltige Datei: %s",
+                font_key,
+                candidate,
+            )
+    return None
+
+
+def _fontspec_path_parts(font_file: Path) -> Tuple[str, str]:
+    resolved = font_file.resolve()
+    directory = resolved.parent.as_posix()
+    if not directory.endswith("/"):
+        directory += "/"
+    return directory, resolved.name
+
+
 def _script_font_macro_lines(
     font_key: str, command_name: str, family_command: str
 ) -> List[str]:
     font_name = _configured_font_name(font_key)
     lines = [f"\\newcommand{{\\{command_name}}}[1]{{#1}}"]
-    if not font_name:
+    font_file = _configured_valid_font_file(font_key)
+    if font_file:
+        font_path, font_filename = _fontspec_path_parts(font_file)
+        lines.extend(
+            [
+                (
+                    f"\\newfontfamily\\{family_command}"
+                    f"[Renderer=HarfBuzz,Path={{{font_path}}}]{{{font_filename}}}"
+                ),
+                f"\\renewcommand{{\\{command_name}}}[1]{{{{\\{family_command} #1}}}}",
+            ]
+        )
         return lines
-    lines.extend(
-        [
-            f"\\IfFontExistsTF{{{font_name}}}{{",
-            f"  \\newfontfamily\\{family_command}[Renderer=HarfBuzz]{{{font_name}}}",
-            f"  \\renewcommand{{\\{command_name}}}[1]{{{{\\{family_command} #1}}}}",
-            "}{}",
-        ]
-    )
+
+    if font_name:
+        logger.warning(
+            "⚠ Optionaler Script-Font %s (%s) wird nicht per Familienname geprueft, "
+            "weil keine valide verwaltete Fontdatei gefunden wurde.",
+            font_key,
+            font_name,
+        )
     return lines
+
+
+def _block_heading_layout_lines() -> List[str]:
+    return [
+        "\\usepackage{titlesec}",
+        "\\titleformat{\\paragraph}[block]{\\normalfont\\normalsize\\bfseries}{\\theparagraph}{1em}{}",
+        "\\titlespacing*{\\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}",
+        "\\titleformat{\\subparagraph}[block]{\\normalfont\\normalsize\\bfseries}{\\thesubparagraph}{1em}{}",
+        "\\titlespacing*{\\subparagraph}{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}",
+    ]
 
 
 def _build_font_header(
@@ -1320,6 +1419,7 @@ def _build_font_header(
     logger.info("📄 FONT-STACK:   include_mainfont = %s", include_mainfont)
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
+    lines.extend(_block_heading_layout_lines())
     lines.extend(_script_font_macro_lines("INDIC", "erdaIndic", "ERDAIndicFont"))
     lines.extend(
         _script_font_macro_lines("ETHIOPIC", "erdaEthiopic", "ERDAEthiopicFont")
