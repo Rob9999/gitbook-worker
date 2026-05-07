@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2026-05-07 - Stronger 0.90 Marker Ink
+
+### Changed
+- Generated CJK, Indic and Ethiopic marker glyphs now use 0.90-cell ink for
+  higher PDF readability in the long-text inspection blocks.
+- `fonts.yml` now reports ERDA generated font version `1.4.1` for `CJK`,
+  `INDIC` and `ETHIOPIC`.
+
+---
+
 ## [1.4.0] - 2026-05-07 - Long Text Section Coverage and Stronger Markers
 
 ### Added

@@ -61,7 +61,7 @@ EM = CONFIG.grid.em
 PIXELS = CONFIG.grid.pixels
 CELL = CONFIG.grid.cell
 MARGIN = CONFIG.grid.margin
-GENERATED_INK_SCALE = 0.70
+GENERATED_INK_SCALE = 0.90
 
 
 def _glyph_from_bitmap(bitmap: List[str], ink_scale: float = 1.0) -> Tuple[object, int]:

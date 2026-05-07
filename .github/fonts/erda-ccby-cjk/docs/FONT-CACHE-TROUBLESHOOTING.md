@@ -1,8 +1,11 @@
 ﻿---
 title: ERDA font cache troubleshooting
-version: 1.3.0
+version: 1.4.0
 date: 2026-05-07
 history:
+   - version: 1.4.0
+      date: 2026-05-07
+      description: Updated cache-busting examples for ERDA font-family version 1.4.1.
   - version: 1.3.0
     date: 2026-05-07
     description: Updated cache-busting examples for ERDA font-family version 1.4.0.
@@ -160,7 +163,7 @@ user32.SendMessageW(HWND_BROADCAST, WM_FONTCHANGE, 0, 0)
 1. Rechtsklick auf `erda-ccby-cjk.ttf`
 2. "Properties" → "Details" Tab
 3. Suchen Sie "Product version" oder "File version"
-4. Sollte SemVer plus Timestamp zeigen: `Version 1.4.0+YYYYMMDD.HHMMSS`
+4. Sollte SemVer plus Timestamp zeigen: `Version 1.4.1+YYYYMMDD.HHMMSS`
 
 ### Option 3: Browser DevTools
 
@@ -234,7 +237,7 @@ Get-ItemProperty "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Fonts" | Se
 - Deshalb fuegt der Generator nach der ERDA-Font-Family-Version einen
    **Buildtimestamp** ein:
   ```
-   Version 1.4.0+20260507.180349
+   Version 1.4.1+20260507.183000
                │   └─ Buildmetadata fuer Cache-Busting
                └───── ERDA Font-Family SemVer
   ```

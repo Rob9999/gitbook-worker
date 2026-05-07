@@ -24,7 +24,7 @@ EM = CONFIG.grid.em
 PIXELS = CONFIG.grid.pixels
 CELL = CONFIG.grid.cell
 MARGIN = CONFIG.grid.margin
-SUBFONT_INK_SCALE = 0.70
+SUBFONT_INK_SCALE = 0.90
 
 
 def _draw_rect(pen: TTGlyphPen, x: int, y: int, w: int, h: int) -> None:
