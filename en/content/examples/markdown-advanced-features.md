@@ -181,7 +181,7 @@ function processData(data) {
 
 ### Code with Filename
 
-```python title="example.py"
+```{.python title="example.py"}
 # example.py
 def greet(name):
     return f"Hello, {name}!"

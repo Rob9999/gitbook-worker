@@ -181,7 +181,7 @@ function verarbeiteDaten(daten) {
 
 ### Code mit Dateinamen
 
-```python title="beispiel.py"
+```{.python title="beispiel.py"}
 # beispiel.py
 def gruesse(name):
     return f"Hallo, {name}!"
