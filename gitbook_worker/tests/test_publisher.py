@@ -274,6 +274,7 @@ def test_font_header_enables_code_block_wrapping_by_default():
     assert "\\DefineVerbatimEnvironment{Highlighting}{Verbatim}" in header
     assert "breaklines=true" in header
     assert "breakanywhere=true" in header
+    assert "breaksymbolleft={}" in header
     assert "\\RecustomVerbatimEnvironment{verbatim}{Verbatim}" in header
 
 

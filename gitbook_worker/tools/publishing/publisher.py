@@ -1410,11 +1410,13 @@ def _code_block_wrap_lines(enabled: bool) -> List[str]:
         r"  \usepackage{fvextra}",
         (
             r"  \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
-            r"{commandchars=\\\{\},breaklines=true,breakanywhere=true}"
+            r"{commandchars=\\\{\},breaklines=true,breakanywhere=true,"
+            r"breaksymbolleft={},breaksymbolsepleft=0pt}"
         ),
         (
             r"  \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
-            r"{breaklines=true,breakanywhere=true}"
+            r"{breaklines=true,breakanywhere=true,breaksymbolleft={},"
+            r"breaksymbolsepleft=0pt}"
         ),
         r"}{%",
         (
