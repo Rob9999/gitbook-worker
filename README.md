@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.4.2 "Pruefsicher Font Hotfix"** · [Release Notes](docs/releases/v2.4.2.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.4.3 "Pruefsicher Font Guard Hotfix"** · [Release Notes](docs/releases/v2.4.3.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.4.2-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.4.3-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -314,6 +314,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.4.3 "Pruefsicher Font Guard Hotfix" (7. Mai 2026)
+
+- **Windows-Font-Stubs gehaertet**: Defekte lokale ERDA Indic/Ethiopic Font-Stubs werden nicht mehr ueber LaTeX-Family-Probes aktiviert.
+- **Verwaltete ERDA-Script-Fonts**: Indic/Ethiopic-Helfer laden validierte Fontdateien per explizitem `fontspec`-Pfad.
+- **H4/H5 als Block-Headings**: Markdown `####`/`#####` wird in PDFs nicht mehr als LaTeX-Run-in-Heading gesetzt.
+
+→ [docs/releases/v2.4.3.md](docs/releases/v2.4.3.md)
+
 #### v2.4.2 "Pruefsicher Font Hotfix" (6. Mai 2026)
 
 - **CJK-Randueberlauf behoben**: Lange CJK-Passagen erhalten sichere LaTeX-Breakpoints und laufen nicht mehr in den Seitenrand.
@@ -492,7 +500,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.4.2-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.4.3-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -743,6 +751,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.4.3 "Pruefsicher Font Guard Hotfix" (May 7, 2026)
+
+- **Windows font stubs hardened**: Broken local ERDA Indic/Ethiopic font stubs no longer get activated through LaTeX family probes.
+- **Managed ERDA script fonts**: Indic/Ethiopic helpers load validated font files through explicit `fontspec` paths.
+- **H4/H5 block headings**: Markdown `####`/`#####` no longer render as LaTeX run-in headings in PDFs.
+
+→ [docs/releases/v2.4.3.md](docs/releases/v2.4.3.md)
 
 #### v2.4.2 "Pruefsicher Font Hotfix" (May 6, 2026)
 
