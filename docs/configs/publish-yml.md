@@ -1,8 +1,9 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-02-08
-config_schema_version: "0.1.1"
+config_schema_version: "0.1.2"
 history:
+  - "1.1.0: 2026-05-07 — pdf_options.code_block_wrap dokumentiert"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
 
@@ -22,7 +23,7 @@ Assets. Der Orchestrator und der Publisher lesen diese Datei.
 
 ## Schema-Version
 
-Aktuell: **0.1.1** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Code 3).
+Aktuell: **0.1.2** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Code 3).
 
 ## Schlüssel-Referenz
 
@@ -112,11 +113,12 @@ Aktuell: **0.1.1** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Co
 | `mono_font` | string | `"DejaVu Sans Mono"` | ✅ | → Pandoc `-V monofont` |
 | `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
+| `code_block_wrap` | bool | `true` | ✅ | Lange Code-Fence-Zeilen im PDF umbrechen (`fvextra`) |
 
 ## Beispiel (Minimalversion)
 
 ```yaml
-version: 0.1.1
+version: 0.1.2
 profiles:
   local:
     description: Lokale Ausführung
@@ -137,6 +139,7 @@ publish:
 |---------|-------|----------|
 | 0.1.0 | 2025-12-05 | Initiales Schema |
 | 0.1.1 | 2026-01-08 | `generate_attribution`, `pdf_options.abort_if_missing_glyph`, `assets` ergänzt |
+| 0.1.2 | 2026-05-07 | `pdf_options.code_block_wrap` ergänzt |
 
 ## Verwandte Dokumente
 

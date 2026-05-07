@@ -257,6 +257,44 @@ def test_font_header_makes_pandoc_h4_h5_block_headings():
     assert "titlesec" not in header
 
 
+def test_font_header_enables_code_block_wrapping_by_default():
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font=None,
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec=None,
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "\\usepackage{fvextra}" in header
+    assert "\\DefineVerbatimEnvironment{Highlighting}{Verbatim}" in header
+    assert "breaklines=true" in header
+    assert "breakanywhere=true" in header
+    assert "\\RecustomVerbatimEnvironment{verbatim}{Verbatim}" in header
+
+
+def test_font_header_can_disable_code_block_wrapping():
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font=None,
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec=None,
+        abort_if_missing_glyph=False,
+        code_block_wrap=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert "fvextra" not in header
+    assert "breaklines=true" not in header
+
+
 def test_default_fallback_order_keeps_cjk_first(monkeypatch):
     class DummyFontConfig:
         def get_default_fonts(self):

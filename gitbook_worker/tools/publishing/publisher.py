@@ -178,7 +178,7 @@ _SEMVER_RE = re.compile(
     r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:[-+][0-9A-Za-z.-]+)?$"
 )
 _MANIFEST_VERSION_MIN = (0, 1, 0)
-_MANIFEST_VERSION_CURRENT = (0, 1, 1)
+_MANIFEST_VERSION_CURRENT = (0, 1, 2)
 
 
 # Helper function to resolve paths relative to this module's directory
@@ -1402,6 +1402,29 @@ def _block_heading_layout_lines() -> List[str]:
     ]
 
 
+def _code_block_wrap_lines(enabled: bool) -> List[str]:
+    if not enabled:
+        return []
+    return [
+        r"\IfFileExists{fvextra.sty}{%",
+        r"  \usepackage{fvextra}",
+        (
+            r"  \DefineVerbatimEnvironment{Highlighting}{Verbatim}"
+            r"{commandchars=\\\{\},breaklines=true,breakanywhere=true}"
+        ),
+        (
+            r"  \RecustomVerbatimEnvironment{verbatim}{Verbatim}"
+            r"{breaklines=true,breakanywhere=true}"
+        ),
+        r"}{%",
+        (
+            "  \\PackageWarning{gitbook-worker}{fvextra.sty not found; "
+            "code block wrapping disabled}"
+        ),
+        "}",
+    ]
+
+
 def _build_font_header(
     *,
     main_font: str,
@@ -1413,6 +1436,7 @@ def _build_font_header(
     manual_fallback_spec: Optional[str],
     abort_if_missing_glyph: bool,
     temp_dir: str,
+    code_block_wrap: bool = True,
 ) -> str:
     """Render a Pandoc header snippet configuring fonts and fallbacks."""
 
@@ -1427,6 +1451,7 @@ def _build_font_header(
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
     lines.extend(_block_heading_layout_lines())
+    lines.extend(_code_block_wrap_lines(code_block_wrap))
     lines.extend(_script_font_macro_lines("INDIC", "erdaIndic", "ERDAIndicFont"))
     lines.extend(
         _script_font_macro_lines("ETHIOPIC", "erdaEthiopic", "ERDAEthiopicFont")
@@ -2332,6 +2357,7 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
 
     # Abort flag defaults to True unless explicitly disabled
     parsed["abort_if_missing_glyph"] = True
+    parsed["code_block_wrap"] = True
 
     if "emoji_color" in raw:
         parsed["emoji_color"] = _as_bool(raw.get("emoji_color"))
@@ -2365,6 +2391,11 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
 
     if "abort_if_missing_glyph" in raw:
         parsed["abort_if_missing_glyph"] = _as_bool(raw.get("abort_if_missing_glyph"))
+
+    if "code_block_wrap" in raw:
+        parsed["code_block_wrap"] = _as_bool(raw.get("code_block_wrap"))
+    elif "code-block-wrap" in raw:
+        parsed["code_block_wrap"] = _as_bool(raw.get("code-block-wrap"))
 
     # -- Passthrough Pandoc/LaTeX variables --------------------------------- #
     for key in _PDF_OPTIONS_PASSTHROUGH_VARS:
@@ -2993,6 +3024,7 @@ def _run_pandoc(
     toc_depth: Optional[int] = None,
     emoji_options: Optional[EmojiOptions] = None,
     abort_if_missing_glyph: bool = True,
+    code_block_wrap: bool = True,
 ) -> None:
     _ensure_dir(os.path.dirname(pdf_out))
 
@@ -3211,6 +3243,7 @@ def _run_pandoc(
             needs_harfbuzz=needs_harfbuzz,
             manual_fallback_spec=manual_fallback_spec,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            code_block_wrap=code_block_wrap,
             temp_dir=temp_dir,
         )
         header_file.write_text(font_header_content, encoding="utf-8")
@@ -3627,6 +3660,7 @@ def convert_a_file(
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
+    code_block_wrap: bool = True,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -3710,6 +3744,7 @@ def convert_a_file(
             variables=variables,
             metadata=metadata_map or None,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            code_block_wrap=code_block_wrap,
             toc_depth=toc_depth,
             extra_args=extra_args,
         )
@@ -3752,6 +3787,7 @@ def convert_a_folder(
     variables: Optional[Dict[str, str]] = None,
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
+    code_block_wrap: bool = True,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -3889,6 +3925,7 @@ def convert_a_folder(
             variables=variables,
             metadata=metadata_map or None,
             abort_if_missing_glyph=abort_if_missing_glyph,
+            code_block_wrap=code_block_wrap,
             toc_depth=toc_depth,
             extra_args=extra_args,
         )
@@ -3935,6 +3972,7 @@ def build_pdf(
     variables: Optional[Dict[str, str]] = None,
     project_metadata: Optional[ProjectMetadata] = None,
     abort_if_missing_glyph: bool = True,
+    code_block_wrap: bool = True,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -3978,6 +4016,7 @@ def build_pdf(
                 variables=variables,
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
+                code_block_wrap=code_block_wrap,
                 toc_override=toc_override,
                 toc_depth=toc_depth,
                 extra_args=extra_args,
@@ -4028,6 +4067,7 @@ def build_pdf(
                 variables=variables,
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
+                code_block_wrap=code_block_wrap,
                 toc_override=toc_override,
                 toc_depth=toc_depth,
                 extra_args=extra_args,
@@ -4315,6 +4355,7 @@ def main() -> None:
             _build_variable_overrides(pdf_options) if pdf_options else {}
         )
         abort_missing_glyph = pdf_options.get("abort_if_missing_glyph", True)
+        code_block_wrap = pdf_options.get("code_block_wrap", True)
 
         # -- toc / toc-depth from pdf_options ------------------------------ #
         toc_override: bool | None = (
@@ -4375,6 +4416,7 @@ def main() -> None:
             variables=variable_overrides or None,
             project_metadata=project_metadata,
             abort_if_missing_glyph=bool(abort_missing_glyph),
+            code_block_wrap=bool(code_block_wrap),
             toc_override=toc_override,
             toc_depth=toc_depth,
             extra_args=entry_extra_args or None,

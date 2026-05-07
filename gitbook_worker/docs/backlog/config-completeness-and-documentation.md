@@ -1,10 +1,11 @@
 ---
-version: 3.0.0
+version: 3.1.0
 date: 2026-02-08
 status: done
 priority: high
 target_release: "v2.2.0 „Lückenlos""
 history:
+  - "3.1.0: 2026-05-07 — pdf_options.code_block_wrap als implementierten Schalter ergaenzt"
   - "3.0.0: 2026-02-08 — Alle Prio 2–6 abgeschlossen: language→Pandoc, copyright→ATTRIBUTION, Versionierung, Tests, Samples"
   - "2.0.0: 2026-02-08 — Release target v2.2.0 „Lückenlos" festgelegt, Prio 1 abgeschlossen"
   - "1.1.0: 2026-02-08 — Added sample content strategy (§7), config file versioning (§8), per-file docs in docs/configs/"
@@ -125,6 +126,7 @@ Diese Policy gilt ab sofort für alle neuen und bestehenden Konfigurationsschlü
 | `mono_font` | ✅ | → Pandoc `-V monofont` |
 | `mainfont_fallback` | ✅ | LuaTeX Fallback-Chain |
 | `abort_if_missing_glyph` | ✅ | Default: `true` |
+| `code_block_wrap` | ✅ | Default: `true`; nutzt `fvextra` fuer PDF-Code-Fence-Wrapping |
 
 ---
 

@@ -1,7 +1,8 @@
 ---
-version: 1.2.2
+version: 1.3.0
 date: 2026-05-07
 history:
+  - "1.3.0: 2026-05-07 — pdf_options.code_block_wrap fuer PDF-Code-Fence-Wrapping ergaenzt"
   - "1.2.2: 2026-05-07 — Release reference refreshed for v2.4.3; no configuration schema changes"
   - "1.2.1: 2026-05-06 — Release reference refreshed for v2.4.2; no configuration schema changes"
   - "1.2.0: 2026-02-08 — pdf_options passthrough, author singular alias, format alias"
@@ -15,9 +16,9 @@ Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
 
-Hinweis fuer v2.4.3: Der PDF-Font-Guard- und Heading-Hotfix aendert keine
-Konfigurationsschluessel; die Windows-Font-Stub-Haertung, ERDA-Script-Font-Pfade
-und H4/H5-Blockheadings werden intern durch den Publisher aktiviert.
+Hinweis fuer v2.5.x: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
+konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das
+LaTeX-Paket in der Umgebung vorhanden ist.
 
 > **Ausführliche Per-File-Dokumentation** mit Versionshistorie:
 > [docs/configs/](configs/README.md)
@@ -141,6 +142,7 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 | `monofont` | string | – | ✅ | → Pandoc `-V monofont` (bevorzugter Key) |
 | `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
+| `code_block_wrap` | bool | `true` | ✅ | Lange Zeilen in Code-Fences im PDF umbrechen (`fvextra`) |
 | `documentclass` | string | `"article"` | ✅ | LaTeX-Dokumentklasse (`report`, `book`, …) |
 | `fontsize` | string | `"10pt"` | ✅ | LaTeX-Schriftgröße |
 | `geometry` | string | `"margin=1in"` | ✅ | LaTeX-Geometry-Parameter |
@@ -248,7 +250,7 @@ Template-basierte Docker-Namensvergabe.
 | Datei | Schema-Version | `version`-Feld | Per-File-Dok |
 |-------|---------------|----------------|-------------|
 | `content.yaml` | 1.0.0 | ✓ | [content-yaml.md](configs/content-yaml.md) |
-| `publish.yml` | 0.1.1 | ✓ | [publish-yml.md](configs/publish-yml.md) |
+| `publish.yml` | 0.1.2 | ✓ | [publish-yml.md](configs/publish-yml.md) |
 | `book.json` | 1.0.0 | ✓ | [book-json.md](configs/book-json.md) |
 | `fonts.yml` | 1.0.0 | ✓ | [fonts-yml.md](configs/fonts-yml.md) |
 | `frontmatter.yml` | 1.0.0 | ✓ | [frontmatter-yml.md](configs/frontmatter-yml.md) |

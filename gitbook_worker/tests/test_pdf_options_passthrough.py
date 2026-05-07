@@ -118,7 +118,18 @@ class TestParsePdfOptions:
         assert result["monofont"] == "DejaVu Sans Mono"
 
     def test_empty_mapping(self) -> None:
-        assert _parse_pdf_options({}) == {"abort_if_missing_glyph": True}
+        assert _parse_pdf_options({}) == {
+            "abort_if_missing_glyph": True,
+            "code_block_wrap": True,
+        }
+
+    def test_code_block_wrap_can_be_disabled(self) -> None:
+        result = _parse_pdf_options({"code_block_wrap": False})
+        assert result["code_block_wrap"] is False
+
+    def test_code_block_wrap_accepts_hyphen_alias(self) -> None:
+        result = _parse_pdf_options({"code-block-wrap": "no"})
+        assert result["code_block_wrap"] is False
 
     def test_non_mapping(self) -> None:
         assert _parse_pdf_options("not a dict") == {}
@@ -141,6 +152,7 @@ class TestParsePdfOptions:
             "citecolor": "NavyBlue",
             "lang": "en-GB",
             "header-includes": "\\usepackage{booktabs}\n\\usepackage{longtable}\n\\usepackage{graphicx}",
+            "code_block_wrap": True,
         }
         result = _parse_pdf_options(raw)
         assert result["documentclass"] == "report"
@@ -154,6 +166,7 @@ class TestParsePdfOptions:
         assert result["lang"] == "en-GB"
         assert "booktabs" in result["header_includes"]
         assert result["mainfont"] == "DejaVu Serif"
+        assert result["code_block_wrap"] is True
 
 
 # ──────────────────────────────────────────────────────────────────────────── #

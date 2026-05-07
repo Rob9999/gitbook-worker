@@ -1,11 +1,14 @@
 ---
 title: General PDF overflow hardening for URLs, tables, and code-like lines
-version: 0.1.0
+version: 0.2.0
 date: 2026-05-07
-status: backlog
+status: partial
 priority: P2
 labels: [pdf, layout, urls, tables, code]
 history:
+  - version: 0.2.0
+    date: 2026-05-07
+    description: Implemented global PDF code-fence wrapping via pdf_options.code_block_wrap; URLs and wide tables remain open.
   - version: 0.1.0
     date: 2026-05-07
     description: Initial anonymized P2 backlog for remaining non-CJK PDF overflows.
@@ -38,6 +41,14 @@ remain relevant for print-quality PDFs.
   - optional landscape/wide-table mode,
   - or preflight diagnostics that explain which table is too wide.
 - Add a reusable PDF bounding-box layout scanner to release QA once stable.
+
+## Implemented Slice
+
+- `pdf_options.code_block_wrap` enables `fvextra`-based wrapping for Pandoc
+  `Highlighting` and plain `verbatim` code environments.
+- Default is `true`; entries can opt out with `code_block_wrap: false`.
+- DE/EN sample content now includes one semantically wrapped folded YAML scalar
+  and one deliberately unwrapped long code-fence line as a regression sample.
 
 ## Verification
 

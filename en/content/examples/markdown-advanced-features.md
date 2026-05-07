@@ -190,6 +190,19 @@ if __name__ == "__main__":
     print(greet("World"))
 ```
 
+### Long Code Fence Wrapping
+
+```yaml
+description: >-
+  State: {{country-code}}, date: {{YYYY-MM-dd}}, responsible editorial desk:
+  {{author}}, legally accountable office: {{official}}, publication channel:
+  {{distribution-channel}}, review state: {{quality-gate-status}}
+```
+
+```text
+UNWRAPPED-CODE-FENCE-STRESS: state={{country-code}}; date={{YYYY-MM-dd}}; responsible-editorial-desk={{author}}; legally-accountable-office={{official}}; publication-channel={{distribution-channel}}; review-state={{quality-gate-status}}; checksum={{content-package-sha256}}; distribution-target={{long-form-customer-publication-profile}}
+```
+
 ## Tables with Alignment
 
 ### Complex Table
