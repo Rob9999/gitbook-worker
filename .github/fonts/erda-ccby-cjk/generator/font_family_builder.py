@@ -24,6 +24,7 @@ EM = CONFIG.grid.em
 PIXELS = CONFIG.grid.pixels
 CELL = CONFIG.grid.cell
 MARGIN = CONFIG.grid.margin
+SUBFONT_INK_SCALE = 0.45
 
 
 def _draw_rect(pen: TTGlyphPen, x: int, y: int, w: int, h: int) -> None:
@@ -77,8 +78,7 @@ def build_bitmap_font(
         if info is None:
             logger.track_missing(char)
             continue
-        ink_scale = 0.45 if info.source == "generated" else 1.0
-        glyph, width = glyph_from_bitmap(info.bitmap, ink_scale=ink_scale)
+        glyph, width = glyph_from_bitmap(info.bitmap, ink_scale=SUBFONT_INK_SCALE)
         name = f"uni{ord(char):04X}"
         glyph_order.append(name)
         glyphs[name] = glyph
