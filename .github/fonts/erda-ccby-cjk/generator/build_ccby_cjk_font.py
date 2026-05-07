@@ -63,17 +63,19 @@ CELL = CONFIG.grid.cell
 MARGIN = CONFIG.grid.margin
 
 
-def _glyph_from_bitmap(bitmap: List[str]) -> Tuple[object, int]:
+def _glyph_from_bitmap(bitmap: List[str], ink_scale: float = 1.0) -> Tuple[object, int]:
     pen = TTGlyphPen(None)
     rows = len(bitmap)
     cols = len(bitmap[0]) if rows else 0
+    ink_size = max(1, int(CELL * ink_scale))
+    ink_inset = max(0, (CELL - ink_size) // 2)
     for row_index, row in enumerate(bitmap):
         for col_index, bit in enumerate(row):
             if bit != "#":
                 continue
-            x = MARGIN + col_index * CELL
-            y = MARGIN + (rows - 1 - row_index) * CELL
-            _draw_rect(pen, x, y, CELL, CELL)
+            x = MARGIN + col_index * CELL + ink_inset
+            y = MARGIN + (rows - 1 - row_index) * CELL + ink_inset
+            _draw_rect(pen, x, y, ink_size, ink_size)
     glyph = pen.glyph()
     width = (cols + 2) * CELL
     return glyph, width
@@ -348,7 +350,8 @@ def build_font(output: str = "../true-type/erda-ccby-cjk.ttf") -> None:
             name = f"uni{ord(char):04X}"
             if name in glyphs:
                 return
-            glyph, width = _glyph_from_bitmap(bitmap)
+            ink_scale = 0.45 if source == "generated" else 1.0
+            glyph, width = _glyph_from_bitmap(bitmap, ink_scale=ink_scale)
             glyph_order.append(name)
             glyphs[name] = glyph
             advance_widths[name] = (width, 0)

@@ -34,17 +34,19 @@ def _draw_rect(pen: TTGlyphPen, x: int, y: int, w: int, h: int) -> None:
     pen.closePath()
 
 
-def glyph_from_bitmap(bitmap: List[str]) -> Tuple[object, int]:
+def glyph_from_bitmap(bitmap: List[str], ink_scale: float = 1.0) -> Tuple[object, int]:
     pen = TTGlyphPen(None)
     rows = len(bitmap)
     cols = len(bitmap[0]) if rows else 0
+    ink_size = max(1, int(CELL * ink_scale))
+    ink_inset = max(0, (CELL - ink_size) // 2)
     for row_index, row in enumerate(bitmap):
         for col_index, bit in enumerate(row):
             if bit != "#":
                 continue
-            x = MARGIN + col_index * CELL
-            y = MARGIN + (rows - 1 - row_index) * CELL
-            _draw_rect(pen, x, y, CELL, CELL)
+            x = MARGIN + col_index * CELL + ink_inset
+            y = MARGIN + (rows - 1 - row_index) * CELL + ink_inset
+            _draw_rect(pen, x, y, ink_size, ink_size)
     glyph = pen.glyph()
     width = (cols + 2) * CELL
     return glyph, width
@@ -75,7 +77,8 @@ def build_bitmap_font(
         if info is None:
             logger.track_missing(char)
             continue
-        glyph, width = glyph_from_bitmap(info.bitmap)
+        ink_scale = 0.45 if info.source == "generated" else 1.0
+        glyph, width = glyph_from_bitmap(info.bitmap, ink_scale=ink_scale)
         name = f"uni{ord(char):04X}"
         glyph_order.append(name)
         glyphs[name] = glyph
