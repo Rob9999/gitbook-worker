@@ -555,17 +555,16 @@ Empfohlene Reihenfolge:
 
 ## 19. Release-Verifikation v2.6.0
 
-Der v2.6.0-Releasekandidat wird lokal mit diesen Signalen geprueft:
+Der v2.6.0-Releasekandidat wurde lokal mit diesen Signalen geprueft:
 
 - ERDA-Font-Stats-Gate: `font_cli.py stats --fail-on-targets` bestanden.
-- ERDA CJK: `maxp.numGlyphs=6824`, `cmap=6823`, 3156 Han- und 3103
+- ERDA CJK: `maxp.numGlyphs=6937`, `cmap=6936`, 3242 Han- und 3130
   Hangul-Zielcodepoints.
 - ERDA Indic: `maxp.numGlyphs=162`, `cmap=161`, vollstaendige Devanagari-
   Haupt- und Extended-Ziele.
 - ERDA Ethiopic: `maxp.numGlyphs=525`, `cmap=524`, vollstaendige Ethiopic-
   Main-/Supplement-/Extended-/Extended-A-/Extended-B-Ziele.
-- Gezielte Font- und Sprachproben-Regressionstests: `16 passed`.
-- Non-slow Test-Suite: `543 passed, 11 skipped, 10 deselected, 4 warnings`.
+- Non-slow Test-Suite: `548 passed, 11 skipped, 10 deselected, 4 warnings`.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.6.0`.
 - Wheel-Smoke in frischer virtueller Umgebung: Import aus `site-packages`,
   Version `2.6.0`, Orchestrator-Hilfe erfolgreich.
@@ -574,6 +573,8 @@ Der v2.6.0-Releasekandidat wird lokal mit diesen Signalen geprueft:
   ERDA CC-BY Ethiopic.
 - Direkte PDF-Fontliste mit ERDA CC-BY CJK, Indic und Ethiopic.
 - Positive CJK-, Devanagari- und Ethiopic-Textsignale in beiden Sample-PDFs.
+- Code-Fence-Textlayer-Sichtpruefung: kein sichtbares `python title=...`, kein
+  temporaerer `### 123`-Marker, lange Code-Fence-Stresszeile bricht um.
 - TOC-Pruefung beider Sample-PDFs erfolgreich.
 
 ## 20. Review- und Smoke-Checkliste fuer diese Anleitung
