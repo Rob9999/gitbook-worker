@@ -1,8 +1,11 @@
 ---
 title: CJK linebreaking and ERDA font metrics
-version: 0.1.0
-date: 2026-05-06
+version: 0.3.0
+date: 2026-05-07
 history:
+  - version: 0.3.0
+    date: 2026-05-07
+    description: Added anonymized customer verification that v2.4.2 fixes the inspected CJK margin overflow and identified regression-gate follow-up.
   - version: 0.2.0
     date: 2026-05-06
     description: Switched implemented mitigation from LuaTeX-ja JFont setup to LaTeX-only CJK breakpoints via Pandoc Lua filter.
@@ -51,7 +54,15 @@ Anonymisierter Repro-Text:
 
 # Offene Punkte
 
-- Visueller Kunden-PDF-Abgleich mit echten Taiwan-/CJK-Lizenzabschnitten.
+- Anonymisierte Kundenverifikation vom 2026-05-07: In einem DE/EN-Buchbuild mit
+  `gitbook_worker 2.4.2` waren `TwemojiMozilla` und `ERDACCbyCJK-Regular`
+  eingebettet, Japanisch/Koreanisch/Traditionelles Chinesisch per PDF-Textscan
+  extrahierbar, und die geprueften CJK-Zeilen auf Lizenzseiten lagen innerhalb
+  der Seitenbox. Die fruehere CJK-Randueberlappung war dort nicht mehr
+  reproduzierbar.
+- CJK-Lizenz-/Sample-Seiten als feste Regression in Release-/CI-Pruefungen
+  aufnehmen: `pdffonts`-Check auf `ERDACCbyCJK-Regular` plus Bounding-Box-Check
+  fuer CJK-Zeilen.
 - Vollwertige ERDA-CJK-Fontmetriken bzw. ein rechtssicherer, vollstaendiger
   CJK-Satzfont bleiben ein separates Font-Backlog-Thema.
 - Pruefen, ob ERDA-Fonts als gestufte Coverage-Fonts gepflegt werden sollen:
