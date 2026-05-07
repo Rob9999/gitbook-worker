@@ -60,7 +60,7 @@ erda-ccby-cjk/
 ├── docs/                     # Dokumentation
 │   ├── MODULAR-ARCHITECTURE.md     # Architektur-Dokumentation
 │   ├── VERSIONING.md               # Eigene ERDA-Font-Versionierung
-│   ├── COVERAGE-MATRIX.md          # v1.3.0 TTF-Coverage-Matrix
+│   ├── COVERAGE-MATRIX.md          # v1.4.0 TTF-Coverage-Matrix
 │   ├── FONT-CACHE-TROUBLESHOOTING.md
 │   └── CODE-REVIEW-REPORT.md
 │
@@ -181,9 +181,9 @@ python build_ccby_cjk_font.py --install --refresh-cache
 
 | Font | ERDA-Font-Version | maxp.numGlyphs | cmap-Codepoints | Release-Ziele |
 |---|---|---:|---:|---|
-| `erda-ccby-cjk.ttf` | 1.3.0 | 6877 | 6876 | PASS: 3194 Han, 3118 Hangul, 93 Hiragana, 96 Katakana, 141/141 long sample chars |
-| `erda-ccby-indic.ttf` | 1.3.0 | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
-| `erda-ccby-ethiopic.ttf` | 1.3.0 | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
+| `erda-ccby-cjk.ttf` | 1.4.0 | 6937 | 6936 | PASS: 3242 Han, 3130 Hangul, 93 Hiragana, 96 Katakana, 141/141 long sample chars, 308/308 long-text section chars |
+| `erda-ccby-indic.ttf` | 1.4.0 | 162 | 161 | PASS: 128 Devanagari main, 32 Devanagari Extended |
+| `erda-ccby-ethiopic.ttf` | 1.4.0 | 525 | 524 | PASS: Ethiopic main/supplement/extended/extended-A/extended-B |
 
 Die Statistik stammt direkt aus den TTFs:
 
@@ -479,6 +479,6 @@ Der Font wird als Fallback für CJK-Zeichen in GitBook PDF-Exporten verwendet:
 ---
 
 **Letzte Aktualisierung**: 2026-05-07  
-**Font-Version**: 1.3.0  
-**Build**: v1.3.0 Coverage-Build  
+**Font-Version**: 1.4.0  
+**Build**: v1.4.0 Coverage-Build  
 **Status**: ✅ Production Ready (mit CJK/Indic/Ethiopic Coverage-Gate)

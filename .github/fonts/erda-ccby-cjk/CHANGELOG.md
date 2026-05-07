@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-05-07 - Long Text Section Coverage and Stronger Markers
+
+### Added
+- CJK long-text section coverage target for the full "Sehr lange Texte" /
+  "Very Long Texts" PDF inspection section, not only the marked 3000-character
+  blocks.
+- Stats gate result `cjk_long_text_section` for `erda-ccby-cjk.ttf`.
+
+### Changed
+- Generated CJK, Indic and Ethiopic marker glyphs now use stronger 0.70-cell
+  ink for better PDF readability while keeping sparse marker shapes.
+- `fonts.yml` now reports ERDA generated font version `1.4.0` for `CJK`,
+  `INDIC` and `ETHIOPIC`.
+
+### Fixed
+- Missing CJK-family codepoints in the non-block long-text rows around the
+  ZH-Hant, JA and KO 3000-character inspection blocks.
+
+---
+
 ## [1.3.0] - 2026-05-07 - Sample Block Coverage and Light Markers
 
 ### Added
