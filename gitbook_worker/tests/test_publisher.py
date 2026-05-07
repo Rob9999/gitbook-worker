@@ -198,15 +198,13 @@ def test_font_header_defines_erda_script_macros(monkeypatch, tmp_path):
     assert (
         "\\newfontfamily\\ERDAIndicFont"
         f"[Renderer=HarfBuzz,Path={{{expected_path}}}]"
-        "{erda-ccby-indic.ttf}"
-        in header
+        "{erda-ccby-indic.ttf}" in header
     )
     assert "\\renewcommand{\\erdaIndic}[1]{{\\ERDAIndicFont #1}}" in header
     assert (
         "\\newfontfamily\\ERDAEthiopicFont"
         f"[Renderer=HarfBuzz,Path={{{expected_path}}}]"
-        "{erda-ccby-ethiopic.ttf}"
-        in header
+        "{erda-ccby-ethiopic.ttf}" in header
     )
     assert "\\renewcommand{\\erdaEthiopic}[1]{{\\ERDAEthiopicFont #1}}" in header
 
