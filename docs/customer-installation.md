@@ -1,8 +1,9 @@
 ---
-version: 2.1.2
+version: 2.1.3
 date: 2026-05-08
 status: stable
 history:
+  - "2.1.3: 2026-05-08 - Finale v2.7.0 Release-Verifikation mit Test-, PDF- und Wheel-Smoke-Ergebnissen ergaenzt"
   - "2.1.2: 2026-05-08 - Anwenderanleitung fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "2.1.1: 2026-05-08 - Anwenderanleitung fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
   - "2.1.0: 2026-05-07 - Anwenderanleitung fuer v2.6.0 Code-Fence-Wrapping und Release-Smoke aktualisiert"
@@ -561,31 +562,24 @@ Empfohlene Reihenfolge:
 
 ## 19. Release-Verifikation v2.7.0
 
-Der v2.7.0-Releasekandidat wird lokal mit diesen Signalen geprueft:
+Der v2.7.0-Release wurde lokal mit diesen Signalen geprueft:
 
-- ERDA-Font-Stats-Gate: `font_cli.py stats --fail-on-targets` bestanden.
-- ERDA CJK: `maxp.numGlyphs=6937`, `cmap=6936`, 3242 Han- und 3130
-  Hangul-Zielcodepoints.
-- ERDA Indic: `maxp.numGlyphs=162`, `cmap=161`, vollstaendige Devanagari-
-  Haupt- und Extended-Ziele.
-- ERDA Ethiopic: `maxp.numGlyphs=525`, `cmap=524`, vollstaendige Ethiopic-
-  Main-/Supplement-/Extended-/Extended-A-/Extended-B-Ziele.
-- Non-slow Test-Suite: `548 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.7.0`.
-- Wheel-Smoke in frischer virtueller Umgebung: Import aus `site-packages`,
-  Version `2.7.0`, Orchestrator-Hilfe erfolgreich.
-- Deutscher und englischer PDF-Build.
-- URL-Code-Fence-Stressbeispiele in DE/EN-PDFs umbrechen sichtbar innerhalb
-  des Satzspiegels und bleiben vollstaendig in der PDF-Textschicht.
-- Wide-Table-Stressbeispiele in DE/EN-PDFs nutzen A1-Querformatseiten und
-  wechseln danach wieder auf A4 zurueck.
-- PDF-Font-Gates fuer Twemoji, ERDA CC-BY CJK, ERDA CC-BY Indic und
-  ERDA CC-BY Ethiopic.
-- Direkte PDF-Fontliste mit ERDA CC-BY CJK, Indic und Ethiopic.
-- Positive CJK-, Devanagari- und Ethiopic-Textsignale in beiden Sample-PDFs.
-- Code-Fence-Textlayer-Sichtpruefung: kein sichtbares `python title=...`, kein
-  temporaerer `### 123`-Marker, lange Code-Fence-Stresszeile bricht um.
-- TOC-Pruefung beider Sample-PDFs erfolgreich.
+- Focused Tests fuer Tabellen-Preprocessing und Paper-Info: `16 passed`.
+- Non-slow Test-Suite: `550 passed, 11 skipped, 10 deselected, 4 warnings`.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.7.0`:
+  `gitbook_worker-2.7.0-py3-none-any.whl` und
+  `gitbook_worker-2.7.0.tar.gz`.
+- Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
+  Import aus `site-packages`, Version `2.7.0`, Orchestrator-Hilfe erfolgreich.
+- Deutscher und englischer PDF-Build bestanden.
+- PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK bestanden; beide
+  Sample-PDFs enthalten positive CJK-Textsignale.
+- Bekannte `Missing character`-Warnungen fuer weitere Sprachsamples bleiben
+  im Log-Scan sichtbar, wurden aber nicht als Gate-Fehler gewertet.
+- Wide-Table-Stressbeispiele stehen im PDF-TOC und nutzen A1-Seiten:
+  Deutsch Seite 43, Englisch Seite 69.
+- URL-Code-Fence-Stressbeispiele bleiben Bestandteil der DE/EN-Sample-PDFs und
+  laufen weiterhin durch dieselbe PDF-Release-Pipeline.
 
 ## 20. Review- und Smoke-Checkliste fuer diese Anleitung
 
