@@ -557,7 +557,7 @@ Empfohlene Reihenfolge:
 
 ## 19. Release-Verifikation v2.6.1
 
-Der v2.6.1-Hotfix-Releasekandidat wird lokal mit diesen Signalen geprueft:
+Der v2.6.1-Hotfix-Releasekandidat wurde lokal mit diesen Signalen geprueft:
 
 - ERDA-Font-Stats-Gate: `font_cli.py stats --fail-on-targets` bestanden.
 - ERDA CJK: `maxp.numGlyphs=6937`, `cmap=6936`, 3242 Han- und 3130
