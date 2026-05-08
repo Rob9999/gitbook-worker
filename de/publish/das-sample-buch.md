@@ -1302,6 +1302,20 @@ URL-CODE-FENCE-STRESS: https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bev
 | Support      | E-Mail| Priorität    | 24/7         |
 | Preis        | Frei  | 50€/Monat    | 200€/Monat   |
 
+\newpage
+\newgeometry{paperwidth=841mm, paperheight=594mm, left=20mm, right=20mm, top=20mm, bottom=20mm}
+
+
+\pagewidth=841mm
+\pageheight=594mm
+### Breite Entscheidungstabelle (anonymisiert)
+
+\begin{longtable}{@{}lllllllll@{}}\toprule Teilraum & Code & Governancegrad & Satzungsstatus & Bedingungen zur Integration & Kooperation & Partnerschafts-Level & Kernverbund-Potenzial & Kommentar \\\midrule \endhead Gebiet Alpha-Verbund & G-A1 & hoch stabil & Satzungsrahmen geprüft, Kontrollpfad dokumentiert & Aufnahmebedingungen mit Auditpfad, Datenschutzfolgeprüfung und abgestimmter Schutzklausel & Fachliche Kooperation, Datenraum, Krisenübung & Assoziiert mit Ausbaupfad & mittelfristig plausibel & Anonymisierte Langnotiz mit Begründung, Risikohinweis und offenem Prüfauftrag \\Gebiet Beta-Korridor & G-B2 & moderat stabil & Übergangsstatus mit externer Qualitätssicherung & Integration nur nach Nachweis belastbarer Betriebsprozesse und konsistenter Berichtspflichten & Pilotkooperation, Schulung, gemeinsamer Lagebericht & Beobachtende Partnerschaft & abhängig von Folgeprüfung & Anonymisierte Bewertung mit bewusst langer Textbreite für PDF-Tabellenstress \\Gebiet Gamma-Netz & G-C3 & uneinheitlich & Satzungsabgleich begonnen, Entscheidung offen & Vorbedingungen: Verantwortlichkeiten klären, Datenklassifizierung abschließen, Auditfenster bestätigen & Fachdialog und technische Bestandsaufnahme & Vorbereitende Kooperation & derzeit nicht belastbar & Neutrale Musterzeile ohne Kundennamen, Originalorte oder politische Einordnung \\\bottomrule \end{longtable}
+\restoregeometry
+\pagewidth=210mm
+\pageheight=297mm
+\newpage
+
 ### Tabelle mit Formatierung
 
 | Code | Ausgabe | Beschreibung |

@@ -2029,6 +2029,20 @@ URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024
 | Support | Email | Priority     | 24/7       |
 | Price   | Free  | £50/month    | £200/month |
 
+\newpage
+\newgeometry{paperwidth=841mm, paperheight=594mm, left=20mm, right=20mm, top=20mm, bottom=20mm}
+
+
+\pagewidth=841mm
+\pageheight=594mm
+### Wide Decision Table (Anonymized)
+
+\begin{longtable}{@{}lllllllll@{}}\toprule Area & Code & Governance grade & Charter status & Entry conditions & Cooperation & Partnership level & Core-group potential & Comment \\\midrule \endhead Area Alpha Network & A-A1 & high stable & charter frame reviewed, control path documented & Entry conditions with audit path, privacy impact review, and aligned safeguard clause & Professional cooperation, data room, crisis exercise & Associated with expansion path & plausible in the medium term & Anonymized long note with rationale, risk marker, and open review task \\Area Beta Corridor & A-B2 & moderately stable & transition status with external quality assurance & Integration only after evidence of reliable operating processes and consistent reporting duties & Pilot cooperation, training, shared situation report & Observing partnership & depends on follow-up review & Anonymized assessment with intentionally long text width for PDF table stress \\Area Gamma Mesh & A-C3 & uneven & charter comparison started, decision open & Preconditions: clarify responsibilities, finish data classification, confirm audit window & Expert dialogue and technical inventory & Preparatory cooperation & not currently robust & Neutral sample row without customer names, original places, or political classification \\\bottomrule \end{longtable}
+\restoregeometry
+\pagewidth=210mm
+\pageheight=297mm
+\newpage
+
 ### Table with Formatting
 
 | Code | Output | Description |
