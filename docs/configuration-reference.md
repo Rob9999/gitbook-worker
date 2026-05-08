@@ -1,7 +1,8 @@
 ---
-version: 1.3.2
+version: 1.3.3
 date: 2026-05-08
 history:
+  - "1.3.3: 2026-05-08 — Release reference fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "1.3.2: 2026-05-08 — Release reference fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
   - "1.3.1: 2026-05-07 — Release reference fuer v2.6.0 Code-Fence-Wrapping aktualisiert"
   - "1.3.0: 2026-05-07 — pdf_options.code_block_wrap fuer PDF-Code-Fence-Wrapping ergaenzt"
@@ -17,6 +18,11 @@ history:
 Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
+
+Hinweis fuer v2.7.0: Breite Markdown-Pipe-Tabellen werden anhand geschaetzter
+Zelltextbreiten und der nutzbaren Textbreite nach Margen auf passende
+Standardpapierformate gelegt. Dafuer ist kein neuer Konfigurationsschluessel
+noetig; die bestehende Wide-Content-Vorverarbeitung bleibt aktiv.
 
 Hinweis fuer v2.6.1: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das

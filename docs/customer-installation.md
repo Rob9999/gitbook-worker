@@ -1,8 +1,9 @@
 ---
-version: 2.1.1
+version: 2.1.2
 date: 2026-05-08
 status: stable
 history:
+  - "2.1.2: 2026-05-08 - Anwenderanleitung fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "2.1.1: 2026-05-08 - Anwenderanleitung fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
   - "2.1.0: 2026-05-07 - Anwenderanleitung fuer v2.6.0 Code-Fence-Wrapping und Release-Smoke aktualisiert"
   - "2.0.4: 2026-05-07 - Anwenderanleitung fuer v2.5.0 Font-Coverage und TTF-Stats-Gate aktualisiert"
@@ -15,15 +16,15 @@ history:
   - "1.0.0: 2025-12-31 - init"
 ---
 
-# GitBook Worker Anwenderanleitung v2.6.1
+# GitBook Worker Anwenderanleitung v2.7.0
 
 Diese Anleitung ist der zentrale Einstieg fuer Anwenderinnen und Anwender von
-GitBook Worker v2.6.1. Sie beschreibt Installation, Projektstruktur,
+GitBook Worker v2.7.0. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
 Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
-fuer v2.6.1 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+fuer v2.7.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
 Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
@@ -68,7 +69,7 @@ bleiben beim jeweiligen Projektteam.
 ### Lokal
 
 - Windows, Linux oder macOS.
-- Python 3.10 oder neuer; fuer v2.6.1 ist Python 3.11/3.12 empfohlen.
+- Python 3.10 oder neuer; fuer v2.7.0 ist Python 3.11/3.12 empfohlen.
 - Pandoc.
 - TeX Live mit LuaLaTeX.
 - Zugriff auf die konfigurierten Fonts oder einen erlaubten Downloadpfad.
@@ -105,7 +106,7 @@ python -m pip uninstall -y gitbook-worker tools
 Installation aus einem gelieferten Wheel:
 
 ```powershell
-python -m pip install --force-reinstall dist\gitbook_worker-2.6.1-py3-none-any.whl
+python -m pip install --force-reinstall dist\gitbook_worker-2.7.0-py3-none-any.whl
 ```
 
 Installation direkt aus dem Repository:
@@ -122,7 +123,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip uninstall -y gitbook-worker tools
-python -m pip install --force-reinstall dist/gitbook_worker-2.6.1-py3-none-any.whl
+python -m pip install --force-reinstall dist/gitbook_worker-2.7.0-py3-none-any.whl
 ```
 
 ## 5. Installation pruefen
@@ -136,7 +137,7 @@ python -c "import gitbook_worker, tools; print('version:', gitbook_worker.__vers
 
 Erwartung:
 
-- `version:` zeigt `2.6.1`.
+- `version:` zeigt `2.7.0`.
 - `gitbook_worker:` zeigt in die aktive `.venv` oder in das bewusst installierte
   Repository.
 - `tools shim:` zeigt auf den Kompatibilitaets-Shim aus `gitbook_worker`, nicht
@@ -368,13 +369,14 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.6.1` verwenden. `2.4.1`
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.7.0` verwenden. `2.4.1`
   stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
   im Lieferpaket enthalten sind; `2.4.2` ergaenzt den PDF-Font-Hotfix fuer
   CJK-Linebreak und ERDA-Script-Sichtpruefung; `2.4.3` haertet Windows-Font-Stubs
   und PDF-H4/H5-Blockheadings; `2.5.0` ergaenzt echte ERDA-TTF-Coverage-Ziele
   und das `font_cli.py stats`-Gate; `2.6.0` ergaenzt PDF-Code-Fence-Wrapping;
-  `2.6.1` haertet URL-artige Tokens in Pandoc-Code-Fences.
+  `2.6.1` haertet URL-artige Tokens in Pandoc-Code-Fences; `2.7.0` waehlt
+  fuer breite Markdown-Tabellen Papier anhand der geschaetzten Zelltextbreite.
 - `--use-dynamic` ist weiterhin der Release-Pfad fuer dynamische Docker-Builds.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
@@ -433,7 +435,7 @@ Als JSON fuer CI oder Support:
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de\publish\das-sample-buch.pdf --json
 ```
 
-Erwartete Signale fuer v2.6.1:
+Erwartete Signale fuer v2.7.0:
 
 - Der konfigurierte Emoji-Font `Twemoji Mozilla` ist eingebettet.
 - Der konfigurierte CJK-Font `ERDA CC-BY CJK` ist eingebettet.
@@ -446,6 +448,8 @@ Erwartete Signale fuer v2.6.1:
   unterstuetzten Unicode-Bloecke vollstaendig abdecken.
 - Neue Missing-Glyph- oder `.notdef`-Signale werden als Warnung oder, mit
   `--fail-on-log-pattern`, als Fehler sichtbar.
+- Breite Markdown-Pipe-Tabellen koennen auf groessere Querformate wechseln,
+  wenn die geschaetzte Zelltextbreite nicht in den aktuellen Satzspiegel passt.
 
 ## 15. AI-Reference-QA
 
@@ -544,7 +548,7 @@ Mehr konkrete Fehlerbilder stehen in den [FAQs](FAQs.md).
 
 Empfohlene Reihenfolge:
 
-1. Release Notes lesen: [v2.6.1 Release Notes](releases/v2.6.1.md).
+1. Release Notes lesen: [v2.7.0 Release Notes](releases/v2.7.0.md).
 2. Recovery-Punkt im Projekt setzen, bevor Build- oder Migrationslaeufe starten.
 3. Neue Version in einer sauberen `.venv` installieren.
 4. Importpfade und Version pruefen.
@@ -555,9 +559,9 @@ Empfohlene Reihenfolge:
 9. Optional Docker-Build mit `Dockerfile.dynamic` ausfuehren.
 10. AI-Reference-QA zuerst report-only testen.
 
-## 19. Release-Verifikation v2.6.1
+## 19. Release-Verifikation v2.7.0
 
-Der v2.6.1-Hotfix-Releasekandidat wurde lokal mit diesen Signalen geprueft:
+Der v2.7.0-Releasekandidat wird lokal mit diesen Signalen geprueft:
 
 - ERDA-Font-Stats-Gate: `font_cli.py stats --fail-on-targets` bestanden.
 - ERDA CJK: `maxp.numGlyphs=6937`, `cmap=6936`, 3242 Han- und 3130
@@ -567,12 +571,14 @@ Der v2.6.1-Hotfix-Releasekandidat wurde lokal mit diesen Signalen geprueft:
 - ERDA Ethiopic: `maxp.numGlyphs=525`, `cmap=524`, vollstaendige Ethiopic-
   Main-/Supplement-/Extended-/Extended-A-/Extended-B-Ziele.
 - Non-slow Test-Suite: `548 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.6.1`.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.7.0`.
 - Wheel-Smoke in frischer virtueller Umgebung: Import aus `site-packages`,
-  Version `2.6.1`, Orchestrator-Hilfe erfolgreich.
+  Version `2.7.0`, Orchestrator-Hilfe erfolgreich.
 - Deutscher und englischer PDF-Build.
 - URL-Code-Fence-Stressbeispiele in DE/EN-PDFs umbrechen sichtbar innerhalb
   des Satzspiegels und bleiben vollstaendig in der PDF-Textschicht.
+- Wide-Table-Stressbeispiele in DE/EN-PDFs nutzen A1-Querformatseiten und
+  wechseln danach wieder auf A4 zurueck.
 - PDF-Font-Gates fuer Twemoji, ERDA CC-BY CJK, ERDA CC-BY Indic und
   ERDA CC-BY Ethiopic.
 - Direkte PDF-Fontliste mit ERDA CC-BY CJK, Indic und Ethiopic.

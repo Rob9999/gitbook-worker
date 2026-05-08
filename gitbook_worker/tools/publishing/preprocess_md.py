@@ -11,6 +11,7 @@ content readable when converted to PDF via Pandoc.
 
 The thresholds are heuristic and can be adjusted in the constants below.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -30,7 +31,6 @@ from gitbook_worker.tools.publishing.paper_info import (
     PaperInfo,
     get_valid_paper_measurements,
 )
-
 
 _FIGURE_START = re.compile(r"<figure\b", re.IGNORECASE)
 _FIGURE_END = re.compile(r"</figure>", re.IGNORECASE)

@@ -1,7 +1,8 @@
 ---
-version: 1.3.6
+version: 1.3.7
 date: 2026-05-08
 history:
+  - "1.3.7: 2026-05-08 - Wide-Table-Paper-Selection fuer v2.7.0 dokumentiert"
   - "1.3.6: 2026-05-08 - URL-Code-Fence-Hotfix fuer v2.6.1 dokumentiert"
   - "1.3.5: 2026-05-07 - PDF-Code-Fence-Wrapping fuer v2.6.0 dokumentiert"
   - "1.3.4: 2026-05-07 - Windows-Font-Stub-Haertung und H4/H5-Blockheadings fuer v2.4.3 dokumentiert"
@@ -63,6 +64,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - v2.4.3 keeps the global fallback stack CJK-first for stability. Long Devanagari and Ethiopic samples are routed through explicit ERDA script helpers instead of moving Indic/Ethiopic ahead of CJK globally. Script helpers now load validated managed font files by path and avoid optional `\IfFontExistsTF` family probes so stale Windows user-font stubs cannot abort the PDF header.
 - Pandoc H4/H5 headings (`\paragraph`/`\subparagraph`) are redefined with package-free LaTeX `\@startsection` rules so they render as block headings without requiring `titlesec.sty`.
 - v2.6.1 extends PDF code-fence wrapping for Pandoc token macros such as `\NormalTok{...}`. When `fvextra` is available, token arguments are routed through `\FV@InsertBreaks`; this keeps long URLs inside code fences within the page bounds while preserving a clean PDF text layer.
+- v2.7.0 improves wide Markdown table handling. Pipe tables are estimated by per-column text width and compared against usable text width after margins; the old column-count heuristic remains a lower bound, and oversized tables emit a warning instead of pretending that a standard paper size solved them.
 
 ### PDF font fallback behavior
 

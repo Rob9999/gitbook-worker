@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.6.1 "URLfest"** · [Release Notes](docs/releases/v2.6.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.7.0 "Tabellenfest"** · [Release Notes](docs/releases/v2.7.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.6.1-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.7.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -317,6 +317,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.7.0 "Tabellenfest" (8. Mai 2026)
+
+- **Breite Tabellen besser einschaetzen**: Markdown-Pipe-Tabellen werden nun anhand geschaetzter Zelltextbreiten und der nutzbaren Textbreite nach Margen bewertet.
+- **Passendes Papier statt Spaltenzaehlung allein**: 9-spaltige Tabellen mit langen Kopf- und Zelltexten koennen automatisch auf ein groesseres Querformat wechseln.
+- **Anonymisierte Regression-Samples**: Deutsche und englische Sample-PDFs enthalten breite Entscheidungstabellen und zeigen die Rueckkehr von A1 quer auf A4.
+
+→ [docs/releases/v2.7.0.md](docs/releases/v2.7.0.md)
+
 #### v2.6.1 "URLfest" (8. Mai 2026)
 
 - **URL-Code-Fences gehaertet**: Pandoc-Token wie `\NormalTok{...}` werden mit `fvextra`-Breakpoints versehen, damit lange URLs im Codeblock nicht rechts aus dem PDF laufen.
@@ -527,7 +535,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.6.1-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.7.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -781,6 +789,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.7.0 "Tabellenfest" (May 8, 2026)
+
+- **Wide tables estimated more safely**: Markdown pipe tables are now assessed by estimated cell text widths and usable text area after margins.
+- **Paper choice beyond column counts**: 9-column tables with long headers and cells can automatically move to a wider landscape paper size.
+- **Anonymized regression samples**: German and English sample PDFs include wide decision tables and demonstrate the return from A1 landscape to A4.
+
+→ [docs/releases/v2.7.0.md](docs/releases/v2.7.0.md)
 
 #### v2.6.1 "URLfest" (May 8, 2026)
 
