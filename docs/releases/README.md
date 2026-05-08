@@ -6,6 +6,7 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
+| **v2.6.1** | 2026-05-08 | `release-v.2.6.1-hotfix` | [v2.6.1](v2.6.1.md) - URL wrapping hotfix for Pandoc-highlighted code fences |
 | **v2.6.0** | 2026-05-07 | `v2.6.0` | [v2.6.0](v2.6.0.md) - PDF code-fence wrapping and repository documentation cleanup |
 | **v2.5.0** | 2026-05-07 | `v2.5.0` | [v2.5.0](v2.5.0.md) - staged ERDA fallback-font coverage and TTF stats gates |
 | **v2.4.3** | 2026-05-07 | `v2.4.3` | [v2.4.3](v2.4.3.md) - Windows font-stub guard and PDF H4/H5 block-heading hotfix |

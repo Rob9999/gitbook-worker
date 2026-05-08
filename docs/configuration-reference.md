@@ -1,7 +1,8 @@
 ---
-version: 1.3.1
-date: 2026-05-07
+version: 1.3.2
+date: 2026-05-08
 history:
+  - "1.3.2: 2026-05-08 — Release reference fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
   - "1.3.1: 2026-05-07 — Release reference fuer v2.6.0 Code-Fence-Wrapping aktualisiert"
   - "1.3.0: 2026-05-07 — pdf_options.code_block_wrap fuer PDF-Code-Fence-Wrapping ergaenzt"
   - "1.2.2: 2026-05-07 — Release reference refreshed for v2.4.3; no configuration schema changes"
@@ -17,9 +18,10 @@ Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
 
-Hinweis fuer v2.6.0: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
+Hinweis fuer v2.6.1: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das
-LaTeX-Paket in der Umgebung vorhanden ist.
+LaTeX-Paket in der Umgebung vorhanden ist, und bricht auch URL-artige Pandoc-
+Token in Code-Fences innerhalb des Satzspiegels um.
 
 > **Ausführliche Per-File-Dokumentation** mit Versionshistorie:
 > [docs/configs/](configs/README.md)

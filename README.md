@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.6.0 "Zeilenfest"** · [Release Notes](docs/releases/v2.6.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.6.1 "URLfest"** · [Release Notes](docs/releases/v2.6.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.6.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.6.1-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -317,6 +317,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.6.1 "URLfest" (8. Mai 2026)
+
+- **URL-Code-Fences gehaertet**: Pandoc-Token wie `\NormalTok{...}` werden mit `fvextra`-Breakpoints versehen, damit lange URLs im Codeblock nicht rechts aus dem PDF laufen.
+- **Saubere PDF-Textschicht**: Umbruchsymbole bleiben unterdrueckt, kopierter PDF-Text enthaelt die vollstaendige URL ohne Marker.
+- **Sample-PDFs aktualisiert**: Deutsche und englische URL-Stressbeispiele sind im PDF sichtbar und mehrzeilig im Satzspiegel.
+
+→ [docs/releases/v2.6.1.md](docs/releases/v2.6.1.md)
+
 #### v2.6.0 "Zeilenfest" (7. Mai 2026)
 
 - **Code-Fence-Wrapping im PDF**: `pdf_options.code_block_wrap` bricht lange Codeblock-Zeilen mit `fvextra` um und ist standardmaessig aktiv.
@@ -519,7 +527,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.6.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.6.1-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -773,6 +781,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.6.1 "URLfest" (May 8, 2026)
+
+- **URL code fences hardened**: Pandoc token macros such as `\NormalTok{...}` now receive `fvextra` breakpoints so long URLs inside code blocks stay inside the PDF text area.
+- **Clean PDF text layer**: Wrap markers remain suppressed, so copied PDF text contains the complete URL without extra symbols.
+- **Sample PDFs refreshed**: German and English URL stress examples now render visibly wrapped within the page bounds.
+
+→ [docs/releases/v2.6.1.md](docs/releases/v2.6.1.md)
 
 #### v2.6.0 "Zeilenfest" (May 7, 2026)
 

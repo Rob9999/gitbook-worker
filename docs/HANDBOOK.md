@@ -1,7 +1,8 @@
 ---
-version: 1.3.5
-date: 2026-05-07
+version: 1.3.6
+date: 2026-05-08
 history:
+  - "1.3.6: 2026-05-08 - URL-Code-Fence-Hotfix fuer v2.6.1 dokumentiert"
   - "1.3.5: 2026-05-07 - PDF-Code-Fence-Wrapping fuer v2.6.0 dokumentiert"
   - "1.3.4: 2026-05-07 - Windows-Font-Stub-Haertung und H4/H5-Blockheadings fuer v2.4.3 dokumentiert"
   - "1.3.3: 2026-05-06 - CJK-Linebreak und ERDA-Script-Font-Routing fuer v2.4.2 dokumentiert"
@@ -61,6 +62,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - Repository builds now keep vendor fonts out of git: `fonts-storage/` (ignored) is populated automatically by `gitbook_worker.tools.publishing.font_storage.FontStorageBootstrapper` during `fonts sync` and orchestrator runs. Delete the folder to force a refresh or set `GITBOOK_WORKER_DISABLE_FONT_STORAGE_BOOTSTRAP=1` when developing offline.
 - v2.4.3 keeps the global fallback stack CJK-first for stability. Long Devanagari and Ethiopic samples are routed through explicit ERDA script helpers instead of moving Indic/Ethiopic ahead of CJK globally. Script helpers now load validated managed font files by path and avoid optional `\IfFontExistsTF` family probes so stale Windows user-font stubs cannot abort the PDF header.
 - Pandoc H4/H5 headings (`\paragraph`/`\subparagraph`) are redefined with package-free LaTeX `\@startsection` rules so they render as block headings without requiring `titlesec.sty`.
+- v2.6.1 extends PDF code-fence wrapping for Pandoc token macros such as `\NormalTok{...}`. When `fvextra` is available, token arguments are routed through `\FV@InsertBreaks`; this keeps long URLs inside code fences within the page bounds while preserving a clean PDF text layer.
 
 ### PDF font fallback behavior
 
