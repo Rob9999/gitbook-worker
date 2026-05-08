@@ -389,9 +389,7 @@ def _split_table_row(line: str) -> list[str]:
 
 def _is_table_separator_row(line: str) -> bool:
     cells = _split_table_row(line)
-    return bool(cells) and all(
-        re.fullmatch(r":?-+:?", cell.strip()) for cell in cells
-    )
+    return bool(cells) and all(re.fullmatch(r":?-+:?", cell.strip()) for cell in cells)
 
 
 def _table_rows_for_measurement(table_lines: list[str]) -> list[list[str]]:
@@ -626,10 +624,7 @@ def wrap_block(
                 and i + 1 < len(lines)
                 and _is_table_separator_row(lines[i + 1])
             ):
-                header = [
-                    _escape_table_text(x.strip())
-                    for x in _split_table_row(line)
-                ]
+                header = [_escape_table_text(x.strip()) for x in _split_table_row(line)]
                 alignments = _split_table_row(lines[i + 1])
                 column_specs: list[str] = []
                 for align in alignments:
@@ -711,20 +706,14 @@ def process(path: str, paper_format: str = "a4") -> str:
         line = lines[i]
 
         # Detect GitHub-style tables
-        if (
-            "|" in line
-            and i + 1 < len(lines)
-            and _is_table_separator_row(lines[i + 1])
-        ):
+        if "|" in line and i + 1 < len(lines) and _is_table_separator_row(lines[i + 1]):
             table_lines = [line, lines[i + 1]]
             i += 2
             while i < len(lines) and "|" in lines[i] and lines[i].strip():
                 table_lines.append(lines[i])
                 i += 1
             cols = _table_column_count(table_lines)
-            paper_info = paper_for_table(
-                table_lines, base_paper=current_paper_info
-            )
+            paper_info = paper_for_table(table_lines, base_paper=current_paper_info)
             escaped_lines = [_escape_table_line(l) for l in table_lines]
             logger.info(
                 "In document '%s': Detected table with %d columns, paper: %s",
