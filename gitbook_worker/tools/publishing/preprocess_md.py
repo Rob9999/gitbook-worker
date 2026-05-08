@@ -494,6 +494,18 @@ def paper_for_table(
     cols = _table_column_count(table_lines)
     paper_by_columns = paper_for_columns(cols=cols, base_paper=base_info)
     required_width = estimate_table_width_mm(table_lines)
+    max_standard_width = max(
+        available_text_width_mm(candidate) for candidate in _paper_candidates(base_info)
+    )
+    if required_width > max_standard_width:
+        logger.warning(
+            "Table estimated text width %.1fmm exceeds supported standard "
+            "papers; keeping column heuristic paper %s.",
+            required_width,
+            paper_by_columns.norm_name,
+        )
+        return paper_by_columns
+
     paper_by_width = paper_for_table_width(required_width, base_paper=base_info)
 
     selected = (
