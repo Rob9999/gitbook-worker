@@ -1,11 +1,14 @@
 ---
 title: General PDF overflow hardening for URLs, tables, and code-like lines
-version: 0.3.1
-date: 2026-05-07
+version: 0.4.0
+date: 2026-05-08
 status: partial
 priority: P2
 labels: [pdf, layout, urls, tables, code]
 history:
+  - version: 0.4.0
+    date: 2026-05-08
+    description: Added content-width based paper selection for Markdown pipe tables and anonymized wide-table regression samples.
   - version: 0.3.1
     date: 2026-05-07
     description: Routed Pandoc token macro arguments through fvextra break insertion so URL-like code tokens wrap instead of clipping.
@@ -66,6 +69,12 @@ remain relevant for print-quality PDFs.
   and one deliberately unwrapped long code-fence line as a regression sample.
 - DE/EN sample content also includes one deliberately long URL inside a text
   code fence to study URL-token behavior without changing customer content.
+- Markdown pipe tables now estimate per-column text width and select paper by
+  usable text area after margins. The existing column-count heuristic remains
+  as a lower bound, while long-cell 9-column tables can move beyond A4
+  landscape when their measured content needs it.
+- DE/EN sample content includes an anonymized 9-column wide-table regression
+  case with long headers and long cells.
 
 ## Verification
 

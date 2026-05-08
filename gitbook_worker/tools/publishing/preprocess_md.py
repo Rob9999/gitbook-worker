@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import unicodedata
 from html import unescape
 from pathlib import Path
 from typing import Iterable, List
@@ -57,6 +58,14 @@ COLUMN_WIDTH_mm = 25  # Annahme: 25mm pro Spalte (inkl. Abstand)
 COLUMN_HEIGHT_mm = 10  # Annahme: 10mm pro Spalte (inkl. Abstand)
 PIXELS_PER_MM = 11.81  # bei 300 dpi (1 inch = 25.4 mm, 300/25.4 ≈ 11.81)
 MIN_COLS_FOR_WRAP = 10
+TABLE_FONT_SIZE_PT = 10.0
+PT_TO_MM = 25.4 / 72.0
+MIN_TABLE_COLUMN_WIDTH_MM = 8.0
+TABLE_CELL_PADDING_MM = 4.5
+TABLE_WIDTH_SAFETY_FACTOR = 1.06
+_MARKDOWN_IMAGE_RE = re.compile(r"!\[(?P<label>[^\]]*)\]\([^)]+\)")
+_MARKDOWN_CODE_SPAN_RE = re.compile(r"`([^`]*)`")
+_MARKDOWN_STYLE_MARK_RE = re.compile(r"(?<!\\)[*_~]+")
 
 
 def _strip_html_tags(value: str) -> str:
@@ -344,6 +353,166 @@ def _paper_candidates(base: PaperInfo) -> Iterable[PaperInfo]:
             yield item
 
 
+def available_text_width_mm(paper_info: PaperInfo) -> float:
+    width, _ = paper_info.size_mm
+    left, _, right, _ = paper_info.margins_mm
+    return max(0.0, float(width - left - right))
+
+
+def _split_table_row(line: str) -> list[str]:
+    stripped = line.strip()
+    if stripped.startswith("|"):
+        stripped = stripped[1:]
+    if stripped.endswith("|"):
+        stripped = stripped[:-1]
+
+    cells: list[str] = []
+    current: list[str] = []
+    escaped = False
+    for char in stripped:
+        if escaped:
+            current.append(char)
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            current.append(char)
+            continue
+        if char == "|":
+            cells.append("".join(current).strip())
+            current = []
+            continue
+        current.append(char)
+    cells.append("".join(current).strip())
+    return cells
+
+
+def _is_table_separator_row(line: str) -> bool:
+    cells = _split_table_row(line)
+    return bool(cells) and all(
+        re.fullmatch(r":?-+:?", cell.strip()) for cell in cells
+    )
+
+
+def _table_rows_for_measurement(table_lines: list[str]) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for line in table_lines:
+        if "|" not in line or _is_table_separator_row(line):
+            continue
+        rows.append(_split_table_row(line))
+    return rows
+
+
+def _table_column_count(table_lines: list[str]) -> int:
+    rows = _table_rows_for_measurement(table_lines[:1])
+    if not rows:
+        return 0
+    return len(rows[0])
+
+
+def _normalize_table_measurement_text(value: str) -> str:
+    text = value.replace(r"\|", "|")
+    text = _MARKDOWN_IMAGE_RE.sub(lambda match: match.group("label"), text)
+    text = _MARKDOWN_LINK_RE.sub(lambda match: match.group("label"), text)
+    text = _MARKDOWN_CODE_SPAN_RE.sub(lambda match: match.group(1), text)
+    text = _strip_html_tags(text)
+    text = _MARKDOWN_STYLE_MARK_RE.sub("", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _glyph_width_em(char: str) -> float:
+    category = unicodedata.category(char)
+    if category.startswith("M"):
+        return 0.0
+    if char.isspace():
+        return 0.32
+    if unicodedata.east_asian_width(char) in {"F", "W"}:
+        return 1.0
+    if category.startswith("S"):
+        return 0.85
+    if char in "ilI.,:;|'!":
+        return 0.28
+    if char in "mwMW@#%&":
+        return 0.75
+    if char.isupper():
+        return 0.62
+    if char.isdigit():
+        return 0.52
+    if category.startswith("P"):
+        return 0.35
+    return 0.52
+
+
+def estimate_text_width_mm(
+    value: str, font_size_pt: float = TABLE_FONT_SIZE_PT
+) -> float:
+    text = _normalize_table_measurement_text(value)
+    return sum(_glyph_width_em(char) * font_size_pt * PT_TO_MM for char in text)
+
+
+def estimate_table_width_mm(table_lines: list[str]) -> float:
+    rows = _table_rows_for_measurement(table_lines)
+    if not rows:
+        return 0.0
+
+    column_count = max(len(row) for row in rows)
+    column_widths = [MIN_TABLE_COLUMN_WIDTH_MM] * column_count
+    for row in rows:
+        for index, cell in enumerate(row):
+            column_widths[index] = max(
+                column_widths[index], estimate_text_width_mm(cell)
+            )
+
+    raw_width = sum(column_widths) + column_count * TABLE_CELL_PADDING_MM
+    return raw_width * TABLE_WIDTH_SAFETY_FACTOR
+
+
+def paper_for_table_width(
+    min_width_mm: float, *, base_paper: PaperInfo | None = None
+) -> PaperInfo:
+    base_info = base_paper or PaperInfo.default()
+    candidates = list(_paper_candidates(base_info))
+    for candidate in candidates:
+        if available_text_width_mm(candidate) >= min_width_mm:
+            return candidate
+
+    fallback = max(candidates, key=available_text_width_mm)
+    logger.warning(
+        "Table requires estimated text width %.1fmm; falling back to %s "
+        "with %.1fmm usable width.",
+        min_width_mm,
+        fallback.norm_name,
+        available_text_width_mm(fallback),
+    )
+    return fallback
+
+
+def paper_for_table(
+    table_lines: list[str], *, base_paper: PaperInfo | None = None
+) -> PaperInfo:
+    base_info = base_paper or PaperInfo.default()
+    cols = _table_column_count(table_lines)
+    paper_by_columns = paper_for_columns(cols=cols, base_paper=base_info)
+    required_width = estimate_table_width_mm(table_lines)
+    paper_by_width = paper_for_table_width(required_width, base_paper=base_info)
+
+    selected = (
+        paper_by_width
+        if available_text_width_mm(paper_by_width)
+        > available_text_width_mm(paper_by_columns)
+        else paper_by_columns
+    )
+    logger.info(
+        "Table width estimate: cols=%d, text_width=%.1fmm, selected=%s "
+        "(usable %.1fmm).",
+        cols,
+        required_width,
+        selected.norm_name,
+        available_text_width_mm(selected),
+    )
+    return selected
+
+
 def paper_for_columns(
     cols: int,
     rows: int = None,
@@ -432,7 +601,7 @@ def wrap_block(
     between formats mid-document.
     """
 
-    def convert_table_to_latex(lines: List[str]) -> str:
+    def convert_table_to_latex(lines: List[str]) -> List[str]:
         """Convert Markdown pipe tables in ``text`` to LaTeX ``longtable`` blocks."""
 
         out_lines: list[str] = []
@@ -443,15 +612,13 @@ def wrap_block(
             if (
                 "|" in line
                 and i + 1 < len(lines)
-                and re.match(r"^\s*\|?\s*:?-+", lines[i + 1])
+                and _is_table_separator_row(lines[i + 1])
             ):
                 header = [
                     _escape_table_text(x.strip())
-                    for x in line.strip().strip("|").split("|")
+                    for x in _split_table_row(line)
                 ]
-                alignments = [
-                    x.strip() for x in lines[i + 1].strip().strip("|").split("|")
-                ]
+                alignments = _split_table_row(lines[i + 1])
                 column_specs: list[str] = []
                 for align in alignments:
                     if align.startswith(":") and align.endswith(":"):
@@ -471,7 +638,7 @@ def wrap_block(
                 while i < len(lines) and "|" in lines[i] and lines[i].strip():
                     row = [
                         _escape_table_text(x.strip())
-                        for x in lines[i].strip().strip("|").split("|")
+                        for x in _split_table_row(lines[i])
                     ]
                     out_lines.append(f"{' & '.join(row)} \\\\")
                     i += 1
@@ -535,15 +702,17 @@ def process(path: str, paper_format: str = "a4") -> str:
         if (
             "|" in line
             and i + 1 < len(lines)
-            and re.match(r"^\s*\|?\s*:?[-]+", lines[i + 1])
+            and _is_table_separator_row(lines[i + 1])
         ):
             table_lines = [line, lines[i + 1]]
             i += 2
             while i < len(lines) and "|" in lines[i] and lines[i].strip():
                 table_lines.append(lines[i])
                 i += 1
-            cols = table_lines[0].count("|") - 1
-            paper_info = paper_for_columns(cols=cols, base_paper=current_paper_info)
+            cols = _table_column_count(table_lines)
+            paper_info = paper_for_table(
+                table_lines, base_paper=current_paper_info
+            )
             escaped_lines = [_escape_table_line(l) for l in table_lines]
             logger.info(
                 "In document '%s': Detected table with %d columns, paper: %s",

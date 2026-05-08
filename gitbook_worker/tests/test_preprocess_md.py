@@ -16,6 +16,27 @@ def _wide_table(tmp_path, cols: int):
     return md
 
 
+def _wide_content_table(tmp_path):
+    md = tmp_path / "wide-content-table.md"
+    content = "\n".join(
+        [
+            "#### Wide content table",
+            "",
+            "| Entity | Code | Stability | Charter status | Entry conditions | "
+            "Cooperation | Partnership level | Core potential | Comment |",
+            "|---|---|---|---|---|---|---|---|---|",
+            "| Region Alpha-Verbund | REG-A1 | stabil-hoch | verfassungsklar "
+            "mit nachweisbarer Kontrollkette | Auditierte Aufnahmebedingungen "
+            "und abgestimmte Schutzklauseln | technische Kooperation, "
+            "Datenraum, Krisenuebung | assoziierte Partnerschaft | "
+            "mittelfristig plausibel | Anonymisierter Kommentar mit langer "
+            "fachlicher Begruendung |",
+        ]
+    )
+    md.write_text(content, encoding="utf-8")
+    return md
+
+
 def test_relative_markdown_links_point_to_pdf_anchor(tmp_path):
     content_root = tmp_path / "content"
     chapter = content_root / "chapters" / "chapter-01.md"
@@ -69,6 +90,27 @@ def test_table_wrapped_landscape_enabled(artifact_dir):
     md = _wide_table(artifact_dir, cols=11)
     out = preprocess_md.process(str(md), paper_format="a4")
     assert_geometry(out, expected_w=297, expected_h=210)
+
+
+def test_table_width_uses_usable_text_area() -> None:
+    a4_landscape = preprocess_md.get_valid_paper_measurements("a4-landscape")
+    required_width = preprocess_md.available_text_width_mm(a4_landscape) + 1
+
+    info = preprocess_md.paper_for_table_width(
+        required_width,
+        base_paper=preprocess_md.get_valid_paper_measurements("a4"),
+    )
+
+    assert info.size_mm == (420, 297)
+
+
+def test_table_with_long_cells_uses_content_width(artifact_dir):
+    md = _wide_content_table(artifact_dir)
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    m = GEOM_RE.search(out)
+    assert m, "Expected long-cell table to switch geometry"
+    assert int(m["w"]) > 297
 
 
 def test_svg_skips_size_probe(monkeypatch, tmp_path):
