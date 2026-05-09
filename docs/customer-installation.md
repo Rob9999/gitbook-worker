@@ -1,8 +1,9 @@
 ---
-version: 2.2.0
+version: 2.2.1
 date: 2026-05-09
 status: stable
 history:
+  - "2.2.1: 2026-05-09 - Tabellenprofi Renderer-Fix, Visual-Smoke und Wheel-Smoke fuer v2.8.0 ergaenzt"
   - "2.2.0: 2026-05-09 - Anwenderanleitung fuer v2.8.0 Tabellenprofi aktualisiert"
   - "2.1.3: 2026-05-08 - Finale v2.7.0 Release-Verifikation mit Test-, PDF- und Wheel-Smoke-Ergebnissen ergaenzt"
   - "2.1.2: 2026-05-08 - Anwenderanleitung fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
@@ -47,6 +48,8 @@ Die wichtigsten Funktionen:
 - AI-Reference-Pruefungen report-first ausfuehren.
 - Tabellenpapier redaktionell waehlen: `pdf_options.table_paper_strategy`
   bewertet Umbrueche, Zeilenhoehen, schmale Spalten und lange Script-Runs.
+  Gewrappte Tabellen werden mit expliziten LaTeX-Spaltenbreiten gerendert,
+  damit die Papierentscheidung auch im PDF-Satz sichtbar wirkt.
 - Builds lokal, in Docker oder in CI/CD vergleichbar betreiben.
 
 Nicht im Fokus sind HTML-Hosting, interaktive Web-Publishing-Workflows oder
@@ -465,6 +468,11 @@ Erwartete Signale fuer v2.8.0:
   `--fail-on-log-pattern`, als Fehler sichtbar.
 - Breite Markdown-Pipe-Tabellen koennen auf groessere Querformate wechseln,
   wenn die geschaetzte Zelltextbreite nicht in den aktuellen Satzspiegel passt.
+- Gewrappte Markdown-Pipe-Tabellen verwenden paragraph-Spalten mit expliziten
+  Breiten; die rechte Spalte darf im PDF nicht mehr durch natuerliche
+  `l/c/r`-Spalten ueber den Seitenrand laufen.
+- CJK-, Hangul- und Kana-Laeufe in Tabellenzellen erhalten lokale Break-Hints,
+  damit die Satzpraxis zur Strategieannahme zeichenweiser Umbrueche passt.
 - Tabellen-Layout-Reports koennen als JSONL-Dateien im Publish-Ordner liegen,
   wenn `pdf_options.table_paper_strategy.report: jsonl` aktiv ist.
 
@@ -581,15 +589,21 @@ Empfohlene Reihenfolge:
 Der v2.8.0-Release wird lokal mit diesen Signalen geprueft:
 
 - Focused Tests fuer Tabellen-Preprocessing, Paper-Info und pdf_options:
-  `51 passed`.
+  `53 passed`.
 - Config-Completeness-Tests: `24 passed`.
 - Non-slow Test-Suite: `554 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.8.0`: ausstehend.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.8.0`: bestanden;
+  `gitbook_worker-2.8.0.tar.gz` und
+  `gitbook_worker-2.8.0-py3-none-any.whl` wurden erzeugt.
 - Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
-  ausstehend.
+  bestanden; Import meldete `version: 2.8.0` und die
+  `workflow_orchestrator --help`-Ausgabe lief aus dem Temp-Environment.
 - Deutscher und englischer PDF-Build: bestanden.
 - PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK: bestanden; beide
   Sample-PDFs enthalten positive CJK-Textsignale.
+- Visual-Smoke: Englisch Seite 69 (`Wide Decision Table`) schneidet die
+  Kommentarspalte nicht mehr ab; Deutsch Seite 45 trennt Script-Run- und
+  Zweck-Spalten nach Break-Hints sauber.
 - Bekannte `Missing character`-Warnungen fuer weitere Sprachsamples bleiben
   im Log-Scan sichtbar, wurden aber nicht als Gate-Fehler gewertet.
 - Wide-Table- und Long-Script-Run-Stressbeispiele bleiben Bestandteil der
