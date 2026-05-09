@@ -243,12 +243,70 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
 def test_table_report_aggregation_flags_fallbacks(tmp_path: Path) -> None:
     report_path = tmp_path / "book.table-layout.jsonl"
     report_path.write_text(
-        json.dumps(
-            {
-                "selected_paper": "a3-landscape",
-                "method": "lowest-score-fallback",
-                "columns": 9,
-            }
+        "\n".join(
+            json.dumps(record)
+            for record in (
+                {
+                    "source_path": "content/chapter.md",
+                    "table_index": 2,
+                    "heading": "Risk Matrix",
+                    "selected_paper": "a3-landscape",
+                    "method": "lowest-score-fallback",
+                    "columns": 9,
+                    "evaluations": [
+                        {
+                            "paper": "a4-portrait",
+                            "acceptable": False,
+                            "score": 32.5,
+                            "unbreakable_overflow_mm": 18.2,
+                            "max_cell_lines": 17,
+                            "reasons": ["long-token"],
+                        },
+                        {
+                            "paper": "a3-landscape",
+                            "acceptable": False,
+                            "score": 12.0,
+                            "overflow_mm": 4.5,
+                            "average_row_lines": 6.2,
+                            "reasons": ["dense-table"],
+                        },
+                    ],
+                },
+                {
+                    "source_path": "content/chapter.md",
+                    "table_index": 3,
+                    "heading": "Risk Matrix",
+                    "selected_paper": "a4-landscape",
+                    "method": "override",
+                    "override": {
+                        "paper": "a4-landscape",
+                        "reason": "Editorial review keeps the table on one page.",
+                    },
+                },
+                {
+                    "source_path": "content/appendix.md",
+                    "table_index": 1,
+                    "heading": "Appendix Scores",
+                    "selected_paper": "a4-landscape",
+                    "method": "editorial-best-fit",
+                    "evaluations": [
+                        {
+                            "paper": "a4-portrait",
+                            "acceptable": False,
+                            "score": 21.0,
+                            "overflow_mm": 9.5,
+                            "reasons": ["narrow-columns"],
+                        },
+                        {
+                            "paper": "a4-landscape",
+                            "acceptable": True,
+                            "score": 3.0,
+                            "max_cell_lines": 5,
+                            "average_row_lines": 2.4,
+                        },
+                    ],
+                },
+            )
         )
         + "\n",
         encoding="utf-8",
@@ -256,9 +314,24 @@ def test_table_report_aggregation_flags_fallbacks(tmp_path: Path) -> None:
 
     metrics, findings = analyze_table_reports(tmp_path, (report_path,))
 
-    assert metrics["decisions_total"] == 1
-    assert metrics["method_counts"] == {"lowest-score-fallback": 1}
+    assert metrics["decisions_total"] == 3
+    assert metrics["method_counts"] == {
+        "lowest-score-fallback": 1,
+        "override": 1,
+        "editorial-best-fit": 1,
+    }
+    assert metrics["problem_decisions_total"] == 3
+    assert metrics["fallback_decisions_total"] == 1
+    assert metrics["override_decisions_total"] == 1
+    assert metrics["rejected_candidate_decisions_total"] == 2
+    assert metrics["rejected_candidates_total"] == 3
     assert findings[0].rule_id == "tables.strategy.lowest-score-fallback"
+    assert "content/chapter.md" in findings[0].location
+    assert "table 2" in findings[0].location
+    assert "rejected_candidates=2" in findings[0].evidence
+    assert "override_reason" in findings[1].evidence
+    assert findings[2].rule_id == "tables.strategy.rejected_candidates"
+    assert findings[2].severity == "info"
 
 
 def test_acceptance_writes_dossier_and_returns_failure(tmp_path: Path) -> None:

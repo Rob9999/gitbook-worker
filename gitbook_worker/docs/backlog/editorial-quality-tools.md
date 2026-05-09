@@ -1,11 +1,12 @@
 ---
-version: 1.3.0
+version: 1.4.0
 date: 2026-05-09
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.4.0: 2026-05-09 - Tabellenstrategie-Problemfaelle mit Kontext als erledigten Schnitt markiert."
   - "1.3.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken als erledigten Schnitt markiert."
   - "1.2.0: 2026-05-09 - Backlog-Status nach Publish-Scope-, PDF-Zielkorridor- und Drift-Schnitt synchronisiert."
   - "1.1.0: 2026-05-09 - Anonymisiertes Kundenreview als Muss-Anforderungen und Abnahmeszenarien aufgenommen."
@@ -232,9 +233,9 @@ Akzeptanzkriterien:
 - [x] ✅ Papierentscheidungen nach Format zaehlen.
 - [x] ✅ Methoden wie `editorial-best-fit`, `lowest-score-fallback`, `override`,
   `disabled` und `oversize-preserve-column-heuristic` zaehlen.
-- [ ] 🔨 Fallbacks, Overrides und abgelehnte Kandidaten als Problemfaelle melden.
-- [ ] Datei, Tabellenindex oder naheliegenden Heading-Kontext ausgeben.
-- [ ] Layout-Trade-offs sichtbar machen, insbesondere horizontale Entlastung
+- [x] ✅ Fallbacks, Overrides und abgelehnte Kandidaten als Problemfaelle melden.
+- [x] ✅ Datei, Tabellenindex oder naheliegenden Heading-Kontext ausgeben.
+- [x] ✅ Layout-Trade-offs sichtbar machen, insbesondere horizontale Entlastung
   gegen geringere vertikale Kapazitaet bei Landscape-Seiten.
 
 Akzeptanzkriterien:

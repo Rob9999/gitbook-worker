@@ -796,6 +796,10 @@ def analyze_table_reports(
         "selected_paper_counts": {},
         "method_counts": {},
         "problem_decisions_total": 0,
+        "fallback_decisions_total": 0,
+        "override_decisions_total": 0,
+        "rejected_candidate_decisions_total": 0,
+        "rejected_candidates_total": 0,
     }
     findings: list[Finding] = []
     selected_counts: Counter[str] = Counter()
@@ -848,8 +852,23 @@ def analyze_table_reports(
             metrics["decisions_total"] += 1
             selected = str(record.get("selected_paper") or "<unknown>")
             method = str(record.get("method") or "<unknown>")
+            rejected_count, rejected_summary = _table_rejected_candidate_summary(
+                record.get("evaluations")
+            )
+            selected_summary = _table_selected_candidate_summary(record, selected)
+            context = _table_decision_context(record, line_number)
             selected_counts[selected] += 1
             method_counts[method] += 1
+            if method in {
+                "lowest-score-fallback",
+                "oversize-preserve-column-heuristic",
+            }:
+                metrics["fallback_decisions_total"] += 1
+            if method == "override":
+                metrics["override_decisions_total"] += 1
+            if rejected_count:
+                metrics["rejected_candidate_decisions_total"] += 1
+                metrics["rejected_candidates_total"] += rejected_count
             if method in problem_methods:
                 metrics["problem_decisions_total"] += 1
                 findings.append(
@@ -858,16 +877,146 @@ def analyze_table_reports(
                         severity="warn" if method != "override" else "info",
                         category="tables.strategy",
                         artifact=rel,
-                        location=f"line {line_number}",
-                        evidence=f"method={method}, selected_paper={selected}",
+                        location=context,
+                        evidence=_table_strategy_evidence(
+                            method=method,
+                            selected=selected,
+                            selected_summary=selected_summary,
+                            rejected_summary=rejected_summary,
+                            override=record.get("override"),
+                        ),
                         editorial_impact="Tabellenlayout enthaelt eine bewusste oder riskante Strategieentscheidung.",
                         healing="Auswahl im Dossier redaktionell pruefen und ggf. Override begruenden.",
+                    )
+                )
+            elif rejected_count:
+                metrics["problem_decisions_total"] += 1
+                findings.append(
+                    make_finding(
+                        rule_id="tables.strategy.rejected_candidates",
+                        severity="info",
+                        category="tables.strategy",
+                        artifact=rel,
+                        location=context,
+                        evidence=_table_strategy_evidence(
+                            method=method,
+                            selected=selected,
+                            selected_summary=selected_summary,
+                            rejected_summary=rejected_summary,
+                            override=record.get("override"),
+                        ),
+                        editorial_impact="Mindestens ein Papierkandidat wurde verworfen; die finale Auswahl ist nachvollziehbar zu pruefen.",
+                        healing="Bei knappen Tabellen die Kandidatenbewertung gegen Markdown-Quelle und PDF-Seite pruefen.",
                     )
                 )
 
     metrics["selected_paper_counts"] = dict(selected_counts)
     metrics["method_counts"] = dict(method_counts)
     return metrics, findings
+
+
+def _table_decision_context(record: Mapping[str, Any], line_number: int) -> str:
+    parts = [f"line {line_number}"]
+    source = _first_text(
+        record, "source_path", "source", "markdown_path", "file", "path"
+    )
+    if source:
+        parts.append(source)
+    table_index = (
+        record.get("table_index") if "table_index" in record else record.get("table")
+    )
+    if table_index is not None:
+        parts.append(f"table {table_index}")
+    heading = _first_text(record, "heading", "nearest_heading", "context_heading")
+    if heading:
+        parts.append(f"heading {heading}")
+    return "; ".join(parts)
+
+
+def _table_rejected_candidate_summary(evaluations: Any) -> tuple[int, str]:
+    if not isinstance(evaluations, Sequence) or isinstance(evaluations, (str, bytes)):
+        return 0, ""
+
+    rejected: list[Mapping[str, Any]] = [
+        evaluation
+        for evaluation in evaluations
+        if isinstance(evaluation, Mapping) and evaluation.get("acceptable") is False
+    ]
+    if not rejected:
+        return 0, ""
+
+    details = [_table_candidate_summary(evaluation) for evaluation in rejected[:3]]
+    if len(rejected) > 3:
+        details.append(f"+{len(rejected) - 3} more")
+    return len(rejected), f"rejected_candidates={len(rejected)} ({'; '.join(details)})"
+
+
+def _table_selected_candidate_summary(
+    record: Mapping[str, Any], selected_paper: str
+) -> str:
+    evaluations = record.get("evaluations")
+    if not isinstance(evaluations, Sequence) or isinstance(evaluations, (str, bytes)):
+        return ""
+    for evaluation in evaluations:
+        if not isinstance(evaluation, Mapping):
+            continue
+        if str(evaluation.get("paper") or "") == selected_paper:
+            return f"selected_candidate=({_table_candidate_summary(evaluation)})"
+    return ""
+
+
+def _table_candidate_summary(evaluation: Mapping[str, Any]) -> str:
+    paper = str(evaluation.get("paper") or "<paper>")
+    parts = [paper]
+    for key in (
+        "score",
+        "overflow_mm",
+        "unbreakable_overflow_mm",
+        "max_cell_lines",
+        "average_row_lines",
+    ):
+        value = evaluation.get(key)
+        if value is not None:
+            parts.append(f"{key}={value}")
+    reasons = evaluation.get("reasons")
+    if isinstance(reasons, Sequence) and not isinstance(reasons, (str, bytes)):
+        reason_text = ",".join(str(reason) for reason in reasons[:3])
+        if reason_text:
+            parts.append(f"reasons={reason_text}")
+    return ", ".join(parts)
+
+
+def _table_strategy_evidence(
+    *,
+    method: str,
+    selected: str,
+    selected_summary: str,
+    rejected_summary: str,
+    override: Any,
+) -> str:
+    parts = [f"method={method}", f"selected_paper={selected}"]
+    if selected_summary:
+        parts.append(selected_summary)
+    if rejected_summary:
+        parts.append(rejected_summary)
+    if isinstance(override, Mapping):
+        reason = override.get("reason")
+        paper = override.get("paper")
+        if paper:
+            parts.append(f"override_paper={paper}")
+        if reason:
+            parts.append(f"override_reason={reason}")
+    return "; ".join(parts)
+
+
+def _first_text(record: Mapping[str, Any], *keys: str) -> str:
+    for key in keys:
+        value = record.get(key)
+        if value is not None:
+            text = str(value).strip()
+            if text:
+                return text
+    return ""
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

@@ -1,7 +1,8 @@
 ---
-version: 1.2.0
+version: 1.3.0
 date: 2026-05-09
 history:
+  - "1.3.0: 2026-05-09 - Tabellenstrategie-Problemfaelle und Kandidatenkontext beschrieben."
   - "1.2.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken dokumentiert."
   - "1.1.0: 2026-05-09 - Publish-Scope, PDF-Zielkorridore und Drift-Pruefungen ergaenzt."
   - "1.0.0: 2026-05-09 - First user guide for editorial quality metrics and acceptance tools."
@@ -26,6 +27,13 @@ Wenn kein `--markdown-root` angegeben ist, nutzt `editorial_metrics` die lokale
 SUMMARY-verwaiste Markdown-Dateien werden in `metrics.publish_scope` sichtbar.
 PDFs aus `build: true` Publish-Eintraegen werden automatisch als erwartete
 Artefakte geprueft.
+
+Tabellenstrategie-JSONL-Reports werden nicht nur gezaehlt. Fallbacks,
+Overrides und verworfene Papierkandidaten erscheinen als Befunde mit
+Report-Zeile, optionaler Markdown-Quelle, Tabellenindex, nahem Heading,
+ausgewaehltem Papier und kurzer Kandidatenbewertung. Overrides bleiben als
+redaktionelle Entscheidung sichtbar; Fallbacks und knappe Kandidatenwahlen
+bleiben reviewbar.
 
 ## Minimaler Lauf
 
