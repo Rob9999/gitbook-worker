@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
-date: 2026-05-04
+version: 1.2.0
+date: 2026-05-09
 history:
+  - 2026-05-09: add editorial quality metrics and acceptance codes 45-48
   - 2026-05-04: add AI reference check failure code 44
   - 2025-12-26: initial draft with exit-code policy and publishing expectations
 ---
@@ -34,3 +35,7 @@ Document each code with at least the following columns:
 | Code | Component | Summary | Healing | Trigger | Observability |
 |------|-----------|---------|---------|---------|---------------|
 | 44 | `ai_references` | AI-Referenzpruefung meldet fehlgeschlagene Eintraege | JSON-Report pruefen, Quellen manuell korrigieren oder Lauf ohne `--fail-on-failed` wiederholen. | Mindestens eine Referenz konnte nicht validiert oder repariert werden. | CLI exit code, Log, JSON-Report unter dem konfigurierten Reportpfad. |
+| 45 | `editorial_metrics`, `editorial_acceptance` | Redaktionelle Abnahme enthaelt harte Findings | Dossier pruefen, Findings beheben oder Restrisiko bewusst dokumentieren. | Mindestens ein Finding mit `severity=fail` oder blockierende Warnungen im Profil. | CLI exit code, Log, JSON-Metrikreport, Markdown-Dossier. |
+| 46 | `editorial_metrics`, `editorial_acceptance` | Redaktionelle Abnahme blockiert durch fehlende Artefakte | PDF/Markdown/Report-Artefakte erzeugen oder Pfade im Profil korrigieren. | Mindestens ein Finding mit `severity=blocked`. | CLI exit code, Log, JSON-Metrikreport, Markdown-Dossier. |
+| 47 | `editorial_acceptance` | Metrikreport konnte nicht gelesen werden | JSON-Reportpfad und JSON-Syntax pruefen; Metriklauf ggf. wiederholen. | Reportdatei fehlt, ist nicht lesbar oder enthaelt kein JSON-Objekt. | CLI exit code, Log. |
+| 48 | `editorial_metrics`, `editorial_acceptance` | Redaktionelles Abnahmeprofil ist ungueltig | Profilnamen, `profiles`-Mapping und YAML-Syntax pruefen. | Profil nicht gefunden oder Profilkonfiguration ungueltig. | CLI exit code, Log. |

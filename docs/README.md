@@ -1,13 +1,14 @@
 ---
-version: 1.0.7
+version: 1.0.8
 date: 2026-05-09
 history:
+	- "1.0.8: 2026-05-09 - Editorial Quality Tools fuer v2.9.0 Qualitaetskompass verlinkt"
 	- "1.0.7: 2026-05-09 - Anwenderdokumentationsindex fuer v2.8.0 Tabellenprofi aktualisiert"
 	- "1.0.6: 2026-05-08 - Anwenderdokumentationsindex fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
 	- "1.0.5: 2026-05-08 - Anwenderdokumentationsindex fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
 	- "1.0.4: 2026-05-07 - Anwenderdokumentationsindex fuer v2.6.0 Code-Fence-Wrapping aktualisiert"
 	- "1.0.3: 2026-05-07 - Anwenderdokumentationsindex fuer v2.5.0 Font-Coverage aktualisiert"
-	- "1.0.2: 2026-05-07 - Anwenderdokumentationsindex fuer v2.4.3 aktualisiert"
+	- "1.0.2: 2026-05-07 - Anwenderdokumentationsindex fuer v2.4.2 aktualisiert"
 	- "1.0.1: 2026-05-06 - Anwenderdokumentationsindex fuer v2.4.2 aktualisiert"
 	- "1.0.0: 2026-05-05 - Anwenderdokumentationsindex fuer v2.4.0 angelegt"
 ---
@@ -20,6 +21,7 @@ Diese Seite buendelt die Anwenderdokumentation fuer GitBook Worker.
 
 - [GitBook Worker Anwenderanleitung v2.8.0](customer-installation.md) - zentrale Installation-, Betriebs- und Supportanleitung.
 - [Configuration Reference](configuration-reference.md) - vollstaendige Referenz der unterstuetzten Konfigurationsschluessel.
+- [Editorial Quality Tools](editorial-quality-tools.md) - Metrikreport und Abnahmedossier fuer redaktionelle Freigaben.
 - [Frequently Asked Questions](FAQs.md) - konkrete Fehlerbilder und schnelle Loesungen.
 - [Release Notes](releases/README.md) - versionsbezogene Aenderungen und Upgrade-Hinweise.
 

@@ -1,7 +1,8 @@
 ---
-version: 1.4.0
+version: 1.5.0
 date: 2026-05-09
 history:
+  - "1.5.0: 2026-05-09 — editorial quality acceptance profiles als v2.9.0-WIP ergaenzt"
   - "1.4.0: 2026-05-09 — pdf_options.table_paper_strategy fuer Tabellenprofi ergaenzt"
   - "1.3.3: 2026-05-08 — Release reference fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "1.3.2: 2026-05-08 — Release reference fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
@@ -273,6 +274,39 @@ Template-basierte Docker-Namensvergabe.
 
 ---
 
+## 6. editorial quality profile (CLI-Option `--profile-config`)
+
+Status: 🔨 Teilweise implementiert fuer `v2.9.0 Qualitaetskompass`. Die Profile
+werden von `gitbook_worker.tools.quality.editorial_metrics` und
+`gitbook_worker.tools.quality.editorial_acceptance` gelesen. Die Datei ist
+optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
+
+| Schlüssel | Typ | Default | Status | Beschreibung |
+|-----------|-----|---------|--------|--------------|
+| `version` | string | – | 📝 | Empfohlene SemVer der Profil-Datei; aktuell dokumentiert, noch nicht hart validiert |
+| `profiles` | object | – | ✅ | Mapping von Profilnamen auf Regeln |
+| `profiles.<name>.network` | bool | `false` | ✅ | Sichtbarer Netzwerkmodus im Report; Netzwerkchecks laufen nur ueber bestehende Tools |
+| `profiles.<name>.fail_on_warnings` | bool | `false` | ✅ | Warnungen koennen die Abnahme blockieren |
+| `profiles.<name>.markdown.locale_field` | string | `content_lang` | ✅ | Frontmatter-Feld fuer Locale-Erkennung |
+| `profiles.<name>.markdown.identity_key` | string | `content_id` | ✅ | Identitaetsfeld fuer Source/Target-Abgleich |
+| `profiles.<name>.markdown.source_link_field` | string | `source` | ✅ | Repo-relativer Source-Verweis in Target-Dateien |
+| `profiles.<name>.markdown.source_locale` | string | `null` | ✅ | Source-Locale, z. B. `ja` |
+| `profiles.<name>.markdown.target_locales` | array | `[]` | ✅ | Target-Locales, z. B. `pl`, `hr`, `no` |
+| `profiles.<name>.markdown.forbidden_frontmatter_keys` | array | `lang`, `language`, `lang-version` | ✅ | Verbotene Keys als Findings |
+| `profiles.<name>.markdown.required_frontmatter_by_role` | object | source/target defaults | ✅ | Pflichtfelder je Rolle `source`/`target` |
+| `profiles.<name>.markdown.allowed_translation_status` | array | `draft`, `in-review`, `approved` | ✅ | Erlaubte Target-Statuswerte |
+| `profiles.<name>.markdown.exclude_dirs` | array | Tool-Default | ✅ | Ausgeschlossene Ordner fuer Markdown-Discovery |
+| `profiles.<name>.markdown.skip_filenames` | array | `SUMMARY.md` | ✅ | Dateien ohne Pflicht-Frontmatter-Pruefung |
+| `profiles.<name>.markdown.long_token_warn_chars` | int | `80` | ✅ | Schwelle fuer lange Token als Layout-Warnung |
+| `profiles.<name>.pdf.low_text_page_threshold` | int | `15` | ✅ | Wenigzeiler-Schwelle pro PDF-Seite |
+| `profiles.<name>.pdf.very_low_text_page_threshold` | int | `5` | ✅ | Sehr-wenig-Text-Schwelle pro PDF-Seite |
+| `profiles.<name>.pdf.required_fonts` | array | `[]` | ✅ | Erwartete eingebettete PDF-Fontnamen |
+| `profiles.<name>.pdf.pdf_targets` | object | `{}` | 🚧 | Seitenzahl-Zielkorridore dokumentiert, Auswertung folgt in einem spaeteren v2.9.0-Schnitt |
+| `profiles.<name>.documentation.fail_on_stale_worker_version` | bool | `false` | 🚧 | Report-Drift-Regel dokumentiert, Auswertung folgt |
+| `profiles.<name>.documentation.fail_on_stale_page_count` | bool | `false` | 🚧 | Seitenzahl-Drift-Regel dokumentiert, Auswertung folgt |
+
+---
+
 ## Konfigurationsdatei-Versionen
 
 | Datei | Schema-Version | `version`-Feld | Per-File-Dok |
@@ -285,6 +319,7 @@ Template-basierte Docker-Namensvergabe.
 | `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
 | `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | ✓ | [docker-config-yml.md](configs/docker-config-yml.md) |
+| editorial quality profile | 1.0.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
 
 ---
 

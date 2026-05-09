@@ -1,7 +1,8 @@
 ---
-version: 1.1.1
+version: 1.2.0
 date: 2026-05-09
 history:
+  - "1.2.0: 2026-05-09 — editorial quality profile reference added"
   - "1.1.1: 2026-05-09 — publish.yml schema version 0.1.3 for table_paper_strategy"
   - "1.1.0: 2026-02-08 — Schema-Versionen aktualisiert (book.json 1.0.0, docker_config.yml 1.0.0)"
   - "1.0.0: 2026-02-08 — Initial index"
@@ -22,6 +23,7 @@ Schlüssel-Tabelle und Änderungshistorie.
 | `readme.yml` | 1.0.0 | `gitbook_worker/defaults/` | [readme-yml.md](readme-yml.md) |
 | `smart.yml` | 1.0.0 | `gitbook_worker/defaults/` | [smart-yml.md](smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | `gitbook_worker/defaults/` | [docker-config-yml.md](docker-config-yml.md) |
+| editorial quality profile | 1.0.0 | CLI `--profile-config` | [editorial-quality-profile.md](editorial-quality-profile.md) |
 
 Alle Konfigurationsdateien haben nun ein `version`-Feld (Config-Completeness-Policy AGENTS.md §29).
 
