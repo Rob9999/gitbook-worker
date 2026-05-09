@@ -815,6 +815,12 @@ def _is_cjk_breakable(char: str) -> bool:
     )
 
 
+def is_table_script_breakable(char: str) -> bool:
+    """Return whether a table cell may break after this script character."""
+
+    return _is_cjk_breakable(char)
+
+
 def _contains_cjk(value: str) -> bool:
     return any(_is_cjk_breakable(char) for char in value)
 

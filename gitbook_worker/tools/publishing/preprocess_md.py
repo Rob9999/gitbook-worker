@@ -47,6 +47,7 @@ from gitbook_worker.tools.publishing.table_strategy import (
     estimate_text_width_mm,
     glyph_width_em,
     is_table_separator_row,
+    is_table_script_breakable,
     iter_paper_candidates,
     paper_for_columns,
     paper_for_table,
@@ -397,6 +398,22 @@ def _escape_table_line(line: str) -> str:
     return "|".join(escaped_segments)
 
 
+def _add_table_script_break_hints(text: str) -> str:
+    """Add LaTeX break hints for scripts that naturally break by character."""
+
+    if not text:
+        return text
+    out: list[str] = []
+    for index, char in enumerate(text):
+        out.append(char)
+        if not is_table_script_breakable(char):
+            continue
+        next_char = text[index + 1] if index + 1 < len(text) else ""
+        if next_char and not next_char.isspace():
+            out.append(r"\allowbreak{}")
+    return "".join(out)
+
+
 def wrap_block(
     lines: List[str],
     paper_info: PaperInfo,
@@ -481,7 +498,7 @@ def wrap_block(
                     i += 1
 
                 header = [
-                    _escape_table_text(x.strip())
+                    _add_table_script_break_hints(_escape_table_text(x.strip()))
                     for x in _split_table_row(table_lines[0])
                 ]
                 alignments = _split_table_row(table_lines[1])
@@ -493,7 +510,7 @@ def wrap_block(
                 out_lines.append("\\endhead ")
                 for table_line in table_lines[2:]:
                     row = [
-                        _escape_table_text(x.strip())
+                        _add_table_script_break_hints(_escape_table_text(x.strip()))
                         for x in _split_table_row(table_line)
                     ]
                     out_lines.append(f"{' & '.join(row)} \\\\")

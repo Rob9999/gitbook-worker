@@ -159,6 +159,14 @@ def test_table_strategy_scores_cjk_long_sequences(artifact_dir):
     assert_geometry(out, expected_w=420, expected_h=297)
 
 
+def test_table_strategy_adds_script_break_hints(artifact_dir):
+    md = _cjk_content_table(artifact_dir)
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    assert r"\allowbreak{}" in out
+    assert "生命\\allowbreak{}共同" in out
+
+
 def test_table_strategy_override_comment_forces_paper(artifact_dir):
     md = artifact_dir / "override-table.md"
     md.write_text(
