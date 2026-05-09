@@ -14,7 +14,6 @@ import yaml
 
 from gitbook_worker import __version__
 
-
 SCHEMA_VERSION = "1.0.0"
 EDITORIAL_HARD_FINDINGS_EXIT_CODE = 45
 EDITORIAL_BLOCKED_EXIT_CODE = 46
