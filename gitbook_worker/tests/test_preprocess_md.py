@@ -107,7 +107,7 @@ def test_table_wrapped_portrait(artifact_dir):
 def test_table_wrapped_landscape_enabled(artifact_dir):
     md = _wide_table(artifact_dir, cols=11)
     out = preprocess_md.process(str(md), paper_format="a4")
-    assert_geometry(out, expected_w=297, expected_h=210)
+    assert_geometry(out, expected_w=420, expected_h=297)
 
 
 def test_table_width_uses_usable_text_area() -> None:
@@ -177,14 +177,14 @@ def test_table_strategy_custom_candidate_and_report(artifact_dir):
                 {
                     "name": "customer-wide",
                     "standard": False,
-                    "size_mm": [500, 297],
+                    "size_mm": [700, 420],
                     "margins_mm": [15, 15, 15, 15],
                 },
             ],
         },
     )
 
-    assert "paperwidth=500mm" in out
+    assert "paperwidth=700mm" in out
     report = json.loads(report_path.read_text(encoding="utf-8").splitlines()[0])
     assert report["selected_paper"] == "customer-wide"
     assert report["evaluations"]
