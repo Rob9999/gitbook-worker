@@ -2030,11 +2030,11 @@ URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024
 | Price   | Free  | £50/month    | £200/month |
 
 \newpage
-\newgeometry{paperwidth=841mm, paperheight=594mm, left=20mm, right=20mm, top=20mm, bottom=20mm}
+\newgeometry{paperwidth=594mm, paperheight=420mm, left=18mm, right=18mm, top=18mm, bottom=18mm}
 
 
-\pagewidth=841mm
-\pageheight=594mm
+\pagewidth=594mm
+\pageheight=420mm
 ### Wide Decision Table (Anonymized)
 
 \begin{longtable}{@{}lllllllll@{}}\toprule Area & Code & Governance grade & Charter status & Entry conditions & Cooperation & Partnership level & Core-group potential & Comment \\\midrule \endhead Area Alpha Network & A-A1 & high stable & charter frame reviewed, control path documented & Entry conditions with audit path, privacy impact review, and aligned safeguard clause & Professional cooperation, data room, crisis exercise & Associated with expansion path & plausible in the medium term & Anonymized long note with rationale, risk marker, and open review task \\Area Beta Corridor & A-B2 & moderately stable & transition status with external quality assurance & Integration only after evidence of reliable operating processes and consistent reporting duties & Pilot cooperation, training, shared situation report & Observing partnership & depends on follow-up review & Anonymized assessment with intentionally long text width for PDF table stress \\Area Gamma Mesh & A-C3 & uneven & charter comparison started, decision open & Preconditions: clarify responsibilities, finish data classification, confirm audit window & Expert dialogue and technical inventory & Preparatory cooperation & not currently robust & Neutral sample row without customer names, original places, or political classification \\\bottomrule \end{longtable}
@@ -2042,6 +2042,13 @@ URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024
 \pagewidth=210mm
 \pageheight=297mm
 \newpage
+
+### Table With Long Script Runs
+
+| Language | Signal | Editorial purpose |
+|---|---|---|
+| CJK | 生命共同体治理结构连续性评估生命共同体治理结构连续性评估生命共同体治理结构连续性评估 | Long character runs without spaces are a general layout risk, not a German-only issue. |
+| Hangul | 민주적회복력전환거버넌스연속성평가민주적회복력전환거버넌스연속성평가 | Table paper selection must account for script runs and wide glyphs. |
 
 ### Table with Formatting
 

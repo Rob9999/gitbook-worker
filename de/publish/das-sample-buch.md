@@ -386,13 +386,17 @@ Bei der Technologieauswahl spielen verschiedene Faktoren eine Rolle:
 
 Ein weiteres häufiges Anwendungsgebiet sind Datenbankvergleiche:
 
-| Typ | Beispiel | Konsistenz | Skalierung | Anwendungsfall |
-|-----|----------|------------|------------|----------------|
-| Relational | PostgreSQL | ACID | Vertikal | Transaktionen |
-| Dokument | MongoDB | Eventual | Horizontal | Flexible Schemas |
-| Schlüssel-Wert | Redis | Eventual | Horizontal | Caching |
-| Graph | Neo4j | ACID | Vertikal | Beziehungen |
-| Spalten | Cassandra | Eventual | Horizontal | Zeitreihen |
+\newpage
+\newgeometry{paperwidth=297mm, paperheight=210mm, left=15mm, right=15mm, top=15mm, bottom=15mm}
+
+
+\pagewidth=297mm
+\pageheight=210mm
+\begin{longtable}{@{}lllll@{}}\toprule Typ & Beispiel & Konsistenz & Skalierung & Anwendungsfall \\\midrule \endhead Relational & PostgreSQL & ACID & Vertikal & Transaktionen \\Dokument & MongoDB & Eventual & Horizontal & Flexible Schemas \\Schlüssel-Wert & Redis & Eventual & Horizontal & Caching \\Graph & Neo4j & ACID & Vertikal & Beziehungen \\Spalten & Cassandra & Eventual & Horizontal & Zeitreihen \\\bottomrule \end{longtable}
+\restoregeometry
+\pagewidth=210mm
+\pageheight=297mm
+\newpage
 
 ### CAP-Theorem
 
@@ -1311,6 +1315,20 @@ URL-CODE-FENCE-STRESS: https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bev
 ### Breite Entscheidungstabelle (anonymisiert)
 
 \begin{longtable}{@{}lllllllll@{}}\toprule Teilraum & Code & Governancegrad & Satzungsstatus & Bedingungen zur Integration & Kooperation & Partnerschafts-Level & Kernverbund-Potenzial & Kommentar \\\midrule \endhead Gebiet Alpha-Verbund & G-A1 & hoch stabil & Satzungsrahmen geprüft, Kontrollpfad dokumentiert & Aufnahmebedingungen mit Auditpfad, Datenschutzfolgeprüfung und abgestimmter Schutzklausel & Fachliche Kooperation, Datenraum, Krisenübung & Assoziiert mit Ausbaupfad & mittelfristig plausibel & Anonymisierte Langnotiz mit Begründung, Risikohinweis und offenem Prüfauftrag \\Gebiet Beta-Korridor & G-B2 & moderat stabil & Übergangsstatus mit externer Qualitätssicherung & Integration nur nach Nachweis belastbarer Betriebsprozesse und konsistenter Berichtspflichten & Pilotkooperation, Schulung, gemeinsamer Lagebericht & Beobachtende Partnerschaft & abhängig von Folgeprüfung & Anonymisierte Bewertung mit bewusst langer Textbreite für PDF-Tabellenstress \\Gebiet Gamma-Netz & G-C3 & uneinheitlich & Satzungsabgleich begonnen, Entscheidung offen & Vorbedingungen: Verantwortlichkeiten klären, Datenklassifizierung abschließen, Auditfenster bestätigen & Fachdialog und technische Bestandsaufnahme & Vorbereitende Kooperation & derzeit nicht belastbar & Neutrale Musterzeile ohne Kundennamen, Originalorte oder politische Einordnung \\\bottomrule \end{longtable}
+\restoregeometry
+\pagewidth=210mm
+\pageheight=297mm
+\newpage
+
+\newpage
+\newgeometry{paperwidth=297mm, paperheight=210mm, left=15mm, right=15mm, top=15mm, bottom=15mm}
+
+
+\pagewidth=297mm
+\pageheight=210mm
+### Tabelle mit langen Script-Runs
+
+\begin{longtable}{@{}lll@{}}\toprule Sprache & Signal & Redaktioneller Zweck \\\midrule \endhead CJK & 生命共同体治理结构连续性评估生命共同体治理结构连续性评估生命共同体治理结构连续性评估 & Lange Zeichenketten ohne Leerzeichen sind ein allgemeines Layout-Risiko und kein deutsches Sonderproblem. \\Hangul & 민주적회복력전환거버넌스연속성평가민주적회복력전환거버넌스연속성평가 & Das Tabellenlayout muss Script-Runs und breite Glyphen bei der Papierwahl berücksichtigen. \\\bottomrule \end{longtable}
 \restoregeometry
 \pagewidth=210mm
 \pageheight=297mm

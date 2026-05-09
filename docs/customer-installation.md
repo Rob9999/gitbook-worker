@@ -583,16 +583,19 @@ Der v2.8.0-Release wird lokal mit diesen Signalen geprueft:
 - Focused Tests fuer Tabellen-Preprocessing, Paper-Info und pdf_options:
   `51 passed`.
 - Config-Completeness-Tests: `24 passed`.
-- Non-slow Test-Suite: ausstehend.
+- Non-slow Test-Suite: `554 passed, 11 skipped, 10 deselected, 4 warnings`.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.8.0`: ausstehend.
 - Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
   ausstehend.
-- Deutscher und englischer PDF-Build: ausstehend.
-- PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK: ausstehend.
+- Deutscher und englischer PDF-Build: bestanden.
+- PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK: bestanden; beide
+  Sample-PDFs enthalten positive CJK-Textsignale.
 - Bekannte `Missing character`-Warnungen fuer weitere Sprachsamples bleiben
   im Log-Scan sichtbar, wurden aber nicht als Gate-Fehler gewertet.
 - Wide-Table- und Long-Script-Run-Stressbeispiele bleiben Bestandteil der
-  DE/EN-Sample-PDFs.
+  DE/EN-Sample-PDFs; TOC-Signal: Deutsch Seite 45, Englisch Seite 70.
+- Tabellen-Layout-Reports wurden als JSONL-Dateien in `de/publish/` und
+  `en/publish/` erzeugt.
 - URL-Code-Fence-Stressbeispiele bleiben Bestandteil der DE/EN-Sample-PDFs und
   laufen weiterhin durch dieselbe PDF-Release-Pipeline.
 
