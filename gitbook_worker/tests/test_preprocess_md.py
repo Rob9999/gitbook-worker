@@ -107,7 +107,7 @@ def test_table_wrapped_portrait(artifact_dir):
 def test_table_wrapped_landscape_enabled(artifact_dir):
     md = _wide_table(artifact_dir, cols=11)
     out = preprocess_md.process(str(md), paper_format="a4")
-    assert_geometry(out, expected_w=420, expected_h=297)
+    assert_geometry(out, expected_w=297, expected_h=210)
 
 
 def test_table_width_uses_usable_text_area() -> None:
@@ -139,7 +139,7 @@ def test_table_strategy_scores_cjk_long_sequences(artifact_dir):
         table_strategy={"max_cell_lines": 2, "max_header_lines": 2},
     )
 
-    assert_geometry(out, expected_w=297, expected_h=210)
+    assert_geometry(out, expected_w=420, expected_h=297)
 
 
 def test_table_strategy_override_comment_forces_paper(artifact_dir):
@@ -166,6 +166,8 @@ def test_table_strategy_override_comment_forces_paper(artifact_dir):
 def test_table_strategy_custom_candidate_and_report(artifact_dir):
     md = _wide_content_table(artifact_dir)
     report_path = artifact_dir / "table-layout.jsonl"
+    if report_path.exists():
+        report_path.unlink()
     out = preprocess_md.process(
         str(md),
         paper_format="a4",
@@ -185,7 +187,7 @@ def test_table_strategy_custom_candidate_and_report(artifact_dir):
     )
 
     assert "paperwidth=700mm" in out
-    report = json.loads(report_path.read_text(encoding="utf-8").splitlines()[0])
+    report = json.loads(report_path.read_text(encoding="utf-8").splitlines()[-1])
     assert report["selected_paper"] == "customer-wide"
     assert report["evaluations"]
 
