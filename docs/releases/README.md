@@ -6,6 +6,7 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
+| **v2.8.0** | 2026-05-09 | `v2.8.0` | [v2.8.0](v2.8.0.md) - editorial table paper strategy with script-aware long-run scoring |
 | **v2.7.0** | 2026-05-08 | `v2.7.0` | [v2.7.0](v2.7.0.md) - content-width based paper selection for wide Markdown tables |
 | **v2.6.1** | 2026-05-08 | `release-v.2.6.1-hotfix` | [v2.6.1](v2.6.1.md) - URL wrapping hotfix for Pandoc-highlighted code fences |
 | **v2.6.0** | 2026-05-07 | `v2.6.0` | [v2.6.0](v2.6.0.md) - PDF code-fence wrapping and repository documentation cleanup |

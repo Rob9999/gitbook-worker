@@ -1,8 +1,9 @@
 ---
-version: 2.1.3
-date: 2026-05-08
+version: 2.2.0
+date: 2026-05-09
 status: stable
 history:
+  - "2.2.0: 2026-05-09 - Anwenderanleitung fuer v2.8.0 Tabellenprofi aktualisiert"
   - "2.1.3: 2026-05-08 - Finale v2.7.0 Release-Verifikation mit Test-, PDF- und Wheel-Smoke-Ergebnissen ergaenzt"
   - "2.1.2: 2026-05-08 - Anwenderanleitung fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "2.1.1: 2026-05-08 - Anwenderanleitung fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
@@ -17,15 +18,15 @@ history:
   - "1.0.0: 2025-12-31 - init"
 ---
 
-# GitBook Worker Anwenderanleitung v2.7.0
+# GitBook Worker Anwenderanleitung v2.8.0
 
 Diese Anleitung ist der zentrale Einstieg fuer Anwenderinnen und Anwender von
-GitBook Worker v2.7.0. Sie beschreibt Installation, Projektstruktur,
+GitBook Worker v2.8.0. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
 Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
-fuer v2.7.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+fuer v2.8.0 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
 Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
@@ -44,6 +45,8 @@ Die wichtigsten Funktionen:
 - Emoji- und CJK-Fonts kontrolliert ueber `fonts.yml` einbetten.
 - Font-Attribution und Lizenzhinweise generieren.
 - AI-Reference-Pruefungen report-first ausfuehren.
+- Tabellenpapier redaktionell waehlen: `pdf_options.table_paper_strategy`
+  bewertet Umbrueche, Zeilenhoehen, schmale Spalten und lange Script-Runs.
 - Builds lokal, in Docker oder in CI/CD vergleichbar betreiben.
 
 Nicht im Fokus sind HTML-Hosting, interaktive Web-Publishing-Workflows oder
@@ -70,7 +73,7 @@ bleiben beim jeweiligen Projektteam.
 ### Lokal
 
 - Windows, Linux oder macOS.
-- Python 3.10 oder neuer; fuer v2.7.0 ist Python 3.11/3.12 empfohlen.
+- Python 3.10 oder neuer; fuer v2.8.0 ist Python 3.11/3.12 empfohlen.
 - Pandoc.
 - TeX Live mit LuaLaTeX.
 - Zugriff auf die konfigurierten Fonts oder einen erlaubten Downloadpfad.
@@ -107,7 +110,7 @@ python -m pip uninstall -y gitbook-worker tools
 Installation aus einem gelieferten Wheel:
 
 ```powershell
-python -m pip install --force-reinstall dist\gitbook_worker-2.7.0-py3-none-any.whl
+python -m pip install --force-reinstall dist\gitbook_worker-2.8.0-py3-none-any.whl
 ```
 
 Installation direkt aus dem Repository:
@@ -124,7 +127,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip uninstall -y gitbook-worker tools
-python -m pip install --force-reinstall dist/gitbook_worker-2.7.0-py3-none-any.whl
+python -m pip install --force-reinstall dist/gitbook_worker-2.8.0-py3-none-any.whl
 ```
 
 ## 5. Installation pruefen
@@ -138,7 +141,7 @@ python -c "import gitbook_worker, tools; print('version:', gitbook_worker.__vers
 
 Erwartung:
 
-- `version:` zeigt `2.7.0`.
+- `version:` zeigt `2.8.0`.
 - `gitbook_worker:` zeigt in die aktive `.venv` oder in das bewusst installierte
   Repository.
 - `tools shim:` zeigt auf den Kompatibilitaets-Shim aus `gitbook_worker`, nicht
@@ -300,6 +303,16 @@ publish:
       mainfont_fallback: "Twemoji Mozilla;ERDA CC-BY CJK"
       abort_if_missing_glyph: true
       code_block_wrap: true
+      table_paper_strategy:
+        enabled: true
+        mode: editorial
+        report: jsonl
+        max_cell_lines: 5
+        max_header_lines: 3
+        preferred_max_avg_row_lines: 2.8
+        min_readable_column_width_mm: 14
+        unbreakable_overflow_tolerance_mm: 2
+        oversize_policy: preserve-column-heuristic
 ```
 
 Die vollstaendige Schluesselreferenz steht in der
@@ -370,14 +383,15 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.7.0` verwenden. `2.4.1`
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.8.0` verwenden. `2.4.1`
   stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
   im Lieferpaket enthalten sind; `2.4.2` ergaenzt den PDF-Font-Hotfix fuer
   CJK-Linebreak und ERDA-Script-Sichtpruefung; `2.4.3` haertet Windows-Font-Stubs
   und PDF-H4/H5-Blockheadings; `2.5.0` ergaenzt echte ERDA-TTF-Coverage-Ziele
   und das `font_cli.py stats`-Gate; `2.6.0` ergaenzt PDF-Code-Fence-Wrapping;
   `2.6.1` haertet URL-artige Tokens in Pandoc-Code-Fences; `2.7.0` waehlt
-  fuer breite Markdown-Tabellen Papier anhand der geschaetzten Zelltextbreite.
+  fuer breite Markdown-Tabellen Papier anhand der geschaetzten Zelltextbreite;
+  `2.8.0` bewertet Tabellenkandidaten redaktionell und script-aware.
 - `--use-dynamic` ist weiterhin der Release-Pfad fuer dynamische Docker-Builds.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
@@ -436,7 +450,7 @@ Als JSON fuer CI oder Support:
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de\publish\das-sample-buch.pdf --json
 ```
 
-Erwartete Signale fuer v2.7.0:
+Erwartete Signale fuer v2.8.0:
 
 - Der konfigurierte Emoji-Font `Twemoji Mozilla` ist eingebettet.
 - Der konfigurierte CJK-Font `ERDA CC-BY CJK` ist eingebettet.
@@ -451,6 +465,8 @@ Erwartete Signale fuer v2.7.0:
   `--fail-on-log-pattern`, als Fehler sichtbar.
 - Breite Markdown-Pipe-Tabellen koennen auf groessere Querformate wechseln,
   wenn die geschaetzte Zelltextbreite nicht in den aktuellen Satzspiegel passt.
+- Tabellen-Layout-Reports koennen als JSONL-Dateien im Publish-Ordner liegen,
+  wenn `pdf_options.table_paper_strategy.report: jsonl` aktiv ist.
 
 ## 15. AI-Reference-QA
 
@@ -549,7 +565,7 @@ Mehr konkrete Fehlerbilder stehen in den [FAQs](FAQs.md).
 
 Empfohlene Reihenfolge:
 
-1. Release Notes lesen: [v2.7.0 Release Notes](releases/v2.7.0.md).
+1. Release Notes lesen: [v2.8.0 Release Notes](releases/v2.8.0.md).
 2. Recovery-Punkt im Projekt setzen, bevor Build- oder Migrationslaeufe starten.
 3. Neue Version in einer sauberen `.venv` installieren.
 4. Importpfade und Version pruefen.
@@ -560,24 +576,23 @@ Empfohlene Reihenfolge:
 9. Optional Docker-Build mit `Dockerfile.dynamic` ausfuehren.
 10. AI-Reference-QA zuerst report-only testen.
 
-## 19. Release-Verifikation v2.7.0
+## 19. Release-Verifikation v2.8.0
 
-Der v2.7.0-Release wurde lokal mit diesen Signalen geprueft:
+Der v2.8.0-Release wird lokal mit diesen Signalen geprueft:
 
-- Focused Tests fuer Tabellen-Preprocessing und Paper-Info: `16 passed`.
-- Non-slow Test-Suite: `550 passed, 11 skipped, 10 deselected, 4 warnings`.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.7.0`:
-  `gitbook_worker-2.7.0-py3-none-any.whl` und
-  `gitbook_worker-2.7.0.tar.gz`.
+- Focused Tests fuer Tabellen-Preprocessing, Paper-Info und pdf_options:
+  `51 passed`.
+- Config-Completeness-Tests: `24 passed`.
+- Non-slow Test-Suite: ausstehend.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.8.0`: ausstehend.
 - Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
-  Import aus `site-packages`, Version `2.7.0`, Orchestrator-Hilfe erfolgreich.
-- Deutscher und englischer PDF-Build bestanden.
-- PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK bestanden; beide
-  Sample-PDFs enthalten positive CJK-Textsignale.
+  ausstehend.
+- Deutscher und englischer PDF-Build: ausstehend.
+- PDF-Font-Gates fuer Twemoji Mozilla und ERDA CC-BY CJK: ausstehend.
 - Bekannte `Missing character`-Warnungen fuer weitere Sprachsamples bleiben
   im Log-Scan sichtbar, wurden aber nicht als Gate-Fehler gewertet.
-- Wide-Table-Stressbeispiele stehen im PDF-TOC und nutzen A1-Seiten:
-  Deutsch Seite 43, Englisch Seite 69.
+- Wide-Table- und Long-Script-Run-Stressbeispiele bleiben Bestandteil der
+  DE/EN-Sample-PDFs.
 - URL-Code-Fence-Stressbeispiele bleiben Bestandteil der DE/EN-Sample-PDFs und
   laufen weiterhin durch dieselbe PDF-Release-Pipeline.
 

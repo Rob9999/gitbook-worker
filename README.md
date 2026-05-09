@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.7.0 "Tabellenfest"** · [Release Notes](docs/releases/v2.7.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.8.0 "Tabellenprofi"** · [Release Notes](docs/releases/v2.8.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.7.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.8.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -317,6 +317,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.8.0 "Tabellenprofi" (9. Mai 2026)
+
+- **Redaktionelles Tabellen-Scoring**: Tabellen werden nach erwarteten Umbruechen, Zeilenhoehen, engen Spalten und untrennbaren Token bewertet.
+- **Steuerbare Papierstrategie**: `pdf_options.table_paper_strategy` erlaubt Grenzwerte, Kandidatenlisten, JSONL-Reports und pro Tabelle Overrides via `gbw-table`-Kommentar.
+- **Mehrsprachige Langlauf-Abdeckung**: CJK, Hangul, Kana und lange lateinische Token werden differenziert bewertet statt als rein deutsches Langwortproblem behandelt.
+
+→ [docs/releases/v2.8.0.md](docs/releases/v2.8.0.md)
+
 #### v2.7.0 "Tabellenfest" (8. Mai 2026)
 
 - **Breite Tabellen besser einschaetzen**: Markdown-Pipe-Tabellen werden nun anhand geschaetzter Zelltextbreiten und der nutzbaren Textbreite nach Margen bewertet.
@@ -477,7 +485,6 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 → [docs/releases/v2.0.0.md](docs/releases/v2.0.0.md)
 
 </details>
-
 ---
 
 ## 🇬🇧 English
@@ -535,7 +542,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.7.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.8.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -789,6 +796,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.8.0 "Tabellenprofi" (May 9, 2026)
+
+- **Editorial table scoring**: Tables are evaluated by expected wrapping, row height, narrow columns, and unbreakable token risk.
+- **Configurable paper strategy**: `pdf_options.table_paper_strategy` supports thresholds, candidate lists, JSONL reports, and per-table `gbw-table` source overrides.
+- **Multilingual long-run coverage**: CJK, Hangul, Kana, and long Latin-script tokens are treated as script-aware layout risks, not just as German compound words.
+
+→ [docs/releases/v2.8.0.md](docs/releases/v2.8.0.md)
 
 #### v2.7.0 "Tabellenfest" (May 8, 2026)
 

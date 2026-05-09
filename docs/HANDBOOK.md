@@ -1,7 +1,8 @@
 ---
-version: 1.3.7
-date: 2026-05-08
+version: 1.3.8
+date: 2026-05-09
 history:
+  - "1.3.8: 2026-05-09 - Tabellenprofi-Strategie fuer v2.8.0 dokumentiert"
   - "1.3.7: 2026-05-08 - Wide-Table-Paper-Selection fuer v2.7.0 dokumentiert"
   - "1.3.6: 2026-05-08 - URL-Code-Fence-Hotfix fuer v2.6.1 dokumentiert"
   - "1.3.5: 2026-05-07 - PDF-Code-Fence-Wrapping fuer v2.6.0 dokumentiert"
@@ -65,6 +66,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - Pandoc H4/H5 headings (`\paragraph`/`\subparagraph`) are redefined with package-free LaTeX `\@startsection` rules so they render as block headings without requiring `titlesec.sty`.
 - v2.6.1 extends PDF code-fence wrapping for Pandoc token macros such as `\NormalTok{...}`. When `fvextra` is available, token arguments are routed through `\FV@InsertBreaks`; this keeps long URLs inside code fences within the page bounds while preserving a clean PDF text layer.
 - v2.7.0 improves wide Markdown table handling. Pipe tables are estimated by per-column text width and compared against usable text width after margins; the old column-count heuristic remains a lower bound, and oversized tables emit a warning instead of pretending that a standard paper size solved them.
+- v2.8.0 moves table paper choice into `table_strategy.py` and adds editorial scoring. The strategy compares candidate papers by expected wrapping, row height, header wraps, narrow columns, and unbreakable overflow; `pdf_options.table_paper_strategy` can tune thresholds, write JSONL layout reports, and accept per-table `gbw-table` paper overrides.
 
 ### PDF font fallback behavior
 
