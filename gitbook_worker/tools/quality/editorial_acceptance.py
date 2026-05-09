@@ -5,9 +5,11 @@ from __future__ import annotations
 import argparse
 import json
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from gitbook_worker import __version__
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.quality.editorial_common import (
@@ -16,6 +18,7 @@ from gitbook_worker.tools.quality.editorial_common import (
     AcceptanceProfile,
     exit_code_for_status,
     load_acceptance_profile,
+    make_finding,
     severity_counts,
     status_from_counts,
     utc_now_iso,
@@ -32,7 +35,10 @@ def build_acceptance_dossier(
 ) -> tuple[str, dict[str, Any]]:
     """Build Markdown dossier text and a structured summary."""
 
-    findings = [finding for report in reports for finding in report.get("findings", [])]
+    derived_findings = _derive_report_drift_findings(reports, profile)
+    findings = [
+        finding for report in reports for finding in report.get("findings", [])
+    ] + derived_findings
     counts = severity_counts(findings)
     status = status_from_counts(
         counts, fail_on_warnings=fail_on_warnings or profile.fail_on_warnings
@@ -78,6 +84,21 @@ def build_acceptance_dossier(
         lines.append(
             f"- `{project}` generated `{generated_at}` with status `{report_status}`"
         )
+
+    lines.extend(["", "## PDF Artifacts", ""])
+    pdf_artifacts = _collect_pdf_artifacts(reports)
+    if not pdf_artifacts:
+        lines.append("No PDF artifacts recorded.")
+    else:
+        for artifact in pdf_artifacts:
+            lines.append(
+                "- "
+                f"`{artifact.get('path', '<pdf>')}`: "
+                f"pages={artifact.get('pages_total', 0)}, "
+                f"size={artifact.get('file_size_bytes', 0)} bytes, "
+                f"created={artifact.get('creation_date') or '<unknown>'}, "
+                f"modified={artifact.get('modified_at') or '<unknown>'}"
+            )
 
     lines.extend(["", "## Findings", ""])
     if not findings:
@@ -215,6 +236,103 @@ def _render_finding(finding: Mapping[str, Any]) -> list[str]:
         f"  - Healing: {finding.get('healing', '')}",
         "",
     ]
+
+
+def _derive_report_drift_findings(
+    reports: Sequence[Mapping[str, Any]], profile: AcceptanceProfile
+) -> list[Mapping[str, Any]]:
+    findings: list[Mapping[str, Any]] = []
+    for report in reports:
+        project = str(report.get("project") or "<unknown>")
+        generated_at = _parse_iso_datetime(report.get("generated_at"))
+        worker_version = str(report.get("worker_version") or "").strip()
+        if worker_version and worker_version != __version__:
+            severity = (
+                "fail" if profile.documentation.fail_on_stale_worker_version else "warn"
+            )
+            findings.append(
+                make_finding(
+                    rule_id="report.worker_version.stale",
+                    severity=severity,
+                    category="report.drift",
+                    artifact=project,
+                    location="worker_version",
+                    evidence=f"report={worker_version}, current={__version__}",
+                    editorial_impact="Abnahmereport wurde mit einer anderen Worker-Version erzeugt.",
+                    healing="Metriken mit aktueller Worker-Version neu erzeugen oder Abweichung als Restrisiko dokumentieren.",
+                ).to_dict()
+            )
+        elif not worker_version:
+            findings.append(
+                make_finding(
+                    rule_id="report.worker_version.missing",
+                    severity="warn",
+                    category="report.drift",
+                    artifact=project,
+                    location="worker_version",
+                    evidence="worker_version missing",
+                    editorial_impact="Worker-Version des Reports ist nicht nachvollziehbar.",
+                    healing="Metrikreport mit aktueller CLI neu erzeugen.",
+                ).to_dict()
+            )
+
+        if generated_at is None:
+            continue
+        for pdf_metric in _collect_pdf_artifacts((report,)):
+            modified_at = _parse_iso_datetime(pdf_metric.get("modified_at"))
+            if modified_at is None or modified_at <= generated_at:
+                continue
+            severity = (
+                "fail" if profile.documentation.fail_on_stale_page_count else "warn"
+            )
+            findings.append(
+                make_finding(
+                    rule_id="report.artifact.stale",
+                    severity=severity,
+                    category="report.drift",
+                    artifact=str(pdf_metric.get("path") or project),
+                    location="modified_at",
+                    evidence=(
+                        f"artifact modified {modified_at.isoformat()} after "
+                        f"report {generated_at.isoformat()}"
+                    ),
+                    editorial_impact="Report kann Seitenzahl, Textlayer oder Layout des aktuellen Artefakts verfehlen.",
+                    healing="Metrikreport nach dem letzten PDF-Build neu erzeugen.",
+                ).to_dict()
+            )
+    return findings
+
+
+def _collect_pdf_artifacts(
+    reports: Sequence[Mapping[str, Any]],
+) -> list[Mapping[str, Any]]:
+    artifacts: list[Mapping[str, Any]] = []
+    for report in reports:
+        metrics = report.get("metrics")
+        if not isinstance(metrics, Mapping):
+            continue
+        pdf_metrics = metrics.get("pdf")
+        if not isinstance(pdf_metrics, Sequence) or isinstance(
+            pdf_metrics, (str, bytes)
+        ):
+            continue
+        for pdf_metric in pdf_metrics:
+            if isinstance(pdf_metric, Mapping):
+                artifacts.append(pdf_metric)
+    return artifacts
+
+
+def _parse_iso_datetime(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        text = str(value).replace("Z", "+00:00")
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-09
 history:
+  - "1.1.0: 2026-05-09 — Publish-Scope, PDF-Zielkorridore und Drift-Regeln als implementierte v2.9.0-Signale dokumentiert."
   - "1.0.0: 2026-05-09 — Editorial quality profile for v2.9.0 Qualitaetskompass documented."
 ---
 
@@ -18,13 +19,13 @@ Die Datei wird per `--profile-config <path>` uebergeben und enthaelt ein
 
 ## Schema-Version
 
-Empfohlen: `version: 1.0.0`. Die Version ist aktuell dokumentiert, aber noch
+Empfohlen: `version: 1.1.0`. Die Version ist aktuell dokumentiert, aber noch
 nicht hart validiert.
 
 ## Beispiel
 
 ```yaml
-version: 1.0.0
+version: 1.1.0
 profiles:
   multilingual-release-candidate:
     network: false
@@ -57,6 +58,11 @@ profiles:
     pdf:
       low_text_page_threshold: 15
       very_low_text_page_threshold: 5
+      pdf_targets:
+        publish/sample.pdf:
+          target_pages_min: 120
+          target_pages_max: 140
+          warn_pages_max: 150
       required_fonts:
         - DejaVuSerif
         - DejaVuSans
@@ -79,10 +85,14 @@ profiles:
 - Target-Statuswerte.
 - lange Markdown-Tokens.
 - PDF-Wenigzeiler- und Leerseiten-Metriken.
+- PDF-TOC/Outline-Metriken.
+- PDF-Seitenzahl-Zielkorridore ueber `pdf_targets`.
 - erwartete eingebettete PDF-Fontnamen.
+- `documentation.fail_on_stale_worker_version`.
+- `documentation.fail_on_stale_page_count`.
+- Publish-Scope-Signale aus `content.yaml` und `publish.yml`.
 
 🚧 WIP:
 
-- `pdf_targets` fuer Seitenzahl-Zielkorridore.
-- `documentation.fail_on_stale_worker_version`.
-- `documentation.fail_on_stale_page_count`.
+- Baseline-Vergleich und akzeptierte Restrisiken mit Ablaufdatum.
+- Tiefe BBox-/Overflow-Auswertung fuer konkrete PDF-Layoutbefunde.

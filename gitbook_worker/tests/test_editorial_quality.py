@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import textwrap
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pypdf import PdfWriter
@@ -10,6 +11,7 @@ from gitbook_worker.tools.quality import editorial_acceptance
 from gitbook_worker.tools.quality.editorial_common import (
     EDITORIAL_HARD_FINDINGS_EXIT_CODE,
     AcceptanceProfile,
+    DocumentationProfile,
     MarkdownProfile,
     PdfProfile,
     load_acceptance_profile,
@@ -141,7 +143,100 @@ def test_pdf_metrics_detect_empty_text_layer(tmp_path: Path) -> None:
     assert metrics["pages_total"] == 1
     assert metrics["orientations"] == {"landscape": 1}
     assert metrics["empty_text_pages"] == 1
+    assert metrics["low_text_reason_hints"] == [
+        {"page": 1, "lines": 0, "reason": "empty"}
+    ]
     assert any(finding.rule_id == "pdf.text.empty_document" for finding in findings)
+
+
+def test_pdf_targets_flag_page_count_outside_corridor(tmp_path: Path) -> None:
+    pdf = tmp_path / "blank.pdf"
+    writer = PdfWriter()
+    writer.add_blank_page(width=300, height=200)
+    with pdf.open("wb") as handle:
+        writer.write(handle)
+    profile = AcceptanceProfile(
+        name="page-target-test",
+        pdf=PdfProfile(
+            pdf_targets={"blank.pdf": {"target_pages_min": 2, "target_pages_max": 4}}
+        ),
+    )
+
+    _, findings = analyze_pdf(tmp_path, pdf, profile)
+
+    assert any(finding.rule_id == "pdf.pages.below_target" for finding in findings)
+
+
+def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> None:
+    language_root = tmp_path / "sample"
+    _write_markdown(
+        language_root / "content" / "SUMMARY.md",
+        """
+        # Summary
+
+        * [Chapter](chapter.md)
+        """,
+    )
+    _write_markdown(language_root / "content" / "chapter.md", "# Chapter\n")
+    _write_markdown(language_root / "content" / "orphan.md", "# Orphan\n")
+    (language_root / "book.json").write_text(
+        json.dumps(
+            {
+                "root": "content/",
+                "structure": {"summary": "SUMMARY.md"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (language_root / "publish.yml").write_text(
+        textwrap.dedent(
+            """
+            version: 0.1.3
+            publish:
+              - path: ./
+                out_format: pdf
+                out_dir: ./publish
+                out: sample.pdf
+                source_type: folder
+                use_summary: true
+                use_book_json: true
+                build: true
+                pdf_options:
+                  table_paper_strategy:
+                    report: jsonl
+            """
+        ).lstrip(),
+        encoding="utf-8",
+    )
+    (tmp_path / "content.yaml").write_text(
+        textwrap.dedent(
+            """
+            version: 1.0.0
+            default: sample
+            contents:
+              - id: sample
+                type: local
+                uri: sample/
+            """
+        ).lstrip(),
+        encoding="utf-8",
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        content_config=tmp_path / "content.yaml",
+        languages=("sample",),
+        profile=AcceptanceProfile(name="publish-scope-test"),
+    )
+
+    publish_metrics = report["metrics"]["publish_scope"]
+    rule_ids = {finding["rule_id"] for finding in report["findings"]}
+    assert publish_metrics["build_entries_total"] == 1
+    assert publish_metrics["published_markdown_files_total"] == 1
+    assert publish_metrics["orphaned_markdown_files_total"] == 1
+    assert publish_metrics["missing_expected_pdfs_total"] == 1
+    assert "publish.pdf.missing_artifact" in rule_ids
+    assert "publish.summary.orphaned_markdown" in rule_ids
 
 
 def test_table_report_aggregation_flags_fallbacks(tmp_path: Path) -> None:
@@ -202,6 +297,45 @@ def test_acceptance_writes_dossier_and_returns_failure(tmp_path: Path) -> None:
     assert "Editorial Acceptance Dossier" in text
     assert "Human Decision" in text
     assert "missing source" in text
+
+
+def test_acceptance_derives_stale_report_findings(tmp_path: Path) -> None:
+    old_report_time = "2026-05-09T10:00:00+00:00"
+    newer_artifact_time = "2026-05-09T10:30:00+00:00"
+    dossier, summary = editorial_acceptance.build_acceptance_dossier(
+        [
+            {
+                "schema_version": "1.0.0",
+                "generated_at": old_report_time,
+                "project": "sample",
+                "worker_version": "0.0.0",
+                "metrics": {
+                    "pdf": [
+                        {
+                            "path": "publish/sample.pdf",
+                            "pages_total": 10,
+                            "file_size_bytes": 100,
+                            "creation_date": None,
+                            "modified_at": newer_artifact_time,
+                        }
+                    ]
+                },
+                "findings": [],
+            }
+        ],
+        profile=AcceptanceProfile(
+            name="stale-test",
+            documentation=DocumentationProfile(
+                fail_on_stale_worker_version=True,
+                fail_on_stale_page_count=True,
+            ),
+        ),
+    )
+
+    assert summary["status"] == "failed"
+    assert "report.worker_version.stale" in dossier
+    assert "report.artifact.stale" in dossier
+    assert "PDF Artifacts" in dossier
 
 
 def test_builtin_multilingual_profile_loads() -> None:

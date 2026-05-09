@@ -1,11 +1,12 @@
 ---
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-09
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.2.0: 2026-05-09 - Backlog-Status nach Publish-Scope-, PDF-Zielkorridor- und Drift-Schnitt synchronisiert."
   - "1.1.0: 2026-05-09 - Anonymisiertes Kundenreview als Muss-Anforderungen und Abnahmeszenarien aufgenommen."
   - "1.0.0: 2026-05-09 - Backlog-Pflichtenheft fuer redaktionelle Qualitaetsmetriken und Abnahme erstellt."
 ---
@@ -69,13 +70,13 @@ Kern der Ergaenzung:
 
 ### M1 Markdown-Metrikcollector
 
-- [ ] CLI `python -m gitbook_worker.tools.quality.editorial_metrics` anlegen.
-- [ ] Markdown-Dateien aus `content.yaml` und optional aus einem direkten Root
+- [x] ✅ CLI `python -m gitbook_worker.tools.quality.editorial_metrics` anlegen.
+- [x] ✅ Markdown-Dateien aus `content.yaml` und optional aus einem direkten Root
   erkennen.
-- [ ] Datei-, Kapitel-, Heading-, Frontmatter-, Link-, Medien-, Tabellen- und
+- [x] ✅ Datei-, Kapitel-, Heading-, Frontmatter-, Link-, Medien-, Tabellen- und
   Codeblock-Metriken sammeln.
-- [ ] TODO/FIXME/Review-Notizen als redaktionelle Findings ausgeben.
-- [ ] Link-Audit-, AI-Referenz- und Frontmatter-Signale wiederverwenden, nicht
+- [x] ✅ TODO/FIXME/Review-Notizen als redaktionelle Findings ausgeben.
+- [ ] 🔨 Link-Audit-, AI-Referenz- und Frontmatter-Signale wiederverwenden, nicht
   parallel neu erfinden.
 
 Akzeptanzkriterien:
@@ -89,12 +90,12 @@ Akzeptanzkriterien:
 
 ### M2 PDF-Metrikcollector
 
-- [ ] PDF-Dateien aus Publish-Artefakten oder CLI-Argumenten erkennen.
-- [ ] Seitenzahl, Seitengroessen, Orientierung und Sondergeometrien ermitteln.
-- [ ] PDF-TOC/Outline extrahieren.
-- [ ] Font-Embedding-, Emoji- und CJK-Signale aus `pdf_validator` integrieren.
-- [ ] Textarme/leere Seiten und auffaellige Ersatzglyphen melden.
-- [ ] Tabellenlayout-Reports mit PDF-Artefakten verknuepfen.
+- [x] ✅ PDF-Dateien aus Publish-Artefakten oder CLI-Argumenten erkennen.
+- [x] ✅ Seitenzahl, Seitengroessen, Orientierung und Sondergeometrien ermitteln.
+- [x] ✅ PDF-TOC/Outline extrahieren.
+- [x] ✅ Font-Embedding-, Emoji- und CJK-Signale aus `pdf_validator` integrieren.
+- [x] ✅ Textarme/leere Seiten und auffaellige Ersatzglyphen melden.
+- [ ] 🔨 Tabellenlayout-Reports mit PDF-Artefakten verknuepfen.
 
 Akzeptanzkriterien:
 
@@ -106,11 +107,11 @@ Akzeptanzkriterien:
 
 ### M3 Markdown-PDF-Abgleich
 
-- [ ] Markdown-Headings gegen PDF-TOC/Outline pruefen.
+- [x] ✅ Markdown-Headings gegen PDF-TOC/Outline pruefen.
 - [ ] erwartete Sample-Seiten als Regeln ausdruecken koennen.
 - [ ] Projektversion, Sprache und Titel zwischen Manifest, Markdown und PDF
   plausibilisieren.
-- [ ] Publish-Eintraege ohne erzeugtes Artefakt als `blocked` melden.
+- [x] ✅ Publish-Eintraege ohne erzeugtes Artefakt als `blocked` melden.
 
 Akzeptanzkriterien:
 
@@ -121,13 +122,13 @@ Akzeptanzkriterien:
 
 ### M4 Redaktionelle Abnahme-CLI
 
-- [ ] CLI `python -m gitbook_worker.tools.quality.editorial_acceptance`
+- [x] ✅ CLI `python -m gitbook_worker.tools.quality.editorial_acceptance`
   anlegen.
-- [ ] Einen oder mehrere Metrikreports lesen.
-- [ ] Findings nach Severity aggregieren.
-- [ ] Gesamtstatus `passed`, `passed_with_warnings`, `failed` oder `blocked`
+- [x] ✅ Einen oder mehrere Metrikreports lesen.
+- [x] ✅ Findings nach Severity aggregieren.
+- [x] ✅ Gesamtstatus `passed`, `passed_with_warnings`, `failed` oder `blocked`
   berechnen.
-- [ ] Markdown-Dossier mit Executive Summary, Befunden und Healing-Steps
+- [x] ✅ Markdown-Dossier mit Executive Summary, Befunden und Healing-Steps
   erzeugen.
 
 Akzeptanzkriterien:
@@ -138,10 +139,10 @@ Akzeptanzkriterien:
 
 ### M5 Exit-Codes und Hilfe
 
-- [ ] Neue Exit-Codes in
+- [x] ✅ Neue Exit-Codes in
   [../attentions/exit-codes.md](../attentions/exit-codes.md) dokumentieren.
-- [ ] `--help-exit-codes` fuer neue CLIs bereitstellen.
-- [ ] Eindeutige Codes fuer fehlende Artefakte, harte Findings,
+- [x] ✅ `--help-exit-codes` fuer neue CLIs bereitstellen.
+- [x] ✅ Eindeutige Codes fuer fehlende Artefakte, harte Findings,
   unlesbare Reports und ungueltige Profile definieren.
 
 Akzeptanzkriterien:
@@ -151,14 +152,14 @@ Akzeptanzkriterien:
 
 ### M6 Report-Drift und Artefakt-Frische
 
-- [ ] Installierte Worker-Version im Metrikreport ausweisen.
-- [ ] Build-Worker-Version pro PDF-Artefakt erfassen, soweit rekonstruierbar.
-- [ ] PDF `CreationDate`, Dateigroesse und Seitenzahl in das Dossier aufnehmen.
-- [ ] Metrikreport-Zeitstempel gegen Artefakt-Zeitstempel pruefen.
+- [x] ✅ Installierte Worker-Version im Metrikreport ausweisen.
+- [ ] 🚧 Build-Worker-Version pro PDF-Artefakt erfassen, soweit rekonstruierbar.
+- [x] ✅ PDF `CreationDate`, Dateigroesse und Seitenzahl in das Dossier aufnehmen.
+- [x] ✅ Metrikreport-Zeitstempel gegen Artefakt-Zeitstempel pruefen.
 - [ ] Release-Dokumente auf alte Worker-Versionen, alte Seitenzahlen und alte
   Layoutbefunde scannen.
-- [ ] Profilregel `fail_on_stale_worker_version` unterstuetzen.
-- [ ] Profilregel `fail_on_stale_page_count` unterstuetzen.
+- [x] ✅ Profilregel `fail_on_stale_worker_version` unterstuetzen.
+- [x] ✅ Profilregel `fail_on_stale_page_count` unterstuetzen.
 
 Akzeptanzkriterien:
 
@@ -170,13 +171,13 @@ Akzeptanzkriterien:
 
 ### M7 Wenigzeiler- und Leerseiten-Metrik
 
-- [ ] `pages_total` pro PDF ermitteln.
-- [ ] `low_text_pages_le_15` zaehlen; reine Seitenzahl-Footer ignorieren.
-- [ ] `very_low_text_pages_le_5` zaehlen.
-- [ ] `empty_text_pages` zaehlen.
-- [ ] `low_text_reason_hint` ableiten: Tabelle, Bild/Caption, Kapitelstart,
+- [x] ✅ `pages_total` pro PDF ermitteln.
+- [x] ✅ `low_text_pages_le_15` zaehlen; reine Seitenzahl-Footer ignorieren.
+- [x] ✅ `very_low_text_pages_le_5` zaehlen.
+- [x] ✅ `empty_text_pages` zaehlen.
+- [x] ✅ `low_text_reason_hint` ableiten: Tabelle, Bild/Caption, Kapitelstart,
   Quellen-/URL-Seite oder unbekannt.
-- [ ] Schwellen `low_text_page_threshold` und `very_low_text_page_threshold`
+- [x] ✅ Schwellen `low_text_page_threshold` und `very_low_text_page_threshold`
   profilierbar machen.
 
 Akzeptanzkriterien:
@@ -187,17 +188,17 @@ Akzeptanzkriterien:
 
 ### M8 Generisches Frontmatter- und Uebersetzungsprofil
 
-- [ ] Profilierbare Sprachrollen `source` und `target` unterstuetzen.
-- [ ] Frei waehlbare `source_locale` und `target_locales` unterstuetzen, z. B.
+- [x] ✅ Profilierbare Sprachrollen `source` und `target` unterstuetzen.
+- [x] ✅ Frei waehlbare `source_locale` und `target_locales` unterstuetzen, z. B.
   `ja` als Source sowie `pl`, `hr` und `no` als Targets.
-- [ ] Profilierbare Pflichtfelder fuer Source-Content unterstuetzen.
-- [ ] Profilierbare Pflichtfelder fuer Target-Content unterstuetzen.
-- [ ] Statuswerte fuer Target-Content projektspezifisch begrenzen koennen.
-- [ ] `approved` separat zaehlen und als bewusste Freigabe sichtbar machen.
-- [ ] Verbotene Keys wie `lang`, `language`, `lang-version` als Findings
+- [x] ✅ Profilierbare Pflichtfelder fuer Source-Content unterstuetzen.
+- [x] ✅ Profilierbare Pflichtfelder fuer Target-Content unterstuetzen.
+- [x] ✅ Statuswerte fuer Target-Content projektspezifisch begrenzen koennen.
+- [x] ✅ `approved` separat zaehlen und als bewusste Freigabe sichtbar machen.
+- [x] ✅ Verbotene Keys wie `lang`, `language`, `lang-version` als Findings
   melden.
-- [ ] Target-`source` repo-relativ validieren.
-- [ ] Source/Target-`content_id`-Drift erkennen.
+- [x] ✅ Target-`source` repo-relativ validieren.
+- [x] ✅ Source/Target-`content_id`-Drift erkennen.
 
 Akzeptanzkriterien:
 
@@ -208,12 +209,12 @@ Akzeptanzkriterien:
 
 ### M9 Publikationsprofil, SUMMARY und Heading-Abgleich
 
-- [ ] Publizierte, nicht publizierte und verwaiste Dateien getrennt zaehlen.
-- [ ] `use_summary: true` und GitBook-SUMMARY-Reihenfolge beruecksichtigen.
-- [ ] Ausschlussordner wie `desktop/`, `tmp/`, `logs/`, `release-docs/` und
+- [x] ✅ Publizierte, nicht publizierte und verwaiste Dateien getrennt zaehlen.
+- [x] ✅ `use_summary: true` und GitBook-SUMMARY-Reihenfolge beruecksichtigen.
+- [x] ✅ Ausschlussordner wie `desktop/`, `tmp/`, `logs/`, `release-docs/` und
   `publish/` profilieren.
-- [ ] PDF-Outline-Eintraege ohne Markdown-Heading melden.
-- [ ] Markdown-Headings ohne erwarteten PDF-Outline-Eintrag melden.
+- [x] ✅ PDF-Outline-Eintraege ohne Markdown-Heading melden.
+- [x] ✅ Markdown-Headings ohne erwarteten PDF-Outline-Eintrag melden.
 - [ ] doppelte Titel im gleichen Dokument oder in direkter PDF-Naehe melden.
 - [ ] Kapitel-/Anhang-Reihenfolge gegen `summary_appendices_last` pruefen.
 
@@ -225,12 +226,12 @@ Akzeptanzkriterien:
 
 ### M10 Tabellenstrategie-Aggregation
 
-- [ ] Tabellenlayout-JSONL-Reports lesen und validieren.
-- [ ] Anzahl erkannter Markdown-Pipe-Tabellen aggregieren.
-- [ ] Papierentscheidungen nach Format zaehlen.
-- [ ] Methoden wie `editorial-best-fit`, `lowest-score-fallback`, `override`,
+- [x] ✅ Tabellenlayout-JSONL-Reports lesen und validieren.
+- [x] ✅ Anzahl erkannter Markdown-Pipe-Tabellen aggregieren.
+- [x] ✅ Papierentscheidungen nach Format zaehlen.
+- [x] ✅ Methoden wie `editorial-best-fit`, `lowest-score-fallback`, `override`,
   `disabled` und `oversize-preserve-column-heuristic` zaehlen.
-- [ ] Fallbacks, Overrides und abgelehnte Kandidaten als Problemfaelle melden.
+- [ ] 🔨 Fallbacks, Overrides und abgelehnte Kandidaten als Problemfaelle melden.
 - [ ] Datei, Tabellenindex oder naheliegenden Heading-Kontext ausgeben.
 - [ ] Layout-Trade-offs sichtbar machen, insbesondere horizontale Entlastung
   gegen geringere vertikale Kapazitaet bei Landscape-Seiten.
@@ -246,8 +247,8 @@ Akzeptanzkriterien:
   Millimetern, gekuerztem Textauszug, Ursache und Healing-Step modellieren.
 - [ ] Kleine DOI-/URL-Ueberstaende profilierbar als `warn` statt `fail`
   behandeln.
-- [ ] Projektfonts aus Profil gegen eingebettete PDF-Fonts pruefen.
-- [ ] Ersatzglyphen wie `□`, `�` und `.notdef` als Befunde melden.
+- [x] ✅ Projektfonts aus Profil gegen eingebettete PDF-Fonts pruefen.
+- [x] ✅ Ersatzglyphen wie `□`, `�` und `.notdef` als Befunde melden.
 - [ ] CJK/Hangul/Kana-Stichproben pruefen, wenn solche Scripts im publizierten
   Scope vorkommen.
 
@@ -259,11 +260,11 @@ Akzeptanzkriterien:
 
 ### M12 Quellen-, Rechts- und AI-Hinweise im Dossier
 
-- [ ] Dossier muss erklaeren, dass Linkstatus technische Erreichbarkeit ist,
+- [x] ✅ Dossier muss erklaeren, dass Linkstatus technische Erreichbarkeit ist,
   keine inhaltliche Quellenwahrheit.
-- [ ] Dossier muss erklaeren, dass AI-Referenzchecks Such- und
+- [x] ✅ Dossier muss erklaeren, dass AI-Referenzchecks Such- und
   Plausibilitaetshilfen sind, keine autoritative Validierung.
-- [ ] Dossier muss erklaeren, dass Rechts-/Konformitaetsbefunde
+- [x] ✅ Dossier muss erklaeren, dass Rechts-/Konformitaetsbefunde
   Review-Signale sind, keine Rechtsberatung.
 
 Akzeptanzkriterien:
@@ -273,12 +274,12 @@ Akzeptanzkriterien:
 
 ### M13 Abnahmeprofile und manuelle Freigabe
 
-- [ ] Profile `local-preview`, `release-candidate`, `publish-final` und
+- [x] ✅ Profile `local-preview`, `release-candidate`, `publish-final` und
   `docs-only` bereitstellen.
-- [ ] generisches Profil `multilingual-release-candidate` dokumentieren und
+- [x] ✅ generisches Profil `multilingual-release-candidate` dokumentieren und
   testen.
-- [ ] `human_decision`-Vorlage in Markdown-Dossier erzeugen.
-- [ ] Tool darf `human_decision` nicht automatisch setzen.
+- [x] ✅ `human_decision`-Vorlage in Markdown-Dossier erzeugen.
+- [x] ✅ Tool darf `human_decision` nicht automatisch setzen.
 - [ ] Restrisiken mit `finding_id`, Grund, Rolle und Datum dokumentierbar
   machen.
 
@@ -290,16 +291,16 @@ Akzeptanzkriterien:
 
 ### M14 Stabile IDs, Baselines und Datenschutz
 
-- [ ] Stabile Finding-ID aus Regel-ID, relativer Datei, nahem Heading,
+- [x] ✅ Stabile Finding-ID aus Regel-ID, relativer Datei, nahem Heading,
   normalisiertem Evidenztext und optional Seite erzeugen.
 - [ ] Baseline-Vergleich mit `new`, `existing`, `resolved`, `changed`
   unterstuetzen.
 - [ ] Bewusst akzeptierte Befunde mit Ablaufdatum oder Releasebezug
   unterstuetzen.
-- [ ] Markdown-Reports mit workspace-relativen Pfaden erzeugen.
-- [ ] Absolute Pfade in JSON optional und deaktivierbar machen.
-- [ ] Evidenzauszuege kurz halten.
-- [ ] Netzwerkchecks im Report sichtbar als aktiviert/deaktiviert markieren.
+- [x] ✅ Markdown-Reports mit workspace-relativen Pfaden erzeugen.
+- [x] ✅ Absolute Pfade in JSON optional und deaktivierbar machen.
+- [x] ✅ Evidenzauszuege kurz halten.
+- [x] ✅ Netzwerkchecks im Report sichtbar als aktiviert/deaktiviert markieren.
 
 Akzeptanzkriterien:
 
@@ -317,8 +318,8 @@ Akzeptanzkriterien:
 
 ### S2 Reportformate
 
-- [ ] JSON als kanonisches Format.
-- [ ] Markdown fuer redaktionelle Abnahme.
+- [x] ✅ JSON als kanonisches Format.
+- [x] ✅ Markdown fuer redaktionelle Abnahme.
 - [ ] CSV fuer tabellarische Metriken optional.
 - [ ] Konsolenausgabe kurz und scanbar halten.
 
@@ -326,7 +327,7 @@ Akzeptanzkriterien:
 
 - [ ] Orchestrator kann nach dem PDF-Build optional Metriken und Abnahme laufen
   lassen.
-- [ ] Reports landen unter `logs/quality/` oder einem konfigurierten Outputpfad.
+- [x] ✅ Reports landen unter `logs/quality/` oder einem konfigurierten Outputpfad.
 - [ ] CI kann den Abnahmestatus als Gate verwenden.
 
 ### S4 Sample- und Regression-Faelle
@@ -338,10 +339,10 @@ Akzeptanzkriterien:
 
 ### S5 Seitenzahl-Zielkorridore
 
-- [ ] Optionale `pdf_targets` pro Profil unterstuetzen.
-- [ ] `target_pages_min`, `target_pages_max` und `warn_pages_max` je PDF
+- [x] ✅ Optionale `pdf_targets` pro Profil unterstuetzen.
+- [x] ✅ `target_pages_min`, `target_pages_max` und `warn_pages_max` je PDF
   auswerten.
-- [ ] Seitenzahlkorridore als projektspezifisch kennzeichnen, nicht als
+- [x] ✅ Seitenzahlkorridore als projektspezifisch kennzeichnen, nicht als
   Worker-Default.
 
 Beispiel:

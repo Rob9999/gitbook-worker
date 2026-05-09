@@ -7,14 +7,18 @@ import json
 import re
 from collections import Counter
 from dataclasses import asdict
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
+from urllib.parse import unquote
 
 import yaml
 from pypdf import PdfReader
 
+from gitbook_worker.core.application.pdf_toc import extract_pdf_toc
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.logging_config import get_logger
+from gitbook_worker.tools.publishing.gitbook_style import get_summary_layout
 from gitbook_worker.tools.quality.editorial_common import (
     EDITORIAL_BLOCKED_EXIT_CODE,
     EDITORIAL_HARD_FINDINGS_EXIT_CODE,
@@ -43,6 +47,10 @@ _IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
 _TODO_RE = re.compile(r"\b(TODO|FIXME|REVIEW|XXX)\b", re.IGNORECASE)
 _TABLE_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$")
 _FOOTER_LINE_RE = re.compile(r"^\s*(?:page\s*)?\d+\s*$", re.IGNORECASE)
+_SUMMARY_LINK_RE = re.compile(
+    r"\(([^)]+?\.(?:md|markdown))(?:#[^)]+)?\)", re.IGNORECASE
+)
+_PDF_REPORT_MODES = {"jsonl", "file", "true"}
 
 
 def collect_editorial_metrics(
@@ -62,20 +70,32 @@ def collect_editorial_metrics(
 
     root = repo_root.resolve()
     active_profile = profile or load_acceptance_profile()
-    markdown_files, markdown_inputs = discover_markdown_files(
+    publish_scope = discover_publish_scope(
         root,
         content_config=content_config,
         languages=languages,
-        markdown_roots=markdown_roots,
         profile=active_profile,
+        enabled=markdown_roots is None,
     )
+    if markdown_roots is None and publish_scope["markdown_files"]:
+        markdown_files = list(publish_scope["markdown_files"])
+        markdown_inputs = list(publish_scope["markdown_inputs"])
+    else:
+        markdown_files, markdown_inputs = discover_markdown_files(
+            root,
+            content_config=content_config,
+            languages=languages,
+            markdown_roots=markdown_roots,
+            profile=active_profile,
+        )
     markdown_metrics, markdown_findings = analyze_markdown_files(
         root, markdown_files, active_profile
     )
 
     pdf_metrics: list[dict[str, Any]] = []
     pdf_findings: list[Finding] = []
-    for pdf_path in pdf_paths or ():
+    pdf_inputs = _dedupe_paths([*(pdf_paths or ()), *publish_scope["expected_pdfs"]])
+    for pdf_path in pdf_inputs:
         metrics, findings = analyze_pdf(root, pdf_path, active_profile, log_paths or ())
         pdf_metrics.append(metrics)
         pdf_findings.extend(findings)
@@ -83,9 +103,18 @@ def collect_editorial_metrics(
     table_paths = list(table_report_paths or ())
     if discover_table_reports:
         table_paths.extend(discover_table_layout_reports(root, markdown_inputs))
+    table_paths.extend(publish_scope["expected_table_reports"])
+    table_paths = _dedupe_paths(table_paths)
     table_metrics, table_findings = analyze_table_reports(root, table_paths)
 
-    findings = [*markdown_findings, *pdf_findings, *table_findings]
+    toc_findings = compare_markdown_pdf_toc(root, markdown_metrics, pdf_metrics)
+    findings = [
+        *publish_scope["findings"],
+        *markdown_findings,
+        *pdf_findings,
+        *toc_findings,
+        *table_findings,
+    ]
     inputs = {
         "repo_root": ".",
         "content_config": (
@@ -93,12 +122,13 @@ def collect_editorial_metrics(
         ),
         "languages": list(languages or []),
         "markdown_roots": markdown_inputs,
-        "pdfs": [relative_artifact(path, root) for path in pdf_paths or ()],
+        "pdfs": [relative_artifact(path, root) for path in pdf_inputs],
         "table_reports": [relative_artifact(path, root) for path in table_paths],
         "logs": [relative_artifact(path, root) for path in log_paths or ()],
         "network": active_profile.network,
     }
     metrics = {
+        "publish_scope": publish_scope["metrics"],
         "markdown": markdown_metrics,
         "pdf": pdf_metrics,
         "tables": table_metrics,
@@ -165,6 +195,179 @@ def discover_markdown_files(
     return files, [relative_artifact(root, repo_root) for root in roots]
 
 
+def discover_publish_scope(
+    repo_root: Path,
+    *,
+    content_config: Path | None,
+    languages: Sequence[str] | None,
+    profile: AcceptanceProfile,
+    enabled: bool = True,
+) -> dict[str, Any]:
+    """Discover publish.yml scope, expected artifacts and scoped Markdown files."""
+
+    metrics: dict[str, Any] = {
+        "enabled": enabled,
+        "content_entries_total": 0,
+        "local_content_entries_total": 0,
+        "skipped_content_entries_total": 0,
+        "manifests_total": 0,
+        "missing_manifests_total": 0,
+        "publish_entries_total": 0,
+        "build_entries_total": 0,
+        "skipped_publish_entries_total": 0,
+        "published_markdown_files_total": 0,
+        "unpublished_markdown_files_total": 0,
+        "orphaned_markdown_files_total": 0,
+        "expected_pdfs_total": 0,
+        "missing_expected_pdfs_total": 0,
+        "expected_table_reports_total": 0,
+        "missing_expected_table_reports_total": 0,
+        "entries": [],
+    }
+    findings: list[Finding] = []
+    markdown_files: list[Path] = []
+    markdown_inputs: list[str] = []
+    expected_pdfs: list[Path] = []
+    expected_table_reports: list[Path] = []
+
+    if not enabled:
+        return {
+            "metrics": metrics,
+            "findings": findings,
+            "markdown_files": markdown_files,
+            "markdown_inputs": markdown_inputs,
+            "expected_pdfs": expected_pdfs,
+            "expected_table_reports": expected_table_reports,
+        }
+
+    try:
+        config = load_content_config(
+            content_config,
+            cwd=repo_root,
+            repo_root=repo_root,
+            allow_missing=True,
+        )
+    except Exception as exc:  # noqa: BLE001 - metrics should remain readable
+        logger.warning("Could not resolve content config for publish scope: %s", exc)
+        return {
+            "metrics": metrics,
+            "findings": findings,
+            "markdown_files": markdown_files,
+            "markdown_inputs": markdown_inputs,
+            "expected_pdfs": expected_pdfs,
+            "expected_table_reports": expected_table_reports,
+        }
+
+    target_languages = list(languages or config.entries.keys())
+    seen_markdown: set[Path] = set()
+    for language_id in target_languages:
+        try:
+            entry = config.get(language_id)
+        except KeyError as exc:
+            findings.append(
+                make_finding(
+                    rule_id="publish.content_entry.missing",
+                    severity="warn",
+                    category="publish.scope",
+                    artifact=relative_artifact(
+                        config.source_path or repo_root, repo_root
+                    ),
+                    location=str(language_id),
+                    evidence=str(exc),
+                    editorial_impact="Angeforderter Content-Scope ist nicht in content.yaml definiert.",
+                    healing="--lang korrigieren oder content.yaml ergaenzen.",
+                )
+            )
+            continue
+        metrics["content_entries_total"] += 1
+        if not entry.is_local:
+            metrics["skipped_content_entries_total"] += 1
+            continue
+        if entry.raw and _as_bool(entry.raw.get("build"), default=True) is False:
+            metrics["skipped_content_entries_total"] += 1
+            continue
+
+        metrics["local_content_entries_total"] += 1
+        language_root = entry.resolve_path(repo_root)
+        manifest = language_root / "publish.yml"
+        if not manifest.exists():
+            metrics["missing_manifests_total"] += 1
+            continue
+        metrics["manifests_total"] += 1
+        try:
+            raw_manifest = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+        except (OSError, yaml.YAMLError) as exc:
+            findings.append(
+                make_finding(
+                    rule_id="publish.manifest.read_error",
+                    severity="blocked",
+                    category="publish.scope",
+                    artifact=relative_artifact(manifest, repo_root),
+                    location="file",
+                    evidence=str(exc),
+                    editorial_impact="publish.yml kann nicht fuer den Abnahmescope gelesen werden.",
+                    healing="YAML-Syntax oder Dateizugriff korrigieren.",
+                )
+            )
+            continue
+        publish_entries = raw_manifest.get("publish")
+        if not isinstance(publish_entries, list):
+            continue
+
+        for index, raw_entry in enumerate(publish_entries, start=1):
+            if not isinstance(raw_entry, Mapping):
+                continue
+            metrics["publish_entries_total"] += 1
+            if not _as_bool(raw_entry.get("build"), default=False):
+                metrics["skipped_publish_entries_total"] += 1
+                continue
+            metrics["build_entries_total"] += 1
+            entry_metrics, entry_findings = _analyze_publish_entry(
+                repo_root,
+                manifest,
+                index,
+                raw_entry,
+                profile,
+            )
+            metrics["entries"].append(entry_metrics)
+            findings.extend(entry_findings)
+            for key in (
+                "published_markdown_files_total",
+                "unpublished_markdown_files_total",
+                "orphaned_markdown_files_total",
+                "expected_pdfs_total",
+                "missing_expected_pdfs_total",
+                "expected_table_reports_total",
+                "missing_expected_table_reports_total",
+            ):
+                metrics[key] += int(entry_metrics.get(key, 0))
+            for markdown_file in entry_metrics.get("published_markdown_files", []):
+                path = (repo_root / markdown_file).resolve()
+                if path not in seen_markdown:
+                    seen_markdown.add(path)
+                    markdown_files.append(path)
+            source_root = entry_metrics.get("source_root")
+            if source_root and source_root not in markdown_inputs:
+                markdown_inputs.append(str(source_root))
+            if entry_metrics.get("expected_pdf"):
+                expected_pdfs.append(
+                    (repo_root / entry_metrics["expected_pdf"]).resolve()
+                )
+            if entry_metrics.get("expected_table_report"):
+                expected_table_reports.append(
+                    (repo_root / entry_metrics["expected_table_report"]).resolve()
+                )
+
+    return {
+        "metrics": metrics,
+        "findings": findings,
+        "markdown_files": markdown_files,
+        "markdown_inputs": markdown_inputs,
+        "expected_pdfs": _dedupe_paths(expected_pdfs),
+        "expected_table_reports": _dedupe_paths(expected_table_reports),
+    }
+
+
 def analyze_markdown_files(
     repo_root: Path,
     markdown_files: Sequence[Path],
@@ -177,6 +380,7 @@ def analyze_markdown_files(
         "lines_total": 0,
         "words_total": 0,
         "headings_total": 0,
+        "headings": [],
         "frontmatter_files": 0,
         "links_total": 0,
         "images_total": 0,
@@ -215,7 +419,19 @@ def analyze_markdown_files(
         metrics["words_total"] += len(re.findall(r"\b\w+\b", text, flags=re.UNICODE))
         metrics["links_total"] += len(_LINK_RE.findall(text))
         metrics["images_total"] += len(_IMAGE_RE.findall(text))
-        metrics["headings_total"] += sum(1 for line in lines if _HEADING_RE.match(line))
+        for line_number, line in enumerate(lines, start=1):
+            heading_match = _HEADING_RE.match(line)
+            if not heading_match:
+                continue
+            metrics["headings_total"] += 1
+            metrics["headings"].append(
+                {
+                    "artifact": rel,
+                    "line": line_number,
+                    "level": len(heading_match.group(1)),
+                    "title": heading_match.group(2).strip(),
+                }
+            )
         metrics["tables_total"] += _count_markdown_tables(lines)
         metrics["codeblocks_total"] += _count_fenced_code_blocks(lines)
 
@@ -328,11 +544,15 @@ def analyze_pdf(
         "pages_total": 0,
         "file_size_bytes": path.stat().st_size if path.exists() else 0,
         "creation_date": None,
+        "modified_at": _path_mtime_iso(path) if path.exists() else None,
         "page_sizes": [],
         "orientations": {},
         "low_text_pages_le_15": 0,
         "very_low_text_pages_le_5": 0,
         "empty_text_pages": 0,
+        "low_text_reason_hints": [],
+        "toc_entries_total": 0,
+        "toc_entries": [],
         "fonts": [],
     }
     findings: list[Finding] = []
@@ -394,6 +614,13 @@ def analyze_pdf(
         line_count = len(_meaningful_text_lines(text))
         if line_count <= profile.pdf.low_text_page_threshold:
             metrics["low_text_pages_le_15"] += 1
+            metrics["low_text_reason_hints"].append(
+                {
+                    "page": page_index,
+                    "lines": line_count,
+                    "reason": _guess_low_text_reason(text),
+                }
+            )
         if line_count <= profile.pdf.very_low_text_page_threshold:
             metrics["very_low_text_pages_le_5"] += 1
         if line_count == 0:
@@ -445,8 +672,98 @@ def analyze_pdf(
     fonts = _safe_extract_fonts(path, rel, findings)
     metrics["fonts"] = [asdict(font) for font in fonts]
     findings.extend(_check_required_fonts(rel, fonts, profile))
+    findings.extend(_check_pdf_page_targets(rel, metrics["pages_total"], profile))
+    toc_entries = _safe_extract_pdf_toc(path, rel, findings)
+    metrics["toc_entries"] = [asdict(entry) for entry in toc_entries]
+    metrics["toc_entries_total"] = len(toc_entries)
     findings.extend(_check_log_patterns(repo_root, rel, log_paths))
     return metrics, findings
+
+
+def compare_markdown_pdf_toc(
+    repo_root: Path,
+    markdown_metrics: Mapping[str, Any],
+    pdf_metrics: Sequence[Mapping[str, Any]],
+) -> list[Finding]:
+    """Compare published Markdown headings with extracted PDF outline entries."""
+
+    findings: list[Finding] = []
+    headings = [
+        heading
+        for heading in markdown_metrics.get("headings", [])
+        if isinstance(heading, Mapping) and int(heading.get("level") or 0) <= 2
+    ]
+    if not headings or not pdf_metrics:
+        return findings
+
+    outline_entries: list[Mapping[str, Any]] = []
+    for pdf_metric in pdf_metrics:
+        outline_entries.extend(
+            entry
+            for entry in pdf_metric.get("toc_entries", [])
+            if isinstance(entry, Mapping)
+        )
+        if pdf_metric.get("exists") and not pdf_metric.get("toc_entries_total"):
+            findings.append(
+                make_finding(
+                    rule_id="pdf.toc.missing",
+                    severity="warn",
+                    category="pdf.toc",
+                    artifact=str(pdf_metric.get("path") or "<pdf>"),
+                    location="outline",
+                    evidence=f"PDF outline empty; {len(headings)} Markdown H1/H2 headings in publish scope",
+                    editorial_impact="PDF-Navigation kann nicht gegen Markdown-Struktur abgeglichen werden.",
+                    healing="Pandoc TOC/Outline-Optionen und PDF-Erzeugung pruefen.",
+                )
+            )
+
+    if not outline_entries:
+        return findings
+
+    outline_by_title = {
+        _normalize_heading_title(str(entry.get("title") or "")): entry
+        for entry in outline_entries
+    }
+    heading_by_title = {
+        _normalize_heading_title(str(heading.get("title") or "")): heading
+        for heading in headings
+    }
+
+    for heading in headings[:50]:
+        normalized = _normalize_heading_title(str(heading.get("title") or ""))
+        if not normalized or normalized in outline_by_title:
+            continue
+        artifact = str(heading.get("artifact") or "<markdown>")
+        findings.append(
+            make_finding(
+                rule_id="pdf.toc.markdown_heading_missing",
+                severity="warn",
+                category="pdf.toc",
+                artifact=artifact,
+                location=f"line {heading.get('line', '?')}",
+                evidence=str(heading.get("title") or ""),
+                editorial_impact="Publizierte Markdown-Ueberschrift fehlt im PDF-Outline-Abgleich.",
+                healing="SUMMARY, Heading-Level und Pandoc TOC-Tiefe pruefen.",
+            )
+        )
+
+    for entry in outline_entries[:50]:
+        normalized = _normalize_heading_title(str(entry.get("title") or ""))
+        if not normalized or normalized in heading_by_title:
+            continue
+        findings.append(
+            make_finding(
+                rule_id="pdf.toc.outline_without_markdown_heading",
+                severity="info",
+                category="pdf.toc",
+                artifact="pdf outline",
+                location=f"page {entry.get('page', '?')}",
+                evidence=str(entry.get("title") or ""),
+                editorial_impact="PDF-Outline enthaelt einen Titel ohne direkten Markdown-Heading-Treffer.",
+                healing="Pruefen, ob der Eintrag aus generierten Sections, Metadaten oder falscher Heading-Struktur stammt.",
+            )
+        )
+    return findings
 
 
 def discover_table_layout_reports(
@@ -670,6 +987,391 @@ def main(argv: Sequence[str] | None = None) -> int:
         if counts.get("fail", 0) or (args.fail_on_warnings and counts.get("warn", 0)):
             return EDITORIAL_HARD_FINDINGS_EXIT_CODE
     return 0
+
+
+def _analyze_publish_entry(
+    repo_root: Path,
+    manifest: Path,
+    index: int,
+    entry: Mapping[str, Any],
+    profile: AcceptanceProfile,
+) -> tuple[dict[str, Any], list[Finding]]:
+    findings: list[Finding] = []
+    manifest_dir = manifest.parent
+    raw_path = str(entry.get("path") or "").strip()
+    source = _resolve_from_base(manifest_dir, raw_path or ".")
+    rel_source = relative_artifact(source, repo_root)
+    out_name = str(entry.get("out") or "").strip()
+    out_dir = _resolve_from_base(manifest_dir, str(entry.get("out_dir") or "publish"))
+    out_format = str(
+        entry.get("out_format")
+        or entry.get("target_format")
+        or entry.get("format")
+        or "pdf"
+    ).lower()
+    use_summary = _as_bool(entry.get("use_summary")) or _as_bool(
+        entry.get("use_book_json")
+    )
+    source_type = str(entry.get("source_type") or entry.get("type") or "").lower()
+    if source_type not in {"file", "folder"}:
+        source_type = "folder" if source.is_dir() else "file"
+
+    metrics: dict[str, Any] = {
+        "manifest": relative_artifact(manifest, repo_root),
+        "index": index,
+        "source_root": rel_source,
+        "source_type": source_type,
+        "use_summary": use_summary,
+        "out_format": out_format,
+        "out_dir": relative_artifact(out_dir, repo_root),
+        "out": out_name,
+        "published_markdown_files": [],
+        "published_markdown_files_total": 0,
+        "unpublished_markdown_files_total": 0,
+        "orphaned_markdown_files_total": 0,
+        "expected_pdfs_total": 0,
+        "missing_expected_pdfs_total": 0,
+        "expected_table_reports_total": 0,
+        "missing_expected_table_reports_total": 0,
+        "expected_pdf": None,
+        "expected_table_report": None,
+    }
+
+    if not source.exists():
+        findings.append(
+            make_finding(
+                rule_id="publish.source.missing",
+                severity="blocked",
+                category="publish.scope",
+                artifact=relative_artifact(manifest, repo_root),
+                location=f"publish[{index}].path",
+                evidence=f"path={raw_path!r}",
+                editorial_impact="Publikationsscope verweist auf fehlende Markdown-Quelle.",
+                healing="publish.yml path korrigieren oder Quelle ergaenzen.",
+            )
+        )
+        return metrics, findings
+
+    if source_type == "file":
+        published_files = (
+            [source] if source.suffix.lower() in {".md", ".markdown"} else []
+        )
+        all_markdown_files = published_files
+        orphaned_files: list[Path] = []
+        missing_summary_refs: list[str] = []
+    else:
+        all_markdown_files = _discover_markdown_under_source(source, profile)
+        published_files, missing_summary_refs = _published_files_from_summary(
+            source, use_summary
+        )
+        if not published_files:
+            published_files = all_markdown_files
+        published_set = {path.resolve() for path in published_files}
+        orphaned_files = [
+            path
+            for path in all_markdown_files
+            if path.resolve() not in published_set
+            and path.name not in profile.markdown.skip_filenames
+        ]
+
+    metrics["published_markdown_files"] = [
+        relative_artifact(path, repo_root) for path in published_files
+    ]
+    metrics["published_markdown_files_total"] = len(published_files)
+    metrics["unpublished_markdown_files_total"] = len(orphaned_files)
+    metrics["orphaned_markdown_files_total"] = len(orphaned_files) if use_summary else 0
+
+    for target in missing_summary_refs[:20]:
+        findings.append(
+            make_finding(
+                rule_id="publish.summary.missing_target",
+                severity="warn",
+                category="publish.scope",
+                artifact=rel_source,
+                location="SUMMARY.md",
+                evidence=target,
+                editorial_impact="SUMMARY verweist auf eine fehlende Markdown-Datei.",
+                healing="SUMMARY-Link korrigieren oder Datei wiederherstellen.",
+            )
+        )
+
+    if use_summary:
+        for orphaned in orphaned_files[:20]:
+            findings.append(
+                make_finding(
+                    rule_id="publish.summary.orphaned_markdown",
+                    severity="warn",
+                    category="publish.scope",
+                    artifact=relative_artifact(orphaned, repo_root),
+                    location="SUMMARY.md",
+                    evidence="Markdown file is not referenced by publish SUMMARY",
+                    editorial_impact="Datei liegt im Publikationsbaum, wird aber voraussichtlich nicht ins PDF uebernommen.",
+                    healing="Datei in SUMMARY aufnehmen, bewusst ausschliessen oder aus dem Scope verschieben.",
+                )
+            )
+
+    if out_format == "pdf" and out_name:
+        expected_pdf = (out_dir / out_name).resolve()
+        metrics["expected_pdf"] = relative_artifact(expected_pdf, repo_root)
+        metrics["expected_pdfs_total"] = 1
+        if not expected_pdf.exists():
+            metrics["missing_expected_pdfs_total"] = 1
+            findings.append(
+                make_finding(
+                    rule_id="publish.pdf.missing_artifact",
+                    severity="blocked",
+                    category="publish.artifact",
+                    artifact=relative_artifact(expected_pdf, repo_root),
+                    location=f"publish[{index}].out",
+                    evidence=f"build=true expected {out_name!r}",
+                    editorial_impact="Build-true Publish-Eintrag hat kein erzeugtes PDF-Artefakt.",
+                    healing="PDF-Build ausfuehren oder publish.yml build/out/out_dir korrigieren.",
+                )
+            )
+
+        table_report = _expected_table_report(entry, out_dir, out_name)
+        if table_report:
+            metrics["expected_table_report"] = relative_artifact(
+                table_report, repo_root
+            )
+            metrics["expected_table_reports_total"] = 1
+            if not table_report.exists():
+                metrics["missing_expected_table_reports_total"] = 1
+                findings.append(
+                    make_finding(
+                        rule_id="publish.tables.missing_report",
+                        severity="warn",
+                        category="tables.report",
+                        artifact=relative_artifact(table_report, repo_root),
+                        location=f"publish[{index}].pdf_options.table_paper_strategy",
+                        evidence="table strategy report configured but not found",
+                        editorial_impact="Tabellenstrategie kann fuer das Publish-Artefakt nicht vollstaendig bewertet werden.",
+                        healing="Build mit table_paper_strategy.report=jsonl wiederholen oder Reportpfad korrigieren.",
+                    )
+                )
+
+    return metrics, findings
+
+
+def _discover_markdown_under_source(
+    source: Path, profile: AcceptanceProfile
+) -> list[Path]:
+    exclude_dirs = set(profile.markdown.exclude_dirs)
+    files: list[Path] = []
+    for path in sorted(source.rglob("*.md")):
+        if not path.is_file():
+            continue
+        try:
+            rel_parts = path.resolve().relative_to(source.resolve()).parts
+        except ValueError:
+            continue
+        if any(part in exclude_dirs for part in rel_parts):
+            continue
+        files.append(path)
+    return files
+
+
+def _published_files_from_summary(
+    source: Path, use_summary: bool
+) -> tuple[list[Path], list[str]]:
+    if not use_summary:
+        return [], []
+    try:
+        summary_layout = get_summary_layout(source)
+    except Exception as exc:  # noqa: BLE001 - fallback is handled by caller
+        logger.debug("Could not resolve SUMMARY layout for %s: %s", source, exc)
+        return [], []
+    if not summary_layout.summary_path.exists():
+        return [], []
+    files: list[Path] = []
+    missing: list[str] = []
+    seen: set[Path] = set()
+    for line in summary_layout.summary_path.read_text(encoding="utf-8").splitlines():
+        for raw_target in _SUMMARY_LINK_RE.findall(line):
+            target = unquote(raw_target.split("#", 1)[0].strip())
+            if target.startswith(("http://", "https://")):
+                continue
+            candidate = (summary_layout.root_dir / target).resolve()
+            if candidate.exists():
+                if candidate not in seen:
+                    seen.add(candidate)
+                    files.append(candidate)
+            else:
+                missing.append(target)
+    return files, missing
+
+
+def _expected_table_report(
+    entry: Mapping[str, Any], out_dir: Path, out_name: str
+) -> Path | None:
+    pdf_options = entry.get("pdf_options")
+    if not isinstance(pdf_options, Mapping):
+        return None
+    table_strategy = pdf_options.get("table_paper_strategy") or pdf_options.get(
+        "table-paper-strategy"
+    )
+    if not isinstance(table_strategy, Mapping):
+        return None
+    report_path = table_strategy.get("report_path") or table_strategy.get("report-file")
+    if report_path:
+        candidate = Path(str(report_path))
+        return candidate if candidate.is_absolute() else (out_dir / candidate).resolve()
+    report_mode = str(table_strategy.get("report") or "").strip().lower()
+    if report_mode in _PDF_REPORT_MODES:
+        stem = Path(out_name).stem or "table-layout"
+        return (out_dir / f"{stem}.table-layout.jsonl").resolve()
+    return None
+
+
+def _resolve_from_base(base: Path, raw_path: str) -> Path:
+    candidate = Path(raw_path)
+    return (
+        candidate.resolve() if candidate.is_absolute() else (base / candidate).resolve()
+    )
+
+
+def _dedupe_paths(paths: Iterable[Path]) -> list[Path]:
+    result: list[Path] = []
+    seen: set[Path] = set()
+    for path in paths:
+        resolved = path.resolve()
+        if resolved not in seen:
+            seen.add(resolved)
+            result.append(path)
+    return result
+
+
+def _as_bool(value: Any, *, default: bool = False) -> bool:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _path_mtime_iso(path: Path) -> str | None:
+    try:
+        return (
+            datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            .replace(microsecond=0)
+            .isoformat()
+        )
+    except OSError:
+        return None
+
+
+def _guess_low_text_reason(text: str) -> str:
+    lowered = text.lower()
+    meaningful = _meaningful_text_lines(text)
+    if not meaningful:
+        return "empty"
+    if "|" in text or "table" in lowered or "tabelle" in lowered:
+        return "table"
+    if "http://" in lowered or "https://" in lowered or "doi" in lowered:
+        return "references-or-url"
+    if any(marker in lowered for marker in ("figure", "abbildung", "caption")):
+        return "image-or-caption"
+    if len(meaningful) <= 3 and any(line.startswith("#") for line in meaningful):
+        return "chapter-start"
+    return "unknown"
+
+
+def _check_pdf_page_targets(
+    artifact: str, pages_total: int, profile: AcceptanceProfile
+) -> list[Finding]:
+    target = _pdf_target_for_artifact(artifact, profile.pdf.pdf_targets)
+    if not target:
+        return []
+    findings: list[Finding] = []
+    min_pages = target.get("target_pages_min")
+    max_pages = target.get("target_pages_max")
+    warn_pages_max = target.get("warn_pages_max")
+    if min_pages is not None and pages_total < min_pages:
+        findings.append(
+            make_finding(
+                rule_id="pdf.pages.below_target",
+                severity="fail",
+                category="pdf.pages",
+                artifact=artifact,
+                location="document",
+                evidence=f"pages_total={pages_total}, target_pages_min={min_pages}",
+                editorial_impact="PDF liegt unter dem projektspezifischen Seitenzahl-Zielkorridor.",
+                healing="Build-Input, fehlende Kapitel oder Zielkorridor pruefen.",
+            )
+        )
+    if max_pages is not None and pages_total > max_pages:
+        findings.append(
+            make_finding(
+                rule_id="pdf.pages.above_target",
+                severity="fail",
+                category="pdf.pages",
+                artifact=artifact,
+                location="document",
+                evidence=f"pages_total={pages_total}, target_pages_max={max_pages}",
+                editorial_impact="PDF ueberschreitet den projektspezifischen Seitenzahl-Zielkorridor.",
+                healing="Layout, Tabellenstrategie oder Zielkorridor redaktionell pruefen.",
+            )
+        )
+    elif warn_pages_max is not None and pages_total > warn_pages_max:
+        findings.append(
+            make_finding(
+                rule_id="pdf.pages.above_warning_target",
+                severity="warn",
+                category="pdf.pages",
+                artifact=artifact,
+                location="document",
+                evidence=f"pages_total={pages_total}, warn_pages_max={warn_pages_max}",
+                editorial_impact="PDF liegt oberhalb des weichen Seitenzahl-Warnkorridors.",
+                healing="Seitenwachstum im Dossier begruenden oder Layout optimieren.",
+            )
+        )
+    return findings
+
+
+def _pdf_target_for_artifact(
+    artifact: str, targets: Mapping[str, Mapping[str, int]]
+) -> Mapping[str, int] | None:
+    normalized_artifact = artifact.replace("\\", "/").lower().lstrip("./")
+    artifact_name = Path(normalized_artifact).name
+    for raw_key, target in targets.items():
+        key = str(raw_key).replace("\\", "/").lower().lstrip("./")
+        if (
+            key == normalized_artifact
+            or key == artifact_name
+            or key.endswith(f"/{artifact_name}")
+        ):
+            return target
+    return None
+
+
+def _safe_extract_pdf_toc(path: Path, rel: str, findings: list[Finding]) -> list[Any]:
+    try:
+        return extract_pdf_toc(path, logger=logger)
+    except Exception as exc:  # noqa: BLE001 - TOC extraction is diagnostic only
+        findings.append(
+            make_finding(
+                rule_id="pdf.toc.extract_error",
+                severity="warn",
+                category="pdf.toc",
+                artifact=rel,
+                location="outline",
+                evidence=str(exc),
+                editorial_impact="PDF-Outline konnte nicht extrahiert werden.",
+                healing="PDF-Parser und Artefakt pruefen; bei Bedarf TOC-Abgleich manuell dokumentieren.",
+            )
+        )
+        return []
+
+
+def _normalize_heading_title(value: str) -> str:
+    text = re.sub(r"\s+", " ", value).strip().lower()
+    text = re.sub(
+        r"^(chapter|appendix|anhang|kapitel)\s+[\w.-]+\s*[–—:-]?\s*", "", text
+    )
+    text = re.sub(r"^[\d.ivxlcdm]+[.)]\s*", "", text)
+    return re.sub(r"[^\w\s-]", "", text, flags=re.UNICODE).strip()
 
 
 def _check_frontmatter_rules(

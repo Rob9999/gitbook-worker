@@ -1,7 +1,8 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-09
 history:
+  - "1.1.0: 2026-05-09 - Publish-Scope, PDF-Zielkorridore und Drift-Pruefungen ergaenzt."
   - "1.0.0: 2026-05-09 - First user guide for editorial quality metrics and acceptance tools."
 ---
 
@@ -17,6 +18,13 @@ Qualitaetsberichte:
 einem JSON-Report. `editorial_acceptance` verdichtet einen oder mehrere
 Metrikreports zu einem Markdown-Dossier mit Status, Befunden, Healing-Steps und
 manueller Freigabevorlage.
+
+Wenn kein `--markdown-root` angegeben ist, nutzt `editorial_metrics` die lokale
+`content.yaml` und die jeweiligen `publish.yml`-Dateien als Scope: `build: true`,
+`use_summary`, `out`, `out_dir`, erwartete PDFs, erwartete Tabellenreports und
+SUMMARY-verwaiste Markdown-Dateien werden in `metrics.publish_scope` sichtbar.
+PDFs aus `build: true` Publish-Eintraegen werden automatisch als erwartete
+Artefakte geprueft.
 
 ## Minimaler Lauf
 
@@ -70,6 +78,23 @@ Weitere Profilfelder stehen in der
 [Configuration Reference](configuration-reference.md#6-editorial-quality-profile-cli-option---profile-config)
 und in der Per-File-Dokumentation
 [editorial-quality-profile.md](configs/editorial-quality-profile.md).
+
+`pdf.pdf_targets` kann projektspezifische Seitenzahlkorridore definieren:
+
+```yaml
+pdf:
+  pdf_targets:
+    publish/sample.pdf:
+      target_pages_min: 120
+      target_pages_max: 140
+      warn_pages_max: 150
+```
+
+`editorial_acceptance` prueft zusaetzlich, ob ein Report mit einer alten
+Worker-Version erzeugt wurde oder ob ein PDF-Artefakt neuer ist als der Report.
+Die Schalter `documentation.fail_on_stale_worker_version` und
+`documentation.fail_on_stale_page_count` steuern, ob diese Drift-Signale warnen
+oder die Abnahme scheitern lassen.
 
 ## Exit-Codes
 

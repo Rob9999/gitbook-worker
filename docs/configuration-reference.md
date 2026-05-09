@@ -1,7 +1,8 @@
 ---
-version: 1.5.0
+version: 1.6.0
 date: 2026-05-09
 history:
+  - "1.6.0: 2026-05-09 — pdf_targets und Drift-Schalter fuer editorial quality profile als implementierte Signale markiert"
   - "1.5.0: 2026-05-09 — editorial quality acceptance profiles als v2.9.0-WIP ergaenzt"
   - "1.4.0: 2026-05-09 — pdf_options.table_paper_strategy fuer Tabellenprofi ergaenzt"
   - "1.3.3: 2026-05-08 — Release reference fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
@@ -301,9 +302,9 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 | `profiles.<name>.pdf.low_text_page_threshold` | int | `15` | ✅ | Wenigzeiler-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.very_low_text_page_threshold` | int | `5` | ✅ | Sehr-wenig-Text-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.required_fonts` | array | `[]` | ✅ | Erwartete eingebettete PDF-Fontnamen |
-| `profiles.<name>.pdf.pdf_targets` | object | `{}` | 🚧 | Seitenzahl-Zielkorridore dokumentiert, Auswertung folgt in einem spaeteren v2.9.0-Schnitt |
-| `profiles.<name>.documentation.fail_on_stale_worker_version` | bool | `false` | 🚧 | Report-Drift-Regel dokumentiert, Auswertung folgt |
-| `profiles.<name>.documentation.fail_on_stale_page_count` | bool | `false` | 🚧 | Seitenzahl-Drift-Regel dokumentiert, Auswertung folgt |
+| `profiles.<name>.pdf.pdf_targets` | object | `{}` | ✅ | Seitenzahl-Zielkorridore je PDF; `target_pages_min`, `target_pages_max`, `warn_pages_max` werden als Findings ausgewertet |
+| `profiles.<name>.documentation.fail_on_stale_worker_version` | bool | `false` | ✅ | Worker-Version-Drift im Acceptance-Dossier als harte Findings behandeln |
+| `profiles.<name>.documentation.fail_on_stale_page_count` | bool | `false` | ✅ | Reports blockieren, wenn PDF-Artefakte nach dem Reportzeitpunkt veraendert wurden |
 
 ---
 
@@ -319,7 +320,7 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 | `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
 | `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | ✓ | [docker-config-yml.md](configs/docker-config-yml.md) |
-| editorial quality profile | 1.0.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
+| editorial quality profile | 1.1.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
 
 ---
 
