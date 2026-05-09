@@ -130,6 +130,23 @@ class TestParsePdfOptions:
         result = _parse_pdf_options({"code-block-wrap": "no"})
         assert result["code_block_wrap"] is False
 
+    def test_table_paper_strategy_is_preserved(self) -> None:
+        result = _parse_pdf_options(
+            {
+                "table_paper_strategy": {
+                    "enabled": True,
+                    "report": "jsonl",
+                    "max_cell_lines": 4,
+                }
+            }
+        )
+
+        assert result["table_paper_strategy"] == {
+            "enabled": True,
+            "report": "jsonl",
+            "max_cell_lines": 4,
+        }
+
     def test_non_mapping(self) -> None:
         assert _parse_pdf_options("not a dict") == {}
 

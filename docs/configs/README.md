@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
-date: 2026-02-08
+version: 1.1.1
+date: 2026-05-09
 history:
+  - "1.1.1: 2026-05-09 — publish.yml schema version 0.1.3 for table_paper_strategy"
   - "1.1.0: 2026-02-08 — Schema-Versionen aktualisiert (book.json 1.0.0, docker_config.yml 1.0.0)"
   - "1.0.0: 2026-02-08 — Initial index"
 ---
@@ -14,7 +15,7 @@ Schlüssel-Tabelle und Änderungshistorie.
 | Datei | Schema-Version | Ort | Dok |
 |-------|---------------|-----|-----|
 | `content.yaml` | 1.0.0 | Repo-Root | [content-yaml.md](content-yaml.md) |
-| `publish.yml` | 0.1.1 | `<lang>/publish.yml` | [publish-yml.md](publish-yml.md) |
+| `publish.yml` | 0.1.3 | `<lang>/publish.yml` | [publish-yml.md](publish-yml.md) |
 | `book.json` | 1.0.0 | `<lang>/book.json` | [book-json.md](book-json.md) |
 | `fonts.yml` | 1.0.0 | `gitbook_worker/defaults/` | [fonts-yml.md](fonts-yml.md) |
 | `frontmatter.yml` | 1.0.0 | `gitbook_worker/defaults/` | [frontmatter-yml.md](frontmatter-yml.md) |

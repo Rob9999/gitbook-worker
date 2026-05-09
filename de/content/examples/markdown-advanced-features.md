@@ -226,6 +226,13 @@ URL-CODE-FENCE-STRESS: https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bev
 | Gebiet Beta-Korridor | G-B2 | moderat stabil | Übergangsstatus mit externer Qualitätssicherung | Integration nur nach Nachweis belastbarer Betriebsprozesse und konsistenter Berichtspflichten | Pilotkooperation, Schulung, gemeinsamer Lagebericht | Beobachtende Partnerschaft | abhängig von Folgeprüfung | Anonymisierte Bewertung mit bewusst langer Textbreite für PDF-Tabellenstress |
 | Gebiet Gamma-Netz | G-C3 | uneinheitlich | Satzungsabgleich begonnen, Entscheidung offen | Vorbedingungen: Verantwortlichkeiten klären, Datenklassifizierung abschließen, Auditfenster bestätigen | Fachdialog und technische Bestandsaufnahme | Vorbereitende Kooperation | derzeit nicht belastbar | Neutrale Musterzeile ohne Kundennamen, Originalorte oder politische Einordnung |
 
+### Tabelle mit langen Script-Runs
+
+| Sprache | Signal | Redaktioneller Zweck |
+|---|---|---|
+| CJK | 生命共同体治理结构连续性评估生命共同体治理结构连续性评估生命共同体治理结构连续性评估 | Lange Zeichenketten ohne Leerzeichen sind ein allgemeines Layout-Risiko und kein deutsches Sonderproblem. |
+| Hangul | 민주적회복력전환거버넌스연속성평가민주적회복력전환거버넌스연속성평가 | Das Tabellenlayout muss Script-Runs und breite Glyphen bei der Papierwahl berücksichtigen. |
+
 ### Tabelle mit Formatierung
 
 | Code | Ausgabe | Beschreibung |

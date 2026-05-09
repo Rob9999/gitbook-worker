@@ -329,8 +329,8 @@ ohne die Hauptbäume zu belasten.
 | Datei | `version`-Feld | Aktueller Wert | Anmerkung |
 |-------|---------------|----------------|-----------|
 | `content.yaml` | ✓ | 1.0.0 | |
-| `de/publish.yml` | ✓ | 0.1.1 | |
-| `en/publish.yml` | ✓ | 0.1.1 | |
+| `de/publish.yml` | ✓ | 0.1.3 | `pdf_options.table_paper_strategy` ergaenzt |
+| `en/publish.yml` | ✓ | 0.1.3 | `pdf_options.table_paper_strategy` ergaenzt |
 | `fonts.yml` | ✓ | 1.0.0 | |
 | `frontmatter.yml` | ✓ | 1.0.0 | |
 | `readme.yml` | ✓ | "1.0.0" | |

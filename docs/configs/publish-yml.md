@@ -1,8 +1,9 @@
 ---
-version: 1.1.0
-date: 2026-02-08
-config_schema_version: "0.1.2"
+version: 1.2.0
+date: 2026-05-09
+config_schema_version: "0.1.3"
 history:
+  - "1.2.0: 2026-05-09 — pdf_options.table_paper_strategy dokumentiert"
   - "1.1.0: 2026-05-07 — pdf_options.code_block_wrap dokumentiert"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
@@ -23,7 +24,7 @@ Assets. Der Orchestrator und der Publisher lesen diese Datei.
 
 ## Schema-Version
 
-Aktuell: **0.1.2** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Code 3).
+Aktuell: **0.1.3** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Code 3).
 
 ## Schlüssel-Referenz
 
@@ -114,11 +115,28 @@ Aktuell: **0.1.2** — Feld `version` (Top-Level). Hard-Exit bei Fehler (Exit-Co
 | `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
 | `code_block_wrap` | bool | `true` | ✅ | Lange Code-Fence-Zeilen im PDF umbrechen (`fvextra`) |
+| `table_paper_strategy` | object | `{}` | ✅ | Redaktionelle Best-Fit-Papierwahl fuer Markdown-Pipe-Tabellen |
+
+#### pdf_options.table_paper_strategy
+
+| Schlüssel | Typ | Default | Status | Beschreibung |
+|-----------|-----|---------|--------|--------------|
+| `enabled` | bool | `true` | ✅ | Strategie aktivieren; bei `false` bleibt nur die Spaltenheuristik |
+| `mode` | string | `"editorial"` | ✅ | Strategieprofil; aktuell redaktionelles Best-Fit-Modell |
+| `max_cell_lines` | int | `5` | ✅ | Maximal akzeptierte geschaetzte Zeilen pro Zelle |
+| `max_header_lines` | int | `3` | ✅ | Maximal akzeptierte geschaetzte Zeilen fuer Tabellenkoepfe |
+| `preferred_max_avg_row_lines` | float | `2.8` | ✅ | Zielwert fuer durchschnittliche Tabellenzeilenhoehe |
+| `min_readable_column_width_mm` | float | `14` | ✅ | Untergrenze fuer lesbare Spaltenbreiten |
+| `unbreakable_overflow_tolerance_mm` | float | `2` | ✅ | Toleranz fuer nicht sinnvoll trennbare Token/Script-Runs |
+| `oversize_policy` | string | `"preserve-column-heuristic"` | ✅ | Fallback bei Tabellen breiter als alle Kandidaten |
+| `report` | string | `null` | ✅ | `jsonl` erzeugt einen maschinenlesbaren Tabellenlayout-Report |
+| `report_path` | string | `null` | ✅ | Optionaler expliziter Pfad fuer JSONL-Report |
+| `candidates` | array | ISO A4-A1 hoch/quer | ✅ | Standard- oder Custom-Paper-Kandidaten in Auswahlreihenfolge |
 
 ## Beispiel (Minimalversion)
 
 ```yaml
-version: 0.1.2
+version: 0.1.3
 profiles:
   local:
     description: Lokale Ausführung
@@ -140,6 +158,7 @@ publish:
 | 0.1.0 | 2025-12-05 | Initiales Schema |
 | 0.1.1 | 2026-01-08 | `generate_attribution`, `pdf_options.abort_if_missing_glyph`, `assets` ergänzt |
 | 0.1.2 | 2026-05-07 | `pdf_options.code_block_wrap` ergänzt |
+| 0.1.3 | 2026-05-09 | `pdf_options.table_paper_strategy` ergänzt |
 
 ## Verwandte Dokumente
 

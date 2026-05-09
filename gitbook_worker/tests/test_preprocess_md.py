@@ -1,4 +1,5 @@
 import difflib
+import json
 import re
 from pathlib import Path
 
@@ -31,6 +32,23 @@ def _wide_content_table(tmp_path):
             "Datenraum, Krisenuebung | assoziierte Partnerschaft | "
             "mittelfristig plausibel | Anonymisierter Kommentar mit langer "
             "fachlicher Begruendung |",
+        ]
+    )
+    md.write_text(content, encoding="utf-8")
+    return md
+
+
+def _cjk_content_table(tmp_path):
+    md = tmp_path / "cjk-content-table.md"
+    cjk_sequence = "生命共同体治理结构连续性评估" * 8
+    content = "\n".join(
+        [
+            "#### CJK content table",
+            "",
+            "| Area | Script signal | Editorial comment |",
+            "|---|---|---|",
+            f"| Region Delta | {cjk_sequence} | Long script run without spaces "
+            "must be treated as a layout risk beyond German compounds |",
         ]
     )
     md.write_text(content, encoding="utf-8")
@@ -111,6 +129,65 @@ def test_table_with_long_cells_uses_content_width(artifact_dir):
     m = GEOM_RE.search(out)
     assert m, "Expected long-cell table to switch geometry"
     assert int(m["w"]) > 297
+
+
+def test_table_strategy_scores_cjk_long_sequences(artifact_dir):
+    md = _cjk_content_table(artifact_dir)
+    out = preprocess_md.process(
+        str(md),
+        paper_format="a4",
+        table_strategy={"max_cell_lines": 2, "max_header_lines": 2},
+    )
+
+    assert_geometry(out, expected_w=297, expected_h=210)
+
+
+def test_table_strategy_override_comment_forces_paper(artifact_dir):
+    md = artifact_dir / "override-table.md"
+    md.write_text(
+        "\n".join(
+            [
+                "#### Override table",
+                "",
+                '<!-- gbw-table paper=a2-landscape reason="reviewed special table" -->',
+                "| A | B |",
+                "|---|---|",
+                "| 1 | 2 |",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    assert_geometry(out, expected_w=594, expected_h=420)
+
+
+def test_table_strategy_custom_candidate_and_report(artifact_dir):
+    md = _wide_content_table(artifact_dir)
+    report_path = artifact_dir / "table-layout.jsonl"
+    out = preprocess_md.process(
+        str(md),
+        paper_format="a4",
+        table_strategy={
+            "report_path": str(report_path),
+            "candidates": [
+                "a4",
+                "a4-landscape",
+                {
+                    "name": "customer-wide",
+                    "standard": False,
+                    "size_mm": [500, 297],
+                    "margins_mm": [15, 15, 15, 15],
+                },
+            ],
+        },
+    )
+
+    assert "paperwidth=500mm" in out
+    report = json.loads(report_path.read_text(encoding="utf-8").splitlines()[0])
+    assert report["selected_paper"] == "customer-wide"
+    assert report["evaluations"]
 
 
 def test_svg_skips_size_probe(monkeypatch, tmp_path):

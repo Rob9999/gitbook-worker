@@ -10,7 +10,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Mapping, Optional
+from typing import Any, List, Mapping, Optional
 
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing import preprocess_md
@@ -72,6 +72,7 @@ def combine_markdown(
     files: List[str],
     paper_format: str = "a4",
     heading_targets: Optional[Mapping[str | Path, int]] = None,
+    table_strategy: Optional[Mapping[str, Any]] = None,
 ) -> str:
     """Return a single Markdown string combining ``files``.
 
@@ -93,7 +94,11 @@ def combine_markdown(
     parts: List[str] = []
     for p in files:
         try:
-            processed = preprocess_md.process(p, paper_format=paper_format)
+            processed = preprocess_md.process(
+                p,
+                paper_format=paper_format,
+                table_strategy=table_strategy,
+            )
             target_level = normalized_targets.get(Path(p).resolve())
             processed = adjust_headings_for_inclusion(
                 processed, Path(p), target_level=target_level

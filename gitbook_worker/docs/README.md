@@ -1,7 +1,9 @@
 ---
-version: 1.0.0
-date: 2025-12-07
-history: Documented PDF font fallback reporting/abort semantics for developers.
+version: 1.1.0
+date: 2026-05-09
+history:
+	- "1.1.0: 2026-05-09 - Concepts index and Tabellenprofi table strategy concept linked."
+	- "1.0.0: 2025-12-07 - Documented PDF font fallback reporting/abort semantics for developers."
 ---
 
 # Developer Docs
@@ -9,6 +11,7 @@ history: Documented PDF font fallback reporting/abort semantics for developers.
 ## Navigation
 
 - [Repository inventory and outlook](inventory/repository-inventory.md)
+- [Concepts](concepts/README.md)
 - [Customer QA feedback archive](qa/customer-feedback/README.md)
 
 ## PDF font fallback behavior

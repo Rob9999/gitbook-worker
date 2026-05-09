@@ -226,6 +226,13 @@ URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024
 | Area Beta Corridor | A-B2 | moderately stable | transition status with external quality assurance | Integration only after evidence of reliable operating processes and consistent reporting duties | Pilot cooperation, training, shared situation report | Observing partnership | depends on follow-up review | Anonymized assessment with intentionally long text width for PDF table stress |
 | Area Gamma Mesh | A-C3 | uneven | charter comparison started, decision open | Preconditions: clarify responsibilities, finish data classification, confirm audit window | Expert dialogue and technical inventory | Preparatory cooperation | not currently robust | Neutral sample row without customer names, original places, or political classification |
 
+### Table With Long Script Runs
+
+| Language | Signal | Editorial purpose |
+|---|---|---|
+| CJK | 生命共同体治理结构连续性评估生命共同体治理结构连续性评估生命共同体治理结构连续性评估 | Long character runs without spaces are a general layout risk, not a German-only issue. |
+| Hangul | 민주적회복력전환거버넌스연속성평가민주적회복력전환거버넌스연속성평가 | Table paper selection must account for script runs and wide glyphs. |
+
 ### Table with Formatting
 
 | Code | Output | Description |

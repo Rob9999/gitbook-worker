@@ -1,7 +1,8 @@
 ---
-version: 1.3.3
-date: 2026-05-08
+version: 1.4.0
+date: 2026-05-09
 history:
+  - "1.4.0: 2026-05-09 — pdf_options.table_paper_strategy fuer Tabellenprofi ergaenzt"
   - "1.3.3: 2026-05-08 — Release reference fuer v2.7.0 Wide-Table-Paper-Selection aktualisiert"
   - "1.3.2: 2026-05-08 — Release reference fuer v2.6.1 URL-Code-Fence-Hotfix aktualisiert"
   - "1.3.1: 2026-05-07 — Release reference fuer v2.6.0 Code-Fence-Wrapping aktualisiert"
@@ -19,10 +20,11 @@ Vollständige Referenz aller Konfigurationsschlüssel, die GitBook Worker kennt.
 Jeder Eintrag trägt einen Implementierungsstatus gemäß der
 Config-Completeness-Policy (AGENTS.md §25–30).
 
-Hinweis fuer v2.7.0: Breite Markdown-Pipe-Tabellen werden anhand geschaetzter
-Zelltextbreiten und der nutzbaren Textbreite nach Margen auf passende
-Standardpapierformate gelegt. Dafuer ist kein neuer Konfigurationsschluessel
-noetig; die bestehende Wide-Content-Vorverarbeitung bleibt aktiv.
+Hinweis fuer v2.8.0: Breite Markdown-Pipe-Tabellen nutzen standardmaessig die
+redaktionelle `pdf_options.table_paper_strategy`. Sie bewertet Kandidaten nach
+erwarteten Zellumbruechen, Kopfzeilen, Spaltentypen, CJK-/Script-Runs,
+Token-Risiken und nutzbarer Textbreite. Ohne Konfiguration bleibt die Strategie
+aktiv; `publish.yml` kann Kandidaten, Schwellen und Reports steuern.
 
 Hinweis fuer v2.6.1: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das
@@ -152,6 +154,7 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 | `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
 | `code_block_wrap` | bool | `true` | ✅ | Lange Zeilen in Code-Fences im PDF umbrechen (`fvextra`) |
+| `table_paper_strategy` | object | `{}` | ✅ | Redaktionelle Best-Fit-Papierwahl fuer Markdown-Pipe-Tabellen (§2.6.1) |
 | `documentclass` | string | `"article"` | ✅ | LaTeX-Dokumentklasse (`report`, `book`, …) |
 | `fontsize` | string | `"10pt"` | ✅ | LaTeX-Schriftgröße |
 | `geometry` | string | `"margin=1in"` | ✅ | LaTeX-Geometry-Parameter |
@@ -168,6 +171,22 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 | `classoption` | string | – | ✅ | Zusätzliche LaTeX-Klassenoptionen |
 | `papersize` | string | – | ✅ | Papiergröße (`a4`, `letter`, …) |
 | `linestretch` | string | – | ✅ | Zeilenabstandsfaktor |
+
+### 2.6.1 pdf_options.table_paper_strategy
+
+| Schlüssel | Typ | Default | Status | Beschreibung |
+|-----------|-----|---------|--------|--------------|
+| `enabled` | bool | `true` | ✅ | Aktiviert das redaktionelle Score-Modell; `false` nutzt nur die Spaltenheuristik |
+| `mode` | string | `"editorial"` | ✅ | Strategieprofil; aktuell redaktionelles Best-Fit-Modell |
+| `max_cell_lines` | int | `5` | ✅ | Maximal akzeptierte geschaetzte Zeilen pro Zelle |
+| `max_header_lines` | int | `3` | ✅ | Maximal akzeptierte geschaetzte Zeilen fuer Tabellenkoepfe |
+| `preferred_max_avg_row_lines` | float | `2.8` | ✅ | Zielwert fuer durchschnittliche Tabellenzeilenhoehe |
+| `min_readable_column_width_mm` | float | `14` | ✅ | Untergrenze fuer lesbare Spaltenbreiten |
+| `unbreakable_overflow_tolerance_mm` | float | `2` | ✅ | Toleranz fuer nicht sinnvoll trennbare Token/Script-Runs |
+| `oversize_policy` | string | `"preserve-column-heuristic"` | ✅ | Fallback bei Tabellen breiter als alle Kandidaten |
+| `report` | string | `null` | ✅ | `jsonl` erzeugt einen maschinenlesbaren Tabellenlayout-Report |
+| `report_path` | string | `null` | ✅ | Optionaler expliziter Pfad fuer JSONL-Report |
+| `candidates` | array | ISO A4-A1 hoch/quer | ✅ | Standard- oder Custom-Paper-Kandidaten in Auswahlreihenfolge |
 
 ---
 

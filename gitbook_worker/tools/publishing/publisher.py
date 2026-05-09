@@ -2479,6 +2479,12 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     elif "code-block-wrap" in raw:
         parsed["code_block_wrap"] = _as_bool(raw.get("code-block-wrap"))
 
+    table_strategy = raw.get("table_paper_strategy") or raw.get(
+        "table-paper-strategy"
+    )
+    if isinstance(table_strategy, Mapping):
+        parsed["table_paper_strategy"] = dict(table_strategy)
+
     # -- Passthrough Pandoc/LaTeX variables --------------------------------- #
     for key in _PDF_OPTIONS_PASSTHROUGH_VARS:
         value = raw.get(key)
@@ -2521,6 +2527,32 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
             parsed["header_includes"] = "\n".join(str(x) for x in hi)
 
     return parsed
+
+
+def _resolve_table_strategy_options(
+    raw: Any,
+    *,
+    publish_dir: Path,
+    out_name: str,
+) -> Any:
+    """Resolve table strategy report paths relative to the publish directory."""
+
+    if not isinstance(raw, Mapping):
+        return raw
+    resolved = dict(raw)
+    report_path = resolved.get("report_path") or resolved.get("report-file")
+    report_mode = str(resolved.get("report") or "").strip().lower()
+    if report_path:
+        report_candidate = Path(str(report_path))
+        if not report_candidate.is_absolute():
+            report_candidate = publish_dir / report_candidate
+        resolved["report_path"] = str(report_candidate.resolve())
+    elif report_mode in {"jsonl", "file", "true"}:
+        stem = Path(out_name).stem or "table-layout"
+        resolved["report_path"] = str(
+            (publish_dir / f"{stem}.table-layout.jsonl").resolve()
+        )
+    return resolved
 
 
 def _build_variable_overrides(pdf_options: Mapping[str, Any]) -> Dict[str, str]:
@@ -3743,6 +3775,7 @@ def convert_a_file(
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
     code_block_wrap: bool = True,
+    table_strategy: Optional[Mapping[str, Any]] = None,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -3763,7 +3796,11 @@ def convert_a_file(
         logger.info("Assets to copy          : %s", assets)
 
     # preprocess for wide content (tables, images), will change page geometry
-    processed = process(md_file, paper_format=paper_format)
+    processed = process(
+        md_file,
+        paper_format=paper_format,
+        table_strategy=table_strategy,
+    )
     logger.info("%s: Nach Preprocessing %d Zeichen.", md_file, len(processed))
     # normalize for pandoc
     normalized = normalize_md(processed)
@@ -3870,6 +3907,7 @@ def convert_a_folder(
     metadata: Optional[Dict[str, Sequence[str] | str]] = None,
     abort_if_missing_glyph: bool = True,
     code_block_wrap: bool = True,
+    table_strategy: Optional[Mapping[str, Any]] = None,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -3907,6 +3945,7 @@ def convert_a_folder(
             md_files,
             paper_format=paper_format,
             heading_targets=heading_targets,
+            table_strategy=table_strategy,
         ),
         paper_format=paper_format,
     )
@@ -4055,6 +4094,7 @@ def build_pdf(
     project_metadata: Optional[ProjectMetadata] = None,
     abort_if_missing_glyph: bool = True,
     code_block_wrap: bool = True,
+    table_strategy: Optional[Mapping[str, Any]] = None,
     toc_override: Optional[bool] = None,
     toc_depth: Optional[int] = None,
     extra_args: Optional[Sequence[str]] = None,
@@ -4099,6 +4139,7 @@ def build_pdf(
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
                 code_block_wrap=code_block_wrap,
+                table_strategy=table_strategy,
                 toc_override=toc_override,
                 toc_depth=toc_depth,
                 extra_args=extra_args,
@@ -4150,6 +4191,7 @@ def build_pdf(
                 metadata=base_metadata,
                 abort_if_missing_glyph=abort_if_missing_glyph,
                 code_block_wrap=code_block_wrap,
+                table_strategy=table_strategy,
                 toc_override=toc_override,
                 toc_depth=toc_depth,
                 extra_args=extra_args,
@@ -4438,6 +4480,11 @@ def main() -> None:
         )
         abort_missing_glyph = pdf_options.get("abort_if_missing_glyph", True)
         code_block_wrap = pdf_options.get("code_block_wrap", True)
+        table_strategy_options = _resolve_table_strategy_options(
+            pdf_options.get("table_paper_strategy"),
+            publish_dir=publish_dir_path,
+            out_name=out,
+        )
 
         # -- toc / toc-depth from pdf_options ------------------------------ #
         toc_override: bool | None = (
@@ -4499,6 +4546,7 @@ def main() -> None:
             project_metadata=project_metadata,
             abort_if_missing_glyph=bool(abort_missing_glyph),
             code_block_wrap=bool(code_block_wrap),
+            table_strategy=table_strategy_options,
             toc_override=toc_override,
             toc_depth=toc_depth,
             extra_args=entry_extra_args or None,
