@@ -649,7 +649,6 @@ def process(
 
 
 def main() -> None:
-    setup_logging()
     # fmt: off
     description_text = (
         "Preprocess Markdown for publishing by adjusting page "
