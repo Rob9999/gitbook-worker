@@ -1,7 +1,8 @@
 ---
-version: 1.2.0
+version: 1.3.0
 date: 2026-05-09
 history:
+  - "1.3.0: 2026-05-09 — Pflicht-/Soll-Schnitt: erwartete PDF-Seiten, Overflow-Schwellen, Release-Doku-Scan und Built-in-Profile local/release/customer-handover dokumentiert."
   - "1.2.0: 2026-05-09 — Baseline und Restrisiken in eigene Acceptance-Eingaben ausgelagert."
   - "1.1.0: 2026-05-09 — Publish-Scope, PDF-Zielkorridore und Drift-Regeln als implementierte v2.9.0-Signale dokumentiert."
   - "1.0.0: 2026-05-09 — Editorial quality profile for v2.9.0 Qualitaetskompass documented."
@@ -15,18 +16,19 @@ Optionale YAML-Konfiguration fuer die CLIs
 
 Die Datei wird per `--profile-config <path>` uebergeben und enthaelt ein
 `profiles`-Mapping. Ohne Datei nutzt das Tool eingebaute Profile wie
-`local-preview`, `release-candidate`, `publish-final`, `docs-only` und
+`local`, `release`, `customer-handover`, `local-preview`,
+`release-candidate`, `publish-final`, `docs-only` und
 `multilingual-release-candidate`.
 
 ## Schema-Version
 
-Empfohlen: `version: 1.1.0`. Die Version ist aktuell dokumentiert, aber noch
+Empfohlen: `version: 1.3.0`. Die Version ist aktuell dokumentiert, aber noch
 nicht hart validiert.
 
 ## Beispiel
 
 ```yaml
-version: 1.1.0
+version: 1.3.0
 profiles:
   multilingual-release-candidate:
     network: false
@@ -64,6 +66,15 @@ profiles:
           target_pages_min: 120
           target_pages_max: 140
           warn_pages_max: 150
+      expected_pages:
+        publish/sample.pdf:
+          - page: 1
+            label: cover sample
+            min_text_lines: 3
+            must_contain: Sample
+      overflow_warn_pt: 0.1
+      overflow_fail_pt: 12.0
+      overflow_token_warn_chars: 96
       required_fonts:
         - DejaVuSerif
         - DejaVuSans
@@ -73,6 +84,10 @@ profiles:
     documentation:
       fail_on_stale_worker_version: true
       fail_on_stale_page_count: true
+      scan_release_docs: true
+      release_doc_dirs:
+        - docs/releases
+        - gitbook_worker/docs/releases
 ```
 
 ## Status
@@ -85,14 +100,18 @@ profiles:
 - verbotene Frontmatter-Keys.
 - Target-Statuswerte.
 - lange Markdown-Tokens.
+- doppelte Markdown-Titel aus dem bestehenden Link-Audit.
+- AI-Referenzkandidaten aus `ai_references` als sichtbare Signale.
+- Frontmatter-Syntaxsignale aus dem bestehenden Frontmatter-Checker.
 - PDF-Wenigzeiler- und Leerseiten-Metriken.
 - PDF-TOC/Outline-Metriken.
 - PDF-Seitenzahl-Zielkorridore ueber `pdf_targets`.
+- erwartete PDF-Sample-Seiten ueber `expected_pages`.
+- BBox-/Overflow-nahe Textsignale mit `overflow_*`-Schwellen.
+- CJK/Hangul/Kana-Stichproben im extrahierten PDF-Text.
 - erwartete eingebettete PDF-Fontnamen.
 - `documentation.fail_on_stale_worker_version`.
 - `documentation.fail_on_stale_page_count`.
+- Release-Dokument-Scan ueber `documentation.scan_release_docs` und
+  `documentation.release_doc_dirs`.
 - Publish-Scope-Signale aus `content.yaml` und `publish.yml`.
-
-🚧 WIP:
-
-- Tiefe BBox-/Overflow-Auswertung fuer konkrete PDF-Layoutbefunde.

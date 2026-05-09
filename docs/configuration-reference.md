@@ -1,7 +1,8 @@
 ---
-version: 1.7.0
+version: 1.8.0
 date: 2026-05-09
 history:
+  - "1.8.0: 2026-05-09 — Pflicht-/Soll-Schnitt fuer editorial quality profile, CSV/Console und Orchestrator-Gate dokumentiert"
   - "1.7.0: 2026-05-09 — editorial accepted findings register fuer Restrisiken dokumentiert"
   - "1.6.0: 2026-05-09 — pdf_targets und Drift-Schalter fuer editorial quality profile als implementierte Signale markiert"
   - "1.5.0: 2026-05-09 — editorial quality acceptance profiles als v2.9.0-WIP ergaenzt"
@@ -300,12 +301,36 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 | `profiles.<name>.markdown.exclude_dirs` | array | Tool-Default | ✅ | Ausgeschlossene Ordner fuer Markdown-Discovery |
 | `profiles.<name>.markdown.skip_filenames` | array | `SUMMARY.md` | ✅ | Dateien ohne Pflicht-Frontmatter-Pruefung |
 | `profiles.<name>.markdown.long_token_warn_chars` | int | `80` | ✅ | Schwelle fuer lange Token als Layout-Warnung |
+| `profiles.<name>.markdown.duplicate_heading_near_window` | int | `3` | ✅ | Kontextfenster fuer doppelte Titel/nahe PDF-Review-Signale |
 | `profiles.<name>.pdf.low_text_page_threshold` | int | `15` | ✅ | Wenigzeiler-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.very_low_text_page_threshold` | int | `5` | ✅ | Sehr-wenig-Text-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.required_fonts` | array | `[]` | ✅ | Erwartete eingebettete PDF-Fontnamen |
 | `profiles.<name>.pdf.pdf_targets` | object | `{}` | ✅ | Seitenzahl-Zielkorridore je PDF; `target_pages_min`, `target_pages_max`, `warn_pages_max` werden als Findings ausgewertet |
+| `profiles.<name>.pdf.expected_pages` | object | `{}` | ✅ | Erwartete Sample-Seiten je PDF; `page`, `label`, `min_text_lines`, `must_contain` werden geprueft |
+| `profiles.<name>.pdf.overflow_warn_pt` | float | `0.1` | ✅ | Warnschwelle fuer modellierte Text-/URL-/DOI-Ueberstaende in Punkten |
+| `profiles.<name>.pdf.overflow_fail_pt` | float | `12.0` | ✅ | Fehlerschwelle fuer modellierte Text-/URL-/DOI-Ueberstaende in Punkten |
+| `profiles.<name>.pdf.overflow_token_warn_chars` | int | `96` | ✅ | Tokenlaenge ab der ein PDF-Overflow-Signal modelliert wird |
 | `profiles.<name>.documentation.fail_on_stale_worker_version` | bool | `false` | ✅ | Worker-Version-Drift im Acceptance-Dossier als harte Findings behandeln |
 | `profiles.<name>.documentation.fail_on_stale_page_count` | bool | `false` | ✅ | Reports blockieren, wenn PDF-Artefakte nach dem Reportzeitpunkt veraendert wurden |
+| `profiles.<name>.documentation.scan_release_docs` | bool | `true` | ✅ | Release-Dokumente auf alte Worker-Versionen und Seitenzahlen scannen |
+| `profiles.<name>.documentation.release_doc_dirs` | array | `docs/releases`, `gitbook_worker/docs/releases` | ✅ | Release-Dokumentationsordner fuer Drift-Scan |
+
+CLI-Ausgaben fuer `editorial_metrics`:
+
+| Option | Typ | Default | Status | Beschreibung |
+|--------|-----|---------|--------|--------------|
+| `--csv-output` | path | `null` | ✅ | Optionale CSV-Ausgabe fuer Findings |
+| `--console-summary` | bool | `false` | ✅ | Eine kurze scanbare Statuszeile fuer lokale Runs und CI-Logs |
+
+Orchestrator-Integration:
+
+| Option/Step | Typ | Default | Status | Beschreibung |
+|-------------|-----|---------|--------|--------------|
+| `--step editorial-quality` | step | – | ✅ | Fuehrt nach einem Build Metrics + Acceptance aus |
+| `--quality-profile` | string | `release` | ✅ | Profil fuer Metrics und Acceptance |
+| `--quality-baseline` | path | `null` | ✅ | Baseline-Report fuer Acceptance-Vergleich |
+| `--quality-accepted-findings` | path | `null` | ✅ | Restrisiko-Register fuer Acceptance |
+| `--quality-gate` | bool | `false` | ✅ | Nicht-null Acceptance-Status als CI-Gate verwenden |
 
 ---
 
@@ -341,7 +366,7 @@ erzeugen ein hartes Finding.
 | `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
 | `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | ✓ | [docker-config-yml.md](configs/docker-config-yml.md) |
-| editorial quality profile | 1.2.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
+| editorial quality profile | 1.3.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
 | editorial accepted findings | 1.0.0 | optional | [editorial-accepted-findings.md](configs/editorial-accepted-findings.md) |
 
 ---

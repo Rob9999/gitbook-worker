@@ -1,7 +1,8 @@
 ---
-version: 1.4.0
+version: 1.5.0
 date: 2026-05-09
 history:
+  - "1.5.0: 2026-05-09 — editorial quality profile reference bumped to 1.3.0"
   - "1.4.0: 2026-05-09 — editorial quality profile 1.2.0 and accepted findings register documented"
   - "1.3.0: 2026-05-09 — editorial quality profile reference bumped to 1.1.0"
   - "1.2.0: 2026-05-09 — editorial quality profile reference added"
@@ -25,7 +26,7 @@ Schlüssel-Tabelle und Änderungshistorie.
 | `readme.yml` | 1.0.0 | `gitbook_worker/defaults/` | [readme-yml.md](readme-yml.md) |
 | `smart.yml` | 1.0.0 | `gitbook_worker/defaults/` | [smart-yml.md](smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | `gitbook_worker/defaults/` | [docker-config-yml.md](docker-config-yml.md) |
-| editorial quality profile | 1.2.0 | CLI `--profile-config` | [editorial-quality-profile.md](editorial-quality-profile.md) |
+| editorial quality profile | 1.3.0 | CLI `--profile-config` | [editorial-quality-profile.md](editorial-quality-profile.md) |
 | editorial accepted findings | 1.0.0 | CLI `--accepted-findings` | [editorial-accepted-findings.md](editorial-accepted-findings.md) |
 
 Alle Konfigurationsdateien haben nun ein `version`-Feld (Config-Completeness-Policy AGENTS.md §29).

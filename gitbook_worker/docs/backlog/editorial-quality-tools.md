@@ -1,11 +1,12 @@
 ---
-version: 1.4.0
+version: 1.5.0
 date: 2026-05-09
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.5.0: 2026-05-09 - Alle offenen Muss- und Soll-Punkte als implementierten Verantwortungs-Schnitt markiert."
   - "1.4.0: 2026-05-09 - Tabellenstrategie-Problemfaelle mit Kontext als erledigten Schnitt markiert."
   - "1.3.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken als erledigten Schnitt markiert."
   - "1.2.0: 2026-05-09 - Backlog-Status nach Publish-Scope-, PDF-Zielkorridor- und Drift-Schnitt synchronisiert."
@@ -78,7 +79,7 @@ Kern der Ergaenzung:
 - [x] ✅ Datei-, Kapitel-, Heading-, Frontmatter-, Link-, Medien-, Tabellen- und
   Codeblock-Metriken sammeln.
 - [x] ✅ TODO/FIXME/Review-Notizen als redaktionelle Findings ausgeben.
-- [ ] 🔨 Link-Audit-, AI-Referenz- und Frontmatter-Signale wiederverwenden, nicht
+- [x] ✅ Link-Audit-, AI-Referenz- und Frontmatter-Signale wiederverwenden, nicht
   parallel neu erfinden.
 
 Akzeptanzkriterien:
@@ -97,7 +98,7 @@ Akzeptanzkriterien:
 - [x] ✅ PDF-TOC/Outline extrahieren.
 - [x] ✅ Font-Embedding-, Emoji- und CJK-Signale aus `pdf_validator` integrieren.
 - [x] ✅ Textarme/leere Seiten und auffaellige Ersatzglyphen melden.
-- [ ] 🔨 Tabellenlayout-Reports mit PDF-Artefakten verknuepfen.
+- [x] ✅ Tabellenlayout-Reports mit PDF-Artefakten verknuepfen.
 
 Akzeptanzkriterien:
 
@@ -110,8 +111,8 @@ Akzeptanzkriterien:
 ### M3 Markdown-PDF-Abgleich
 
 - [x] ✅ Markdown-Headings gegen PDF-TOC/Outline pruefen.
-- [ ] erwartete Sample-Seiten als Regeln ausdruecken koennen.
-- [ ] Projektversion, Sprache und Titel zwischen Manifest, Markdown und PDF
+- [x] ✅ erwartete Sample-Seiten als Regeln ausdruecken koennen.
+- [x] ✅ Projektversion, Sprache und Titel zwischen Manifest, Markdown und PDF
   plausibilisieren.
 - [x] ✅ Publish-Eintraege ohne erzeugtes Artefakt als `blocked` melden.
 
@@ -155,10 +156,10 @@ Akzeptanzkriterien:
 ### M6 Report-Drift und Artefakt-Frische
 
 - [x] ✅ Installierte Worker-Version im Metrikreport ausweisen.
-- [ ] 🚧 Build-Worker-Version pro PDF-Artefakt erfassen, soweit rekonstruierbar.
+- [x] ✅ Build-Worker-Version pro PDF-Artefakt erfassen, soweit rekonstruierbar.
 - [x] ✅ PDF `CreationDate`, Dateigroesse und Seitenzahl in das Dossier aufnehmen.
 - [x] ✅ Metrikreport-Zeitstempel gegen Artefakt-Zeitstempel pruefen.
-- [ ] Release-Dokumente auf alte Worker-Versionen, alte Seitenzahlen und alte
+- [x] ✅ Release-Dokumente auf alte Worker-Versionen, alte Seitenzahlen und alte
   Layoutbefunde scannen.
 - [x] ✅ Profilregel `fail_on_stale_worker_version` unterstuetzen.
 - [x] ✅ Profilregel `fail_on_stale_page_count` unterstuetzen.
@@ -217,8 +218,8 @@ Akzeptanzkriterien:
   `publish/` profilieren.
 - [x] ✅ PDF-Outline-Eintraege ohne Markdown-Heading melden.
 - [x] ✅ Markdown-Headings ohne erwarteten PDF-Outline-Eintrag melden.
-- [ ] doppelte Titel im gleichen Dokument oder in direkter PDF-Naehe melden.
-- [ ] Kapitel-/Anhang-Reihenfolge gegen `summary_appendices_last` pruefen.
+- [x] ✅ doppelte Titel im gleichen Dokument oder in direkter PDF-Naehe melden.
+- [x] ✅ Kapitel-/Anhang-Reihenfolge gegen `summary_appendices_last` pruefen.
 
 Akzeptanzkriterien:
 
@@ -245,13 +246,13 @@ Akzeptanzkriterien:
 
 ### M11 PDF-Layout, Fonts und Textextraktion
 
-- [ ] BBox-/Overflow-Findings mit Seite, Art, Ueberstand in Punkten und
+- [x] ✅ BBox-/Overflow-Findings mit Seite, Art, Ueberstand in Punkten und
   Millimetern, gekuerztem Textauszug, Ursache und Healing-Step modellieren.
-- [ ] Kleine DOI-/URL-Ueberstaende profilierbar als `warn` statt `fail`
+- [x] ✅ Kleine DOI-/URL-Ueberstaende profilierbar als `warn` statt `fail`
   behandeln.
 - [x] ✅ Projektfonts aus Profil gegen eingebettete PDF-Fonts pruefen.
 - [x] ✅ Ersatzglyphen wie `□`, `�` und `.notdef` als Befunde melden.
-- [ ] CJK/Hangul/Kana-Stichproben pruefen, wenn solche Scripts im publizierten
+- [x] ✅ CJK/Hangul/Kana-Stichproben pruefen, wenn solche Scripts im publizierten
   Scope vorkommen.
 
 Akzeptanzkriterien:
@@ -313,31 +314,31 @@ Akzeptanzkriterien:
 
 ### S1 Profile und Schwellen
 
-- [ ] Profile `local`, `release`, `customer-handover` vorsehen.
-- [ ] Schwellen fuer Warnungen und Fehler konfigurierbar machen.
-- [ ] Neue Konfigurationsschluessel nur zusammen mit
+- [x] ✅ Profile `local`, `release`, `customer-handover` vorsehen.
+- [x] ✅ Schwellen fuer Warnungen und Fehler konfigurierbar machen.
+- [x] ✅ Neue Konfigurationsschluessel nur zusammen mit
   `docs/configuration-reference.md` und Tests einfuehren.
 
 ### S2 Reportformate
 
 - [x] ✅ JSON als kanonisches Format.
 - [x] ✅ Markdown fuer redaktionelle Abnahme.
-- [ ] CSV fuer tabellarische Metriken optional.
-- [ ] Konsolenausgabe kurz und scanbar halten.
+- [x] ✅ CSV fuer tabellarische Metriken optional.
+- [x] ✅ Konsolenausgabe kurz und scanbar halten.
 
 ### S3 Workflow-Integration
 
-- [ ] Orchestrator kann nach dem PDF-Build optional Metriken und Abnahme laufen
+- [x] ✅ Orchestrator kann nach dem PDF-Build optional Metriken und Abnahme laufen
   lassen.
 - [x] ✅ Reports landen unter `logs/quality/` oder einem konfigurierten Outputpfad.
-- [ ] CI kann den Abnahmestatus als Gate verwenden.
+- [x] ✅ CI kann den Abnahmestatus als Gate verwenden.
 
 ### S4 Sample- und Regression-Faelle
 
-- [ ] Mehrsprachige Samples mit absichtlich ausloesbaren Warnungen ergaenzen.
-- [ ] Mindestens ein Fehler-Sample fuer fehlende Artefakte.
-- [ ] Mindestens ein Warnungs-Sample fuer redaktionelle Notizen.
-- [ ] Snapshot- oder strukturierte JSON-Assertions fuer stabile Reports.
+- [x] ✅ Mehrsprachige Samples mit absichtlich ausloesbaren Warnungen ergaenzen.
+- [x] ✅ Mindestens ein Fehler-Sample fuer fehlende Artefakte.
+- [x] ✅ Mindestens ein Warnungs-Sample fuer redaktionelle Notizen.
+- [x] ✅ Snapshot- oder strukturierte JSON-Assertions fuer stabile Reports.
 
 ### S5 Seitenzahl-Zielkorridore
 

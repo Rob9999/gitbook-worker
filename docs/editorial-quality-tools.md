@@ -1,7 +1,8 @@
 ---
-version: 1.3.0
+version: 1.4.0
 date: 2026-05-09
 history:
+  - "1.4.0: 2026-05-09 - Pflicht-/Soll-Schnitt mit wiederverwendeten Signalen, Sample-Seiten, Release-Doku-Scan, CSV/Console und Orchestrator-Gate dokumentiert."
   - "1.3.0: 2026-05-09 - Tabellenstrategie-Problemfaelle und Kandidatenkontext beschrieben."
   - "1.2.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken dokumentiert."
   - "1.1.0: 2026-05-09 - Publish-Scope, PDF-Zielkorridore und Drift-Pruefungen ergaenzt."
@@ -34,6 +35,24 @@ Report-Zeile, optionaler Markdown-Quelle, Tabellenindex, nahem Heading,
 ausgewaehltem Papier und kurzer Kandidatenbewertung. Overrides bleiben als
 redaktionelle Entscheidung sichtbar; Fallbacks und knappe Kandidatenwahlen
 bleiben reviewbar.
+
+Der Collector wiederverwendet vorhandene Einzelchecks: doppelte Titel und
+TODO-Signale aus `link_audit`, Referenzkandidaten aus `ai_references` und
+Frontmatter-Syntaxsignale aus dem Frontmatter-Checker. PDF-Reports enthalten
+zusaetzlich rekonstruierbare Build-Worker-Versionen aus Metadaten,
+modellierte URL-/DOI-Overflow-Signale, CJK/Hangul/Kana-Stichproben und
+projektdefinierte Sample-Seitenregeln.
+
+Optional entstehen tabellarische Findings und eine kurze Konsolenzeile:
+
+```powershell
+python -m gitbook_worker.tools.quality.editorial_metrics `
+  --root . `
+  --lang en `
+  --output logs/quality/en-editorial-metrics.json `
+  --csv-output logs/quality/en-editorial-findings.csv `
+  --console-summary
+```
 
 ## Minimaler Lauf
 
@@ -99,6 +118,18 @@ pdf:
       warn_pages_max: 150
 ```
 
+`pdf.expected_pages` drueckt feste Sample-Seiten als Regeln aus:
+
+```yaml
+pdf:
+  expected_pages:
+    publish/sample.pdf:
+      - page: 1
+        label: cover sample
+        min_text_lines: 3
+        must_contain: Sample
+```
+
 `editorial_acceptance` prueft zusaetzlich, ob ein Report mit einer alten
 Worker-Version erzeugt wurde oder ob ein PDF-Artefakt neuer ist als der Report.
 Die Schalter `documentation.fail_on_stale_worker_version` und
@@ -134,6 +165,25 @@ accepted_findings:
 
 Schema und Pflichtfelder stehen in
 [editorial-accepted-findings.md](configs/editorial-accepted-findings.md).
+
+## Orchestrator und CI-Gate
+
+Der Workflow-Orchestrator kennt den optionalen Schritt `editorial-quality`.
+Er schreibt Metrics, CSV-Findings, Markdown-Dossier und JSON-Summary nach
+`logs/quality/`. Ohne `--quality-gate` bleibt der Schritt ein Bericht; mit
+`--quality-gate` wird der Acceptance-Status zum CI-Gate.
+
+```powershell
+python -m gitbook_worker.tools.workflow_orchestrator run `
+  --root . `
+  --content-config content.yaml `
+  --lang en `
+  --profile local `
+  --step publisher `
+  --step editorial-quality `
+  --quality-profile release `
+  --quality-gate
+```
 
 ## Exit-Codes
 

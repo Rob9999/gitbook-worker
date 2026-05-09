@@ -194,6 +194,10 @@ class OrchestratorConfig:
     isolated: bool
     no_gitbook_rename: bool = False
     steps_override: tuple[str, ...] | None = None
+    quality_profile: str = "release"
+    quality_baseline: Path | None = None
+    quality_accepted_findings: Path | None = None
+    quality_gate: bool = False
 
 
 class RuntimeContext:
@@ -659,6 +663,10 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         isolated=getattr(args, "isolated", False),
         no_gitbook_rename=getattr(args, "no_gitbook_rename", False),
         steps_override=steps_override,
+        quality_profile=getattr(args, "quality_profile", "release"),
+        quality_baseline=getattr(args, "quality_baseline", None),
+        quality_accepted_findings=getattr(args, "quality_accepted_findings", None),
+        quality_gate=getattr(args, "quality_gate", False),
     )
 
 
@@ -1288,6 +1296,65 @@ def _step_publisher(ctx: RuntimeContext) -> None:
         raise
 
 
+def _step_editorial_quality(ctx: RuntimeContext) -> None:
+    """Run editorial metrics and acceptance after a build."""
+
+    quality_dir = ctx.config.logs_dir / "quality"
+    quality_dir.mkdir(parents=True, exist_ok=True)
+    prefix = f"{ctx.config.language_id}-{ctx.config.quality_profile}"
+    metrics_report = quality_dir / f"{prefix}-editorial-metrics.json"
+    findings_csv = quality_dir / f"{prefix}-editorial-findings.csv"
+    dossier = quality_dir / f"{prefix}-editorial-acceptance.md"
+    summary_json = quality_dir / f"{prefix}-editorial-acceptance.json"
+
+    metrics_cmd: list[str] = [
+        ctx.python,
+        "-m",
+        "gitbook_worker.tools.quality.editorial_metrics",
+        "--root",
+        str(ctx.root),
+        "--lang",
+        str(ctx.config.language_id),
+        "--profile",
+        ctx.config.quality_profile,
+        "--output",
+        str(metrics_report),
+        "--csv-output",
+        str(findings_csv),
+        "--console-summary",
+    ]
+    if ctx.config.content_config_path:
+        metrics_cmd.extend(["--content-config", str(ctx.config.content_config_path)])
+    ctx.run_command(metrics_cmd)
+
+    acceptance_cmd: list[str] = [
+        ctx.python,
+        "-m",
+        "gitbook_worker.tools.quality.editorial_acceptance",
+        str(metrics_report),
+        "--profile",
+        ctx.config.quality_profile,
+        "--output",
+        str(dossier),
+        "--json-output",
+        str(summary_json),
+    ]
+    if ctx.config.quality_baseline:
+        acceptance_cmd.extend(["--baseline", str(ctx.config.quality_baseline)])
+    if ctx.config.quality_accepted_findings:
+        acceptance_cmd.extend(
+            ["--accepted-findings", str(ctx.config.quality_accepted_findings)]
+        )
+    result = ctx.run_command(acceptance_cmd, check=ctx.config.quality_gate)
+    if result.returncode:
+        LOGGER.warning(
+            "Editorial quality acceptance finished with status %s; gate=%s, dossier=%s",
+            result.returncode,
+            ctx.config.quality_gate,
+            dossier,
+        )
+
+
 STEP_HANDLERS = {
     "check_if_to_publish": _step_check_if_to_publish,
     "ensure_readme": _step_ensure_readme,
@@ -1297,6 +1364,7 @@ STEP_HANDLERS = {
     "engineering-document-formatter": _step_engineering_docs,
     "generate_attribution": _step_generate_attribution,
     "publisher": _step_publisher,
+    "editorial-quality": _step_editorial_quality,
 }
 
 
@@ -1388,6 +1456,26 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--step",
         action="append",
         help="Überschreibt die im Profil definierten Schritte",
+    )
+    run_parser.add_argument(
+        "--quality-profile",
+        default="release",
+        help="Editorial-Quality-Profil fuer den Schritt editorial-quality",
+    )
+    run_parser.add_argument(
+        "--quality-baseline",
+        type=Path,
+        help="Vorheriger Editorial-Metrics-Report fuer Baseline-Vergleich",
+    )
+    run_parser.add_argument(
+        "--quality-accepted-findings",
+        type=Path,
+        help="YAML/JSON Restrisiko-Register fuer editorial_acceptance",
+    )
+    run_parser.add_argument(
+        "--quality-gate",
+        action="store_true",
+        help="Editorial-Acceptance-Status als CI-Gate verwenden",
     )
 
     validate_parser = subparsers.add_parser(

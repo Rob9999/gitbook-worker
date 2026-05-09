@@ -87,6 +87,7 @@ class MarkdownProfile:
     exclude_dirs: tuple[str, ...] = DEFAULT_EXCLUDE_DIRS
     skip_filenames: tuple[str, ...] = DEFAULT_SKIP_FILENAMES
     long_token_warn_chars: int = 80
+    duplicate_heading_near_window: int = 3
 
 
 @dataclass(frozen=True)
@@ -96,7 +97,13 @@ class PdfProfile:
     low_text_page_threshold: int = 15
     very_low_text_page_threshold: int = 5
     required_fonts: tuple[str, ...] = ()
-    pdf_targets: Mapping[str, Mapping[str, int]] = field(default_factory=dict)
+    pdf_targets: Mapping[str, Mapping[str, Any]] = field(default_factory=dict)
+    expected_pages: Mapping[str, tuple[Mapping[str, Any], ...]] = field(
+        default_factory=dict
+    )
+    overflow_warn_pt: float = 0.1
+    overflow_fail_pt: float = 12.0
+    overflow_token_warn_chars: int = 96
 
 
 @dataclass(frozen=True)
@@ -105,6 +112,11 @@ class DocumentationProfile:
 
     fail_on_stale_worker_version: bool = False
     fail_on_stale_page_count: bool = False
+    scan_release_docs: bool = True
+    release_doc_dirs: tuple[str, ...] = (
+        "docs/releases",
+        "gitbook_worker/docs/releases",
+    )
 
 
 @dataclass(frozen=True)
@@ -355,6 +367,9 @@ def _profile_from_mapping(name: str, raw: Mapping[str, Any]) -> AcceptanceProfil
                 )
             ),
             long_token_warn_chars=int(markdown_raw.get("long_token_warn_chars") or 80),
+            duplicate_heading_near_window=int(
+                markdown_raw.get("duplicate_heading_near_window") or 3
+            ),
         ),
         pdf=PdfProfile(
             low_text_page_threshold=int(pdf_raw.get("low_text_page_threshold") or 15),
@@ -365,6 +380,12 @@ def _profile_from_mapping(name: str, raw: Mapping[str, Any]) -> AcceptanceProfil
                 str(font) for font in _as_sequence(pdf_raw.get("required_fonts"))
             ),
             pdf_targets=_mapping_of_mappings(pdf_raw.get("pdf_targets") or {}),
+            expected_pages=_expected_pages_mapping(pdf_raw.get("expected_pages") or {}),
+            overflow_warn_pt=float(pdf_raw.get("overflow_warn_pt") or 0.1),
+            overflow_fail_pt=float(pdf_raw.get("overflow_fail_pt") or 12.0),
+            overflow_token_warn_chars=int(
+                pdf_raw.get("overflow_token_warn_chars") or 96
+            ),
         ),
         documentation=DocumentationProfile(
             fail_on_stale_worker_version=_as_bool(
@@ -372,6 +393,14 @@ def _profile_from_mapping(name: str, raw: Mapping[str, Any]) -> AcceptanceProfil
             ),
             fail_on_stale_page_count=_as_bool(
                 docs_raw.get("fail_on_stale_page_count"), default=False
+            ),
+            scan_release_docs=_as_bool(docs_raw.get("scan_release_docs"), default=True),
+            release_doc_dirs=tuple(
+                str(path)
+                for path in _as_sequence(
+                    docs_raw.get("release_doc_dirs")
+                    or DocumentationProfile().release_doc_dirs
+                )
             ),
         ),
     )
@@ -418,23 +447,47 @@ def _optional_str(value: Any) -> str | None:
     return text or None
 
 
-def _mapping_of_mappings(value: Any) -> Mapping[str, Mapping[str, int]]:
+def _mapping_of_mappings(value: Any) -> Mapping[str, Mapping[str, Any]]:
     if not isinstance(value, Mapping):
         return {}
-    result: dict[str, Mapping[str, int]] = {}
+    result: dict[str, Mapping[str, Any]] = {}
     for key, nested in value.items():
         if not isinstance(nested, Mapping):
             continue
         result[str(key)] = {
-            str(nested_key): int(nested_value)
-            for nested_key, nested_value in nested.items()
-            if isinstance(nested_value, int)
-            or (isinstance(nested_value, str) and nested_value.isdigit())
+            str(nested_key): nested_value for nested_key, nested_value in nested.items()
         }
     return result
 
 
+def _expected_pages_mapping(value: Any) -> Mapping[str, tuple[Mapping[str, Any], ...]]:
+    if not isinstance(value, Mapping):
+        return {}
+    result: dict[str, tuple[Mapping[str, Any], ...]] = {}
+    for key, raw_rules in value.items():
+        rules: list[Mapping[str, Any]] = []
+        for raw_rule in _as_sequence(raw_rules):
+            if isinstance(raw_rule, Mapping):
+                rules.append(
+                    {
+                        str(rule_key): rule_value
+                        for rule_key, rule_value in raw_rule.items()
+                    }
+                )
+        if rules:
+            result[str(key)] = tuple(rules)
+    return result
+
+
 _BUILTIN_PROFILES: Mapping[str, Mapping[str, Any]] = {
+    "local": {
+        "network": False,
+        "fail_on_warnings": False,
+        "markdown": {
+            "forbidden_frontmatter_keys": ["lang", "language", "lang-version"],
+        },
+        "pdf": {},
+    },
     "local-preview": {
         "network": False,
         "fail_on_warnings": False,
@@ -443,9 +496,33 @@ _BUILTIN_PROFILES: Mapping[str, Mapping[str, Any]] = {
         },
         "pdf": {},
     },
+    "release": {
+        "network": False,
+        "fail_on_warnings": False,
+        "markdown": {
+            "forbidden_frontmatter_keys": ["lang", "language", "lang-version"],
+        },
+        "pdf": {},
+        "documentation": {
+            "fail_on_stale_worker_version": True,
+            "fail_on_stale_page_count": True,
+        },
+    },
     "release-candidate": {
         "network": False,
         "fail_on_warnings": False,
+        "markdown": {
+            "forbidden_frontmatter_keys": ["lang", "language", "lang-version"],
+        },
+        "pdf": {},
+        "documentation": {
+            "fail_on_stale_worker_version": True,
+            "fail_on_stale_page_count": True,
+        },
+    },
+    "customer-handover": {
+        "network": False,
+        "fail_on_warnings": True,
         "markdown": {
             "forbidden_frontmatter_keys": ["lang", "language", "lang-version"],
         },

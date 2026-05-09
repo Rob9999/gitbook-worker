@@ -19,9 +19,13 @@ from gitbook_worker.tools.quality.editorial_common import (
     stable_finding_id,
 )
 from gitbook_worker.tools.quality.editorial_metrics import (
+    _check_pdf_script_samples,
+    _check_pdf_text_overflow,
     analyze_pdf,
     analyze_table_reports,
     collect_editorial_metrics,
+    format_console_summary,
+    write_findings_csv,
 )
 
 
@@ -132,6 +136,45 @@ def test_markdown_metrics_detect_translation_content_id_mismatch(
     assert report["metrics"]["markdown"]["approved_targets_total"] == 1
 
 
+def test_markdown_metrics_reuses_existing_quality_signals(tmp_path: Path) -> None:
+    _write_markdown(
+        tmp_path / "source" / "chapter-a.md",
+        """
+        ---
+        content_id: ch-a
+        content_lang: ja
+        doi: 10.1234/example
+        ---
+        # Shared Title
+        TODO: verify this citation trail.
+        """,
+    )
+    _write_markdown(
+        tmp_path / "source" / "chapter-b.md",
+        """
+        ---
+        content_id: ch-b
+        content_lang: ja
+        ---
+        # Shared Title
+        """,
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        profile=_multilingual_profile(),
+        markdown_roots=(tmp_path,),
+    )
+
+    markdown_metrics = report["metrics"]["markdown"]
+    rule_ids = {finding["rule_id"] for finding in report["findings"]}
+    assert markdown_metrics["duplicate_headings_total"] == 1
+    assert markdown_metrics["link_audit_todo_entries_total"] == 1
+    assert markdown_metrics["inline_reference_tasks_total"] >= 1
+    assert "markdown.heading.duplicate_title" in rule_ids
+    assert "references.ai.tasks_detected" in rule_ids
+
+
 def test_pdf_metrics_detect_empty_text_layer(tmp_path: Path) -> None:
     pdf = tmp_path / "blank.pdf"
     writer = PdfWriter()
@@ -166,6 +209,53 @@ def test_pdf_targets_flag_page_count_outside_corridor(tmp_path: Path) -> None:
     _, findings = analyze_pdf(tmp_path, pdf, profile)
 
     assert any(finding.rule_id == "pdf.pages.below_target" for finding in findings)
+
+
+def test_pdf_expected_page_rules_and_overflow_signals(tmp_path: Path) -> None:
+    pdf = tmp_path / "blank.pdf"
+    writer = PdfWriter()
+    writer.add_blank_page(width=300, height=200)
+    writer.add_metadata({"/Title": "Blank Sample"})
+    with pdf.open("wb") as handle:
+        writer.write(handle)
+    profile = AcceptanceProfile(
+        name="sample-pages",
+        pdf=PdfProfile(
+            expected_pages={
+                "blank.pdf": (
+                    {
+                        "page": 1,
+                        "label": "sample anchor",
+                        "min_text_lines": 1,
+                        "must_contain": "Sample Anchor",
+                    },
+                )
+            },
+            overflow_warn_pt=0.1,
+            overflow_fail_pt=12.0,
+            overflow_token_warn_chars=20,
+        ),
+    )
+
+    metrics, findings = analyze_pdf(tmp_path, pdf, profile)
+    overflow_findings = _check_pdf_text_overflow(
+        "blank.pdf",
+        {1: "https://example.test/" + "x" * 80},
+        profile,
+    )
+    script_findings = _check_pdf_script_samples(
+        "blank.pdf", {"cjk": 1, "hangul": 1, "kana": 0}, ()
+    )
+
+    assert metrics["metadata_title"] == "Blank Sample"
+    assert any(finding.rule_id == "pdf.sample_page.low_text" for finding in findings)
+    assert any(
+        finding.rule_id == "pdf.sample_page.missing_text" for finding in findings
+    )
+    assert overflow_findings[0].rule_id == "pdf.layout.text_overflow"
+    assert overflow_findings[0].severity == "fail"
+    assert "overflow_mm=" in overflow_findings[0].evidence
+    assert script_findings[0].rule_id == "pdf.text.script_sample"
 
 
 def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> None:
@@ -238,6 +328,114 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
     assert publish_metrics["missing_expected_pdfs_total"] == 1
     assert "publish.pdf.missing_artifact" in rule_ids
     assert "publish.summary.orphaned_markdown" in rule_ids
+
+
+def test_publish_metadata_summary_order_and_release_docs_drift(
+    tmp_path: Path,
+) -> None:
+    language_root = tmp_path / "sample"
+    _write_markdown(
+        language_root / "content" / "SUMMARY.md",
+        """
+        # Summary
+
+        * [Appendix](appendix-a.md)
+        * [Chapter](chapter.md)
+        """,
+    )
+    _write_markdown(
+        language_root / "content" / "appendix-a.md",
+        """
+        ---
+        content_id: appendix-a
+        content_lang: de
+        version: 1.0.0
+        ---
+        # Appendix A
+        """,
+    )
+    _write_markdown(
+        language_root / "content" / "chapter.md",
+        """
+        ---
+        content_id: chapter
+        content_lang: de
+        version: 1.0.0
+        ---
+        # Chapter
+        """,
+    )
+    publish_dir = language_root / "publish"
+    publish_dir.mkdir(parents=True)
+    pdf = publish_dir / "sample.pdf"
+    writer = PdfWriter()
+    writer.add_blank_page(width=300, height=200)
+    writer.add_metadata({"/Title": "PDF Title"})
+    with pdf.open("wb") as handle:
+        writer.write(handle)
+    (language_root / "book.json").write_text(
+        json.dumps({"root": "content/", "structure": {"summary": "SUMMARY.md"}}),
+        encoding="utf-8",
+    )
+    (language_root / "publish.yml").write_text(
+        textwrap.dedent(
+            """
+            version: 2.0.0
+            title: Manifest Title
+            language: en
+            publish:
+              - path: ./
+                out_format: pdf
+                out_dir: ./publish
+                out: sample.pdf
+                source_type: folder
+                use_summary: true
+                use_book_json: true
+                build: true
+                summary_appendices_last: true
+            """
+        ).lstrip(),
+        encoding="utf-8",
+    )
+    (tmp_path / "content.yaml").write_text(
+        textwrap.dedent(
+            """
+            version: 1.0.0
+            default: sample
+            contents:
+              - id: sample
+                type: local
+                uri: sample/
+            """
+        ).lstrip(),
+        encoding="utf-8",
+    )
+    _write_markdown(
+        tmp_path / "docs" / "releases" / "v0.md",
+        """
+        # Release v0
+
+        GitBook Worker 0.0.0
+        sample pages: 99
+        Layout findings: old
+        """,
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        content_config=tmp_path / "content.yaml",
+        languages=("sample",),
+        profile=AcceptanceProfile(name="metadata-test"),
+    )
+
+    rule_ids = {finding["rule_id"] for finding in report["findings"]}
+    assert "publish.summary.appendix_order" in rule_ids
+    assert "metadata.version_mismatch" in rule_ids
+    assert "metadata.title_mismatch" in rule_ids
+    assert "metadata.language_mismatch" in rule_ids
+    assert "release_docs.worker_version.stale" in rule_ids
+    assert "release_docs.page_count.stale" in rule_ids
+    assert report["metrics"]["release_docs"]["layout_claims_total"] == 1
 
 
 def test_table_report_aggregation_flags_fallbacks(tmp_path: Path) -> None:
@@ -371,6 +569,36 @@ def test_acceptance_writes_dossier_and_returns_failure(tmp_path: Path) -> None:
     assert "Editorial Acceptance Dossier" in text
     assert "Human Decision" in text
     assert "missing source" in text
+
+
+def test_metrics_writes_optional_csv_and_console_summary(tmp_path: Path) -> None:
+    report = {
+        "summary": {
+            "status": "passed_with_warnings",
+            "finding_counts": {"blocked": 0, "fail": 0, "warn": 1, "info": 0},
+        },
+        "findings": [
+            {
+                "id": "rule:1",
+                "severity": "warn",
+                "category": "markdown",
+                "rule_id": "markdown.review_marker",
+                "artifact": "chapter.md",
+                "location": "line 1",
+                "evidence": "TODO",
+                "editorial_impact": "Review needed.",
+                "healing": "Resolve note.",
+            }
+        ],
+    }
+    csv_path = tmp_path / "findings.csv"
+
+    write_findings_csv(report, csv_path)
+
+    assert "markdown.review_marker" in csv_path.read_text(encoding="utf-8")
+    assert format_console_summary(report) == (
+        "editorial_metrics status=passed_with_warnings blocked=0 fail=0 warn=1 info=0"
+    )
 
 
 def test_acceptance_derives_stale_report_findings(tmp_path: Path) -> None:
@@ -535,3 +763,13 @@ def test_builtin_multilingual_profile_loads() -> None:
     assert profile.markdown.source_locale == "ja"
     assert profile.markdown.target_locales == ("pl", "hr", "no")
     assert "ProjectCJK-Regular" in profile.pdf.required_fonts
+
+
+def test_builtin_local_release_and_customer_handover_profiles_load() -> None:
+    local = load_acceptance_profile(profile_name="local")
+    release = load_acceptance_profile(profile_name="release")
+    handover = load_acceptance_profile(profile_name="customer-handover")
+
+    assert local.fail_on_warnings is False
+    assert release.documentation.fail_on_stale_worker_version is True
+    assert handover.fail_on_warnings is True

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 from collections import Counter
@@ -15,10 +16,15 @@ from urllib.parse import unquote
 import yaml
 from pypdf import PdfReader
 
+from gitbook_worker import __version__
 from gitbook_worker.core.application.pdf_toc import extract_pdf_toc
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
 from gitbook_worker.tools.logging_config import get_logger
 from gitbook_worker.tools.publishing.gitbook_style import get_summary_layout
+from gitbook_worker.tools.quality.ai_references import (
+    load_inline_reference_tasks,
+    load_reference_tasks,
+)
 from gitbook_worker.tools.quality.editorial_common import (
     EDITORIAL_BLOCKED_EXIT_CODE,
     EDITORIAL_HARD_FINDINGS_EXIT_CODE,
@@ -31,12 +37,19 @@ from gitbook_worker.tools.quality.editorial_common import (
     relative_artifact,
     write_json_report,
 )
+from gitbook_worker.tools.quality.link_audit import (
+    check_duplicate_headings,
+    list_todos,
+)
 from gitbook_worker.tools.testing.pdf_validator import (
     extract_pdf_fonts,
     font_name_matches,
     scan_forbidden_log_patterns,
 )
 from gitbook_worker.tools.utils.smart_content import load_content_config
+from gitbook_worker.tools.validators.frontmatter_checker import (
+    check_file as check_frontmatter_file,
+)
 
 logger = get_logger(__name__)
 
@@ -105,15 +118,28 @@ def collect_editorial_metrics(
         table_paths.extend(discover_table_layout_reports(root, markdown_inputs))
     table_paths.extend(publish_scope["expected_table_reports"])
     table_paths = _dedupe_paths(table_paths)
-    table_metrics, table_findings = analyze_table_reports(root, table_paths)
+    table_artifact_links = _table_report_artifact_links(
+        publish_scope["metrics"].get("entries", [])
+    )
+    table_metrics, table_findings = analyze_table_reports(
+        root, table_paths, artifact_links=table_artifact_links
+    )
 
     toc_findings = compare_markdown_pdf_toc(root, markdown_metrics, pdf_metrics)
+    metadata_findings = compare_publish_metadata(
+        publish_scope["metrics"], markdown_metrics, pdf_metrics
+    )
+    release_doc_metrics, release_doc_findings = analyze_release_documentation(
+        root, active_profile, pdf_metrics
+    )
     findings = [
         *publish_scope["findings"],
         *markdown_findings,
         *pdf_findings,
         *toc_findings,
         *table_findings,
+        *metadata_findings,
+        *release_doc_findings,
     ]
     inputs = {
         "repo_root": ".",
@@ -132,6 +158,7 @@ def collect_editorial_metrics(
         "markdown": markdown_metrics,
         "pdf": pdf_metrics,
         "tables": table_metrics,
+        "release_docs": release_doc_metrics,
     }
     return build_report(
         project=project or root.name,
@@ -325,6 +352,7 @@ def discover_publish_scope(
             entry_metrics, entry_findings = _analyze_publish_entry(
                 repo_root,
                 manifest,
+                raw_manifest,
                 index,
                 raw_entry,
                 profile,
@@ -389,6 +417,12 @@ def analyze_markdown_files(
         "todo_markers_total": 0,
         "approved_targets_total": 0,
         "by_locale": {},
+        "metadata": [],
+        "duplicate_headings_total": 0,
+        "link_audit_todo_entries_total": 0,
+        "ai_reference_tasks_total": 0,
+        "inline_reference_tasks_total": 0,
+        "frontmatter_syntax_issues_total": 0,
     }
     findings: list[Finding] = []
     source_ids: dict[str, Path] = {}
@@ -501,6 +535,18 @@ def analyze_markdown_files(
         metrics["frontmatter_files"] += 1
         frontmatter_by_path[path.resolve()] = frontmatter
         locale = str(frontmatter.get(profile.markdown.locale_field) or "").strip()
+        metrics["metadata"].append(
+            {
+                "artifact": rel,
+                "title": str(frontmatter.get("title") or "").strip() or None,
+                "version": str(frontmatter.get("version") or "").strip() or None,
+                "locale": locale or None,
+                "content_id": str(
+                    frontmatter.get(profile.markdown.identity_key) or ""
+                ).strip()
+                or None,
+            }
+        )
         if locale:
             by_locale = metrics["by_locale"]
             by_locale[locale] = int(by_locale.get(locale, 0)) + 1
@@ -525,6 +571,92 @@ def analyze_markdown_files(
             profile,
         )
     )
+    reused_metrics, reused_findings = _collect_reused_markdown_signals(
+        repo_root, markdown_files, profile
+    )
+    metrics.update(reused_metrics)
+    findings.extend(reused_findings)
+    return metrics, findings
+
+
+def _collect_reused_markdown_signals(
+    repo_root: Path,
+    markdown_files: Sequence[Path],
+    profile: AcceptanceProfile,
+) -> tuple[dict[str, Any], list[Finding]]:
+    """Reuse existing quality modules and convert their signals to findings."""
+
+    findings: list[Finding] = []
+    todo_entries = list_todos(markdown_files)
+    duplicate_headings = check_duplicate_headings(markdown_files)
+    frontmatter_issues = []
+    for markdown_file in markdown_files:
+        try:
+            frontmatter_issues.extend(check_frontmatter_file(markdown_file))
+        except OSError as exc:
+            logger.debug(
+                "Frontmatter checker could not read %s: %s", markdown_file, exc
+            )
+
+    for duplicate in duplicate_headings:
+        rel = relative_artifact(duplicate.file, repo_root)
+        findings.append(
+            make_finding(
+                rule_id="markdown.heading.duplicate_title",
+                severity="warn",
+                category="markdown.structure",
+                artifact=rel,
+                location=f"line {duplicate.lineno}",
+                evidence=f"title={duplicate.title!r}, first_seen={duplicate.first_seen}",
+                editorial_impact="Doppelte Titel erschweren PDF-Outline, Querverweise und Review-Kommunikation.",
+                healing="Titel praezisieren oder bewusst gleiche Titel im Dossier begruenden.",
+            )
+        )
+
+    for issue in frontmatter_issues:
+        rel = relative_artifact(issue.path, repo_root)
+        findings.append(
+            make_finding(
+                rule_id="markdown.frontmatter.syntax_checker",
+                severity="fail",
+                category="markdown.frontmatter",
+                artifact=rel,
+                location=f"line {issue.line}",
+                evidence=issue.message,
+                editorial_impact="Der bestehende Frontmatter-Checker meldet ungueltige YAML-Syntax.",
+                healing="YAML-Syntax korrigieren; Snippet im Checker-Kontext pruefen.",
+            )
+        )
+
+    reference_tasks = load_reference_tasks(markdown_files, language="de")
+    inline_reference_tasks = load_inline_reference_tasks(
+        markdown_files,
+        include_markdown_links=False,
+        include_frontmatter_dois=True,
+    )
+    metrics = {
+        "duplicate_headings_total": len(duplicate_headings),
+        "link_audit_todo_entries_total": len(todo_entries),
+        "ai_reference_tasks_total": len(reference_tasks),
+        "inline_reference_tasks_total": len(inline_reference_tasks),
+        "frontmatter_syntax_issues_total": len(frontmatter_issues),
+    }
+    if reference_tasks or inline_reference_tasks:
+        findings.append(
+            make_finding(
+                rule_id="references.ai.tasks_detected",
+                severity="info",
+                category="references.ai",
+                artifact="markdown scope",
+                location="source extraction",
+                evidence=(
+                    f"source_tasks={len(reference_tasks)}, "
+                    f"inline_tasks={len(inline_reference_tasks)}"
+                ),
+                editorial_impact="AI-Referenzcheck hat pruefbare Referenzkandidaten erkannt.",
+                healing="Bei Release-Abnahme optional ai_references mit Review-Protokoll laufen lassen.",
+            )
+        )
     return metrics, findings
 
 
@@ -545,6 +677,9 @@ def analyze_pdf(
         "file_size_bytes": path.stat().st_size if path.exists() else 0,
         "creation_date": None,
         "modified_at": _path_mtime_iso(path) if path.exists() else None,
+        "metadata_title": None,
+        "metadata_language": None,
+        "build_worker_version": None,
         "page_sizes": [],
         "orientations": {},
         "low_text_pages_le_15": 0,
@@ -554,6 +689,7 @@ def analyze_pdf(
         "toc_entries_total": 0,
         "toc_entries": [],
         "fonts": [],
+        "script_samples": {},
     }
     findings: list[Finding] = []
     if not path.exists():
@@ -593,8 +729,13 @@ def analyze_pdf(
         metrics["creation_date"] = (
             str(reader.metadata.get("/CreationDate") or "") or None
         )
+        metrics["metadata_title"] = str(reader.metadata.get("/Title") or "") or None
+        metrics["metadata_language"] = str(reader.metadata.get("/Lang") or "") or None
+        metrics["build_worker_version"] = _pdf_worker_version(reader.metadata)
     orientations: Counter[str] = Counter()
     text_all: list[str] = []
+    page_texts: dict[int, str] = {}
+    page_line_counts: dict[int, int] = {}
     replacement_hits = 0
     for page_index, page in enumerate(reader.pages, start=1):
         width_pt = float(page.mediabox.width)
@@ -611,7 +752,9 @@ def analyze_pdf(
         )
         text = page.extract_text() or ""
         text_all.append(text)
+        page_texts[page_index] = text
         line_count = len(_meaningful_text_lines(text))
+        page_line_counts[page_index] = line_count
         if line_count <= profile.pdf.low_text_page_threshold:
             metrics["low_text_pages_le_15"] += 1
             metrics["low_text_reason_hints"].append(
@@ -629,6 +772,7 @@ def analyze_pdf(
 
     metrics["orientations"] = dict(orientations)
     document_text = "\n".join(text_all).strip()
+    metrics["script_samples"] = _script_counts(document_text)
     if not document_text and metrics["pages_total"]:
         findings.append(
             make_finding(
@@ -673,6 +817,17 @@ def analyze_pdf(
     metrics["fonts"] = [asdict(font) for font in fonts]
     findings.extend(_check_required_fonts(rel, fonts, profile))
     findings.extend(_check_pdf_page_targets(rel, metrics["pages_total"], profile))
+    findings.extend(
+        _check_expected_pdf_pages(
+            rel,
+            metrics["pages_total"],
+            page_texts,
+            page_line_counts,
+            profile,
+        )
+    )
+    findings.extend(_check_pdf_text_overflow(rel, page_texts, profile))
+    findings.extend(_check_pdf_script_samples(rel, metrics["script_samples"], fonts))
     toc_entries = _safe_extract_pdf_toc(path, rel, findings)
     metrics["toc_entries"] = [asdict(entry) for entry in toc_entries]
     metrics["toc_entries_total"] = len(toc_entries)
@@ -766,6 +921,239 @@ def compare_markdown_pdf_toc(
     return findings
 
 
+def compare_publish_metadata(
+    publish_metrics: Mapping[str, Any],
+    markdown_metrics: Mapping[str, Any],
+    pdf_metrics: Sequence[Mapping[str, Any]],
+) -> list[Finding]:
+    """Plausibilize project metadata across manifest, Markdown, and PDF."""
+
+    findings: list[Finding] = []
+    entries = [
+        entry
+        for entry in publish_metrics.get("entries", [])
+        if isinstance(entry, Mapping)
+    ]
+    markdown_metadata = [
+        item
+        for item in markdown_metrics.get("metadata", [])
+        if isinstance(item, Mapping)
+    ]
+    markdown_versions = {
+        str(item.get("version")) for item in markdown_metadata if item.get("version")
+    }
+    markdown_locales = {
+        str(item.get("locale")) for item in markdown_metadata if item.get("locale")
+    }
+    pdf_by_artifact = {
+        str(metric.get("path")): metric
+        for metric in pdf_metrics
+        if isinstance(metric, Mapping) and metric.get("path")
+    }
+
+    for entry in entries:
+        manifest = str(entry.get("manifest") or "publish.yml")
+        expected_pdf = str(entry.get("expected_pdf") or "")
+        pdf_metric = pdf_by_artifact.get(expected_pdf, {})
+        manifest_version = str(entry.get("manifest_version") or "").strip()
+        if (
+            manifest_version
+            and markdown_versions
+            and manifest_version not in markdown_versions
+        ):
+            findings.append(
+                make_finding(
+                    rule_id="metadata.version_mismatch",
+                    severity="warn",
+                    category="metadata.consistency",
+                    artifact=manifest,
+                    location=f"publish[{entry.get('index', '?')}].version",
+                    evidence=f"manifest={manifest_version}, markdown={sorted(markdown_versions)}",
+                    editorial_impact="Release- und Inhaltsversionen wirken nicht deckungsgleich.",
+                    healing="Manifest- und Markdown-Versionen angleichen oder bewusste Abweichung dokumentieren.",
+                )
+            )
+
+        expected_title = str(
+            entry.get("entry_title") or entry.get("manifest_title") or ""
+        ).strip()
+        pdf_title = str(pdf_metric.get("metadata_title") or "").strip()
+        if (
+            expected_title
+            and pdf_title
+            and _normalize_heading_title(expected_title)
+            != _normalize_heading_title(pdf_title)
+        ):
+            findings.append(
+                make_finding(
+                    rule_id="metadata.title_mismatch",
+                    severity="warn",
+                    category="metadata.consistency",
+                    artifact=expected_pdf or manifest,
+                    location="pdf metadata title",
+                    evidence=f"manifest={expected_title!r}, pdf={pdf_title!r}",
+                    editorial_impact="PDF-Titel und Manifesttitel sind nicht plausibel synchron.",
+                    healing="PDF-Metadaten, publish.yml title/name und Buch-Metadaten pruefen.",
+                )
+            )
+
+        expected_language = str(
+            entry.get("entry_language") or entry.get("manifest_language") or ""
+        ).strip()
+        pdf_language = str(pdf_metric.get("metadata_language") or "").strip()
+        known_languages = {lang.lower() for lang in markdown_locales if lang}
+        if (
+            expected_language
+            and known_languages
+            and expected_language.lower() not in known_languages
+        ):
+            findings.append(
+                make_finding(
+                    rule_id="metadata.language_mismatch",
+                    severity="warn",
+                    category="metadata.consistency",
+                    artifact=manifest,
+                    location=f"publish[{entry.get('index', '?')}].language",
+                    evidence=f"manifest={expected_language!r}, markdown={sorted(known_languages)}",
+                    editorial_impact="Manifest-Sprache passt nicht zum publizierten Markdown-Scope.",
+                    healing="publish.yml language/lang oder Markdown-Frontmatter content_lang pruefen.",
+                )
+            )
+        if (
+            expected_language
+            and pdf_language
+            and expected_language.lower() not in pdf_language.lower()
+        ):
+            findings.append(
+                make_finding(
+                    rule_id="metadata.pdf_language_mismatch",
+                    severity="info",
+                    category="metadata.consistency",
+                    artifact=expected_pdf or manifest,
+                    location="pdf metadata language",
+                    evidence=f"manifest={expected_language!r}, pdf={pdf_language!r}",
+                    editorial_impact="PDF-Sprachmetadaten weichen vom Manifest ab oder fehlen in anderer Notation.",
+                    healing="PDF-Metadaten pruefen; bei fehlendem PDF-Lang ggf. Pandoc-Variablen ergaenzen.",
+                )
+            )
+    return findings
+
+
+def analyze_release_documentation(
+    repo_root: Path,
+    profile: AcceptanceProfile,
+    pdf_metrics: Sequence[Mapping[str, Any]],
+) -> tuple[dict[str, Any], list[Finding]]:
+    """Scan release documents for stale worker/page/layout claims."""
+
+    metrics: dict[str, Any] = {
+        "enabled": profile.documentation.scan_release_docs,
+        "files_total": 0,
+        "stale_worker_claims_total": 0,
+        "stale_page_claims_total": 0,
+        "layout_claims_total": 0,
+    }
+    findings: list[Finding] = []
+    if not profile.documentation.scan_release_docs:
+        return metrics, findings
+
+    pdf_pages = {
+        Path(str(metric.get("path") or "")).stem.lower(): int(
+            metric.get("pages_total") or 0
+        )
+        for metric in pdf_metrics
+        if isinstance(metric, Mapping) and metric.get("path")
+    }
+    for release_doc in _iter_release_docs(repo_root, profile):
+        rel = relative_artifact(release_doc, repo_root)
+        metrics["files_total"] += 1
+        try:
+            lines = release_doc.read_text(encoding="utf-8").splitlines()
+        except OSError as exc:
+            findings.append(
+                make_finding(
+                    rule_id="release_docs.read_error",
+                    severity="warn",
+                    category="release_docs.drift",
+                    artifact=rel,
+                    location="file",
+                    evidence=str(exc),
+                    editorial_impact="Release-Dokument kann nicht auf Drift geprueft werden.",
+                    healing="Dateizugriff pruefen oder Release-Dokument aus dem Scan nehmen.",
+                )
+            )
+            continue
+        for line_number, line in enumerate(lines, start=1):
+            worker_match = re.search(
+                r"(?:gitbook[-_ ]?worker|worker[-_ ]?version)\D+(\d+\.\d+\.\d+)",
+                line,
+                re.IGNORECASE,
+            )
+            if worker_match and _version_tuple(worker_match.group(1)) < _version_tuple(
+                __version__
+            ):
+                metrics["stale_worker_claims_total"] += 1
+                findings.append(
+                    make_finding(
+                        rule_id="release_docs.worker_version.stale",
+                        severity="warn",
+                        category="release_docs.drift",
+                        artifact=rel,
+                        location=f"line {line_number}",
+                        evidence=f"claimed={worker_match.group(1)}, current={__version__}",
+                        editorial_impact="Release-Dokument nennt eine aeltere Worker-Version als der aktuelle Lauf.",
+                        healing="Release-Dokument aktualisieren oder historischen Bezug klar kennzeichnen.",
+                    )
+                )
+
+            page_match = re.search(r"(?:pages|seiten)\D+(\d+)", line, re.IGNORECASE)
+            if page_match:
+                claimed_pages = int(page_match.group(1))
+                for stem, actual_pages in pdf_pages.items():
+                    if (
+                        stem
+                        and stem in line.lower()
+                        and actual_pages
+                        and claimed_pages != actual_pages
+                    ):
+                        metrics["stale_page_claims_total"] += 1
+                        findings.append(
+                            make_finding(
+                                rule_id="release_docs.page_count.stale",
+                                severity="warn",
+                                category="release_docs.drift",
+                                artifact=rel,
+                                location=f"line {line_number}",
+                                evidence=f"{stem}: claimed={claimed_pages}, actual={actual_pages}",
+                                editorial_impact="Release-Dokument nennt eine alte Seitenzahl fuer ein aktuelles PDF.",
+                                healing="Seitenzahl im Release-Dokument aktualisieren oder als historisch markieren.",
+                            )
+                        )
+            if re.search(r"layout\s*(?:findings|befunde|issues)", line, re.IGNORECASE):
+                metrics["layout_claims_total"] += 1
+    return metrics, findings
+
+
+def _iter_release_docs(repo_root: Path, profile: AcceptanceProfile) -> Iterable[Path]:
+    seen: set[Path] = set()
+    for raw_dir in profile.documentation.release_doc_dirs:
+        directory = _resolve_path(repo_root, Path(raw_dir))
+        if not directory.exists():
+            continue
+        for path in sorted(directory.rglob("*.md")):
+            resolved = path.resolve()
+            if resolved not in seen:
+                seen.add(resolved)
+                yield path
+
+
+def _version_tuple(value: str) -> tuple[int, int, int]:
+    match = re.search(r"(\d+)\.(\d+)\.(\d+)", str(value))
+    if not match:
+        return (0, 0, 0)
+    return tuple(int(part) for part in match.groups())  # type: ignore[return-value]
+
+
 def discover_table_layout_reports(
     repo_root: Path, markdown_inputs: Sequence[str]
 ) -> list[Path]:
@@ -786,7 +1174,10 @@ def discover_table_layout_reports(
 
 
 def analyze_table_reports(
-    repo_root: Path, table_report_paths: Sequence[Path]
+    repo_root: Path,
+    table_report_paths: Sequence[Path],
+    *,
+    artifact_links: Mapping[str, str] | None = None,
 ) -> tuple[dict[str, Any], list[Finding]]:
     """Aggregate table strategy JSONL reports."""
 
@@ -800,6 +1191,7 @@ def analyze_table_reports(
         "override_decisions_total": 0,
         "rejected_candidate_decisions_total": 0,
         "rejected_candidates_total": 0,
+        "artifact_links": {},
     }
     findings: list[Finding] = []
     selected_counts: Counter[str] = Counter()
@@ -814,6 +1206,9 @@ def analyze_table_reports(
     for report_path in table_report_paths:
         path = _resolve_path(repo_root, report_path)
         rel = relative_artifact(path, repo_root)
+        linked_pdf = _linked_pdf_for_table_report(rel, artifact_links or {})
+        if linked_pdf:
+            metrics["artifact_links"][rel] = linked_pdf
         if not path.exists():
             findings.append(
                 make_finding(
@@ -881,6 +1276,7 @@ def analyze_table_reports(
                         evidence=_table_strategy_evidence(
                             method=method,
                             selected=selected,
+                            linked_pdf=linked_pdf,
                             selected_summary=selected_summary,
                             rejected_summary=rejected_summary,
                             override=record.get("override"),
@@ -901,6 +1297,7 @@ def analyze_table_reports(
                         evidence=_table_strategy_evidence(
                             method=method,
                             selected=selected,
+                            linked_pdf=linked_pdf,
                             selected_summary=selected_summary,
                             rejected_summary=rejected_summary,
                             override=record.get("override"),
@@ -990,11 +1387,14 @@ def _table_strategy_evidence(
     *,
     method: str,
     selected: str,
+    linked_pdf: str | None,
     selected_summary: str,
     rejected_summary: str,
     override: Any,
 ) -> str:
     parts = [f"method={method}", f"selected_paper={selected}"]
+    if linked_pdf:
+        parts.append(f"pdf={linked_pdf}")
     if selected_summary:
         parts.append(selected_summary)
     if rejected_summary:
@@ -1017,6 +1417,30 @@ def _first_text(record: Mapping[str, Any], *keys: str) -> str:
             if text:
                 return text
     return ""
+
+
+def _table_report_artifact_links(entries: Sequence[Any]) -> dict[str, str]:
+    links: dict[str, str] = {}
+    for entry in entries:
+        if not isinstance(entry, Mapping):
+            continue
+        report = str(entry.get("expected_table_report") or "").strip()
+        pdf = str(entry.get("expected_pdf") or "").strip()
+        if report and pdf:
+            links[report.replace("\\", "/").lower().lstrip("./")] = pdf
+    return links
+
+
+def _linked_pdf_for_table_report(
+    report_artifact: str, artifact_links: Mapping[str, str]
+) -> str | None:
+    normalized = report_artifact.replace("\\", "/").lower().lstrip("./")
+    name = Path(normalized).name
+    for raw_key, linked_pdf in artifact_links.items():
+        key = str(raw_key).replace("\\", "/").lower().lstrip("./")
+        if key == normalized or key == name or key.endswith(f"/{name}"):
+            return linked_pdf
+    return None
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -1072,8 +1496,14 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--profile-config", type=Path, help="YAML file containing editorial profiles"
     )
     parser.add_argument("-o", "--output", type=Path, help="Destination JSON report")
+    parser.add_argument("--csv-output", type=Path, help="Optional findings CSV report")
     parser.add_argument(
         "--stdout-json", action="store_true", help="Print report JSON to stdout"
+    )
+    parser.add_argument(
+        "--console-summary",
+        action="store_true",
+        help="Print one compact status line for humans/CI logs",
     )
     parser.add_argument(
         "--fail-on-findings",
@@ -1120,9 +1550,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     output = args.output or root / "logs" / "quality" / "editorial-metrics.json"
     write_json_report(report, output)
+    if args.csv_output:
+        write_findings_csv(report, args.csv_output)
     logger.info("Editorial metrics report written to %s", output)
     if args.stdout_json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
+    if args.console_summary:
+        print(format_console_summary(report))
     summary = report["summary"]
     logger.info(
         "Editorial metrics status=%s findings=%s",
@@ -1138,9 +1572,51 @@ def main(argv: Sequence[str] | None = None) -> int:
     return 0
 
 
+def write_findings_csv(report: Mapping[str, Any], destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fields = [
+        "id",
+        "severity",
+        "category",
+        "rule_id",
+        "artifact",
+        "location",
+        "evidence",
+        "editorial_impact",
+        "healing",
+    ]
+    with destination.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for finding in report.get("findings", []):
+            if not isinstance(finding, Mapping):
+                continue
+            writer.writerow({field: finding.get(field, "") for field in fields})
+
+
+def format_console_summary(report: Mapping[str, Any]) -> str:
+    summary = (
+        report.get("summary") if isinstance(report.get("summary"), Mapping) else {}
+    )
+    counts = (
+        summary.get("finding_counts")
+        if isinstance(summary.get("finding_counts"), Mapping)
+        else {}
+    )
+    return (
+        "editorial_metrics "
+        f"status={summary.get('status', '<unknown>')} "
+        f"blocked={counts.get('blocked', 0)} "
+        f"fail={counts.get('fail', 0)} "
+        f"warn={counts.get('warn', 0)} "
+        f"info={counts.get('info', 0)}"
+    )
+
+
 def _analyze_publish_entry(
     repo_root: Path,
     manifest: Path,
+    manifest_data: Mapping[str, Any],
     index: int,
     entry: Mapping[str, Any],
     profile: AcceptanceProfile,
@@ -1168,9 +1644,17 @@ def _analyze_publish_entry(
     metrics: dict[str, Any] = {
         "manifest": relative_artifact(manifest, repo_root),
         "index": index,
+        "manifest_version": str(manifest_data.get("version") or "").strip() or None,
+        "manifest_title": _manifest_title(manifest_data),
+        "manifest_language": _manifest_language(manifest_data),
+        "entry_title": str(entry.get("title") or entry.get("name") or "").strip()
+        or None,
+        "entry_language": str(entry.get("language") or entry.get("lang") or "").strip()
+        or None,
         "source_root": rel_source,
         "source_type": source_type,
         "use_summary": use_summary,
+        "summary_appendices_last": _as_bool(entry.get("summary_appendices_last")),
         "out_format": out_format,
         "out_dir": relative_artifact(out_dir, repo_root),
         "out": out_name,
@@ -1259,6 +1743,9 @@ def _analyze_publish_entry(
                 )
             )
 
+    if use_summary and _as_bool(entry.get("summary_appendices_last")):
+        findings.extend(_check_summary_appendices_last(repo_root, published_files))
+
     if out_format == "pdf" and out_name:
         expected_pdf = (out_dir / out_name).resolve()
         metrics["expected_pdf"] = relative_artifact(expected_pdf, repo_root)
@@ -1318,6 +1805,70 @@ def _discover_markdown_under_source(
             continue
         files.append(path)
     return files
+
+
+def _check_summary_appendices_last(
+    repo_root: Path, published_files: Sequence[Path]
+) -> list[Finding]:
+    findings: list[Finding] = []
+    appendix_seen = False
+    first_appendix: Path | None = None
+    for path in published_files:
+        if _is_appendix_path(path):
+            appendix_seen = True
+            if first_appendix is None:
+                first_appendix = path
+            continue
+        if appendix_seen:
+            findings.append(
+                make_finding(
+                    rule_id="publish.summary.appendix_order",
+                    severity="warn",
+                    category="publish.scope",
+                    artifact=relative_artifact(path, repo_root),
+                    location="SUMMARY.md order",
+                    evidence=(
+                        "summary_appendices_last=true but non-appendix follows "
+                        f"{relative_artifact(first_appendix or path, repo_root)}"
+                    ),
+                    editorial_impact="Kapitel erscheinen nach Anhaengen, obwohl summary_appendices_last aktiv ist.",
+                    healing="SUMMARY-Reihenfolge oder publish.yml summary_appendices_last pruefen.",
+                )
+            )
+            break
+    return findings
+
+
+def _is_appendix_path(path: Path) -> bool:
+    lowered = path.as_posix().lower()
+    return any(
+        marker in lowered
+        for marker in ("appendix", "appendices", "anhang", "anhaenge", "anhänge")
+    )
+
+
+def _manifest_title(manifest_data: Mapping[str, Any]) -> str | None:
+    project = manifest_data.get("project")
+    candidates = [manifest_data.get("title"), manifest_data.get("name")]
+    if isinstance(project, Mapping):
+        candidates.extend([project.get("title"), project.get("name")])
+    for candidate in candidates:
+        text = str(candidate or "").strip()
+        if text:
+            return text
+    return None
+
+
+def _manifest_language(manifest_data: Mapping[str, Any]) -> str | None:
+    project = manifest_data.get("project")
+    candidates = [manifest_data.get("language"), manifest_data.get("lang")]
+    if isinstance(project, Mapping):
+        candidates.extend([project.get("language"), project.get("lang")])
+    for candidate in candidates:
+        text = str(candidate or "").strip()
+        if text:
+            return text
+    return None
 
 
 def _published_files_from_summary(
@@ -1479,9 +2030,139 @@ def _check_pdf_page_targets(
     return findings
 
 
+def _check_expected_pdf_pages(
+    artifact: str,
+    pages_total: int,
+    page_texts: Mapping[int, str],
+    page_line_counts: Mapping[int, int],
+    profile: AcceptanceProfile,
+) -> list[Finding]:
+    rules = _pdf_expected_pages_for_artifact(artifact, profile.pdf.expected_pages)
+    findings: list[Finding] = []
+    for rule in rules:
+        page = _int_value(rule.get("page"))
+        if page is None:
+            continue
+        label = str(rule.get("label") or f"page {page}")
+        if page < 1 or page > pages_total:
+            findings.append(
+                make_finding(
+                    rule_id="pdf.sample_page.missing",
+                    severity="fail",
+                    category="pdf.sample_page",
+                    artifact=artifact,
+                    location=f"page {page}",
+                    evidence=f"expected sample page {label!r}; pages_total={pages_total}",
+                    editorial_impact="Eine erwartete Sample-Seite fehlt im PDF-Artefakt.",
+                    healing="Build-Input, SUMMARY oder Sample-Regel pruefen.",
+                    page=page,
+                )
+            )
+            continue
+        min_lines = _int_value(rule.get("min_text_lines"))
+        actual_lines = int(page_line_counts.get(page, 0))
+        if min_lines is not None and actual_lines < min_lines:
+            findings.append(
+                make_finding(
+                    rule_id="pdf.sample_page.low_text",
+                    severity="warn",
+                    category="pdf.sample_page",
+                    artifact=artifact,
+                    location=f"page {page}",
+                    evidence=f"{label}: lines={actual_lines}, min_text_lines={min_lines}",
+                    editorial_impact="Eine erwartete Sample-Seite enthaelt weniger extrahierbaren Text als erwartet.",
+                    healing="PDF-Textlayer, Sample-Erwartung oder Seiteninhalt pruefen.",
+                    page=page,
+                )
+            )
+        must_contain = str(rule.get("must_contain") or "").strip()
+        if must_contain and must_contain not in page_texts.get(page, ""):
+            findings.append(
+                make_finding(
+                    rule_id="pdf.sample_page.missing_text",
+                    severity="fail",
+                    category="pdf.sample_page",
+                    artifact=artifact,
+                    location=f"page {page}",
+                    evidence=f"{label}: missing {must_contain!r}",
+                    editorial_impact="Eine erwartete Sample-Seite enthaelt nicht den geforderten Textanker.",
+                    healing="Sample-Regel oder PDF-Inhalt pruefen.",
+                    page=page,
+                )
+            )
+    return findings
+
+
+def _check_pdf_text_overflow(
+    artifact: str,
+    page_texts: Mapping[int, str],
+    profile: AcceptanceProfile,
+) -> list[Finding]:
+    findings: list[Finding] = []
+    token_threshold = profile.pdf.overflow_token_warn_chars
+    for page, text in page_texts.items():
+        for token in re.findall(r"https?://\S+|doi:\S+|10\.\d{4,9}/\S+|\S+", text):
+            cleaned = token.strip().strip(".,;:)]}")
+            if len(cleaned) < token_threshold:
+                continue
+            overflow_pt = round((len(cleaned) - token_threshold + 1) * 2.1, 3)
+            if overflow_pt < profile.pdf.overflow_warn_pt:
+                continue
+            overflow_mm = round(overflow_pt * 0.352778, 3)
+            severity = "fail" if overflow_pt >= profile.pdf.overflow_fail_pt else "warn"
+            cause = (
+                "url-or-doi" if _looks_like_reference_token(cleaned) else "long-token"
+            )
+            findings.append(
+                make_finding(
+                    rule_id="pdf.layout.text_overflow",
+                    severity=severity,
+                    category="pdf.layout",
+                    artifact=artifact,
+                    location=f"page {page}",
+                    evidence=(
+                        f"type=text-overflow, overflow_pt={overflow_pt}, "
+                        f"overflow_mm={overflow_mm}, cause={cause}, text={cleaned[:120]}"
+                    ),
+                    editorial_impact="Ein langer extrahierter Token kann auf BBox-/Overflow-Risiko im PDF hindeuten.",
+                    healing="URL/DOI umbrechen, als Fussnote setzen oder Profil-Schwelle bewusst als Restrisiko dokumentieren.",
+                    page=page,
+                )
+            )
+            break
+    return findings
+
+
+def _check_pdf_script_samples(
+    artifact: str, script_counts: Mapping[str, int], fonts: Sequence[Any]
+) -> list[Finding]:
+    active = {name: count for name, count in script_counts.items() if count}
+    if not active:
+        return []
+    font_names = " ".join(str(getattr(font, "name", "")) for font in fonts).lower()
+    has_cjk_font = any(
+        marker in font_names for marker in ("cjk", "noto", "sourcehan", "ipa")
+    )
+    severity = "info" if has_cjk_font else "warn"
+    return [
+        make_finding(
+            rule_id="pdf.text.script_sample",
+            severity=severity,
+            category="pdf.text",
+            artifact=artifact,
+            location="document",
+            evidence=", ".join(
+                f"{key}={value}" for key, value in sorted(active.items())
+            ),
+            editorial_impact="PDF enthaelt CJK/Hangul/Kana-Zeichen und braucht sichtbare Schriftabdeckung.",
+            healing="Eingebettete CJK-Fonts und Stichprobenseiten pruefen; fehlende Fonts in fonts.yml konfigurieren.",
+        )
+    ]
+
+
 def _pdf_target_for_artifact(
-    artifact: str, targets: Mapping[str, Mapping[str, int]]
-) -> Mapping[str, int] | None:
+    artifact: str, targets: Mapping[str, Mapping[str, Any]]
+) -> Mapping[str, Any] | None:
     normalized_artifact = artifact.replace("\\", "/").lower().lstrip("./")
     artifact_name = Path(normalized_artifact).name
     for raw_key, target in targets.items():
@@ -1492,6 +2173,67 @@ def _pdf_target_for_artifact(
             or key.endswith(f"/{artifact_name}")
         ):
             return target
+    return None
+
+
+def _pdf_expected_pages_for_artifact(
+    artifact: str, expected_pages: Mapping[str, Sequence[Mapping[str, Any]]]
+) -> Sequence[Mapping[str, Any]]:
+    normalized_artifact = artifact.replace("\\", "/").lower().lstrip("./")
+    artifact_name = Path(normalized_artifact).name
+    for raw_key, rules in expected_pages.items():
+        key = str(raw_key).replace("\\", "/").lower().lstrip("./")
+        if (
+            key == normalized_artifact
+            or key == artifact_name
+            or key.endswith(f"/{artifact_name}")
+        ):
+            return rules
+    return ()
+
+
+def _int_value(value: Any) -> int | None:
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str) and value.strip().isdigit():
+        return int(value.strip())
+    return None
+
+
+def _looks_like_reference_token(value: str) -> bool:
+    lowered = value.lower()
+    return lowered.startswith(("http://", "https://", "doi:")) or lowered.startswith(
+        "10."
+    )
+
+
+def _script_counts(text: str) -> dict[str, int]:
+    counts = {"cjk": 0, "hangul": 0, "kana": 0}
+    for char in text:
+        codepoint = ord(char)
+        if 0x4E00 <= codepoint <= 0x9FFF:
+            counts["cjk"] += 1
+        elif 0xAC00 <= codepoint <= 0xD7AF:
+            counts["hangul"] += 1
+        elif 0x3040 <= codepoint <= 0x30FF:
+            counts["kana"] += 1
+    return counts
+
+
+def _pdf_worker_version(metadata: Mapping[str, Any]) -> str | None:
+    for key in (
+        "/GitBookWorkerVersion",
+        "/GitBook-Worker-Version",
+        "/GitBookWorker",
+        "/Producer",
+        "/Creator",
+    ):
+        value = str(metadata.get(key) or "")
+        match = re.search(
+            r"gitbook[-_ ]?worker\D+(\d+\.\d+\.\d+)", value, re.IGNORECASE
+        )
+        if match:
+            return match.group(1)
     return None
 
 
