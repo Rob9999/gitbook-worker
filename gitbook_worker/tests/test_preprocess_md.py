@@ -55,6 +55,23 @@ def _cjk_content_table(tmp_path):
     return md
 
 
+def _english_wide_decision_table(tmp_path):
+    md = tmp_path / "english-wide-decision-table.md"
+    content = "\n".join(
+        [
+            "### Wide Decision Table (Anonymized)",
+            "",
+            "| Area | Code | Governance grade | Charter status | Entry conditions | Cooperation | Partnership level | Core-group potential | Comment |",
+            "|---|---|---|---|---|---|---|---|---|",
+            "| Area Alpha Network | A-A1 | high stable | charter frame reviewed, control path documented | Entry conditions with audit path, privacy impact review, and aligned safeguard clause | Professional cooperation, data room, crisis exercise | Associated with expansion path | plausible in the medium term | Anonymized long note with rationale, risk marker, and open review task |",
+            "| Area Beta Corridor | A-B2 | moderately stable | transition status with external quality assurance | Integration only after evidence of reliable operating processes and consistent reporting duties | Pilot cooperation, training, shared situation report | Observing partnership | depends on follow-up review | Anonymized assessment with intentionally long text width for PDF table stress |",
+            "| Area Gamma Mesh | A-C3 | uneven | charter comparison started, decision open | Preconditions: clarify responsibilities, finish data classification, confirm audit window | Expert dialogue and technical inventory | Preparatory cooperation | not currently robust | Neutral sample row without customer names, original places, or political classification |",
+        ]
+    )
+    md.write_text(content, encoding="utf-8")
+    return md
+
+
 def test_relative_markdown_links_point_to_pdf_anchor(tmp_path):
     content_root = tmp_path / "content"
     chapter = content_root / "chapters" / "chapter-01.md"
@@ -190,6 +207,15 @@ def test_table_strategy_custom_candidate_and_report(artifact_dir):
     report = json.loads(report_path.read_text(encoding="utf-8").splitlines()[-1])
     assert report["selected_paper"] == "customer-wide"
     assert report["evaluations"]
+
+
+def test_table_strategy_uses_wrapping_latex_columns(artifact_dir):
+    md = _english_wide_decision_table(artifact_dir)
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    assert_geometry(out, expected_w=594, expected_h=420)
+    assert r"\begin{longtable}{@{}>{\raggedright\arraybackslash}p{" in out
+    assert "lllllllll" not in out
 
 
 def test_svg_skips_size_probe(monkeypatch, tmp_path):

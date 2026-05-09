@@ -42,6 +42,7 @@ from gitbook_worker.tools.publishing.table_strategy import (
     TABLE_WIDTH_SAFETY_FACTOR,
     TablePaperStrategyConfig,
     available_text_width_mm,
+    evaluate_candidate_layout,
     estimate_table_width_mm,
     estimate_text_width_mm,
     glyph_width_em,
@@ -400,6 +401,7 @@ def wrap_block(
     lines: List[str],
     paper_info: PaperInfo,
     current_paper_info: PaperInfo = PaperInfo.default(),
+    table_strategy_config: TablePaperStrategyConfig | None = None,
 ) -> List[str]:
     """Wrap ``lines`` with LaTeX to switch to ``paper_info``.
 
@@ -409,6 +411,55 @@ def wrap_block(
     not respecting the intended page size, particularly when switching
     between formats mid-document.
     """
+
+    layout_config = table_strategy_config or parse_table_strategy_config(None)
+
+    def _legacy_column_preamble(alignments: List[str]) -> str:
+        column_specs: list[str] = []
+        for align in alignments:
+            if align.startswith(":") and align.endswith(":"):
+                column_specs.append("c")
+            elif align.endswith(":"):
+                column_specs.append("r")
+            else:
+                column_specs.append("l")
+        return "@{}" + "".join(column_specs) + "@{}"
+
+    def _paragraph_alignment(align: str) -> str:
+        if align.startswith(":") and align.endswith(":"):
+            return r"\centering"
+        if align.endswith(":"):
+            return r"\raggedleft"
+        return r"\raggedright"
+
+    def _paragraph_column_preamble(
+        alignments: List[str], table_lines: List[str]
+    ) -> str:
+        if not layout_config.enabled:
+            return _legacy_column_preamble(alignments)
+
+        evaluation = evaluate_candidate_layout(table_lines, paper_info, layout_config)
+        widths = evaluation.allocated_widths_mm
+        if len(widths) != len(alignments):
+            return _legacy_column_preamble(alignments)
+
+        usable_width = available_text_width_mm(paper_info)
+        gap_count = max(0, len(widths) - 1)
+        gap_mm = 0.0
+        if gap_count:
+            gap_budget = max(0.0, usable_width - sum(widths))
+            gap_mm = min(TABLE_CELL_PADDING_MM, gap_budget / gap_count)
+
+        parts: list[str] = ["@{}"]
+        for index, (align, width) in enumerate(zip(alignments, widths)):
+            if index:
+                parts.append(f"@{{\\hspace{{{gap_mm:.2f}mm}}}}")
+            alignment = _paragraph_alignment(align.strip())
+            parts.append(
+                f">{{{alignment}\\arraybackslash}}p{{{max(1.0, width):.2f}mm}}"
+            )
+        parts.append("@{}")
+        return "".join(parts)
 
     def convert_table_to_latex(lines: List[str]) -> List[str]:
         """Convert Markdown pipe tables in ``text`` to LaTeX ``longtable`` blocks."""
@@ -423,31 +474,29 @@ def wrap_block(
                 and i + 1 < len(lines)
                 and _is_table_separator_row(lines[i + 1])
             ):
-                header = [_escape_table_text(x.strip()) for x in _split_table_row(line)]
-                alignments = _split_table_row(lines[i + 1])
-                column_specs: list[str] = []
-                for align in alignments:
-                    if align.startswith(":") and align.endswith(":"):
-                        column_specs.append("c")
-                    elif align.endswith(":"):
-                        column_specs.append("r")
-                    else:
-                        column_specs.append("l")
-                out_lines.append(
-                    "\\begin{longtable}{@{}" + "".join(column_specs) + "@{}}"
-                )
+                table_lines = [line, lines[i + 1]]
+                i += 2
+                while i < len(lines) and "|" in lines[i] and lines[i].strip():
+                    table_lines.append(lines[i])
+                    i += 1
+
+                header = [
+                    _escape_table_text(x.strip())
+                    for x in _split_table_row(table_lines[0])
+                ]
+                alignments = _split_table_row(table_lines[1])
+                column_preamble = _paragraph_column_preamble(alignments, table_lines)
+                out_lines.append(f"\\begin{{longtable}}{{{column_preamble}}}")
                 out_lines.append("\\toprule ")
                 out_lines.append(f"{' & '.join(header)} \\\\")
                 out_lines.append("\\midrule ")
                 out_lines.append("\\endhead ")
-                i += 2
-                while i < len(lines) and "|" in lines[i] and lines[i].strip():
+                for table_line in table_lines[2:]:
                     row = [
                         _escape_table_text(x.strip())
-                        for x in _split_table_row(lines[i])
+                        for x in _split_table_row(table_line)
                     ]
                     out_lines.append(f"{' & '.join(row)} \\\\")
-                    i += 1
                 out_lines.append("\\bottomrule ")
                 out_lines.append("\\end{longtable}")
             else:
@@ -546,6 +595,7 @@ def process(
                         prefix + escaped_lines,
                         paper_info=paper_info,
                         current_paper_info=current_paper_info,
+                        table_strategy_config=table_strategy_config,
                     )
                 )
             else:
