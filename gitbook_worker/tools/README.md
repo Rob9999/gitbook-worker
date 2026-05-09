@@ -139,10 +139,12 @@ Quality assurance tooling that inspects Markdown sources for regressions:
   large language models.  It derives the Markdown scope from `SUMMARY.md`,
   submits each reference to the configured AI backend, updates confirmed fixes on
   disk, and emits a structured JSON report for downstream tooling.
-* `staatenprofil_links.py` scans Markdown files matching `*staatenprofil*.md`
-  and writes a CSV report listing failing HTTP checks so editors can repair the
-  profiles without combing through the book manually (`python -m
-  tools.quality.staatenprofil_links --help`).
+* `profile_link_audit.py` scans Markdown files matching a configurable filename
+  pattern such as `*profile*.md` and writes a CSV report listing failing HTTP
+  checks so editors can repair profile-style pages without combing through the
+  book manually (`python -m gitbook_worker.tools.quality.profile_link_audit
+  --help`). The older `staatenprofil_links.py` module remains as a compatibility
+  alias for `--filename-pattern *staatenprofil*.md`.
 
 ### `emoji/`
 

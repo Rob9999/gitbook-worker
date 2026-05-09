@@ -6,6 +6,7 @@ __all__ = [
     "editorial_common",
     "editorial_metrics",
     "link_audit",
+    "profile_link_audit",
     "sources",
     "staatenprofil_links",
 ]
