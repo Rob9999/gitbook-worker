@@ -455,7 +455,9 @@ def choose_table_paper(
         return decision
 
     candidates = list(iter_paper_candidates(base_info, strategy))
-    max_candidate_width = max(available_text_width_mm(candidate) for candidate in candidates)
+    max_candidate_width = max(
+        available_text_width_mm(candidate) for candidate in candidates
+    )
     if (
         required_width > max_candidate_width
         and strategy.oversize_policy == "preserve-column-heuristic"
@@ -685,7 +687,10 @@ def _allocate_column_widths(
         return tuple(targets), 0.0
     if min_sum >= text_budget:
         equal_width = text_budget / len(profiles)
-        return tuple(max(1.0, min(width, equal_width)) for width in min_widths), overflow_mm
+        return (
+            tuple(max(1.0, min(width, equal_width)) for width in min_widths),
+            overflow_mm,
+        )
 
     extra_budget = text_budget - min_sum
     flex_demands = [target - minimum for target, minimum in zip(targets, min_widths)]

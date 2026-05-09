@@ -2479,9 +2479,7 @@ def _parse_pdf_options(raw: Any) -> Dict[str, Any]:
     elif "code-block-wrap" in raw:
         parsed["code_block_wrap"] = _as_bool(raw.get("code-block-wrap"))
 
-    table_strategy = raw.get("table_paper_strategy") or raw.get(
-        "table-paper-strategy"
-    )
+    table_strategy = raw.get("table_paper_strategy") or raw.get("table-paper-strategy")
     if isinstance(table_strategy, Mapping):
         parsed["table_paper_strategy"] = dict(table_strategy)
 
