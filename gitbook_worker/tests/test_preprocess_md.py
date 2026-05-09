@@ -164,7 +164,7 @@ def test_table_strategy_adds_script_break_hints(artifact_dir):
     out = preprocess_md.process(str(md), paper_format="a4")
 
     assert r"\allowbreak{}" in out
-    assert "生命\\allowbreak{}共同" in out
+    assert "生\\allowbreak{}命\\allowbreak{}共" in out
 
 
 def test_table_strategy_override_comment_forces_paper(artifact_dir):
