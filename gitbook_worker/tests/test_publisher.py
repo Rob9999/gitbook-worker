@@ -539,7 +539,7 @@ def test_convert_file_emits_emoji_report(tmp_path, monkeypatch):
     monkeypatch.setattr(
         publisher,
         "process",
-        lambda path, paper_format="a4": Path(path).read_text(encoding="utf-8"),
+        lambda path, paper_format="a4", **_: Path(path).read_text(encoding="utf-8"),
     )
     monkeypatch.setattr(publisher, "normalize_md", lambda text: text)
     monkeypatch.setattr(
@@ -573,7 +573,7 @@ def test_build_pdf_forwards_project_metadata(tmp_path, monkeypatch):
     monkeypatch.setattr(
         publisher,
         "process",
-        lambda path, paper_format="a4": Path(path).read_text(encoding="utf-8"),
+        lambda path, paper_format="a4", **_: Path(path).read_text(encoding="utf-8"),
     )
     monkeypatch.setattr(publisher, "normalize_md", lambda text: text)
     monkeypatch.setattr(
