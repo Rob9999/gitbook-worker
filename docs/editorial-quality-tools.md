@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-09
 history:
+  - "1.2.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken dokumentiert."
   - "1.1.0: 2026-05-09 - Publish-Scope, PDF-Zielkorridore und Drift-Pruefungen ergaenzt."
   - "1.0.0: 2026-05-09 - First user guide for editorial quality metrics and acceptance tools."
 ---
@@ -95,6 +96,36 @@ Worker-Version erzeugt wurde oder ob ein PDF-Artefakt neuer ist als der Report.
 Die Schalter `documentation.fail_on_stale_worker_version` und
 `documentation.fail_on_stale_page_count` steuern, ob diese Drift-Signale warnen
 oder die Abnahme scheitern lassen.
+
+## Baseline und Restrisiken
+
+`editorial_acceptance` kann einen frueheren Metrikreport als Baseline lesen und
+Befunde als `new`, `existing`, `changed` oder `resolved` einordnen:
+
+```powershell
+python -m gitbook_worker.tools.quality.editorial_acceptance `
+  logs/quality/editorial-metrics.json `
+  --baseline logs/quality/editorial-metrics.previous.json `
+  --output logs/quality/editorial-acceptance.md
+```
+
+Bewusst akzeptierte Restrisiken werden ueber `--accepted-findings` eingebunden.
+Sie bleiben im Dossier sichtbar; abgelaufene Akzeptanzen erzeugen ein hartes
+Finding, damit alte Freigaben nicht stillschweigend weitergelten:
+
+```yaml
+version: 1.0.0
+accepted_findings:
+  - finding_id: tables.strategy.lowest-score-fallback:abc123def456
+    reason: Known layout trade-off for this release candidate.
+    role: editor
+    date: 2026-05-09
+    expires: 2026-06-30
+    release: v2.9.0
+```
+
+Schema und Pflichtfelder stehen in
+[editorial-accepted-findings.md](configs/editorial-accepted-findings.md).
 
 ## Exit-Codes
 

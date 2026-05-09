@@ -5,9 +5,11 @@ from __future__ import annotations
 import argparse
 import json
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
+
+import yaml
 
 from gitbook_worker import __version__
 from gitbook_worker.tools.exit_codes import add_exit_code_help, handle_exit_code_help
@@ -32,25 +34,40 @@ def build_acceptance_dossier(
     *,
     profile: AcceptanceProfile,
     fail_on_warnings: bool = False,
+    baseline_report: Mapping[str, Any] | None = None,
+    accepted_findings: Sequence[Mapping[str, Any]] = (),
 ) -> tuple[str, dict[str, Any]]:
     """Build Markdown dossier text and a structured summary."""
 
     derived_findings = _derive_report_drift_findings(reports, profile)
     findings = [
-        finding for report in reports for finding in report.get("findings", [])
+        dict(finding)
+        for report in reports
+        for finding in report.get("findings", [])
+        if isinstance(finding, Mapping)
     ] + derived_findings
+    baseline_summary = _compare_with_baseline(findings, baseline_report)
+    generated_at = utc_now_iso()
+    accepted_summary, acceptance_findings = _apply_accepted_findings(
+        findings,
+        accepted_findings,
+        today=_date_from_iso(generated_at) or date.today(),
+    )
+    findings.extend(acceptance_findings)
     counts = severity_counts(findings)
     status = status_from_counts(
         counts, fail_on_warnings=fail_on_warnings or profile.fail_on_warnings
     )
     summary = {
         "schema_version": "1.0.0",
-        "generated_at": utc_now_iso(),
+        "generated_at": generated_at,
         "profile": profile.name,
         "status": status,
         "finding_counts": counts,
         "reports_total": len(reports),
         "findings_total": len(findings),
+        "baseline": baseline_summary,
+        "accepted_findings": accepted_summary,
     }
     lines = [
         "---",
@@ -99,6 +116,12 @@ def build_acceptance_dossier(
                 f"created={artifact.get('creation_date') or '<unknown>'}, "
                 f"modified={artifact.get('modified_at') or '<unknown>'}"
             )
+
+    lines.extend(["", "## Baseline Comparison", ""])
+    lines.extend(_render_baseline_summary(baseline_summary))
+
+    lines.extend(["", "## Accepted Residual Risks", ""])
+    lines.extend(_render_accepted_summary(accepted_summary))
 
     lines.extend(["", "## Findings", ""])
     if not findings:
@@ -150,6 +173,33 @@ def read_metric_reports(paths: Sequence[Path]) -> list[Mapping[str, Any]]:
     return reports
 
 
+def read_mapping_file(path: Path) -> Mapping[str, Any]:
+    """Read a JSON or YAML mapping file."""
+
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError) as exc:
+        raise ValueError(f"Could not read {path}: {exc}") from exc
+    if not isinstance(data, Mapping):
+        raise ValueError(f"{path} does not contain a YAML/JSON object")
+    return data
+
+
+def read_accepted_findings(path: Path) -> list[Mapping[str, Any]]:
+    """Read accepted residual risk records from YAML or JSON."""
+
+    data = read_mapping_file(path)
+    raw_records = data.get("accepted_findings") or data.get("findings") or []
+    if not isinstance(raw_records, Sequence) or isinstance(raw_records, (str, bytes)):
+        raise ValueError(f"{path} must contain an 'accepted_findings' list")
+    records: list[Mapping[str, Any]] = []
+    for record in raw_records:
+        if not isinstance(record, Mapping):
+            raise ValueError(f"{path} contains a non-object accepted finding record")
+        records.append(record)
+    return records
+
+
 def build_arg_parser() -> argparse.ArgumentParser:
     """Build CLI parser for editorial acceptance."""
 
@@ -168,6 +218,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--json-output", type=Path, help="Optional structured acceptance JSON summary"
+    )
+    parser.add_argument(
+        "--baseline",
+        type=Path,
+        help="Previous editorial metric report used for new/existing/resolved comparison",
+    )
+    parser.add_argument(
+        "--accepted-findings",
+        type=Path,
+        help="YAML/JSON residual-risk register with accepted finding IDs",
     )
     parser.add_argument(
         "--fail-on-warnings",
@@ -199,9 +259,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     except ValueError as exc:
         logger.error("%s", exc)
         return EDITORIAL_REPORT_READ_EXIT_CODE
+    try:
+        baseline_report = read_mapping_file(args.baseline) if args.baseline else None
+        accepted_findings = (
+            read_accepted_findings(args.accepted_findings)
+            if args.accepted_findings
+            else []
+        )
+    except ValueError as exc:
+        logger.error("%s", exc)
+        return EDITORIAL_REPORT_READ_EXIT_CODE
 
     dossier, summary = build_acceptance_dossier(
-        reports, profile=profile, fail_on_warnings=args.fail_on_warnings
+        reports,
+        profile=profile,
+        fail_on_warnings=args.fail_on_warnings,
+        baseline_report=baseline_report,
+        accepted_findings=accepted_findings,
     )
     output = args.output or Path("logs") / "quality" / "editorial-acceptance.md"
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -227,15 +301,243 @@ def _group_findings(
 
 
 def _render_finding(finding: Mapping[str, Any]) -> list[str]:
-    return [
+    lines = [
         f"- `{finding.get('id', '<no-id>')}` `{finding.get('rule_id', '<no-rule>')}`",
         f"  - Artifact: `{finding.get('artifact', '')}`",
         f"  - Location: `{finding.get('location', '')}`",
         f"  - Evidence: {finding.get('evidence', '')}",
         f"  - Impact: {finding.get('editorial_impact', '')}",
         f"  - Healing: {finding.get('healing', '')}",
-        "",
     ]
+    baseline_status = finding.get("baseline_status")
+    if baseline_status:
+        baseline_line = f"  - Baseline: `{baseline_status}`"
+        previous_id = finding.get("baseline_previous_id")
+        if previous_id:
+            baseline_line += f" (previous `{previous_id}`)"
+        lines.append(baseline_line)
+    residual_risk = finding.get("residual_risk")
+    if isinstance(residual_risk, Mapping):
+        lines.append(
+            "  - Residual risk: "
+            f"`{residual_risk.get('status', 'accepted')}`; "
+            f"reason={residual_risk.get('reason', '')}; "
+            f"role={residual_risk.get('role', '')}; "
+            f"date={residual_risk.get('date', '')}; "
+            f"expires={residual_risk.get('expires') or '<none>'}; "
+            f"release={residual_risk.get('release') or '<none>'}"
+        )
+    lines.append("")
+    return lines
+
+
+def _compare_with_baseline(
+    findings: list[dict[str, Any]], baseline_report: Mapping[str, Any] | None
+) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "enabled": baseline_report is not None,
+        "new": 0,
+        "existing": 0,
+        "changed": 0,
+        "resolved": 0,
+        "resolved_findings": [],
+    }
+    if baseline_report is None:
+        return summary
+
+    baseline_findings = [
+        dict(finding)
+        for finding in baseline_report.get("findings", [])
+        if isinstance(finding, Mapping)
+    ]
+    baseline_by_id = {
+        str(finding.get("id")): finding
+        for finding in baseline_findings
+        if finding.get("id")
+    }
+    baseline_by_key: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(
+        list
+    )
+    for finding in baseline_findings:
+        baseline_by_key[_finding_key(finding)].append(finding)
+
+    current_ids = {str(finding.get("id")) for finding in findings if finding.get("id")}
+    current_keys = {_finding_key(finding) for finding in findings}
+    for finding in findings:
+        finding_id = str(finding.get("id") or "")
+        key = _finding_key(finding)
+        if finding_id and finding_id in baseline_by_id:
+            finding["baseline_status"] = "existing"
+            summary["existing"] += 1
+        elif key in baseline_by_key:
+            previous = baseline_by_key[key][0]
+            finding["baseline_status"] = "changed"
+            finding["baseline_previous_id"] = previous.get("id")
+            summary["changed"] += 1
+        else:
+            finding["baseline_status"] = "new"
+            summary["new"] += 1
+
+    resolved: list[dict[str, Any]] = []
+    for finding in baseline_findings:
+        finding_id = str(finding.get("id") or "")
+        key = _finding_key(finding)
+        if finding_id not in current_ids and key not in current_keys:
+            resolved.append(
+                {
+                    "id": finding.get("id"),
+                    "rule_id": finding.get("rule_id"),
+                    "artifact": finding.get("artifact"),
+                    "location": finding.get("location"),
+                    "evidence": finding.get("evidence"),
+                }
+            )
+    summary["resolved"] = len(resolved)
+    summary["resolved_findings"] = resolved[:50]
+    return summary
+
+
+def _apply_accepted_findings(
+    findings: list[dict[str, Any]],
+    accepted_findings: Sequence[Mapping[str, Any]],
+    *,
+    today: date,
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    summary: dict[str, Any] = {
+        "enabled": bool(accepted_findings),
+        "records_total": len(accepted_findings),
+        "matched": 0,
+        "active": 0,
+        "expired": 0,
+        "unused": 0,
+        "incomplete": 0,
+        "unused_records": [],
+    }
+    if not accepted_findings:
+        return summary, []
+
+    records_by_id: dict[str, Mapping[str, Any]] = {}
+    for record in accepted_findings:
+        finding_id = str(record.get("finding_id") or record.get("id") or "").strip()
+        if finding_id:
+            records_by_id[finding_id] = record
+
+    matched_ids: set[str] = set()
+    derived_findings: list[dict[str, Any]] = []
+    for finding in findings:
+        finding_id = str(finding.get("id") or "").strip()
+        record = records_by_id.get(finding_id)
+        if record is None:
+            continue
+        matched_ids.add(finding_id)
+        summary["matched"] += 1
+        expires_value = record.get("expires") or record.get("expires_at")
+        expires = _parse_date(expires_value)
+        expired = expires is not None and expires < today
+        status = "expired" if expired else "accepted"
+        summary["expired" if expired else "active"] += 1
+        residual_risk = {
+            "status": status,
+            "reason": str(record.get("reason") or "").strip(),
+            "role": str(record.get("role") or "").strip(),
+            "date": str(record.get("date") or "").strip(),
+            "expires": str(expires_value or "").strip() or None,
+            "release": str(record.get("release") or "").strip() or None,
+        }
+        finding["residual_risk"] = residual_risk
+
+        missing_fields = [
+            key for key in ("reason", "role", "date") if not residual_risk.get(key)
+        ]
+        if not residual_risk.get("expires") and not residual_risk.get("release"):
+            missing_fields.append("expires_or_release")
+        if missing_fields:
+            summary["incomplete"] += 1
+            derived_findings.append(
+                make_finding(
+                    rule_id="acceptance.residual_risk.incomplete",
+                    severity="warn",
+                    category="acceptance.residual_risk",
+                    artifact=str(finding.get("artifact") or "<finding>"),
+                    location=str(finding.get("id") or "residual_risk"),
+                    evidence="missing " + ", ".join(missing_fields),
+                    editorial_impact="Akzeptiertes Restrisiko ist nicht vollstaendig begruendet.",
+                    healing="reason, role, date und expires oder release im Restrisiko-Register ergaenzen.",
+                ).to_dict()
+            )
+        if expired:
+            derived_findings.append(
+                make_finding(
+                    rule_id="acceptance.residual_risk.expired",
+                    severity="fail",
+                    category="acceptance.residual_risk",
+                    artifact=str(finding.get("artifact") or "<finding>"),
+                    location=str(finding.get("id") or "residual_risk"),
+                    evidence=f"accepted finding expired on {expires.isoformat() if expires else expires_value}",
+                    editorial_impact="Ein vormals akzeptiertes Restrisiko ist fuer diese Abnahme wieder faellig.",
+                    healing="Finding beheben oder Restrisiko mit neuer Begruendung und Ablauf erneuern.",
+                ).to_dict()
+            )
+
+    unused = [
+        {"finding_id": finding_id, "reason": record.get("reason")}
+        for finding_id, record in records_by_id.items()
+        if finding_id not in matched_ids
+    ]
+    summary["unused"] = len(unused)
+    summary["unused_records"] = unused[:50]
+    return summary, derived_findings
+
+
+def _render_baseline_summary(summary: Mapping[str, Any]) -> list[str]:
+    if not summary.get("enabled"):
+        return ["No baseline report provided."]
+    lines = [
+        f"- New: {summary.get('new', 0)}",
+        f"- Existing: {summary.get('existing', 0)}",
+        f"- Changed: {summary.get('changed', 0)}",
+        f"- Resolved: {summary.get('resolved', 0)}",
+    ]
+    resolved = summary.get("resolved_findings") or []
+    if isinstance(resolved, Sequence) and resolved:
+        lines.extend(["", "Resolved findings:"])
+        for finding in resolved[:20]:
+            if not isinstance(finding, Mapping):
+                continue
+            lines.append(
+                f"- `{finding.get('id', '<no-id>')}` `{finding.get('rule_id', '<no-rule>')}` "
+                f"in `{finding.get('artifact', '')}`"
+            )
+    return lines
+
+
+def _render_accepted_summary(summary: Mapping[str, Any]) -> list[str]:
+    if not summary.get("enabled"):
+        return ["No accepted residual risks file provided."]
+    lines = [
+        f"- Records: {summary.get('records_total', 0)}",
+        f"- Matched: {summary.get('matched', 0)}",
+        f"- Active: {summary.get('active', 0)}",
+        f"- Expired: {summary.get('expired', 0)}",
+        f"- Incomplete: {summary.get('incomplete', 0)}",
+        f"- Unused: {summary.get('unused', 0)}",
+    ]
+    unused = summary.get("unused_records") or []
+    if isinstance(unused, Sequence) and unused:
+        lines.extend(["", "Unused records:"])
+        for record in unused[:20]:
+            if not isinstance(record, Mapping):
+                continue
+            lines.append(f"- `{record.get('finding_id', '<no-id>')}`")
+    return lines
+
+
+def _finding_key(finding: Mapping[str, Any]) -> tuple[str, str, str]:
+    return (
+        str(finding.get("rule_id") or ""),
+        str(finding.get("artifact") or ""),
+        str(finding.get("location") or ""),
+    )
 
 
 def _derive_report_drift_findings(
@@ -333,6 +635,23 @@ def _parse_iso_datetime(value: Any) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=timezone.utc)
     return parsed.astimezone(timezone.utc)
+
+
+def _date_from_iso(value: Any) -> date | None:
+    parsed = _parse_iso_datetime(value)
+    return parsed.date() if parsed else None
+
+
+def _parse_date(value: Any) -> date | None:
+    if not value:
+        return None
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return value
+    text = str(value).strip()
+    try:
+        return date.fromisoformat(text[:10])
+    except ValueError:
+        return None
 
 
 if __name__ == "__main__":

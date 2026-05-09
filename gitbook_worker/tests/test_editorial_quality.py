@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pypdf import PdfWriter
 
+from gitbook_worker import __version__
 from gitbook_worker.tools.quality import editorial_acceptance
 from gitbook_worker.tools.quality.editorial_common import (
     EDITORIAL_HARD_FINDINGS_EXIT_CODE,
@@ -336,6 +337,123 @@ def test_acceptance_derives_stale_report_findings(tmp_path: Path) -> None:
     assert "report.worker_version.stale" in dossier
     assert "report.artifact.stale" in dossier
     assert "PDF Artifacts" in dossier
+
+
+def test_acceptance_compares_baseline_and_marks_residual_risks() -> None:
+    baseline_report = {
+        "findings": [
+            {
+                "id": "existing-id",
+                "severity": "warn",
+                "rule_id": "markdown.long_token",
+                "artifact": "chapter.md",
+                "location": "line 3",
+                "evidence": "same evidence",
+            },
+            {
+                "id": "changed-old-id",
+                "severity": "warn",
+                "rule_id": "pdf.toc.missing",
+                "artifact": "book.pdf",
+                "location": "outline",
+                "evidence": "old evidence",
+            },
+            {
+                "id": "resolved-id",
+                "severity": "warn",
+                "rule_id": "markdown.review_marker",
+                "artifact": "old.md",
+                "location": "line 1",
+                "evidence": "resolved",
+            },
+        ]
+    }
+    current_report = {
+        "schema_version": "1.0.0",
+        "generated_at": "2026-05-09T00:00:00+00:00",
+        "project": "sample",
+        "worker_version": __version__,
+        "findings": [
+            {
+                "id": "existing-id",
+                "severity": "warn",
+                "category": "markdown.layout",
+                "rule_id": "markdown.long_token",
+                "artifact": "chapter.md",
+                "location": "line 3",
+                "evidence": "same evidence",
+                "editorial_impact": "Layout risk.",
+                "healing": "Wrap token.",
+            },
+            {
+                "id": "changed-new-id",
+                "severity": "warn",
+                "category": "pdf.toc",
+                "rule_id": "pdf.toc.missing",
+                "artifact": "book.pdf",
+                "location": "outline",
+                "evidence": "new evidence",
+                "editorial_impact": "Navigation risk.",
+                "healing": "Regenerate TOC.",
+            },
+            {
+                "id": "new-id",
+                "severity": "warn",
+                "category": "tables.strategy",
+                "rule_id": "tables.strategy.lowest-score-fallback",
+                "artifact": "book.table-layout.jsonl",
+                "location": "line 1",
+                "evidence": "fallback",
+                "editorial_impact": "Layout trade-off.",
+                "healing": "Review table.",
+            },
+        ],
+    }
+    accepted_findings = [
+        {
+            "finding_id": "new-id",
+            "reason": "Known table trade-off for release candidate.",
+            "role": "editor",
+            "date": "2026-05-09",
+            "expires": "2099-01-01",
+            "release": "v2.9.0",
+        },
+        {
+            "finding_id": "existing-id",
+            "reason": "Old acceptance must be renewed.",
+            "role": "editor",
+            "date": "2026-01-01",
+            "expires": "2000-01-01",
+        },
+        {
+            "finding_id": "unused-id",
+            "reason": "No longer present.",
+            "role": "editor",
+            "date": "2026-05-09",
+            "expires": "2099-01-01",
+        },
+    ]
+
+    dossier, summary = editorial_acceptance.build_acceptance_dossier(
+        [current_report],
+        profile=AcceptanceProfile(name="baseline-test"),
+        baseline_report=baseline_report,
+        accepted_findings=accepted_findings,
+    )
+
+    assert summary["baseline"]["new"] == 1
+    assert summary["baseline"]["existing"] == 1
+    assert summary["baseline"]["changed"] == 1
+    assert summary["baseline"]["resolved"] == 1
+    assert summary["accepted_findings"]["matched"] == 2
+    assert summary["accepted_findings"]["active"] == 1
+    assert summary["accepted_findings"]["expired"] == 1
+    assert summary["accepted_findings"]["unused"] == 1
+    assert summary["status"] == "failed"
+    assert "Baseline Comparison" in dossier
+    assert "Accepted Residual Risks" in dossier
+    assert "Baseline: `changed`" in dossier
+    assert "acceptance.residual_risk.expired" in dossier
 
 
 def test_builtin_multilingual_profile_loads() -> None:

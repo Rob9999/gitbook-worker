@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
+version: 1.2.0
 date: 2026-05-09
 history:
+  - "1.2.0: 2026-05-09 — Baseline und Restrisiken in eigene Acceptance-Eingaben ausgelagert."
   - "1.1.0: 2026-05-09 — Publish-Scope, PDF-Zielkorridore und Drift-Regeln als implementierte v2.9.0-Signale dokumentiert."
   - "1.0.0: 2026-05-09 — Editorial quality profile for v2.9.0 Qualitaetskompass documented."
 ---
@@ -94,5 +95,4 @@ profiles:
 
 🚧 WIP:
 
-- Baseline-Vergleich und akzeptierte Restrisiken mit Ablaufdatum.
 - Tiefe BBox-/Overflow-Auswertung fuer konkrete PDF-Layoutbefunde.

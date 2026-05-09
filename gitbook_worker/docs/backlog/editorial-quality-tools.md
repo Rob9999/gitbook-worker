@@ -1,11 +1,12 @@
 ---
-version: 1.2.0
+version: 1.3.0
 date: 2026-05-09
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.3.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken als erledigten Schnitt markiert."
   - "1.2.0: 2026-05-09 - Backlog-Status nach Publish-Scope-, PDF-Zielkorridor- und Drift-Schnitt synchronisiert."
   - "1.1.0: 2026-05-09 - Anonymisiertes Kundenreview als Muss-Anforderungen und Abnahmeszenarien aufgenommen."
   - "1.0.0: 2026-05-09 - Backlog-Pflichtenheft fuer redaktionelle Qualitaetsmetriken und Abnahme erstellt."
@@ -280,7 +281,7 @@ Akzeptanzkriterien:
   testen.
 - [x] ✅ `human_decision`-Vorlage in Markdown-Dossier erzeugen.
 - [x] ✅ Tool darf `human_decision` nicht automatisch setzen.
-- [ ] Restrisiken mit `finding_id`, Grund, Rolle und Datum dokumentierbar
+- [x] ✅ Restrisiken mit `finding_id`, Grund, Rolle und Datum dokumentierbar
   machen.
 
 Akzeptanzkriterien:
@@ -293,9 +294,9 @@ Akzeptanzkriterien:
 
 - [x] ✅ Stabile Finding-ID aus Regel-ID, relativer Datei, nahem Heading,
   normalisiertem Evidenztext und optional Seite erzeugen.
-- [ ] Baseline-Vergleich mit `new`, `existing`, `resolved`, `changed`
+- [x] ✅ Baseline-Vergleich mit `new`, `existing`, `resolved`, `changed`
   unterstuetzen.
-- [ ] Bewusst akzeptierte Befunde mit Ablaufdatum oder Releasebezug
+- [x] ✅ Bewusst akzeptierte Befunde mit Ablaufdatum oder Releasebezug
   unterstuetzen.
 - [x] ✅ Markdown-Reports mit workspace-relativen Pfaden erzeugen.
 - [x] ✅ Absolute Pfade in JSON optional und deaktivierbar machen.

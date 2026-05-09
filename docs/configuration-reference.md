@@ -1,7 +1,8 @@
 ---
-version: 1.6.0
+version: 1.7.0
 date: 2026-05-09
 history:
+  - "1.7.0: 2026-05-09 — editorial accepted findings register fuer Restrisiken dokumentiert"
   - "1.6.0: 2026-05-09 — pdf_targets und Drift-Schalter fuer editorial quality profile als implementierte Signale markiert"
   - "1.5.0: 2026-05-09 — editorial quality acceptance profiles als v2.9.0-WIP ergaenzt"
   - "1.4.0: 2026-05-09 — pdf_options.table_paper_strategy fuer Tabellenprofi ergaenzt"
@@ -308,6 +309,26 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 
 ---
 
+## 7. editorial accepted findings (CLI-Option `--accepted-findings`)
+
+Status: ✅ Implementiert fuer `v2.9.0 Qualitaetskompass`. Die Datei dokumentiert
+bewusst akzeptierte Restrisiken fuer `editorial_acceptance`. Akzeptierte Befunde
+werden nicht versteckt; sie erscheinen im Dossier. Abgelaufene Akzeptanzen
+erzeugen ein hartes Finding.
+
+| Schlüssel | Typ | Default | Status | Beschreibung |
+|-----------|-----|---------|--------|--------------|
+| `version` | string | – | ✅ | SemVer der Restrisiko-Datei |
+| `accepted_findings` | array | `[]` | ✅ | Liste akzeptierter Finding-IDs |
+| `accepted_findings[].finding_id` | string | – | ✅ | Exakte stabile Finding-ID aus dem Metrikreport |
+| `accepted_findings[].reason` | string | – | ✅ | Redaktionelle Begruendung der Akzeptanz |
+| `accepted_findings[].role` | string | – | ✅ | Rolle der akzeptierenden Person, z. B. `editor` |
+| `accepted_findings[].date` | string | – | ✅ | Datum der Entscheidung (`YYYY-MM-DD`) |
+| `accepted_findings[].expires` | string | `null` | ✅ | Ablaufdatum; abgelaufene Akzeptanzen werden harte Findings |
+| `accepted_findings[].release` | string | `null` | ✅ | Optionaler Releasebezug, z. B. `v2.9.0` |
+
+---
+
 ## Konfigurationsdatei-Versionen
 
 | Datei | Schema-Version | `version`-Feld | Per-File-Dok |
@@ -320,7 +341,8 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 | `readme.yml` | 1.0.0 | ✓ | [readme-yml.md](configs/readme-yml.md) |
 | `smart.yml` | 1.0.0 | ✓ | [smart-yml.md](configs/smart-yml.md) |
 | `docker_config.yml` | 1.0.0 | ✓ | [docker-config-yml.md](configs/docker-config-yml.md) |
-| editorial quality profile | 1.1.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
+| editorial quality profile | 1.2.0 | optional | [editorial-quality-profile.md](configs/editorial-quality-profile.md) |
+| editorial accepted findings | 1.0.0 | optional | [editorial-accepted-findings.md](configs/editorial-accepted-findings.md) |
 
 ---
 
