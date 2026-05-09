@@ -591,7 +591,7 @@ Der v2.8.0-Release wird lokal mit diesen Signalen geprueft:
 - Focused Tests fuer Tabellen-Preprocessing, Paper-Info und pdf_options:
   `53 passed`.
 - Config-Completeness-Tests: `24 passed`.
-- Non-slow Test-Suite: `554 passed, 11 skipped, 10 deselected, 4 warnings`.
+- Non-slow Test-Suite: `556 passed, 11 skipped, 10 deselected, 4 warnings`.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.8.0`: bestanden;
   `gitbook_worker-2.8.0.tar.gz` und
   `gitbook_worker-2.8.0-py3-none-any.whl` wurden erzeugt.
