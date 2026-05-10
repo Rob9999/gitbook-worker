@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import textwrap
 from pathlib import Path
 
@@ -27,12 +28,14 @@ from gitbook_worker.tools.utils.smart_content import ContentEntry
 def temp_repo(tmp_path: Path) -> Path:
     manifest = tmp_path / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             publish:
               - path: ./
                 out: dummy.pdf
                 build: false
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     return tmp_path
@@ -41,7 +44,8 @@ def temp_repo(tmp_path: Path) -> Path:
 def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             profiles:
               default:
                 steps: [publisher]
@@ -49,7 +53,8 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     args = parse_args(
@@ -71,7 +76,8 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
 def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             profiles:
               default:
                 steps: [publisher]
@@ -79,7 +85,8 @@ def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     args = parse_args(
@@ -125,6 +132,27 @@ def test_build_config_resolves_quality_options(temp_repo: Path) -> None:
     assert config.quality_baseline == baseline
     assert config.quality_accepted_findings == accepted
     assert config.quality_gate is True
+    assert config.quality_scope == "current"
+
+
+def test_build_config_resolves_quality_scope(temp_repo: Path) -> None:
+    manifest = temp_repo / "publish.yml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    args = parse_args(
+        [
+            "run",
+            "--root",
+            str(temp_repo),
+            "--manifest",
+            str(manifest),
+            "--quality-scope",
+            "configured",
+        ]
+    )
+
+    config = build_config(args)
+
+    assert config.quality_scope == "configured"
 
 
 def test_run_creates_missing_readme(tmp_path: Path) -> None:
@@ -302,6 +330,197 @@ def test_step_editorial_quality_runs_metrics_and_acceptance(
     assert "--trend-output" in commands[1][0]
     assert "--snapshot-dir" in commands[1][0]
     assert commands[1][1] is True
+
+
+def test_step_editorial_quality_configured_scope_runs_languages_and_project(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path
+    (repo / "de").mkdir()
+    (repo / "en").mkdir()
+    (repo / "de-edge-cases").mkdir()
+    manifest = repo / "publish.yml"
+    content_config = repo / "content.yaml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    content_config.write_text(
+        textwrap.dedent(
+            """
+            version: 1.0.0
+            default: de
+            contents:
+              - id: de
+                type: local
+                uri: de/
+              - id: en
+                type: local
+                uri: en/
+              - id: de-edge-cases
+                type: local
+                uri: de-edge-cases/
+                build: false
+              - id: ua
+                type: git
+                uri: example.invalid/repo
+            """
+        ),
+        encoding="utf-8",
+    )
+    profile = OrchestratorProfile(
+        name="test",
+        steps=("editorial-quality",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    entry = ContentEntry(id="de", uri="de/", type="local")
+    config = OrchestratorConfig(
+        root=repo,
+        manifest=manifest,
+        logs_dir=repo / "logs",
+        content_config_path=content_config,
+        language_id="de",
+        content_entry=entry,
+        language_root=repo / "de",
+        profile=profile,
+        repo_visibility="public",
+        repository="example/repo",
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+        isolated=False,
+        quality_profile="release",
+        quality_scope="configured",
+    )
+    ctx = RuntimeContext(config)
+    commands: list[tuple[list[str], bool]] = []
+
+    def fake_run_command(cmd, *, cwd=None, env=None, check=True):
+        commands.append((list(cmd), check))
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr(ctx, "run_command", fake_run_command)
+
+    _step_editorial_quality(ctx)
+
+    assert len(commands) == 6
+    metric_commands = [
+        cmd for cmd, _check in commands if _command_contains(cmd, "editorial_metrics")
+    ]
+    acceptance_commands = [
+        cmd
+        for cmd, _check in commands
+        if _command_contains(cmd, "editorial_acceptance")
+    ]
+    assert len(metric_commands) == 3
+    assert len(acceptance_commands) == 3
+    assert _values_after(metric_commands[0], "--lang") == ["de"]
+    assert _values_after(metric_commands[1], "--lang") == ["en"]
+    assert _values_after(metric_commands[2], "--lang") == ["de", "en"]
+    assert any(
+        any("de-release-editorial-acceptance.md" in part for part in cmd)
+        for cmd in acceptance_commands
+    )
+    assert any(
+        any("en-release-editorial-acceptance.md" in part for part in cmd)
+        for cmd in acceptance_commands
+    )
+    assert any(
+        any("project-release-editorial-acceptance.md" in part for part in cmd)
+        for cmd in acceptance_commands
+    )
+
+
+def test_step_editorial_quality_configured_scope_gate_runs_all_before_failing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path
+    (repo / "de").mkdir()
+    (repo / "en").mkdir()
+    manifest = repo / "publish.yml"
+    content_config = repo / "content.yaml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    content_config.write_text(
+        textwrap.dedent(
+            """
+            version: 1.0.0
+            default: de
+            contents:
+              - id: de
+                type: local
+                uri: de/
+              - id: en
+                type: local
+                uri: en/
+            """
+        ),
+        encoding="utf-8",
+    )
+    profile = OrchestratorProfile(
+        name="test",
+        steps=("editorial-quality",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    config = OrchestratorConfig(
+        root=repo,
+        manifest=manifest,
+        logs_dir=repo / "logs",
+        content_config_path=content_config,
+        language_id="de",
+        content_entry=ContentEntry(id="de", uri="de/", type="local"),
+        language_root=repo / "de",
+        profile=profile,
+        repo_visibility="public",
+        repository="example/repo",
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+        isolated=False,
+        quality_profile="release",
+        quality_gate=True,
+        quality_scope="configured",
+    )
+    ctx = RuntimeContext(config)
+    commands: list[tuple[list[str], bool]] = []
+
+    def fake_run_command(cmd, *, cwd=None, env=None, check=True):
+        commands.append((list(cmd), check))
+        returncode = (
+            7
+            if _command_contains(list(cmd), "editorial_acceptance")
+            and len(commands) == 2
+            else 0
+        )
+        return type("Result", (), {"returncode": returncode})()
+
+    monkeypatch.setattr(ctx, "run_command", fake_run_command)
+
+    with pytest.raises(subprocess.CalledProcessError):
+        _step_editorial_quality(ctx)
+
+    assert len(commands) == 6
+    assert all(
+        check is False
+        for cmd, check in commands
+        if _command_contains(cmd, "editorial_acceptance")
+    )
+
+
+def _command_contains(command: list[str], text: str) -> bool:
+    return any(text in part for part in command)
+
+
+def _values_after(command: list[str], option: str) -> list[str]:
+    values: list[str] = []
+    index = 0
+    while index < len(command):
+        if command[index] == option and index + 1 < len(command):
+            values.append(command[index + 1])
+            index += 2
+            continue
+        index += 1
+    return values
 
 
 def test_step_publisher_missing_pipeline_fails(tmp_path: Path) -> None:

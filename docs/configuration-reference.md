@@ -1,7 +1,8 @@
 ---
-version: 1.9.0
+version: 1.10.0
 date: 2026-05-10
 history:
+  - "1.10.0: 2026-05-10 — Orchestrator --quality-scope fuer Sprach- und Gesamtprojekt-Dossiers dokumentiert"
   - "1.9.0: 2026-05-10 — editorial quality HTML-/Trend-/Snapshot-/SARIF-Ausgaben dokumentiert"
   - "1.8.0: 2026-05-09 — Pflicht-/Soll-Schnitt fuer editorial quality profile, CSV/Console und Orchestrator-Gate dokumentiert"
   - "1.7.0: 2026-05-09 — editorial accepted findings register fuer Restrisiken dokumentiert"
@@ -345,10 +346,15 @@ Orchestrator-Integration:
 | `--quality-baseline` | path | `null` | ✅ | Baseline-Report fuer Acceptance-Vergleich |
 | `--quality-accepted-findings` | path | `null` | ✅ | Restrisiko-Register fuer Acceptance |
 | `--quality-gate` | bool | `false` | ✅ | Nicht-null Acceptance-Status als CI-Gate verwenden |
+| `--quality-scope` | enum | `current` | ✅ | `current` erzeugt Artefakte fuer `--lang`; `configured` erzeugt je buildbarer lokaler `content.yaml`-Version plus `project-<profile>`-Gesamtdossier |
 
 Der Schritt erzeugt neben JSON/CSV/Markdown auch SARIF,
 `*-editorial-report.html`, `editorial-trends.jsonl` und
 `snapshots/<lang-profile>/index.html`.
+Mit `--quality-scope configured` entstehen zusaetzlich
+`project-<profile>-editorial-*`-Artefakte als Gesamtprojekt-Sicht. Remote-
+Eintraege und `build: false`-Content werden fuer diesen Lieferumfang bewusst
+uebersprungen.
 
 ---
 

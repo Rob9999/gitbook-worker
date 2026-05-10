@@ -1,11 +1,12 @@
 ---
-version: 1.7.0
+version: 1.8.0
 date: 2026-05-10
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.8.0: 2026-05-10 - Orchestrator --quality-scope configured fuer Sprach- und Gesamtprojekt-Dossiers als Umsetzungsschnitt ergaenzt."
   - "1.7.0: 2026-05-10 - Kann-Artefakte HTML-Report, Trend-JSONL, SARIF und Snapshot-Index als umgesetzt markiert."
   - "1.6.0: 2026-05-10 - Definition of Done mit lokalem EN-Dossier-Nachweis formal geschlossen; Baseline-Kann-Punkt als erledigt markiert."
   - "1.5.0: 2026-05-09 - Alle offenen Muss- und Soll-Punkte als implementierten Verantwortungs-Schnitt markiert."
@@ -334,6 +335,9 @@ Akzeptanzkriterien:
   lassen.
 - [x] ✅ Reports landen unter `logs/quality/` oder einem konfigurierten Outputpfad.
 - [x] ✅ CI kann den Abnahmestatus als Gate verwenden.
+- [x] ✅ Orchestrator kann mit `--quality-scope configured` je buildbarer lokaler
+  `content.yaml`-Version ein Dossier plus `project-<profile>`-Gesamtdossier
+  erzeugen; Remote- und `build: false`-Eintraege werden bewusst uebersprungen.
 
 ### S4 Sample- und Regression-Faelle
 

@@ -1,7 +1,9 @@
 ---
-version: 1.6.0
+version: 1.8.0
 date: 2026-05-10
 history:
+  - "1.8.0: 2026-05-10 - Konfigurierten release-Liefernachweis fuer de/en/project dokumentiert."
+  - "1.7.0: 2026-05-10 - Orchestrator quality-scope configured fuer Sprach- und Gesamtprojekt-Dossiers dokumentiert."
   - "1.6.0: 2026-05-10 - Statische HTML-Reports, Trend-JSONL, SARIF und High-Risk-Snapshot-Index dokumentiert."
   - "1.5.0: 2026-05-10 - Dossier-Lesehilfe und lokaler EN-Nachweis fuer die Definition of Done ergaenzt."
   - "1.4.0: 2026-05-09 - Pflicht-/Soll-Schnitt mit wiederverwendeten Signalen, Sample-Seiten, Release-Doku-Scan, CSV/Console und Orchestrator-Gate dokumentiert."
@@ -213,6 +215,13 @@ Er schreibt Metrics, CSV-Findings, SARIF, Markdown-Dossier, JSON-Summary,
 statischen HTML-Report, Trend-JSONL und Snapshot-Index nach `logs/quality/`.
 Ohne `--quality-gate` bleibt der Schritt ein Bericht; mit
 `--quality-gate` wird der Acceptance-Status zum CI-Gate.
+Standardmaessig erzeugt der Schritt Artefakte fuer die mit `--lang` gewaehlte
+Content-Version. Fuer ein Lieferpaket mit allen konfigurierten buildbaren
+lokalen Sprachversionen plus Gesamtprojekt-Dossier wird `--quality-scope
+configured` genutzt. Dabei entstehen pro Sprache `logs/quality/<lang>-<profile>-
+editorial-*` und zusaetzlich `logs/quality/project-<profile>-editorial-*`.
+Eintraege mit `build: false` sowie nicht-lokale Content-Quellen werden in diesem
+Scope uebersprungen.
 
 ```powershell
 python -m gitbook_worker.tools.workflow_orchestrator run `
@@ -224,6 +233,18 @@ python -m gitbook_worker.tools.workflow_orchestrator run `
   --step editorial-quality `
   --quality-profile release `
   --quality-gate
+```
+
+Lieferlauf fuer alle buildbaren lokalen `content.yaml`-Versionen:
+
+```powershell
+python -m gitbook_worker.tools.workflow_orchestrator run `
+  --root . `
+  --content-config content.yaml `
+  --profile local `
+  --step editorial-quality `
+  --quality-profile release `
+  --quality-scope configured
 ```
 
 ## Exit-Codes
@@ -266,3 +287,24 @@ Das Dossier ist bewusst nicht als „gruen“ behauptet: Der Sample-Status war
 `failed` mit `1 fail`, `172 warn` und `19 info`. Das ist fuer den
 Qualitaetskompass ein gueltiger Nachweis, weil der Build ein lesbares Dossier
 erzeugt und reale redaktionelle Restarbeit sichtbar macht.
+
+## Konfigurierter Liefernachweis
+
+Am 2026-05-10 wurde zusaetzlich ein konfigurierter `release`-Lieferlauf ohne
+Gate ausgefuehrt:
+
+```powershell
+python -m gitbook_worker.tools.workflow_orchestrator run `
+  --root C:\gitbook-worker `
+  --content-config C:\gitbook-worker\content.yaml `
+  --profile local `
+  --step editorial-quality `
+  --quality-profile release `
+  --quality-scope configured
+```
+
+Der Lauf erzeugte vollstaendige Artefaktpakete fuer `de-release`, `en-release`
+und `project-release`. Die Detailnachweise stehen unter
+[reviews/editorial-quality-delivery-evidence.md](reviews/editorial-quality-delivery-evidence.md).
+Alle drei Dossiers sind absichtlich `failed`, weil reale
+`pdf.text.replacement_glyph`-Fails nicht versteckt werden.

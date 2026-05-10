@@ -41,7 +41,7 @@ from gitbook_worker.tools.utils.smart_manifest import (
     detect_repo_root,
     resolve_manifest,
 )
-from gitbook_worker.tools.utils.smart_content import ContentEntry
+from gitbook_worker.tools.utils.smart_content import ContentEntry, load_content_config
 from gitbook_worker.tools.utils.smart_manage_publish_flags import set_publish_flags
 
 LOGGER = get_logger(__name__)
@@ -198,6 +198,7 @@ class OrchestratorConfig:
     quality_baseline: Path | None = None
     quality_accepted_findings: Path | None = None
     quality_gate: bool = False
+    quality_scope: str = "current"
 
 
 class RuntimeContext:
@@ -667,6 +668,7 @@ def build_config(args: argparse.Namespace) -> OrchestratorConfig:
         quality_baseline=getattr(args, "quality_baseline", None),
         quality_accepted_findings=getattr(args, "quality_accepted_findings", None),
         quality_gate=getattr(args, "quality_gate", False),
+        quality_scope=getattr(args, "quality_scope", "current"),
     )
 
 
@@ -1296,12 +1298,87 @@ def _step_publisher(ctx: RuntimeContext) -> None:
         raise
 
 
-def _step_editorial_quality(ctx: RuntimeContext) -> None:
-    """Run editorial metrics and acceptance after a build."""
+def _quality_content_build_enabled(entry: ContentEntry) -> bool:
+    """Return whether a content entry participates in configured quality runs."""
 
-    quality_dir = ctx.config.logs_dir / "quality"
-    quality_dir.mkdir(parents=True, exist_ok=True)
-    prefix = f"{ctx.config.language_id}-{ctx.config.quality_profile}"
+    raw = entry.raw or {}
+    return _as_bool(raw.get("build"), default=True)
+
+
+def _configured_quality_language_ids(ctx: RuntimeContext) -> tuple[str, ...]:
+    """Resolve buildable local content IDs for a configured quality run."""
+
+    if not ctx.config.content_config_path:
+        return (ctx.config.language_id,)
+    try:
+        content_config = load_content_config(
+            ctx.config.content_config_path,
+            cwd=ctx.root,
+            repo_root=ctx.root,
+            allow_missing=True,
+        )
+    except Exception as exc:  # pragma: no cover - defensive fallback
+        LOGGER.warning(
+            "Unable to load content config for configured quality scope: %s; "
+            "falling back to current language %s",
+            exc,
+            ctx.config.language_id,
+        )
+        return (ctx.config.language_id,)
+
+    language_ids: list[str] = []
+    for entry in content_config.entries.values():
+        if not entry.is_local:
+            LOGGER.info(
+                "Skipping content entry %s for configured quality scope: type=%s",
+                entry.id,
+                entry.type,
+            )
+            continue
+        if not _quality_content_build_enabled(entry):
+            LOGGER.info(
+                "Skipping content entry %s for configured quality scope: build=false",
+                entry.id,
+            )
+            continue
+        try:
+            language_root = entry.resolve_path(ctx.root)
+        except ValueError as exc:
+            LOGGER.info(
+                "Skipping content entry %s for configured quality scope: %s",
+                entry.id,
+                exc,
+            )
+            continue
+        if not language_root.exists():
+            LOGGER.warning(
+                "Skipping content entry %s for configured quality scope: root %s missing",
+                entry.id,
+                language_root,
+            )
+            continue
+        language_ids.append(entry.id)
+
+    if not language_ids:
+        LOGGER.warning(
+            "No buildable local content entries found for configured quality scope; "
+            "falling back to current language %s",
+            ctx.config.language_id,
+        )
+        return (ctx.config.language_id,)
+    return tuple(dict.fromkeys(language_ids))
+
+
+def _run_editorial_quality_bundle(
+    ctx: RuntimeContext,
+    *,
+    quality_dir: Path,
+    prefix: str,
+    language_ids: Sequence[str],
+    check_acceptance: bool,
+) -> tuple[Path, int]:
+    """Run metrics and acceptance for one language set."""
+
     metrics_report = quality_dir / f"{prefix}-editorial-metrics.json"
     findings_csv = quality_dir / f"{prefix}-editorial-findings.csv"
     findings_sarif = quality_dir / f"{prefix}-editorial-findings.sarif"
@@ -1311,14 +1388,16 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
     trend_jsonl = quality_dir / "editorial-trends.jsonl"
     snapshot_dir = quality_dir / "snapshots" / prefix
 
+    language_args: list[str] = []
+    for language_id in language_ids:
+        language_args.extend(["--lang", str(language_id)])
+
     metrics_cmd: list[str] = [
         ctx.python,
         "-m",
         "gitbook_worker.tools.quality.editorial_metrics",
         "--root",
         str(ctx.root),
-        "--lang",
-        str(ctx.config.language_id),
         "--profile",
         ctx.config.quality_profile,
         "--output",
@@ -1329,6 +1408,7 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
         str(findings_sarif),
         "--console-summary",
     ]
+    metrics_cmd[5:5] = language_args
     if ctx.config.content_config_path:
         metrics_cmd.extend(["--content-config", str(ctx.config.content_config_path)])
     ctx.run_command(metrics_cmd)
@@ -1359,7 +1439,7 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
         acceptance_cmd.extend(
             ["--accepted-findings", str(ctx.config.quality_accepted_findings)]
         )
-    result = ctx.run_command(acceptance_cmd, check=ctx.config.quality_gate)
+    result = ctx.run_command(acceptance_cmd, check=check_acceptance)
     if result.returncode:
         LOGGER.warning(
             "Editorial quality acceptance finished with status %s; gate=%s, dossier=%s",
@@ -1367,6 +1447,59 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
             ctx.config.quality_gate,
             dossier,
         )
+    return dossier, int(result.returncode or 0)
+
+
+def _step_editorial_quality(ctx: RuntimeContext) -> None:
+    """Run editorial metrics and acceptance after a build."""
+
+    quality_dir = ctx.config.logs_dir / "quality"
+    quality_dir.mkdir(parents=True, exist_ok=True)
+
+    if ctx.config.quality_scope == "configured":
+        language_ids = _configured_quality_language_ids(ctx)
+        LOGGER.info(
+            "Running editorial quality for configured content entries: %s",
+            ", ".join(language_ids),
+        )
+        failures: list[tuple[Path, int]] = []
+        for language_id in language_ids:
+            dossier, returncode = _run_editorial_quality_bundle(
+                ctx,
+                quality_dir=quality_dir,
+                prefix=f"{language_id}-{ctx.config.quality_profile}",
+                language_ids=(language_id,),
+                check_acceptance=False,
+            )
+            if returncode:
+                failures.append((dossier, returncode))
+
+        project_dossier, project_returncode = _run_editorial_quality_bundle(
+            ctx,
+            quality_dir=quality_dir,
+            prefix=f"project-{ctx.config.quality_profile}",
+            language_ids=language_ids,
+            check_acceptance=False,
+        )
+        if project_returncode:
+            failures.append((project_dossier, project_returncode))
+
+        if ctx.config.quality_gate and failures:
+            first_dossier, first_returncode = failures[0]
+            raise subprocess.CalledProcessError(
+                first_returncode,
+                ["editorial-quality", "--quality-scope", "configured"],
+                output=f"first failing dossier: {first_dossier}",
+            )
+        return
+
+    _run_editorial_quality_bundle(
+        ctx,
+        quality_dir=quality_dir,
+        prefix=f"{ctx.config.language_id}-{ctx.config.quality_profile}",
+        language_ids=(ctx.config.language_id,),
+        check_acceptance=ctx.config.quality_gate,
+    )
 
 
 STEP_HANDLERS = {
@@ -1490,6 +1623,16 @@ def parse_args(argv: Iterable[str] | None = None) -> argparse.Namespace:
         "--quality-gate",
         action="store_true",
         help="Editorial-Acceptance-Status als CI-Gate verwenden",
+    )
+    run_parser.add_argument(
+        "--quality-scope",
+        choices=("current", "configured"),
+        default="current",
+        help=(
+            "Umfang fuer editorial-quality: current erzeugt ein Dossier fuer --lang; "
+            "configured erzeugt je buildbarer lokaler content.yaml-Version plus "
+            "project-Gesamtdossier"
+        ),
     )
 
     validate_parser = subparsers.add_parser(

@@ -99,6 +99,9 @@ testground/
 # Release procedure docker logs (repo-local)
 /logs/docker/
 
+# Generated editorial quality reports; keep as delivery artifacts, not source
+/logs/quality/
+
 # OS generated files
 .DS_Store
 .DS_Store?
