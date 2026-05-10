@@ -1,8 +1,9 @@
 ---
-version: 1.1.0
-date: 2026-02-08
+version: 1.2.0
+date: 2026-05-10
 config_schema_version: "1.0.0"
 history:
+  - "1.2.0: 2026-05-10 — CC-BY-only policy boundary, no-Noto rule and ERDA Emoji/v2.10.0 note documented"
   - "1.1.0: 2026-02-08 — copyright→ATTRIBUTION, usage_note→ATTRIBUTION implementiert, fontconfig_name als 📝"
   - "1.0.0: 2026-02-08 — Initial documentation"
 ---
@@ -31,6 +32,9 @@ Aktuell: **1.0.0** — Feld `version` (Top-Level).
 2. **Dockerfile.dynamic** liest `fonts.yml` und installiert nur konfigurierte Fonts
 3. **Build schlägt fehl** statt auf System-Fonts zurückzufallen
 4. **LuaTeX Cache Guard** — fehlende Fonts im Cache → Early Abort
+5. **Lizenzgrenze** — ausser der bestehenden DejaVu-Familie werden nur CC BY 4.0 lizenzierte Projektfonts und Emoji-Fonts aufgenommen
+6. **No Noto** — Noto-Fonts sind als Fallback, Fixture, Docker-Abhaengigkeit und Empfehlung ausgeschlossen
+7. **Keine Phantom-Konfiguration** — ERDA Emoji wird erst in `fonts.yml` eingetragen, wenn ein echter validierter Font-Artefaktpfad existiert
 
 ## Schlüssel-Referenz
 
@@ -51,17 +55,32 @@ Aktuell: **1.0.0** — Feld `version` (Top-Level).
 
 \* `paths` oder `download_url` — mindestens eines muss gesetzt sein.
 
-## Aktuelle Fonts (v1.0.0)
+## Aktuelle Fonts (fonts.yml v1.0.0)
 
 | Key | Name | Version | Lizenz |
 |-----|------|---------|--------|
-| CJK | ERDA CC-BY CJK | 1.0.0 | CC BY 4.0 |
-| INDIC | ERDA CC-BY Indic | 1.0.0 | CC BY 4.0 |
-| ETHIOPIC | ERDA CC-BY Ethiopic | 1.0.0 | CC BY 4.0 |
+| CJK | ERDA CC-BY CJK | 1.4.1 | CC BY 4.0 |
+| INDIC | ERDA CC-BY Indic | 1.4.1 | CC BY 4.0 |
+| ETHIOPIC | ERDA CC-BY Ethiopic | 1.4.1 | CC BY 4.0 |
 | EMOJI | Twemoji Mozilla | 0.7.0 | CC BY 4.0 |
 | MONO | DejaVu Sans Mono | 2.37 | Bitstream Vera + PD |
 | SANS | DejaVu Sans | 2.37 | Bitstream Vera + PD |
 | SERIF | DejaVu Serif | 2.37 | Bitstream Vera + PD |
+
+## v2.10.0 Font-Familienentscheidung
+
+Der historische Generatorpfad `.github/fonts/erda-ccby-cjk/` beschreibt die
+aktuelle Fontfamilie nicht mehr praezise. Fuer v2.10.0 ist geplant, die Familie
+unter `.github/fonts/erda-ccby-fonts/` zu fuehren und dort CJK, Indic,
+Ethiopic, ERDA Emoji und weitere Sprachschrift-Basisssaetze zu buendeln.
+
+Die Umbenennung ist eine Pfad- und Dokumentationsmigration. Sie darf nicht mit
+versteckten Fontwechseln vermischt werden. `fonts.yml` wird erst angepasst,
+wenn die neuen Pfade existieren und die TTFs validiert wurden.
+
+ERDA Emoji wird als CC BY 4.0 lizenzierter Projektfont gebaut, wenn Twemoji
+Mozilla die benoetigten Kunden-Emojis nicht abdeckt. Noto-Fonts bleiben fuer
+diese Luecke ausgeschlossen.
 
 ## Implementierte Änderungen (v2.2.0)
 
@@ -73,6 +92,7 @@ Aktuell: **1.0.0** — Feld `version` (Top-Level).
 
 | Version | Datum | Änderung |
 |---------|-------|----------|
+| 1.2.0 | 2026-05-10 | CC-BY-only/no-Noto Fontpolitik und v2.10.0 ERDA-Fontfamilienentscheidung dokumentiert |
 | 1.0.0 | 2026-01-08 | Initiales Schema mit 7 Fonts |
 | 1.0.0 | 2026-02-08 | copyright/usage_note von Attribution-Generator gelesen (kein Schemaänderung) |
 

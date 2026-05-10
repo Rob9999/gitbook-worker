@@ -1,8 +1,11 @@
 ---
 title: ERDA font coverage matrix
-version: 1.0.0
-date: 2026-05-07
+version: 1.1.0
+date: 2026-05-10
 history:
+  - version: 1.1.0
+    date: 2026-05-10
+    description: Adds v2.10.0 ERDA Emoji, per-script baseline and erda-ccby-fonts rename direction.
   - version: 1.0.0
     date: 2026-05-07
     description: Documents the v2.5.0 staged coverage targets and TTF statistics workflow.
@@ -67,3 +70,26 @@ C:/gitbook-worker/.venv/Scripts/python.exe -m pytest gitbook_worker/tests/test_e
 The `stats` command reads the finished TTF files with `fontTools.ttLib.TTFont`
 and reports `maxp.numGlyphs`, glyph-order length, mapped Unicode codepoints,
 per-range counts and release-target pass/fail status.
+
+## v2.10.0 Direction
+
+The font family is no longer only a CJK fallback. The historical
+`.github/fonts/erda-ccby-cjk/` path should be migrated to
+`.github/fonts/erda-ccby-fonts/` in a dedicated compatibility-aware rename.
+
+Policy boundary:
+
+- DejaVu remains the configured primary Latin/mono family.
+- Every additional project font and emoji font must be CC BY 4.0 licensed.
+- Noto fonts are explicitly forbidden for fallback coverage.
+
+Planned v2.10.0 expansion:
+
+| Font family area | Target |
+|---|---|
+| ERDA Emoji | Customer-required emoji coverage missing from Twemoji Mozilla, with CC BY 4.0 provenance and LuaLaTeX embedding proof. |
+| ERDA per-script baselines | Up to 5000 glyphs per script where useful; complete assigned block coverage for smaller declared script scopes. |
+| ERDA CJK/Indic/Ethiopic | Keep existing validated targets and move paths only during the explicit rename step. |
+
+ERDA Emoji must not appear in `fonts.yml` until a real font artifact exists and
+has passed PDF embedding, attribution and editorial-quality validation.

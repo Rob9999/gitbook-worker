@@ -1,4 +1,4 @@
-# Agent Directives for GitBook Worker (v1.3.1)
+# Agent Directives for GitBook Worker (v1.3.2)
 
 ## Scope & How to Use This File
 - Diese Anweisungen gelten für das gesamte Repository; es gibt aktuell keine verschachtelten Abweichungen.
@@ -39,6 +39,12 @@
     - `download_url` or `paths`: Where to obtain the font
 17. **Dynamic Docker Font Setup**: The `Dockerfile.dynamic` reads `fonts.yml` and installs only configured fonts. No fonts are hardcoded in the Dockerfile itself.
 18. **LuaTeX Cache Guard**: If fallback fonts are configured but not in the LuaTeX cache, publishing will now abort early. See [gitbook_worker/docs/attentions/lua-font-cache.md](gitbook_worker/docs/attentions/lua-font-cache.md) for recovery steps (install fonts, then run `luaotfload-tool --update --force`).
+
+Additional font policy decisions as of 2026-05-10:
+- Apart from the already configured DejaVu family, all project fonts and emoji fonts must be CC BY 4.0 licensed ERDA/Twemoji-family assets.
+- Noto fonts are explicitly forbidden for this repository, including as temporary fallback, test fixture, Docker dependency, or documentation recommendation.
+- When Twemoji Mozilla does not cover required customer emojis, build and configure an ERDA Emoji font under CC BY 4.0 instead of adding another external fallback family.
+- The historical `.github/fonts/erda-ccby-cjk/` name is deprecated conceptually; new planning should use the broader `erda-ccby-fonts` family name while preserving compatibility until the rename is performed deliberately.
 
 ## Versionierung
 19. Semantic Versioning in allen Dokumenten, JSONs, YAMLs, ...

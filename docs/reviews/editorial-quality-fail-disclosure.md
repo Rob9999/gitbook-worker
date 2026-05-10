@@ -1,10 +1,11 @@
 ---
-version: 1.0.0
+version: 1.1.0
 date: 2026-05-10
 status: delivery-evidence
 target_release: "v2.9.0 Qualitaetskompass"
 history:
-  - "1.0.0: 2026-05-10 - Fail-Befunde des konfigurierten release-Lieferlaufs offengelegt."
+   - "1.1.0: 2026-05-10 - Fachentscheidung fuer ERDA Emoji, ERDA-Sprachfonts v2.10.0 und no-Noto Fontpolitik ergaenzt."
+   - "1.0.0: 2026-05-10 - Fail-Befunde des konfigurierten release-Lieferlaufs offengelegt."
 ---
 
 # Editorial Quality Fail Disclosure
@@ -39,6 +40,28 @@ Script-Samples und Emoji-/Font-Coverage-Seiten.
 |---|---|---|
 | replacement glyph signal(s) in PDF text extraction | `fail` | Release blockierend, bis Fontkonfiguration, LaTeX-Logs und visuelle Stichprobe geklaert sind. |
 
+## Fachentscheidung vom 2026-05-10
+
+Die bekannten Glyphen-/Font-Fails werden nicht als stilles Restrisiko
+akzeptiert. Sie werden als Font-Coverage-Healing fuer v2.10.0 geplant.
+
+Verbindliche Leitplanken:
+
+1. Ausser der bestehenden DejaVu-Familie werden nur CC BY 4.0 lizenzierte
+   Projektfonts und Emoji-Fonts verwendet.
+2. Noto-Fonts sind ausgeschlossen, auch als Zwischenloesung oder Testfixture.
+3. Wenn Twemoji Mozilla benoetigte Kunden-Emojis nicht abdeckt, wird ein ERDA
+   Emoji Font unter CC BY 4.0 gebaut und erst nach TTF-/PDF-Validierung in
+   `gitbook_worker/defaults/fonts.yml` konfiguriert.
+4. Fehlende Sprachschrift-Coverage wird in v2.10.0 mit ERDA-generierten
+   Basissatz-Fonts je Sprachschrift adressiert. Ziel ist bis zu 5000 Glyphen je
+   Schrift, sofern der deklarierte Unicode-/Script-Scope so gross ist; kleinere
+   Bloecke gelten als vollstaendig, wenn alle zugeordneten Codepoints im Scope
+   abgedeckt sind.
+5. Der historisch benannte Generatorpfad `.github/fonts/erda-ccby-cjk/` soll
+   in einem separaten Migrationsschnitt zu `.github/fonts/erda-ccby-fonts/`
+   werden, weil die Fontfamilie nicht mehr nur CJK umfasst.
+
 ## Healing-Steps
 
 1. LaTeX- und Build-Logs auf Missing-Glyph-, `.notdef`- oder Fontfallback-
@@ -50,6 +73,10 @@ Script-Samples und Emoji-/Font-Coverage-Seiten.
    pruefen.
 5. Erst nach technischer und visueller Klaerung als behoben oder als explizit
    akzeptiertes Restrisiko dokumentieren.
+
+6. Fuer v2.10.0 den ERDA-Fontfamilienplan in
+   [gitbook_worker/docs/backlog/erda-ccby-fonts-v2-10.md](../../gitbook_worker/docs/backlog/erda-ccby-fonts-v2-10.md)
+   umsetzen und danach DE/EN/Projekt-Dossiers erneut erzeugen.
 
 ## Abnahmeaussage
 
