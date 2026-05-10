@@ -201,6 +201,7 @@ def _resolve_module_path(relative_path: str) -> str:
 _DEFAULT_LUA_FILTERS: List[str] = [
     _resolve_module_path("lua/image-path-resolver.lua"),
     _resolve_module_path("lua/emoji-span.lua"),
+    _resolve_module_path("lua/text-symbols.lua"),
     _resolve_module_path("lua/erda-script-fonts.lua"),
     _resolve_module_path("lua/cjk-linebreak.lua"),
     _resolve_module_path("lua/latex-emoji.lua"),
@@ -1775,6 +1776,7 @@ def _build_font_header(
     )
     lines.append(f"\\setsansfont{sans_options}{{{sans_font}}}")
     lines.append(f"\\setmonofont{sans_options}{{{mono_font}}}")
+    lines.append("\\DeclareRobustCommand*{\\erdaTextSymbol}[1]{{\\sffamily#1}}")
 
     # Note: SVG files are converted to PDF during asset copying (asset_copy.py)
     # No LaTeX svg package needed since we now use Python-based conversion

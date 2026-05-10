@@ -31,6 +31,7 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 LUA_DIR = Path(__file__).parent.parent / "tools" / "publishing" / "lua"
 EMOJI_SPAN_LUA = LUA_DIR / "emoji-span.lua"
+TEXT_SYMBOLS_LUA = LUA_DIR / "text-symbols.lua"
 LATEX_EMOJI_LUA = LUA_DIR / "latex-emoji.lua"
 
 # ---------------------------------------------------------------------------
@@ -77,6 +78,8 @@ def _check_lua_filters():
     """Skip tests if Lua filters are missing."""
     if not EMOJI_SPAN_LUA.exists():
         pytest.skip(f"emoji-span.lua not found at {EMOJI_SPAN_LUA}")
+    if not TEXT_SYMBOLS_LUA.exists():
+        pytest.skip(f"text-symbols.lua not found at {TEXT_SYMBOLS_LUA}")
     if not LATEX_EMOJI_LUA.exists():
         pytest.skip(f"latex-emoji.lua not found at {LATEX_EMOJI_LUA}")
 
@@ -124,6 +127,8 @@ def _run_pandoc_to_latex(
         str(md_file),
         "--lua-filter",
         str(EMOJI_SPAN_LUA),
+        "--lua-filter",
+        str(TEXT_SYMBOLS_LUA),
         "--lua-filter",
         str(LATEX_EMOJI_LUA),
         # Pass metadata via --metadata flags (avoids MetaInlines splitting)
@@ -255,6 +260,34 @@ class TestTocEmojiHeading:
             "No \\panEmoji{…} wrapping found in LaTeX output.\n"
             "emoji-span.lua or latex-emoji.lua did not process the emoji spans."
         )
+
+    def test_text_checkbox_symbols_are_not_wrapped_as_emoji(self, tmp_path):
+        r"""Checklist box symbols must stay in the text font fallback path."""
+        _check_pandoc_available()
+        _check_lua_filters()
+
+        tex = _run_pandoc_to_latex(
+            """\
+# ✅ Checkliste
+
+- ☐ Offen
+- ☑ Erledigt
+- ☒ Abgelehnt
+""",
+            tmp_path,
+            with_toc=False,
+            standalone=False,
+        )
+
+        assert r"\panEmoji{✅}" in tex
+        assert r"\panEmoji{☐}" not in tex
+        assert r"\panEmoji{☑}" not in tex
+        assert r"\panEmoji{☒}" not in tex
+        assert r"\erdaTextSymbol{☐}" in tex
+        assert r"\erdaTextSymbol{☑}" in tex
+        assert r"\erdaTextSymbol{☒}" in tex
+        assert r"\item[$\square$]" not in tex
+        assert r"\item[$\boxtimes$]" not in tex
 
     # -----------------------------------------------------------------------
     # Prologue must contain the emoji font face setup

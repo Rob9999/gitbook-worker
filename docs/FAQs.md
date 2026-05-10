@@ -1,7 +1,8 @@
 ---
-version: 1.1.0
-date: 2026-02-08
+version: 1.2.0
+date: 2026-05-10
 history:
+  - "1.2.0: 2026-05-10 — FAQ #6 fuer Checkbox-/Textsymbol-Fallbacks in PDFs ergaenzt"
   - "1.1.0: 2026-02-08 — FAQ #1 aktualisiert: Auto-Detect & gitbook_rename-Key implementiert (v2.3.0)"
   - "1.0.0: 2026-02-08 — Initial FAQ from customer flat-file scenario"
 ---
@@ -15,6 +16,7 @@ history:
 3. [Profil-Fallback auf `default` statt `local`](#3-profil-fallback-auf-default-statt-local)
 4. [Manifest-Version-Warnung (neuer als getestete)](#4-manifest-version-warnung-neuer-als-getestete)
 5. [Sonderzeichen in Dateinamen (m², &, @, Leerzeichen)](#5-sonderzeichen-in-dateinamen)
+6. [Checkbox-Symbole erscheinen im PDF als Rechtecke](#6-checkbox-symbole-erscheinen-im-pdf-als-rechtecke)
 
 ---
 
@@ -235,3 +237,36 @@ portabel sein sollen:
 - ASCII-Kleinbuchstaben, Ziffern, Bindestriche
 - Keine Leerzeichen, keine Unicode-Sonderzeichen
 - Beispiel: `mars-rubber-glass-house-v2.md`
+
+---
+
+## 6. Checkbox-Symbole erscheinen im PDF als Rechtecke
+
+### Symptom
+
+Markdown-Tasklisten oder Textsymbole wie `☐`, `☑`, `☒`, `✓` oder `✔`
+erscheinen im PDF als leere oder fremd wirkende Rechtecke.
+
+### Ursache
+
+Diese Zeichen sind Textsymbole, keine Farb-Emojis. Der Serif-Hauptfont deckt
+einige davon nicht ab. Deshalb muss der PDF-Fallback eine Sans-Schrift
+enthalten, die diese Symbole liefert.
+
+### Lösung
+
+Bei eigenen `publish.yml`-Overrides `DejaVu Sans:mode=harf` in die
+Fallback-Kette aufnehmen, vor script-spezifischen ERDA-Fallbacks:
+
+```yaml
+pdf_options:
+  main_font: DejaVu Serif
+  sans_font: DejaVu Sans
+  mono_font: DejaVu Sans Mono
+  mainfont_fallback: Twemoji Mozilla:mode=harf; DejaVu Sans:mode=harf; ERDA CC-BY CJK:mode=harf
+```
+
+Der Publisher routet Checkbox-/Checkmark-Symbole zusaetzlich ueber
+`text-symbols.lua` durch den konfigurierten Sans-Font. So bleiben
+Markdown-Tasklisten und literal geschriebene Checkboxen im PDF sichtbar und im
+Textlayer extrahierbar.

@@ -1,8 +1,9 @@
 ---
-version: 2.2.1
-date: 2026-05-09
+version: 2.2.2
+date: 2026-05-10
 status: stable
 history:
+  - "2.2.2: 2026-05-10 - DejaVu-Sans-Hinweis fuer Checkbox-/Textsymbol-Fallbacks in Kundenlieferungen ergaenzt"
   - "2.2.1: 2026-05-09 - Tabellenprofi Renderer-Fix, Visual-Smoke und Wheel-Smoke fuer v2.8.0 ergaenzt"
   - "2.2.0: 2026-05-09 - Anwenderanleitung fuer v2.8.0 Tabellenprofi aktualisiert"
   - "2.1.3: 2026-05-08 - Finale v2.7.0 Release-Verifikation mit Test-, PDF- und Wheel-Smoke-Ergebnissen ergaenzt"
@@ -303,7 +304,7 @@ publish:
       mainfont: "DejaVu Serif"
       sansfont: "DejaVu Sans"
       monofont: "DejaVu Sans Mono"
-      mainfont_fallback: "Twemoji Mozilla;ERDA CC-BY CJK"
+      mainfont_fallback: "Twemoji Mozilla:mode=harf;DejaVu Sans:mode=harf;ERDA CC-BY CJK:mode=harf"
       abort_if_missing_glyph: true
       code_block_wrap: true
       table_paper_strategy:
@@ -563,6 +564,7 @@ Die zentrale Tabelle fuer Diagnose und Healing-Steps liegt in
 | Manifest wird nicht gefunden | Falscher Root oder falsches `--lang` | `--root`, `--content-config` und `content.yaml` pruefen |
 | Profil faellt auf `default` zurueck | Gewuenschtes Profil fehlt in `publish.yml` | Profil anlegen oder korrekt benennen |
 | PDF zeigt fehlende Glyphen | Font fehlt oder LuaTeX-Cache veraltet | Fonts syncen und `luaotfload-tool --update --force` ausfuehren |
+| Checkboxen wie `☐`/`☑` erscheinen als Rechtecke | `mainfont_fallback` wurde ohne Sans-Fallback ueberschrieben | `DejaVu Sans:mode=harf` in der Fallback-Kette belassen |
 | Docker findet Fonts nicht | Font-Cache/Font-Ordner fehlen im Workspace | `gitbook-worker-fonts sync` ausfuehren und Docker mit `--use-dynamic --rebuild` starten |
 | AI-Reference bricht wegen 429 ab | Provider-Rate-Limit | `--requests-per-minute`, `--max-consecutive-429` und Backoff-Optionen setzen |
 | Markdown wurde nicht geaendert | Report-first Default | Nur mit `--apply` werden Vorschlaege geschrieben |
@@ -626,6 +628,8 @@ eine konkrete Lieferung oder ein Kundenprojekt geprueft werden:
 - [ ] `validate` funktioniert fuer mindestens einen lokalen Sprachbaum.
 - [ ] Lokaler PDF-Build erzeugt das erwartete PDF.
 - [ ] PDF-Font-Gate bestaetigt Emoji- und CJK-Font-Einbettung.
+- [ ] Bei eigenen `mainfont_fallback`-Overrides bleibt `DejaVu Sans:mode=harf`
+  fuer Checkbox- und Checkmark-Symbole enthalten.
 - [ ] Docker-Lauf mit `--use-dynamic` funktioniert, falls Docker Teil der
       Lieferung ist.
 - [ ] AI-Reference-Precheck schreibt einen JSON-Report ohne Markdown-Aenderung.

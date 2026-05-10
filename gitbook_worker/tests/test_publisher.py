@@ -108,6 +108,10 @@ def test_default_filters_include_cjk_linebreak_filter():
         str(path).endswith("erda-script-fonts.lua")
         for path in publisher._DEFAULT_LUA_FILTERS
     )
+    assert any(
+        str(path).endswith("text-symbols.lua")
+        for path in publisher._DEFAULT_LUA_FILTERS
+    )
 
 
 def test_luaotfload_rejects_invalid_resolved_font_file(monkeypatch, tmp_path):

@@ -1,7 +1,8 @@
 ---
-version: 1.10.0
+version: 1.11.0
 date: 2026-05-10
 history:
+  - "1.11.0: 2026-05-10 — DejaVu Sans in mainfont_fallback fuer Checkbox-/Textsymbole dokumentiert"
   - "1.10.0: 2026-05-10 — Orchestrator --quality-scope fuer Sprach- und Gesamtprojekt-Dossiers dokumentiert"
   - "1.9.0: 2026-05-10 — editorial quality HTML-/Trend-/Snapshot-/SARIF-Ausgaben dokumentiert"
   - "1.8.0: 2026-05-09 — Pflicht-/Soll-Schnitt fuer editorial quality profile, CSV/Console und Orchestrator-Gate dokumentiert"
@@ -36,6 +37,11 @@ Hinweis fuer v2.6.1: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wra
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das
 LaTeX-Paket in der Umgebung vorhanden ist, und bricht auch URL-artige Pandoc-
 Token in Code-Fences innerhalb des Satzspiegels um.
+
+Hinweis fuer Checkbox-/Textsymbole: Wenn `mainfont_fallback` projektseitig
+ueberschrieben wird, muss `DejaVu Sans:mode=harf` in der Kette bleiben. Der
+Publisher routet `☐`, `☑`, `☒`, `✓` und `✔` als Textsymbole ueber den Sans-Font;
+ohne Sans-Fallback koennen PDF-Viewer fehlende Rechteckglyphen zeigen.
 
 > **Ausführliche Per-File-Dokumentation** mit Versionshistorie:
 > [docs/configs/](configs/README.md)
@@ -157,7 +163,7 @@ Steuert Profile, Projekt-Metadaten, Publish-Entries und PDF-Optionen.
 | `mainfont` | string | – | ✅ | → Pandoc `-V mainfont` (bevorzugter Key) |
 | `sansfont` | string | – | ✅ | → Pandoc `-V sansfont` (bevorzugter Key) |
 | `monofont` | string | – | ✅ | → Pandoc `-V monofont` (bevorzugter Key) |
-| `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt) |
+| `mainfont_fallback` | string | `""` | ✅ | LuaTeX Fallback-Chain (`;`-getrennt); bei Overrides `DejaVu Sans:mode=harf` fuer Checkbox-/Textsymbole beibehalten |
 | `abort_if_missing_glyph` | bool | `true` | ✅ | Bei fehlenden Glyphen abbrechen |
 | `code_block_wrap` | bool | `true` | ✅ | Lange Zeilen in Code-Fences im PDF umbrechen (`fvextra`) |
 | `table_paper_strategy` | object | `{}` | ✅ | Redaktionelle Best-Fit-Papierwahl fuer Markdown-Pipe-Tabellen (§2.6.1) |

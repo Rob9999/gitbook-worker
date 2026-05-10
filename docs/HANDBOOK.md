@@ -1,7 +1,8 @@
 ---
-version: 1.3.8
-date: 2026-05-09
+version: 1.3.9
+date: 2026-05-10
 history:
+  - "1.3.9: 2026-05-10 - Text-Checkbox-Symbole fuer PDF-Fallback ueber DejaVu Sans dokumentiert"
   - "1.3.8: 2026-05-09 - Tabellenprofi-Strategie fuer v2.8.0 dokumentiert"
   - "1.3.7: 2026-05-08 - Wide-Table-Paper-Selection fuer v2.7.0 dokumentiert"
   - "1.3.6: 2026-05-08 - URL-Code-Fence-Hotfix fuer v2.6.1 dokumentiert"
@@ -67,6 +68,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - v2.6.1 extends PDF code-fence wrapping for Pandoc token macros such as `\NormalTok{...}`. When `fvextra` is available, token arguments are routed through `\FV@InsertBreaks`; this keeps long URLs inside code fences within the page bounds while preserving a clean PDF text layer.
 - v2.7.0 improves wide Markdown table handling. Pipe tables are estimated by per-column text width and compared against usable text width after margins; the old column-count heuristic remains a lower bound, and oversized tables emit a warning instead of pretending that a standard paper size solved them.
 - v2.8.0 moves table paper choice into `table_strategy.py` and adds editorial scoring. The strategy compares candidate papers by expected wrapping, row height, header wraps, narrow columns, and unbreakable overflow; `pdf_options.table_paper_strategy` can tune thresholds, write JSONL layout reports, and accept per-table `gbw-table` paper overrides.
+- Checklist symbols such as `☐`, `☑`, `☒`, `✓`, and `✔` are text symbols, not colour emoji. The publisher routes them through `text-symbols.lua` and the configured sans font so Pandoc task-list markers do not fall back to math square placeholders or missing-glyph boxes.
 
 ### PDF font fallback behavior
 
@@ -81,6 +83,8 @@ This report shall be written to the build log for troubleshooting.
 The `mainfontfallback` stack exists to prevent missing-glyph boxes, not just to check font availability. For every glyph that the primary fonts cannot render, the PDF build shall try each font in the `mainfontfallback` stack in order and use the first fallback font that can provide a proper glyph (e.g. a regular text glyph, emoji glyph, etc.). As long as every required glyph can be rendered either by a primary font or by at least one font in the `mainfontfallback` stack, the PDF build shall succeed and no .notdef / empty box glyphs shall appear in the output.
 
 For CJK-heavy PDFs, `cjk-linebreak.lua` adds safe breakpoints after CJK characters so long Traditional Chinese, Japanese, and Korean passages can wrap before the page margin.
+
+Text-style checklist symbols are routed through the configured sans font (`DejaVu Sans` in the shipped profiles). Keep that font available and include it in custom fallback stacks when a project overrides `mainfont_fallback`, especially for customer books that use Pandoc task lists or literal `☐`/`☑` markers.
 
 3. Abort condition
 The PDF build shall abort only if, after trying all configured primary fonts and all fonts in the `mainfontfallback` stack, there remains at least one required glyph that would still be rendered as a missing-glyph box (.notdef). In that case, the pipeline shall fail and emit the detailed missing-glyph report described in (1), instead of silently producing a PDF with empty boxes.

@@ -1361,6 +1361,9 @@ Speichern mit <kbd>Strg</kbd> + <kbd>S</kbd> (Windows/Linux) oder <kbd>⌘</kbd>
 
 ✓ ✗ ☐ ☑ ☒
 
+- [ ] Offene Aufgabe mit PDF-Textsymbol-Fallback
+- [x] Erledigte Aufgabe mit PDF-Textsymbol-Fallback
+
 ★ ☆ ♠ ♣ ♥ ♦
 
 ### Mathematische Symbole

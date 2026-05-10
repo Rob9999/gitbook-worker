@@ -260,6 +260,9 @@ Save with <kbd>Ctrl</kbd> + <kbd>S</kbd> (Windows/Linux) or <kbd>⌘</kbd> + <kb
 
 ✓ ✗ ☐ ☑ ☒
 
+- [ ] Open task with PDF text-symbol fallback
+- [x] Completed task with PDF text-symbol fallback
+
 ★ ☆ ♠ ♣ ♥ ♦
 
 ### Mathematical Symbols

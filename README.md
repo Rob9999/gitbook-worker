@@ -214,6 +214,7 @@ publish:
       monofont: "DejaVu Sans Mono"
       mainfontfallback:
         - "Twemoji Mozilla"
+        - "DejaVu Sans"
         - "ERDA CC-BY CJK"
       # Layout & Typografie (seit v2.2.0)
       documentclass: book           # article | report | book
@@ -233,6 +234,11 @@ publish:
 
 > Alle Standard-Pandoc/LaTeX-Variablen werden transparent als `-V key=value`
 > weitergereicht. Vollständige Referenz: [docs/configuration-reference.md](docs/configuration-reference.md).
+
+Hinweis fuer Checklisten: Textsymbole wie `☐`, `☑`, `☒`, `✓` und `✔` sind
+keine Farb-Emojis. Wenn ein Projekt `mainfontfallback` selbst setzt, muss
+`DejaVu Sans` in der Fallback-Kette bleiben, damit Pandoc-Tasklisten im PDF
+nicht als fehlende Rechteckglyphen erscheinen.
 
 #### Tipps für optimale Ergebnisse
 
@@ -694,6 +700,7 @@ publish:
       monofont: "DejaVu Sans Mono"
       mainfontfallback:
         - "Twemoji Mozilla"
+        - "DejaVu Sans"
         - "ERDA CC-BY CJK"
       # Layout & typography (since v2.2.0)
       documentclass: book           # article | report | book
@@ -713,6 +720,11 @@ publish:
 
 > All standard Pandoc/LaTeX variables are transparently forwarded as `-V key=value`.
 > Full reference: [docs/configuration-reference.md](docs/configuration-reference.md).
+
+Checklist note: text symbols such as `☐`, `☑`, `☒`, `✓`, and `✔` are not
+colour emoji. If a project overrides `mainfontfallback`, keep `DejaVu Sans` in
+the fallback chain so Pandoc task lists do not render as missing rectangle
+glyphs in PDFs.
 
 #### Tips for Optimal Results
 

@@ -25,7 +25,20 @@ local emoji_singletons = {
   [0x2935] = true,
 }
 
+local text_symbol_exclusions = {
+  [0x2610] = true, -- ballot box
+  [0x2611] = true, -- ballot box with check
+  [0x2612] = true, -- ballot box with x
+  [0x2713] = true, -- check mark
+  [0x2714] = true, -- heavy check mark
+  [0x2717] = true, -- ballot x
+  [0x2718] = true, -- heavy ballot x
+}
+
 local function is_emoji_base(cp)
+  if text_symbol_exclusions[cp] then
+    return false
+  end
   if emoji_singletons[cp] then
     return true
   end
