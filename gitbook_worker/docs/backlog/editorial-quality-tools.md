@@ -1,11 +1,12 @@
 ---
-version: 1.5.0
-date: 2026-05-09
+version: 1.6.0
+date: 2026-05-10
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.6.0: 2026-05-10 - Definition of Done mit lokalem EN-Dossier-Nachweis formal geschlossen; Baseline-Kann-Punkt als erledigt markiert."
   - "1.5.0: 2026-05-09 - Alle offenen Muss- und Soll-Punkte als implementierten Verantwortungs-Schnitt markiert."
   - "1.4.0: 2026-05-09 - Tabellenstrategie-Problemfaelle mit Kontext als erledigten Schnitt markiert."
   - "1.3.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken als erledigten Schnitt markiert."
@@ -366,7 +367,9 @@ acceptance_profile:
 
 - [ ] HTML-Dashboard aus JSON-Reports generieren.
 - [ ] Visuelle Seiten-Snapshots fuer High-Risk-Seiten automatisiert erzeugen.
-- [ ] Baseline-Vergleich zwischen zwei Builds anbieten.
+- [x] ✅ Baseline-Vergleich zwischen zwei Builds anbieten. Durch M14 umgesetzt;
+  `editorial_acceptance --baseline` klassifiziert Befunde als `new`,
+  `existing`, `changed` und `resolved`.
 - [ ] Trendmetriken fuer Seitenzahl, Findings und Warnungen ueber Releases
   sammeln.
 - [ ] SARIF-Ausgabe fuer Code-Scanning-Oberflaechen pruefen.
@@ -421,16 +424,16 @@ profiles:
 
 ## Ergaenzte Abnahmeszenarien
 
-| Szenario | Erwartung |
-|---|---|
-| Sauberes Sample | `passed` mit Markdown- und PDF-Metrikreport plus Markdown-Dossier. |
-| Warnungs-Sample | `passed_with_warnings`, z. B. lange URL mit kleinem PDF-Ueberstand. |
-| Fehler-Sample | `failed`, z. B. verbotener Frontmatter-Key, fehlender PDF-Font oder nicht lesbares Pflichtartefakt. |
-| Blocked-Sample | `blocked`, wenn erwartete PDF/Markdown-Artefakte fehlen. |
-| Drift-Sample | `failed` oder `warn`, wenn Release-Doku eine alte Worker-Version oder alte Seitenzahlen behauptet. |
-| Translation-Sample | Target-Datei ohne `source`/`status` oder mit falscher `content_id` erzeugt Befund. |
-| Table-Sample | Tabellenstrategie-Report wird aggregiert und mindestens ein Landscape-/Fallback-Fall erscheint im Dossier. |
-| Wenigzeiler-Sample | Textarme und leere Seiten werden reproduzierbar gezaehlt. |
+| Szenario | Erwartung | Nachweis |
+|---|---|---|
+| Sauberes Sample | `passed` mit Markdown- und PDF-Metrikreport plus Markdown-Dossier. | `test_acceptance_passes_clean_sample` |
+| Warnungs-Sample | `passed_with_warnings`, z. B. lange URL mit kleinem PDF-Ueberstand. | `test_metrics_writes_optional_csv_and_console_summary` |
+| Fehler-Sample | `failed`, z. B. verbotener Frontmatter-Key, fehlender PDF-Font oder nicht lesbares Pflichtartefakt. | `test_acceptance_writes_dossier_and_returns_failure` und lokaler EN-Sample-Lauf vom 2026-05-10 |
+| Blocked-Sample | `blocked`, wenn erwartete PDF/Markdown-Artefakte fehlen. | `test_publish_scope_uses_summary_and_blocks_missing_pdf` |
+| Drift-Sample | `failed` oder `warn`, wenn Release-Doku eine alte Worker-Version oder alte Seitenzahlen behauptet. | `test_acceptance_derives_stale_report_findings` und `test_publish_metadata_summary_order_and_release_docs_drift` |
+| Translation-Sample | Target-Datei ohne `source`/`status` oder mit falscher `content_id` erzeugt Befund. | `test_markdown_metrics_detect_generic_target_frontmatter_rules` und `test_markdown_metrics_detect_translation_content_id_mismatch` |
+| Table-Sample | Tabellenstrategie-Report wird aggregiert und mindestens ein Landscape-/Fallback-Fall erscheint im Dossier. | `test_table_report_aggregation_flags_fallbacks` |
+| Wenigzeiler-Sample | Textarme und leere Seiten werden reproduzierbar gezaehlt. | `test_pdf_metrics_detect_empty_text_layer` und `test_pdf_expected_page_rules_and_overflow_signals` |
 
 ## Finding-Modell
 
@@ -464,19 +467,28 @@ Jedes Finding soll diese Felder tragen:
 
 ## Definition of Done
 
-- [ ] Konzept und Backlog sind aktuell verlinkt.
-- [ ] Anonymisiertes Kundenreview ist als Abnahmeergaenzung dokumentiert und
+- [x] ✅ Konzept und Backlog sind aktuell verlinkt.
+- [x] ✅ Anonymisiertes Kundenreview ist als Abnahmeergaenzung dokumentiert und
   umgesetzt.
-- [ ] Neue CLIs haben Tests, Typannotationen und klare Logs.
-- [ ] `python -m pytest gitbook_worker/tests -m "not slow"` bleibt gruen.
-- [ ] Mindestens ein lokaler DE- oder EN-Sample-Build erzeugt ein
+- [x] ✅ Neue CLIs haben Tests, Typannotationen und klare Logs.
+- [x] ✅ `python -m pytest gitbook_worker/tests -m "not slow"` bleibt gruen.
+- [x] ✅ Mindestens ein lokaler DE- oder EN-Sample-Build erzeugt ein
   Abnahmedossier.
-- [ ] Alle acht ergaenzten Abnahmeszenarien sind als Tests oder Sample-Runs
+- [x] ✅ Alle acht ergaenzten Abnahmeszenarien sind als Tests oder Sample-Runs
   nachweisbar.
-- [ ] Die Doku erklaert, wie ein Redakteur das Dossier liest.
-- [ ] Neue Konfigurationsschluessel sind in der Konfigurationsreferenz
+- [x] ✅ Die Doku erklaert, wie ein Redakteur das Dossier liest.
+- [x] ✅ Neue Konfigurationsschluessel sind in der Konfigurationsreferenz
   statusmarkiert.
-- [ ] Exit-Codes sind dokumentiert und per CLI abrufbar.
+- [x] ✅ Exit-Codes sind dokumentiert und per CLI abrufbar.
+
+Nachweis vom 2026-05-10:
+
+- Lokaler EN-Sample-Lauf:
+  `python -m gitbook_worker.tools.workflow_orchestrator run --root C:\gitbook-worker --content-config content.yaml --lang en --profile local --step publisher --step editorial-quality --quality-profile local`
+- Erzeugte Dossier-Datei:
+  `logs/quality/en-local-editorial-acceptance.md`
+- Ergebnis: `failed` mit `1 fail`, `172 warn`, `19 info`; der Lauf ist damit
+  ein ehrlicher Abnahmenachweis und kein Scheingruen.
 
 ## Offene redaktionelle Entscheidungen
 

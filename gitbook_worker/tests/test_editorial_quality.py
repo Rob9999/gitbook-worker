@@ -25,6 +25,7 @@ from gitbook_worker.tools.quality.editorial_metrics import (
     analyze_table_reports,
     collect_editorial_metrics,
     format_console_summary,
+    main as editorial_metrics_main,
     write_findings_csv,
 )
 
@@ -569,6 +570,38 @@ def test_acceptance_writes_dossier_and_returns_failure(tmp_path: Path) -> None:
     assert "Editorial Acceptance Dossier" in text
     assert "Human Decision" in text
     assert "missing source" in text
+
+
+def test_acceptance_passes_clean_sample() -> None:
+    dossier, summary = editorial_acceptance.build_acceptance_dossier(
+        [
+            {
+                "schema_version": "1.0.0",
+                "generated_at": "2026-05-09T00:00:00+00:00",
+                "project": "clean-sample",
+                "worker_version": __version__,
+                "summary": {"status": "passed"},
+                "findings": [],
+            }
+        ],
+        profile=AcceptanceProfile(name="clean-sample"),
+    )
+
+    assert summary["status"] == "passed"
+    assert "No findings recorded." in dossier
+    assert "Human Decision" in dossier
+
+
+def test_editorial_quality_clis_expose_exit_code_help(capsys) -> None:
+    assert editorial_metrics_main(["--help-exit-codes"]) == 0
+    metrics_help = capsys.readouterr().out
+    assert "45" in metrics_help
+    assert "48" in metrics_help
+
+    assert editorial_acceptance.main(["--help-exit-codes"]) == 0
+    acceptance_help = capsys.readouterr().out
+    assert "45" in acceptance_help
+    assert "48" in acceptance_help
 
 
 def test_metrics_writes_optional_csv_and_console_summary(tmp_path: Path) -> None:

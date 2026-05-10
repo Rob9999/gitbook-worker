@@ -1,7 +1,8 @@
 ---
-version: 1.4.0
+version: 1.5.0
 date: 2026-05-09
 history:
+  - "1.5.0: 2026-05-10 - Dossier-Lesehilfe und lokaler EN-Nachweis fuer die Definition of Done ergaenzt."
   - "1.4.0: 2026-05-09 - Pflicht-/Soll-Schnitt mit wiederverwendeten Signalen, Sample-Seiten, Release-Doku-Scan, CSV/Console und Orchestrator-Gate dokumentiert."
   - "1.3.0: 2026-05-09 - Tabellenstrategie-Problemfaelle und Kandidatenkontext beschrieben."
   - "1.2.0: 2026-05-09 - Baseline-Vergleich und akzeptierte Restrisiken dokumentiert."
@@ -166,6 +167,26 @@ accepted_findings:
 Schema und Pflichtfelder stehen in
 [editorial-accepted-findings.md](configs/editorial-accepted-findings.md).
 
+## Dossier lesen
+
+Ein Dossier wird von oben nach unten als Abnahmeprotokoll gelesen:
+
+- `Executive Summary`: Profil, Gesamtstatus und Finding-Zahlen. `blocked` und
+  `fail` sind zuerst zu klaeren; `warn` bleibt sichtbar fuer bewusste
+  redaktionelle Entscheidungen.
+- `Inputs`: zeigt, welche Metrikreports Grundlage der Abnahme sind. Alte oder
+  falsche Reports duerfen hier nicht als aktuelle Freigabequelle gelten.
+- `PDF Artifacts`: nennt Seitenzahl, Dateigroesse, CreationDate und
+  Aenderungszeitpunkt pro PDF, damit Report-Frische nachvollziehbar bleibt.
+- `Baseline Comparison` und `Accepted Residual Risks`: zeigen, ob Befunde neu,
+  bestehend, geloest, bewusst akzeptiert oder abgelaufen sind.
+- `Findings`: sortiert nach Severity. Jeder Befund nennt Artefakt, Ort,
+  Evidenz, redaktionelle Wirkung und Healing-Step.
+- `Review Notes`: grenzt technische Link-/AI-/Compliance-Signale von
+  inhaltlicher Wahrheit, autoritativer Quellenpruefung und Rechtsberatung ab.
+- `Human Decision`: bleibt absichtlich leer. Die finale Freigabe ist eine
+  menschliche Entscheidung und wird nicht vom Tool gesetzt.
+
 ## Orchestrator und CI-Gate
 
 Der Workflow-Orchestrator kennt den optionalen Schritt `editorial-quality`.
@@ -193,3 +214,31 @@ python -m gitbook_worker.tools.workflow_orchestrator run `
 - `48`: ungueltiges Abnahmeprofil.
 
 Beide neuen CLIs unterstuetzen `--help-exit-codes`.
+
+## Lokaler Nachweis
+
+Am 2026-05-10 wurde ein lokaler EN-Sample-Lauf mit PDF-Build und
+`editorial-quality` ausgefuehrt:
+
+```powershell
+python -m gitbook_worker.tools.workflow_orchestrator run `
+  --root C:\gitbook-worker `
+  --content-config content.yaml `
+  --lang en `
+  --profile local `
+  --step publisher `
+  --step editorial-quality `
+  --quality-profile local
+```
+
+Der Lauf erzeugte:
+
+- `logs/quality/en-local-editorial-metrics.json`
+- `logs/quality/en-local-editorial-findings.csv`
+- `logs/quality/en-local-editorial-acceptance.md`
+- `logs/quality/en-local-editorial-acceptance.json`
+
+Das Dossier ist bewusst nicht als „gruen“ behauptet: Der Sample-Status war
+`failed` mit `1 fail`, `172 warn` und `19 info`. Das ist fuer den
+Qualitaetskompass ein gueltiger Nachweis, weil der Build ein lesbares Dossier
+erzeugt und reale redaktionelle Restarbeit sichtbar macht.
