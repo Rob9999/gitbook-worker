@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.8.0 "Tabellenprofi"** · [Release Notes](docs/releases/v2.8.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.9.0 "Qualitaetskompass"** · [Release Notes](docs/releases/v2.9.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.8.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.9.0-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -323,6 +323,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.9.0 "Qualitaetskompass" (10. Mai 2026)
+
+- **Qualitaetsdossiers**: Sprach- und Gesamtprojekt-Dossiers dokumentieren die Release-Freigabe nachvollziehbar.
+- **PDF-Checklist-Symbole**: Tasklisten- und Checkmark-Zeichen werden als Textsymbole ueber den Sans-Fallback geroutet.
+- **Font-Hinweis fuer Lieferungen**: `DejaVu Sans:mode=harf` bleibt Teil der empfohlenen Fallback-Kette fuer sichtbare Checkboxen.
+
+→ [docs/releases/v2.9.0.md](docs/releases/v2.9.0.md)
+
 #### v2.8.0 "Tabellenprofi" (9. Mai 2026)
 
 - **Redaktionelles Tabellen-Scoring**: Tabellen werden nach erwarteten Umbruechen, Zeilenhoehen, engen Spalten und untrennbaren Token bewertet.
@@ -548,7 +556,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.8.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.9.0-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -808,6 +816,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.9.0 "Qualitaetskompass" (May 10, 2026)
+
+- **Quality dossiers**: language-level and whole-project dossiers make release acceptance auditable.
+- **PDF checklist symbols**: task-list and checkmark characters are routed as text symbols through the sans fallback.
+- **Delivery font guidance**: `DejaVu Sans:mode=harf` remains part of the recommended fallback chain for visible checkboxes.
+
+→ [docs/releases/v2.9.0.md](docs/releases/v2.9.0.md)
 
 #### v2.8.0 "Tabellenprofi" (May 9, 2026)
 
