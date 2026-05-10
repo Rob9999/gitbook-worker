@@ -1,7 +1,8 @@
 ---
-version: 1.5.0
-date: 2026-05-09
+version: 1.6.0
+date: 2026-05-10
 history:
+  - "1.6.0: 2026-05-10 - Statische HTML-Reports, Trend-JSONL, SARIF und High-Risk-Snapshot-Index dokumentiert."
   - "1.5.0: 2026-05-10 - Dossier-Lesehilfe und lokaler EN-Nachweis fuer die Definition of Done ergaenzt."
   - "1.4.0: 2026-05-09 - Pflicht-/Soll-Schnitt mit wiederverwendeten Signalen, Sample-Seiten, Release-Doku-Scan, CSV/Console und Orchestrator-Gate dokumentiert."
   - "1.3.0: 2026-05-09 - Tabellenstrategie-Problemfaelle und Kandidatenkontext beschrieben."
@@ -52,8 +53,13 @@ python -m gitbook_worker.tools.quality.editorial_metrics `
   --lang en `
   --output logs/quality/en-editorial-metrics.json `
   --csv-output logs/quality/en-editorial-findings.csv `
+  --sarif-output logs/quality/en-editorial-findings.sarif `
   --console-summary
 ```
+
+`--sarif-output` schreibt dieselben Findings als SARIF 2.1.0. Markdown-Findings
+mit `line N` im Ort erhalten eine SARIF-Region; PDF- und Report-Findings bleiben
+als artefaktbezogene Ergebnisse sichtbar.
 
 ## Minimaler Lauf
 
@@ -65,8 +71,21 @@ python -m gitbook_worker.tools.quality.editorial_metrics `
 
 python -m gitbook_worker.tools.quality.editorial_acceptance `
   build/quality-smoke/editorial-metrics.json `
-  --output build/quality-smoke/editorial-acceptance.md
+  --output build/quality-smoke/editorial-acceptance.md `
+  --html-output build/quality-smoke/editorial-acceptance.html `
+  --trend-output build/quality-smoke/editorial-trends.jsonl `
+  --snapshot-dir build/quality-smoke/snapshots `
+  --snapshot-renderer none
 ```
+
+Der HTML-Report ist eine einzelne statische Datei ohne CDN, externe Fonts oder
+Telemetry. Er ist kein gehostetes Dashboard, sondern ein archivfester
+Review-Artefakt fuer Redaktionen und Releases. `--trend-output` haengt pro Lauf
+eine kompakte JSONL-Zeile mit Status, Finding-Zahlen, PDF-Anzahl und
+Seitenzahlen an. `--snapshot-dir` schreibt immer einen HTML-/JSON-Index fuer
+High-Risk-PDF-Seiten; wenn `pdftoppm` im System verfuegbar ist und
+`--snapshot-renderer auto` gilt, werden zusaetzlich PNG-Seitenbilder erzeugt.
+Fehlt der Renderer, bleibt der Index bewusst ehrlich als "index only" erhalten.
 
 ## Mehrsprachiges Profil
 
@@ -190,8 +209,9 @@ Ein Dossier wird von oben nach unten als Abnahmeprotokoll gelesen:
 ## Orchestrator und CI-Gate
 
 Der Workflow-Orchestrator kennt den optionalen Schritt `editorial-quality`.
-Er schreibt Metrics, CSV-Findings, Markdown-Dossier und JSON-Summary nach
-`logs/quality/`. Ohne `--quality-gate` bleibt der Schritt ein Bericht; mit
+Er schreibt Metrics, CSV-Findings, SARIF, Markdown-Dossier, JSON-Summary,
+statischen HTML-Report, Trend-JSONL und Snapshot-Index nach `logs/quality/`.
+Ohne `--quality-gate` bleibt der Schritt ein Bericht; mit
 `--quality-gate` wird der Acceptance-Status zum CI-Gate.
 
 ```powershell
@@ -235,8 +255,12 @@ Der Lauf erzeugte:
 
 - `logs/quality/en-local-editorial-metrics.json`
 - `logs/quality/en-local-editorial-findings.csv`
+- `logs/quality/en-local-editorial-findings.sarif`
 - `logs/quality/en-local-editorial-acceptance.md`
 - `logs/quality/en-local-editorial-acceptance.json`
+- `logs/quality/en-local-editorial-report.html`
+- `logs/quality/editorial-trends.jsonl`
+- `logs/quality/snapshots/en-local/index.html`
 
 Das Dossier ist bewusst nicht als „gruen“ behauptet: Der Sample-Status war
 `failed` mit `1 fail`, `172 warn` und `19 info`. Das ist fuer den

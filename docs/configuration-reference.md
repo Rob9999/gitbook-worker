@@ -1,7 +1,8 @@
 ---
-version: 1.8.0
-date: 2026-05-09
+version: 1.9.0
+date: 2026-05-10
 history:
+  - "1.9.0: 2026-05-10 — editorial quality HTML-/Trend-/Snapshot-/SARIF-Ausgaben dokumentiert"
   - "1.8.0: 2026-05-09 — Pflicht-/Soll-Schnitt fuer editorial quality profile, CSV/Console und Orchestrator-Gate dokumentiert"
   - "1.7.0: 2026-05-09 — editorial accepted findings register fuer Restrisiken dokumentiert"
   - "1.6.0: 2026-05-09 — pdf_targets und Drift-Schalter fuer editorial quality profile als implementierte Signale markiert"
@@ -320,7 +321,20 @@ CLI-Ausgaben fuer `editorial_metrics`:
 | Option | Typ | Default | Status | Beschreibung |
 |--------|-----|---------|--------|--------------|
 | `--csv-output` | path | `null` | ✅ | Optionale CSV-Ausgabe fuer Findings |
+| `--sarif-output` | path | `null` | ✅ | Optionale SARIF-2.1.0-Ausgabe fuer Findings |
 | `--console-summary` | bool | `false` | ✅ | Eine kurze scanbare Statuszeile fuer lokale Runs und CI-Logs |
+
+CLI-Ausgaben fuer `editorial_acceptance`:
+
+| Option | Typ | Default | Status | Beschreibung |
+|--------|-----|---------|--------|--------------|
+| `--json-output` | path | `null` | ✅ | Strukturierte Acceptance-Summary als JSON |
+| `--html-output` | path | `null` | ✅ | Statischer, selbstenthaltener HTML-Report ohne gehostetes Dashboard |
+| `--trend-output` | path | `null` | ✅ | JSONL-Trenddatei; haengt pro Lauf einen kompakten Datensatz an |
+| `--snapshot-dir` | path | `null` | ✅ | High-Risk-PDF-Seitenindex und optionale PNG-Snapshots |
+| `--snapshot-root` | path | `null` | ✅ | Root zur Aufloesung relativer PDF-Pfade fuer Snapshot-Rendering |
+| `--snapshot-renderer` | enum | `auto` | ✅ | `auto` nutzt `pdftoppm` falls vorhanden; `none` schreibt nur den Index |
+| `--snapshot-max-pages` | int | `20` | ✅ | Maximale High-Risk-Seiten pro PDF fuer Snapshot-Rendering |
 
 Orchestrator-Integration:
 
@@ -331,6 +345,10 @@ Orchestrator-Integration:
 | `--quality-baseline` | path | `null` | ✅ | Baseline-Report fuer Acceptance-Vergleich |
 | `--quality-accepted-findings` | path | `null` | ✅ | Restrisiko-Register fuer Acceptance |
 | `--quality-gate` | bool | `false` | ✅ | Nicht-null Acceptance-Status als CI-Gate verwenden |
+
+Der Schritt erzeugt neben JSON/CSV/Markdown auch SARIF,
+`*-editorial-report.html`, `editorial-trends.jsonl` und
+`snapshots/<lang-profile>/index.html`.
 
 ---
 

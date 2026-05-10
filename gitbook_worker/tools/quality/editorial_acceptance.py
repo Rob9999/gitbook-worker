@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
+import re
+import shutil
+import subprocess
 from collections import defaultdict
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -28,6 +32,8 @@ from gitbook_worker.tools.quality.editorial_common import (
 
 logger = get_logger(__name__)
 
+_PAGE_RE = re.compile(r"\bpage\s+(\d+)\b", re.IGNORECASE)
+
 
 def build_acceptance_dossier(
     reports: Sequence[Mapping[str, Any]],
@@ -38,6 +44,26 @@ def build_acceptance_dossier(
     accepted_findings: Sequence[Mapping[str, Any]] = (),
 ) -> tuple[str, dict[str, Any]]:
     """Build Markdown dossier text and a structured summary."""
+
+    context = _build_acceptance_context(
+        reports,
+        profile=profile,
+        fail_on_warnings=fail_on_warnings,
+        baseline_report=baseline_report,
+        accepted_findings=accepted_findings,
+    )
+    return _render_acceptance_dossier(context), context["summary"]
+
+
+def _build_acceptance_context(
+    reports: Sequence[Mapping[str, Any]],
+    *,
+    profile: AcceptanceProfile,
+    fail_on_warnings: bool = False,
+    baseline_report: Mapping[str, Any] | None = None,
+    accepted_findings: Sequence[Mapping[str, Any]] = (),
+) -> dict[str, Any]:
+    """Build the shared acceptance context for every output format."""
 
     derived_findings = _derive_report_drift_findings(reports, profile)
     findings = [
@@ -69,6 +95,23 @@ def build_acceptance_dossier(
         "baseline": baseline_summary,
         "accepted_findings": accepted_summary,
     }
+    return {"reports": list(reports), "findings": findings, "summary": summary}
+
+
+def _render_acceptance_dossier(context: Mapping[str, Any]) -> str:
+    reports = [
+        report for report in context.get("reports", []) if isinstance(report, Mapping)
+    ]
+    findings = [
+        finding
+        for finding in context.get("findings", [])
+        if isinstance(finding, Mapping)
+    ]
+    summary = context["summary"]
+    counts = summary["finding_counts"]
+    status = summary["status"]
+    baseline_summary = summary["baseline"]
+    accepted_summary = summary["accepted_findings"]
     lines = [
         "---",
         "version: 1.0.0",
@@ -82,7 +125,7 @@ def build_acceptance_dossier(
         "",
         "## Executive Summary",
         "",
-        f"- Profile: `{profile.name}`",
+        f"- Profile: `{summary['profile']}`",
         f"- Status: `{status}`",
         f"- Reports: {len(reports)}",
         f"- Findings: {len(findings)}",
@@ -155,7 +198,7 @@ def build_acceptance_dossier(
             "",
         ]
     )
-    return "\n".join(lines), summary
+    return "\n".join(lines)
 
 
 def read_metric_reports(paths: Sequence[Path]) -> list[Mapping[str, Any]]:
@@ -220,6 +263,36 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--json-output", type=Path, help="Optional structured acceptance JSON summary"
     )
     parser.add_argument(
+        "--html-output", type=Path, help="Optional static HTML acceptance report"
+    )
+    parser.add_argument(
+        "--trend-output",
+        type=Path,
+        help="Optional JSONL trend file to append one compact acceptance record",
+    )
+    parser.add_argument(
+        "--snapshot-dir",
+        type=Path,
+        help="Optional directory for high-risk page snapshots or a snapshot index",
+    )
+    parser.add_argument(
+        "--snapshot-root",
+        type=Path,
+        help="Repository root used to resolve PDF paths for snapshot rendering",
+    )
+    parser.add_argument(
+        "--snapshot-renderer",
+        choices=("auto", "none"),
+        default="auto",
+        help="Render snapshots with pdftoppm when available, or write only the index",
+    )
+    parser.add_argument(
+        "--snapshot-max-pages",
+        type=int,
+        default=20,
+        help="Maximum high-risk pages to render per PDF",
+    )
+    parser.add_argument(
         "--baseline",
         type=Path,
         help="Previous editorial metric report used for new/existing/resolved comparison",
@@ -270,13 +343,16 @@ def main(argv: Sequence[str] | None = None) -> int:
         logger.error("%s", exc)
         return EDITORIAL_REPORT_READ_EXIT_CODE
 
-    dossier, summary = build_acceptance_dossier(
+    context = _build_acceptance_context(
         reports,
         profile=profile,
         fail_on_warnings=args.fail_on_warnings,
         baseline_report=baseline_report,
         accepted_findings=accepted_findings,
     )
+    dossier = _render_acceptance_dossier(context)
+    summary = context["summary"]
+    findings = context["findings"]
     output = args.output or Path("logs") / "quality" / "editorial-acceptance.md"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(dossier, encoding="utf-8")
@@ -286,9 +362,238 @@ def main(argv: Sequence[str] | None = None) -> int:
             json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
+    if args.html_output:
+        write_html_report(reports, summary, args.html_output, findings=findings)
+    if args.trend_output:
+        append_trend_record(reports, summary, args.trend_output)
+    if args.snapshot_dir:
+        write_high_risk_snapshots(
+            reports,
+            args.snapshot_dir,
+            findings=findings,
+            root=args.snapshot_root,
+            render=args.snapshot_renderer == "auto",
+            max_pages=max(args.snapshot_max_pages, 0),
+        )
     logger.info("Editorial acceptance dossier written to %s", output)
     logger.info("Editorial acceptance status=%s", summary["status"])
     return exit_code_for_status(summary["status"])
+
+
+def write_html_report(
+    reports: Sequence[Mapping[str, Any]],
+    summary: Mapping[str, Any],
+    destination: Path,
+    *,
+    findings: Sequence[Mapping[str, Any]] | None = None,
+) -> None:
+    """Write a static, self-contained HTML acceptance report."""
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        render_acceptance_html(reports, summary, findings=findings),
+        encoding="utf-8",
+    )
+
+
+def render_acceptance_html(
+    reports: Sequence[Mapping[str, Any]],
+    summary: Mapping[str, Any],
+    *,
+    findings: Sequence[Mapping[str, Any]] | None = None,
+) -> str:
+    """Render a static HTML acceptance report without external assets."""
+
+    display_findings = (
+        list(findings) if findings is not None else _all_report_findings(reports)
+    )
+    grouped = _group_findings(display_findings)
+    counts = (
+        summary.get("finding_counts")
+        if isinstance(summary.get("finding_counts"), Mapping)
+        else {}
+    )
+    status = str(summary.get("status") or "unknown")
+    finding_blocks: list[str] = []
+    for severity in ("blocked", "fail", "warn", "info"):
+        for finding in grouped.get(severity, []):
+            finding_blocks.append(_render_html_finding(finding))
+    if not finding_blocks:
+        finding_blocks.append('<p class="empty">No findings recorded.</p>')
+
+    return "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            f"<title>Editorial Acceptance - {_html_escape(status)}</title>",
+            "<style>",
+            _HTML_STYLE,
+            "</style>",
+            "</head>",
+            "<body>",
+            f'<header class="hero {_html_class(status)}">',
+            "<p>Editorial Acceptance</p>",
+            f"<h1>{_html_escape(status)}</h1>",
+            '<dl class="counts">',
+            _count_card("Blocked", counts.get("blocked", 0)),
+            _count_card("Fail", counts.get("fail", 0)),
+            _count_card("Warn", counts.get("warn", 0)),
+            _count_card("Info", counts.get("info", 0)),
+            "</dl>",
+            "</header>",
+            "<main>",
+            "<section>",
+            "<h2>Inputs</h2>",
+            _render_html_inputs(reports),
+            "</section>",
+            "<section>",
+            "<h2>PDF Artifacts</h2>",
+            _render_html_pdf_artifacts(_collect_pdf_artifacts(reports)),
+            "</section>",
+            "<section>",
+            "<h2>Baseline And Residual Risks</h2>",
+            _render_html_summary_block("Baseline", summary.get("baseline")),
+            _render_html_summary_block(
+                "Accepted Residual Risks", summary.get("accepted_findings")
+            ),
+            "</section>",
+            "<section>",
+            "<h2>Findings</h2>",
+            *finding_blocks,
+            "</section>",
+            "<section>",
+            "<h2>Review Notes</h2>",
+            "<ul>",
+            "<li>Link status is technical reachability, not source truth.</li>",
+            "<li>AI reference checks are search and plausibility aids, not authoritative validation.</li>",
+            "<li>Legal or compliance signals are review prompts, not legal advice.</li>",
+            "</ul>",
+            "</section>",
+            "<section>",
+            "<h2>Human Decision</h2>",
+            '<p class="decision">Decision: pending</p>',
+            "</section>",
+            "</main>",
+            "</body>",
+            "</html>",
+        ]
+    )
+
+
+def append_trend_record(
+    reports: Sequence[Mapping[str, Any]], summary: Mapping[str, Any], destination: Path
+) -> None:
+    """Append one compact JSONL trend record."""
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with destination.open("a", encoding="utf-8") as handle:
+        handle.write(
+            json.dumps(build_trend_record(reports, summary), ensure_ascii=False)
+        )
+        handle.write("\n")
+
+
+def build_trend_record(
+    reports: Sequence[Mapping[str, Any]], summary: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Build one compact trend record from an acceptance run."""
+
+    counts = (
+        summary.get("finding_counts")
+        if isinstance(summary.get("finding_counts"), Mapping)
+        else {}
+    )
+    first_report = reports[0] if reports and isinstance(reports[0], Mapping) else {}
+    inputs = first_report.get("inputs") if isinstance(first_report, Mapping) else {}
+    languages = inputs.get("languages") if isinstance(inputs, Mapping) else []
+    if isinstance(languages, (str, bytes)) or not isinstance(languages, Sequence):
+        languages = []
+    pdf_artifacts = _collect_pdf_artifacts(reports)
+    return {
+        "generated_at": summary.get("generated_at"),
+        "project": first_report.get("project"),
+        "worker_version": first_report.get("worker_version"),
+        "profile": summary.get("profile"),
+        "languages": list(languages),
+        "status": summary.get("status"),
+        "reports_total": summary.get("reports_total", len(reports)),
+        "findings_total": summary.get("findings_total", 0),
+        "blocked": counts.get("blocked", 0),
+        "fail": counts.get("fail", 0),
+        "warn": counts.get("warn", 0),
+        "info": counts.get("info", 0),
+        "pdfs_total": len(pdf_artifacts),
+        "pages_total": sum(
+            _int_value(artifact.get("pages_total")) for artifact in pdf_artifacts
+        ),
+        "baseline": summary.get("baseline"),
+        "accepted_findings": summary.get("accepted_findings"),
+    }
+
+
+def write_high_risk_snapshots(
+    reports: Sequence[Mapping[str, Any]],
+    destination: Path,
+    *,
+    findings: Sequence[Mapping[str, Any]] | None = None,
+    root: Path | None = None,
+    render: bool = True,
+    max_pages: int = 20,
+) -> dict[str, Any]:
+    """Write a high-risk page index and render PNGs when pdftoppm is available."""
+
+    destination.mkdir(parents=True, exist_ok=True)
+    page_findings = (
+        list(findings) if findings is not None else _all_report_findings(reports)
+    )
+    page_map = _collect_high_risk_pages(reports, page_findings)
+    renderer = shutil.which("pdftoppm") if render else None
+    rendered: list[dict[str, Any]] = []
+    skipped: list[dict[str, Any]] = []
+    for pdf_path, pages in sorted(page_map.items()):
+        pdf_file = _resolve_pdf_path(pdf_path, root)
+        for page in sorted(pages)[:max_pages]:
+            image_name = _snapshot_image_name(pdf_path, page)
+            image_path = destination / image_name
+            skip_reason: str | None = None
+            if renderer and pdf_file.exists():
+                try:
+                    _render_pdf_page(renderer, pdf_file, page, image_path)
+                    rendered.append(
+                        {"pdf": pdf_path, "page": page, "image": image_name}
+                    )
+                    continue
+                except (OSError, subprocess.CalledProcessError) as exc:
+                    skip_reason = str(exc)
+                    renderer = None
+            skipped.append(
+                {
+                    "pdf": pdf_path,
+                    "page": page,
+                    "reason": skip_reason
+                    or ("pdftoppm unavailable" if not renderer else "pdf missing"),
+                }
+            )
+    summary = {
+        "renderer": "pdftoppm" if renderer else "none",
+        "requested_pages_total": sum(len(pages) for pages in page_map.values()),
+        "rendered_pages_total": len(rendered),
+        "skipped_pages_total": len(skipped),
+        "rendered": rendered,
+        "skipped": skipped,
+    }
+    (destination / "index.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (destination / "index.html").write_text(
+        _render_snapshot_index(page_map, rendered, skipped),
+        encoding="utf-8",
+    )
+    return summary
 
 
 def _group_findings(
@@ -298,6 +603,306 @@ def _group_findings(
     for finding in findings:
         grouped[str(finding.get("severity") or "info")].append(finding)
     return grouped
+
+
+def _all_report_findings(
+    reports: Sequence[Mapping[str, Any]],
+) -> list[dict[str, Any]]:
+    return [
+        dict(finding)
+        for report in reports
+        for finding in report.get("findings", [])
+        if isinstance(finding, Mapping)
+    ]
+
+
+def _html_escape(value: object) -> str:
+    return html.escape("" if value is None else str(value), quote=True)
+
+
+def _html_class(value: object) -> str:
+    text = re.sub(r"[^a-z0-9_-]+", "-", str(value or "unknown").lower()).strip("-")
+    return text or "unknown"
+
+
+def _count_card(label: str, value: object) -> str:
+    return (
+        "<div>"
+        f"<dt>{_html_escape(label)}</dt>"
+        f"<dd>{_html_escape(value)}</dd>"
+        "</div>"
+    )
+
+
+def _render_html_inputs(reports: Sequence[Mapping[str, Any]]) -> str:
+    if not reports:
+        return '<p class="empty">No input reports provided.</p>'
+    items = []
+    for report in reports:
+        if not isinstance(report, Mapping):
+            continue
+        items.append(
+            "<li>"
+            f"<strong>{_html_escape(report.get('project', '<unknown>'))}</strong> "
+            f"generated {_html_escape(report.get('generated_at', '<unknown>'))} "
+            f"with worker {_html_escape(report.get('worker_version', '<unknown>'))}"
+            "</li>"
+        )
+    return "<ul>" + "".join(items) + "</ul>"
+
+
+def _render_html_pdf_artifacts(artifacts: Sequence[Mapping[str, Any]]) -> str:
+    if not artifacts:
+        return '<p class="empty">No PDF artifacts recorded.</p>'
+    rows = [
+        "<table>",
+        "<thead><tr><th>PDF</th><th>Pages</th><th>Size</th><th>Modified</th></tr></thead>",
+        "<tbody>",
+    ]
+    for artifact in artifacts:
+        rows.append(
+            "<tr>"
+            f"<td>{_html_escape(artifact.get('path'))}</td>"
+            f"<td>{_html_escape(artifact.get('pages_total'))}</td>"
+            f"<td>{_html_escape(artifact.get('file_size_bytes'))}</td>"
+            f"<td>{_html_escape(artifact.get('modified_at'))}</td>"
+            "</tr>"
+        )
+    rows.extend(["</tbody>", "</table>"])
+    return "".join(rows)
+
+
+def _render_html_summary_block(title: str, data: object) -> str:
+    if not isinstance(data, Mapping) or not data:
+        return f'<h3>{_html_escape(title)}</h3><p class="empty">No data recorded.</p>'
+    rows = [f"<h3>{_html_escape(title)}</h3>", '<dl class="meta">']
+    for key, value in data.items():
+        if isinstance(value, (list, tuple, dict)):
+            rendered_value = json.dumps(value, ensure_ascii=False)
+        else:
+            rendered_value = str(value)
+        rows.append(
+            "<div>"
+            f"<dt>{_html_escape(key)}</dt>"
+            f"<dd>{_html_escape(rendered_value)}</dd>"
+            "</div>"
+        )
+    rows.append("</dl>")
+    return "".join(rows)
+
+
+def _render_html_finding(finding: Mapping[str, Any]) -> str:
+    severity = str(finding.get("severity") or "info")
+    fields = [
+        ("Artifact", finding.get("artifact")),
+        ("Location", finding.get("location")),
+        ("Evidence", finding.get("evidence")),
+        ("Impact", finding.get("editorial_impact")),
+        ("Healing", finding.get("healing")),
+    ]
+    details = "".join(
+        "<div>"
+        f"<dt>{_html_escape(label)}</dt>"
+        f"<dd>{_html_escape(value)}</dd>"
+        "</div>"
+        for label, value in fields
+    )
+    return (
+        f'<article class="finding {_html_class(severity)}">'
+        f"<p>{_html_escape(severity)}</p>"
+        f"<h3>{_html_escape(finding.get('rule_id', '<no-rule>'))}</h3>"
+        f"<code>{_html_escape(finding.get('id', '<no-id>'))}</code>"
+        f'<dl class="meta">{details}</dl>'
+        "</article>"
+    )
+
+
+def _int_value(value: object) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _collect_high_risk_pages(
+    reports: Sequence[Mapping[str, Any]], findings: Sequence[Mapping[str, Any]]
+) -> dict[str, set[int]]:
+    pdf_paths = [
+        str(artifact.get("path")) for artifact in _collect_pdf_artifacts(reports)
+    ]
+    page_map: dict[str, set[int]] = defaultdict(set)
+    for finding in findings:
+        severity = str(finding.get("severity") or "info")
+        if severity not in {"blocked", "fail", "warn"}:
+            continue
+        page = _extract_page_number(finding)
+        pdf_path = _finding_pdf_path(finding, pdf_paths)
+        if page is not None and pdf_path:
+            page_map[pdf_path].add(page)
+    return dict(page_map)
+
+
+def _extract_page_number(finding: Mapping[str, Any]) -> int | None:
+    page = finding.get("page")
+    if isinstance(page, int) and page > 0:
+        return page
+    for key in ("location", "evidence"):
+        match = _PAGE_RE.search(str(finding.get(key) or ""))
+        if match:
+            return int(match.group(1))
+    return None
+
+
+def _finding_pdf_path(
+    finding: Mapping[str, Any], pdf_paths: Sequence[str]
+) -> str | None:
+    artifact = str(finding.get("artifact") or "")
+    if artifact.lower().endswith(".pdf"):
+        return artifact
+    if artifact in pdf_paths:
+        return artifact
+    if len(pdf_paths) == 1 and str(finding.get("category") or "").startswith("pdf"):
+        return pdf_paths[0]
+    return None
+
+
+def _resolve_pdf_path(pdf_path: str, root: Path | None) -> Path:
+    path = Path(pdf_path)
+    if path.is_absolute():
+        return path
+    if root is not None:
+        return root / path
+    return Path.cwd() / path
+
+
+def _snapshot_image_name(pdf_path: str, page: int) -> str:
+    stem = Path(pdf_path).with_suffix("").as_posix()
+    safe_stem = re.sub(r"[^A-Za-z0-9_.-]+", "-", stem).strip("-") or "snapshot"
+    return f"{safe_stem}-page-{page:03d}.png"
+
+
+def _render_pdf_page(
+    renderer: str, pdf_file: Path, page: int, image_path: Path
+) -> None:
+    prefix = image_path.with_suffix("")
+    subprocess.run(
+        [
+            renderer,
+            "-f",
+            str(page),
+            "-l",
+            str(page),
+            "-png",
+            "-singlefile",
+            str(pdf_file),
+            str(prefix),
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    if not image_path.exists():
+        raise OSError(f"renderer did not create {image_path}")
+
+
+def _render_snapshot_index(
+    page_map: Mapping[str, set[int]],
+    rendered: Sequence[Mapping[str, Any]],
+    skipped: Sequence[Mapping[str, Any]],
+) -> str:
+    rendered_lookup = {
+        (str(item.get("pdf")), _int_value(item.get("page"))): str(item.get("image"))
+        for item in rendered
+    }
+    rows: list[str] = []
+    for pdf_path, pages in sorted(page_map.items()):
+        for page in sorted(pages):
+            image = rendered_lookup.get((pdf_path, page))
+            if image:
+                preview = f'<img src="{_html_escape(image)}" alt="{_html_escape(pdf_path)} page {page}">'
+                status = "rendered"
+            else:
+                preview = '<span class="empty">Snapshot renderer unavailable.</span>'
+                status = "index only"
+            rows.append(
+                "<article>"
+                f"<h2>{_html_escape(pdf_path)} page {page}</h2>"
+                f"<p>{_html_escape(status)}</p>"
+                f"{preview}"
+                "</article>"
+            )
+    if not rows:
+        rows.append('<p class="empty">No high-risk PDF pages detected.</p>')
+    if skipped:
+        rows.append("<h2>Skipped</h2><ul>")
+        for item in skipped:
+            rows.append(
+                "<li>"
+                f"{_html_escape(item.get('pdf'))} page {_html_escape(item.get('page'))}: "
+                f"{_html_escape(item.get('reason'))}"
+                "</li>"
+            )
+        rows.append("</ul>")
+    return "\n".join(
+        [
+            "<!doctype html>",
+            '<html lang="en">',
+            "<head>",
+            '<meta charset="utf-8">',
+            '<meta name="viewport" content="width=device-width, initial-scale=1">',
+            "<title>Editorial High-Risk Snapshots</title>",
+            "<style>",
+            _SNAPSHOT_STYLE,
+            "</style>",
+            "</head>",
+            "<body>",
+            "<main>",
+            "<h1>Editorial High-Risk Snapshots</h1>",
+            *rows,
+            "</main>",
+            "</body>",
+            "</html>",
+        ]
+    )
+
+
+_HTML_STYLE = """
+:root { color-scheme: light; }
+body { margin: 0; background: #f5f7fa; color: #1f2937; }
+.hero { background: #1f2937; color: #fff; padding: 32px; }
+.hero.passed { background: #116149; }
+.hero.passed-with-warnings { background: #7a4f01; }
+.hero.failed, .hero.blocked { background: #8f1d2c; }
+.hero p { margin: 0 0 8px; text-transform: uppercase; font-size: 12px; }
+.hero h1 { margin: 0 0 24px; font-size: 32px; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px; }
+section { margin: 0 0 24px; }
+.counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin: 0; }
+.counts div, .meta div { background: #fff; color: #1f2937; border: 1px solid #d6dbe3; padding: 12px; }
+dt { font-weight: 700; font-size: 12px; color: #4b5563; }
+dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td { text-align: left; border: 1px solid #d6dbe3; padding: 10px; vertical-align: top; }
+.finding { background: #fff; border: 1px solid #d6dbe3; border-left: 6px solid #6b7280; padding: 16px; margin: 0 0 12px; }
+.finding.blocked, .finding.fail { border-left-color: #b42318; }
+.finding.warn { border-left-color: #b7791f; }
+.finding.info { border-left-color: #2563eb; }
+.finding p { margin: 0 0 8px; font-weight: 700; text-transform: uppercase; font-size: 12px; }
+.finding h3 { margin: 0 0 8px; font-size: 18px; }
+code { display: inline-block; margin: 0 0 12px; padding: 2px 4px; background: #eef2f7; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.empty { color: #6b7280; }
+.decision { border: 1px dashed #9ca3af; background: #fff; padding: 16px; }
+""".strip()
+
+
+_SNAPSHOT_STYLE = """
+body { margin: 0; background: #f5f7fa; color: #1f2937; }
+main { max-width: 1120px; margin: 0 auto; padding: 24px; }
+article { background: #fff; border: 1px solid #d6dbe3; padding: 16px; margin: 0 0 16px; }
+img { max-width: 100%; height: auto; border: 1px solid #d6dbe3; }
+.empty { color: #6b7280; }
+""".strip()
 
 
 def _render_finding(finding: Mapping[str, Any]) -> list[str]:

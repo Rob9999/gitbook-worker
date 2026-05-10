@@ -1498,6 +1498,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("-o", "--output", type=Path, help="Destination JSON report")
     parser.add_argument("--csv-output", type=Path, help="Optional findings CSV report")
     parser.add_argument(
+        "--sarif-output", type=Path, help="Optional SARIF findings report"
+    )
+    parser.add_argument(
         "--stdout-json", action="store_true", help="Print report JSON to stdout"
     )
     parser.add_argument(
@@ -1552,6 +1555,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     write_json_report(report, output)
     if args.csv_output:
         write_findings_csv(report, args.csv_output)
+    if args.sarif_output:
+        write_findings_sarif(report, args.sarif_output)
     logger.info("Editorial metrics report written to %s", output)
     if args.stdout_json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -1592,6 +1597,101 @@ def write_findings_csv(report: Mapping[str, Any], destination: Path) -> None:
             if not isinstance(finding, Mapping):
                 continue
             writer.writerow({field: finding.get(field, "") for field in fields})
+
+
+def write_findings_sarif(report: Mapping[str, Any], destination: Path) -> None:
+    """Write findings as SARIF 2.1.0 for code scanning integrations."""
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    findings = [
+        finding
+        for finding in report.get("findings", [])
+        if isinstance(finding, Mapping)
+    ]
+    rules: dict[str, dict[str, Any]] = {}
+    results: list[dict[str, Any]] = []
+    for finding in findings:
+        rule_id = str(finding.get("rule_id") or "editorial.finding")
+        if rule_id not in rules:
+            rules[rule_id] = {
+                "id": rule_id,
+                "name": rule_id,
+                "shortDescription": {"text": rule_id},
+                "help": {"text": str(finding.get("healing") or "Review finding.")},
+                "properties": {"category": str(finding.get("category") or "")},
+            }
+        result: dict[str, Any] = {
+            "ruleId": rule_id,
+            "level": _sarif_level(finding.get("severity")),
+            "message": {"text": _sarif_message(finding)},
+            "partialFingerprints": {
+                "gitbookWorkerFindingId": str(finding.get("id") or "")
+            },
+        }
+        location = _sarif_location(finding)
+        if location:
+            result["locations"] = [location]
+        results.append(result)
+    payload = {
+        "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {
+                    "driver": {
+                        "name": "gitbook-worker editorial_metrics",
+                        "semanticVersion": __version__,
+                        "rules": list(rules.values()),
+                    }
+                },
+                "results": results,
+            }
+        ],
+    }
+    destination.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def _sarif_level(severity: object) -> str:
+    severity_text = str(severity or "")
+    if severity_text in {"blocked", "fail"}:
+        return "error"
+    if severity_text == "warn":
+        return "warning"
+    return "note"
+
+
+def _sarif_message(finding: Mapping[str, Any]) -> str:
+    parts = [
+        str(finding.get("evidence") or "").strip(),
+        str(finding.get("editorial_impact") or "").strip(),
+        str(finding.get("healing") or "").strip(),
+    ]
+    return " | ".join(part for part in parts if part) or str(
+        finding.get("rule_id") or "Editorial finding"
+    )
+
+
+def _sarif_location(finding: Mapping[str, Any]) -> dict[str, Any] | None:
+    artifact = str(finding.get("artifact") or "").strip()
+    if not artifact:
+        return None
+    physical_location: dict[str, Any] = {
+        "artifactLocation": {"uri": artifact.replace("\\", "/")}
+    }
+    line = _sarif_line_number(finding.get("location"))
+    if line is not None:
+        physical_location["region"] = {"startLine": line}
+    return {"physicalLocation": physical_location}
+
+
+def _sarif_line_number(location: object) -> int | None:
+    match = re.search(r"\bline\s+(\d+)\b", str(location or ""), re.IGNORECASE)
+    if not match:
+        return None
+    line = int(match.group(1))
+    return line if line > 0 else None
 
 
 def format_console_summary(report: Mapping[str, Any]) -> str:

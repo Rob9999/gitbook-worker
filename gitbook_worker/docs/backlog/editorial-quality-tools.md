@@ -1,11 +1,12 @@
 ---
-version: 1.6.0
+version: 1.7.0
 date: 2026-05-10
 status: proposed
 priority: high
 target_release: "v2.9.0 Qualitaetskompass"
 labels: [quality, editorial-acceptance, metrics, pdf, markdown, multilingual]
 history:
+  - "1.7.0: 2026-05-10 - Kann-Artefakte HTML-Report, Trend-JSONL, SARIF und Snapshot-Index als umgesetzt markiert."
   - "1.6.0: 2026-05-10 - Definition of Done mit lokalem EN-Dossier-Nachweis formal geschlossen; Baseline-Kann-Punkt als erledigt markiert."
   - "1.5.0: 2026-05-09 - Alle offenen Muss- und Soll-Punkte als implementierten Verantwortungs-Schnitt markiert."
   - "1.4.0: 2026-05-09 - Tabellenstrategie-Problemfaelle mit Kontext als erledigten Schnitt markiert."
@@ -365,14 +366,21 @@ acceptance_profile:
 
 ## Kann-Anforderungen
 
-- [ ] HTML-Dashboard aus JSON-Reports generieren.
-- [ ] Visuelle Seiten-Snapshots fuer High-Risk-Seiten automatisiert erzeugen.
+- [x] ✅ Statischen HTML-Report aus JSON-Reports generieren. Bewusst kein
+  gehostetes Dashboard: `editorial_acceptance --html-output` erzeugt eine
+  archivfeste Einzeldatei fuer Redaktion und Release-Review.
+- [x] ✅ Visuelle Seiten-Snapshots fuer High-Risk-Seiten automatisiert
+  vorbereiten. `--snapshot-dir` erzeugt immer einen HTML-/JSON-Index; wenn
+  `pdftoppm` verfuegbar ist, werden PNG-Seitenbilder gerendert, sonst bleibt
+  der Index als ehrlicher Fallback erhalten.
 - [x] ✅ Baseline-Vergleich zwischen zwei Builds anbieten. Durch M14 umgesetzt;
   `editorial_acceptance --baseline` klassifiziert Befunde als `new`,
   `existing`, `changed` und `resolved`.
-- [ ] Trendmetriken fuer Seitenzahl, Findings und Warnungen ueber Releases
-  sammeln.
-- [ ] SARIF-Ausgabe fuer Code-Scanning-Oberflaechen pruefen.
+- [x] ✅ Trendmetriken fuer Seitenzahl, Findings und Warnungen ueber Releases
+  sammeln. `--trend-output` haengt pro Acceptance-Lauf eine JSONL-Zeile an.
+- [x] ✅ SARIF-Ausgabe fuer Code-Scanning-Oberflaechen pruefen.
+  `editorial_metrics --sarif-output` schreibt SARIF 2.1.0 mit Severity- und
+  Source-Line-Mapping, soweit Findings quelladressierbar sind.
 
 ## Generisches mehrsprachiges Abnahmeprofil Entwurf
 

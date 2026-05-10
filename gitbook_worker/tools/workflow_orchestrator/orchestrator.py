@@ -1304,8 +1304,12 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
     prefix = f"{ctx.config.language_id}-{ctx.config.quality_profile}"
     metrics_report = quality_dir / f"{prefix}-editorial-metrics.json"
     findings_csv = quality_dir / f"{prefix}-editorial-findings.csv"
+    findings_sarif = quality_dir / f"{prefix}-editorial-findings.sarif"
     dossier = quality_dir / f"{prefix}-editorial-acceptance.md"
     summary_json = quality_dir / f"{prefix}-editorial-acceptance.json"
+    html_report = quality_dir / f"{prefix}-editorial-report.html"
+    trend_jsonl = quality_dir / "editorial-trends.jsonl"
+    snapshot_dir = quality_dir / "snapshots" / prefix
 
     metrics_cmd: list[str] = [
         ctx.python,
@@ -1321,6 +1325,8 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
         str(metrics_report),
         "--csv-output",
         str(findings_csv),
+        "--sarif-output",
+        str(findings_sarif),
         "--console-summary",
     ]
     if ctx.config.content_config_path:
@@ -1338,6 +1344,14 @@ def _step_editorial_quality(ctx: RuntimeContext) -> None:
         str(dossier),
         "--json-output",
         str(summary_json),
+        "--html-output",
+        str(html_report),
+        "--trend-output",
+        str(trend_jsonl),
+        "--snapshot-dir",
+        str(snapshot_dir),
+        "--snapshot-root",
+        str(ctx.root),
     ]
     if ctx.config.quality_baseline:
         acceptance_cmd.extend(["--baseline", str(ctx.config.quality_baseline)])

@@ -27,14 +27,12 @@ from gitbook_worker.tools.utils.smart_content import ContentEntry
 def temp_repo(tmp_path: Path) -> Path:
     manifest = tmp_path / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             publish:
               - path: ./
                 out: dummy.pdf
                 build: false
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     return tmp_path
@@ -43,8 +41,7 @@ def temp_repo(tmp_path: Path) -> Path:
 def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             profiles:
               default:
                 steps: [publisher]
@@ -52,8 +49,7 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     args = parse_args(
@@ -75,8 +71,7 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
 def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             profiles:
               default:
                 steps: [publisher]
@@ -84,8 +79,7 @@ def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     args = parse_args(
@@ -302,7 +296,11 @@ def test_step_editorial_quality_runs_metrics_and_acceptance(
     assert len(commands) == 2
     assert "gitbook_worker.tools.quality.editorial_metrics" in commands[0][0]
     assert "--csv-output" in commands[0][0]
+    assert "--sarif-output" in commands[0][0]
     assert "gitbook_worker.tools.quality.editorial_acceptance" in commands[1][0]
+    assert "--html-output" in commands[1][0]
+    assert "--trend-output" in commands[1][0]
+    assert "--snapshot-dir" in commands[1][0]
     assert commands[1][1] is True
 
 

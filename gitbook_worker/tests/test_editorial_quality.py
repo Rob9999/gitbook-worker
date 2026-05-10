@@ -27,6 +27,7 @@ from gitbook_worker.tools.quality.editorial_metrics import (
     format_console_summary,
     main as editorial_metrics_main,
     write_findings_csv,
+    write_findings_sarif,
 )
 
 
@@ -281,8 +282,7 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
         encoding="utf-8",
     )
     (language_root / "publish.yml").write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 0.1.3
             publish:
               - path: ./
@@ -296,21 +296,18 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
                 pdf_options:
                   table_paper_strategy:
                     report: jsonl
-            """
-        ).lstrip(),
+            """).lstrip(),
         encoding="utf-8",
     )
     (tmp_path / "content.yaml").write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             default: sample
             contents:
               - id: sample
                 type: local
                 uri: sample/
-            """
-        ).lstrip(),
+            """).lstrip(),
         encoding="utf-8",
     )
 
@@ -379,8 +376,7 @@ def test_publish_metadata_summary_order_and_release_docs_drift(
         encoding="utf-8",
     )
     (language_root / "publish.yml").write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 2.0.0
             title: Manifest Title
             language: en
@@ -394,21 +390,18 @@ def test_publish_metadata_summary_order_and_release_docs_drift(
                 use_book_json: true
                 build: true
                 summary_appendices_last: true
-            """
-        ).lstrip(),
+            """).lstrip(),
         encoding="utf-8",
     )
     (tmp_path / "content.yaml").write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             default: sample
             contents:
               - id: sample
                 type: local
                 uri: sample/
-            """
-        ).lstrip(),
+            """).lstrip(),
         encoding="utf-8",
     )
     _write_markdown(
@@ -632,6 +625,101 @@ def test_metrics_writes_optional_csv_and_console_summary(tmp_path: Path) -> None
     assert format_console_summary(report) == (
         "editorial_metrics status=passed_with_warnings blocked=0 fail=0 warn=1 info=0"
     )
+
+
+def test_metrics_writes_sarif_with_source_locations(tmp_path: Path) -> None:
+    report = {
+        "findings": [
+            {
+                "id": "rule:1",
+                "severity": "fail",
+                "category": "markdown",
+                "rule_id": "markdown.review_marker",
+                "artifact": "content/chapter.md",
+                "location": "line 12",
+                "evidence": "TODO",
+                "editorial_impact": "Review needed.",
+                "healing": "Resolve note.",
+            }
+        ]
+    }
+    sarif_path = tmp_path / "findings.sarif"
+
+    write_findings_sarif(report, sarif_path)
+
+    sarif = json.loads(sarif_path.read_text(encoding="utf-8"))
+    result = sarif["runs"][0]["results"][0]
+    assert sarif["version"] == "2.1.0"
+    assert result["level"] == "error"
+    assert result["locations"][0]["physicalLocation"]["region"] == {"startLine": 12}
+
+
+def test_acceptance_writes_html_trends_and_snapshot_index(tmp_path: Path) -> None:
+    metrics_report = tmp_path / "metrics.json"
+    metrics_report.write_text(
+        json.dumps(
+            {
+                "schema_version": "1.0.0",
+                "generated_at": "2026-05-09T00:00:00+00:00",
+                "project": "sample",
+                "worker_version": __version__,
+                "inputs": {"languages": ["en"]},
+                "summary": {"status": "failed"},
+                "metrics": {
+                    "pdf": [
+                        {
+                            "path": "publish/sample.pdf",
+                            "pages_total": 3,
+                            "file_size_bytes": 42,
+                            "modified_at": "2026-05-09T00:00:00+00:00",
+                        }
+                    ]
+                },
+                "findings": [
+                    {
+                        "id": "pdf:1",
+                        "severity": "fail",
+                        "category": "pdf.text",
+                        "rule_id": "pdf.text.empty_page",
+                        "artifact": "publish/sample.pdf",
+                        "location": "page 2",
+                        "evidence": "empty text layer",
+                        "editorial_impact": "Search and copy are unreliable.",
+                        "healing": "Rebuild PDF with text layer.",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    dossier = tmp_path / "acceptance.md"
+    html_report = tmp_path / "acceptance.html"
+    trends = tmp_path / "trends.jsonl"
+    snapshots = tmp_path / "snapshots"
+
+    exit_code = editorial_acceptance.main(
+        [
+            str(metrics_report),
+            "--output",
+            str(dossier),
+            "--html-output",
+            str(html_report),
+            "--trend-output",
+            str(trends),
+            "--snapshot-dir",
+            str(snapshots),
+            "--snapshot-renderer",
+            "none",
+        ]
+    )
+
+    assert exit_code == EDITORIAL_HARD_FINDINGS_EXIT_CODE
+    assert "Editorial Acceptance" in html_report.read_text(encoding="utf-8")
+    trend_record = json.loads(trends.read_text(encoding="utf-8"))
+    assert trend_record["status"] == "failed"
+    assert trend_record["pages_total"] == 3
+    snapshot_index = (snapshots / "index.html").read_text(encoding="utf-8")
+    assert "publish/sample.pdf page 2" in snapshot_index
 
 
 def test_acceptance_derives_stale_report_findings(tmp_path: Path) -> None:
