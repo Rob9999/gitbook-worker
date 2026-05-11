@@ -597,15 +597,21 @@ Der v2.9.1-Release wird lokal mit diesen Signalen geprueft:
 
 - Kundenabnahme `customer-de`: PDF-Build bestanden, Editorial Acceptance `passed_with_warnings` mit 0 Blockern, 0 Fails, 43 Warnungen und 7 Infos.
 - Impacted Regressionen fuer Publisher, URL-Filter, Editorial Metrics und Orchestrator: `77 passed, 7 skipped`.
-- Non-slow Test-Suite: wird vor Tagging erneut ausgefuehrt und in den Release Notes dokumentiert.
-- `git diff --check`, `git diff --cached --check`, `py_compile` und
-  `black --check` fuer die beruehrten Python-Dateien: bestanden.
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.9.1`: vor Tagging pruefen;
-  erwartete Artefakte sind `gitbook_worker-2.9.1.tar.gz` und
+- Non-slow Test-Suite: `595 passed, 11 skipped, 10 deselected`, mit vier
+  bekannten `Path.__enter__`-Deprecation-Warnungen.
+- `git diff --check`, `py_compile` und `black --check` fuer die beruehrten
+  Python-Dateien: bestanden; `flake8` war in der lokalen Release-venv nicht
+  installiert (`No module named flake8`).
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.9.1`: bestanden;
+  erzeugte Artefakte sind `gitbook_worker-2.9.1.tar.gz` und
   `gitbook_worker-2.9.1-py3-none-any.whl`.
 - Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
-  vor Tagging mit `version: 2.9.1` pruefen.
-- Deutscher und englischer PDF-Build sowie TOC-Extraktion: bestanden.
+  bestanden mit `version: 2.9.1` und startender Orchestrator-Hilfe.
+- Deutscher und englischer PDF-Build sowie TOC-Extraktion: bestanden fuer
+  `de/publish/das-sample-buch.pdf` und `en/publish/the-sample-book.pdf`.
+- Redigiertes Kundenabnahme-Zip:
+  `gitbook-worker-v2.9.1-customer-acceptance-redacted-2026-05-11.zip`,
+  SHA-256 `E7D44FC7DDFFD62B703128584640BB1B7A5A07FC671B17D166FABC5D369EAEC4`.
 - Sichtbare URLs und DOI-Links werden in PDFs breakbar gesetzt; verschachtelte
   `\href{...}{\url{...}}`-Ausgabe wird durch Regressionen verhindert.
 - Textlayer-Replacement-Signale werden als Copy/Paste-/Accessibility-Warnung
