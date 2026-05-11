@@ -37,10 +37,7 @@ from gitbook_worker.tools.quality.editorial_common import (
     relative_artifact,
     write_json_report,
 )
-from gitbook_worker.tools.quality.link_audit import (
-    check_duplicate_headings,
-    list_todos,
-)
+from gitbook_worker.tools.quality.link_audit import DuplicateHeading, list_todos
 from gitbook_worker.tools.testing.pdf_validator import (
     extract_pdf_fonts,
     font_name_matches,
@@ -57,7 +54,10 @@ logger = get_logger(__name__)
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$")
 _LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 _IMAGE_RE = re.compile(r"!\[[^\]]*\]\(([^)]+)\)")
-_TODO_RE = re.compile(r"\b(TODO|FIXME|REVIEW|XXX)\b", re.IGNORECASE)
+_TODO_RE = re.compile(
+    r"\b(TODO|FIXME|XXX)\b|\bREVIEW\b\s*:|\[REVIEW\]|<!--\s*REVIEW",
+    re.IGNORECASE,
+)
 _TABLE_SEPARATOR_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$")
 _FOOTER_LINE_RE = re.compile(r"^\s*(?:page\s*)?\d+\s*$", re.IGNORECASE)
 _SUMMARY_LINK_RE = re.compile(
@@ -453,6 +453,7 @@ def analyze_markdown_files(
         metrics["words_total"] += len(re.findall(r"\b\w+\b", text, flags=re.UNICODE))
         metrics["links_total"] += len(_LINK_RE.findall(text))
         metrics["images_total"] += len(_IMAGE_RE.findall(text))
+        frontmatter_lines = _frontmatter_line_numbers(lines)
         for line_number, line in enumerate(lines, start=1):
             heading_match = _HEADING_RE.match(line)
             if not heading_match:
@@ -471,6 +472,8 @@ def analyze_markdown_files(
 
         todo_count = 0
         for line_number, line in enumerate(lines, start=1):
+            if line_number in frontmatter_lines:
+                continue
             if _TODO_RE.search(line):
                 todo_count += 1
                 findings.append(
@@ -588,7 +591,9 @@ def _collect_reused_markdown_signals(
 
     findings: list[Finding] = []
     todo_entries = list_todos(markdown_files)
-    duplicate_headings = check_duplicate_headings(markdown_files)
+    duplicate_headings = _check_near_duplicate_headings(
+        markdown_files, profile.markdown.duplicate_heading_near_window
+    )
     frontmatter_issues = []
     for markdown_file in markdown_files:
         try:
@@ -660,6 +665,41 @@ def _collect_reused_markdown_signals(
     return metrics, findings
 
 
+def _check_near_duplicate_headings(
+    markdown_files: Sequence[Path], window: int
+) -> list[DuplicateHeading]:
+    if window <= 0:
+        return []
+
+    duplicates: list[DuplicateHeading] = []
+    for markdown_file in markdown_files:
+        try:
+            lines = markdown_file.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
+
+        headings: list[tuple[int, str]] = []
+        for line_number, line in enumerate(lines, start=1):
+            match = _HEADING_RE.match(line)
+            if match:
+                headings.append((line_number, match.group(2).strip().lower()))
+
+        for index, (line_number, title) in enumerate(headings):
+            nearby_headings = headings[max(0, index - window) : index]
+            for previous_line_number, previous_title in nearby_headings:
+                if title == previous_title:
+                    duplicates.append(
+                        DuplicateHeading(
+                            markdown_file,
+                            line_number,
+                            title,
+                            f"{markdown_file}:{previous_line_number}",
+                        )
+                    )
+                    break
+    return duplicates
+
+
 def analyze_pdf(
     repo_root: Path,
     pdf_path: Path,
@@ -686,6 +726,8 @@ def analyze_pdf(
         "very_low_text_pages_le_5": 0,
         "empty_text_pages": 0,
         "low_text_reason_hints": [],
+        "text_extraction_replacement_signals_total": 0,
+        "text_extraction_replacement_signals_by_page": [],
         "toc_entries_total": 0,
         "toc_entries": [],
         "fonts": [],
@@ -736,7 +778,7 @@ def analyze_pdf(
     text_all: list[str] = []
     page_texts: dict[int, str] = {}
     page_line_counts: dict[int, int] = {}
-    replacement_hits = 0
+    replacement_signals_by_page: list[dict[str, int]] = []
     for page_index, page in enumerate(reader.pages, start=1):
         width_pt = float(page.mediabox.width)
         height_pt = float(page.mediabox.height)
@@ -768,9 +810,25 @@ def analyze_pdf(
             metrics["very_low_text_pages_le_5"] += 1
         if line_count == 0:
             metrics["empty_text_pages"] += 1
-        replacement_hits += text.count("□") + text.count("�")
+        replacement_counts = _pdf_text_replacement_signal_counts(text)
+        if sum(replacement_counts.values()):
+            replacement_signals_by_page.append(
+                {
+                    "page": page_index,
+                    "replacement_character": replacement_counts[
+                        "replacement_character"
+                    ],
+                    "white_square": replacement_counts["white_square"],
+                    "total": sum(replacement_counts.values()),
+                }
+            )
 
     metrics["orientations"] = dict(orientations)
+    replacement_signal_total = sum(
+        entry["total"] for entry in replacement_signals_by_page
+    )
+    metrics["text_extraction_replacement_signals_total"] = replacement_signal_total
+    metrics["text_extraction_replacement_signals_by_page"] = replacement_signals_by_page
     document_text = "\n".join(text_all).strip()
     metrics["script_samples"] = _script_counts(document_text)
     if not document_text and metrics["pages_total"]:
@@ -799,17 +857,32 @@ def analyze_pdf(
                 healing="Seitenkontext pruefen und ggf. als akzeptiertes Restrisiko dokumentieren.",
             )
         )
-    if replacement_hits:
+    if replacement_signal_total:
+        page_hint = ", ".join(
+            f"p{entry['page']}={entry['total']}"
+            for entry in replacement_signals_by_page[:8]
+        )
+        if len(replacement_signals_by_page) > 8:
+            page_hint += ", ..."
         findings.append(
             make_finding(
-                rule_id="pdf.text.replacement_glyph",
-                severity="fail",
-                category="pdf.fonts",
+                rule_id="pdf.text.extraction_replacement",
+                severity="warn",
+                category="pdf.text",
                 artifact=rel,
                 location="text extraction",
-                evidence=f"{replacement_hits} replacement glyph signal(s)",
-                editorial_impact="Moegliche fehlende Glyphen oder Fontfallback-Probleme im PDF.",
-                healing="Fontkonfiguration und LaTeX-Logs pruefen.",
+                evidence=(
+                    f"{replacement_signal_total} text extraction replacement signal(s)"
+                    + (f" ({page_hint})" if page_hint else "")
+                ),
+                editorial_impact=(
+                    "PDF-Textlayer, Accessibility oder Copy/Paste koennen beeintraechtigt sein; "
+                    "das ist ohne Sichtbefund kein harter Font-/Glyphenfehler."
+                ),
+                healing=(
+                    "Visuelle Stichprobe und Poppler/pypdf-Extraktion vergleichen; "
+                    "LaTeX-Logs auf echte Missing-character-Signale pruefen."
+                ),
             )
         )
 
@@ -2540,9 +2613,29 @@ def _count_fenced_code_blocks(lines: Sequence[str]) -> int:
 
 def _find_long_token(line: str, threshold: int) -> str | None:
     for token in re.findall(r"\S+", line):
-        if len(token) >= threshold:
+        if len(token) >= threshold and not _is_breakable_url_token(token):
             return token
     return None
+
+
+def _is_breakable_url_token(token: str) -> bool:
+    if "http://" in token or "https://" in token:
+        return True
+    stripped = token.strip("<>()[]{}.,;:\"'")
+    if stripped.startswith(("http://", "https://")):
+        return True
+    if token.startswith(("[http://", "[https://")) and "](" in token:
+        return True
+    return False
+
+
+def _frontmatter_line_numbers(lines: Sequence[str]) -> set[int]:
+    if not lines or lines[0].strip() != "---":
+        return set()
+    for index, line in enumerate(lines[1:], start=2):
+        if line.strip() == "---":
+            return set(range(1, index + 1))
+    return set()
 
 
 def _meaningful_text_lines(text: str) -> list[str]:
@@ -2551,6 +2644,15 @@ def _meaningful_text_lines(text: str) -> list[str]:
         for line in text.splitlines()
         if line.strip() and not _FOOTER_LINE_RE.match(line.strip())
     ]
+
+
+def _pdf_text_replacement_signal_counts(text: str) -> Counter[str]:
+    return Counter(
+        {
+            "replacement_character": text.count("�"),
+            "white_square": text.count("□"),
+        }
+    )
 
 
 def _safe_extract_fonts(path: Path, rel: str, findings: list[Finding]) -> list[Any]:

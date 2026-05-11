@@ -1,7 +1,9 @@
 ---
-version: 1.2.0
+version: 1.4.0
 date: 2026-05-10
 history:
+  - "1.4.0: 2026-05-11 — FAQ #8 fuer visuell saubere PDFs mit Textlayer-Replacement-Signalen ergaenzt"
+  - "1.3.0: 2026-05-10 — FAQ #7 fuer lange URL-/DOI-Umbrueche in PDFs ergaenzt"
   - "1.2.0: 2026-05-10 — FAQ #6 fuer Checkbox-/Textsymbol-Fallbacks in PDFs ergaenzt"
   - "1.1.0: 2026-02-08 — FAQ #1 aktualisiert: Auto-Detect & gitbook_rename-Key implementiert (v2.3.0)"
   - "1.0.0: 2026-02-08 — Initial FAQ from customer flat-file scenario"
@@ -17,6 +19,8 @@ history:
 4. [Manifest-Version-Warnung (neuer als getestete)](#4-manifest-version-warnung-neuer-als-getestete)
 5. [Sonderzeichen in Dateinamen (m², &, @, Leerzeichen)](#5-sonderzeichen-in-dateinamen)
 6. [Checkbox-Symbole erscheinen im PDF als Rechtecke](#6-checkbox-symbole-erscheinen-im-pdf-als-rechtecke)
+7. [Lange URLs oder DOI-Links laufen im PDF ueber den Rand](#7-lange-urls-oder-doi-links-laufen-im-pdf-ueber-den-rand)
+8. [Quality meldet Replacement-Signale, aber das PDF sieht korrekt aus](#8-quality-meldet-replacement-signale-aber-das-pdf-sieht-korrekt-aus)
 
 ---
 
@@ -270,3 +274,67 @@ Der Publisher routet Checkbox-/Checkmark-Symbole zusaetzlich ueber
 `text-symbols.lua` durch den konfigurierten Sans-Font. So bleiben
 Markdown-Tasklisten und literal geschriebene Checkboxen im PDF sichtbar und im
 Textlayer extrahierbar.
+
+---
+
+## 7. Lange URLs oder DOI-Links laufen im PDF ueber den Rand
+
+### Symptom
+
+Im Quellenverzeichnis oder in Fussnoten reichen lange DOI-/URL-Zeilen bis an
+den rechten Rand oder darueber hinaus, besonders wenn die sichtbare Linkschrift
+selbst die URL ist.
+
+### Ursache
+
+LaTeX kann normale Texttokens nur an wenigen Stellen umbrechen. Markdown-Links
+wie `[https://example.org/...](https://example.org/...)` werden ohne
+Sonderbehandlung als sichtbarer Linktext gesetzt und erhalten nicht automatisch
+die URL-spezifischen Umbruchpunkte.
+
+### Lösung
+
+Der PDF-Publisher routet sichtbare `http`-/`https`-Links ueber `url-breaks.lua`
+als `\url{...}` und erweitert die LaTeX-Umbruchstellen fuer URLs/DOIs. Bei
+manueller Content-Pflege bleiben diese Schreibweisen trotzdem empfehlenswert:
+
+```markdown
+<https://doi.org/10.1080/01972243.2017.1391919>
+```
+
+oder, wenn der Linktext nicht voll ausgeschrieben werden muss:
+
+```markdown
+[DOI 10.1080/01972243.2017.1391919](https://doi.org/10.1080/01972243.2017.1391919)
+```
+
+Fuer Kundenlieferungen sollte nach dieser Korrektur mindestens die betroffene
+PDF-Seite visuell geprueft werden, weil Bibliografien oft lange Titel und URLs
+in derselben Zeile kombinieren.
+
+---
+
+## 8. Quality meldet Replacement-Signale, aber das PDF sieht korrekt aus
+
+### Symptom
+
+Die PDF-Seite sieht in der Sichtpruefung korrekt aus, aber der Quality-Report
+meldet Replacement-Zeichen im extrahierten Text, z. B. vor kleinen Symbolen
+oder Emoji-Markern.
+
+### Ursache
+
+`pypdf` kann im Textlayer andere Zeichen extrahieren als visuell im PDF
+gerendert werden. Das ist ein Textlayer-, Accessibility- oder
+Copy/Paste-Signal, aber ohne sichtbaren Befund kein harter Font- oder
+Glyphenfehler.
+
+### Lösung
+
+Der Quality-Collector meldet solche Faelle als
+`pdf.text.extraction_replacement` mit Severity `warn`. Fuer echte sichtbare
+Glyphenprobleme muessen zusaetzlich die PDF-Seite und die LaTeX-Logs geprueft
+werden, insbesondere `Missing character`- oder `.notdef`-Signale.
+
+Fuer Kundenprobleme gilt: Kundendaten nur zur Diagnose verwenden und danach ein
+eigenes anonymisiertes Sample oder Fixture fuer die interne Abnahme anlegen.

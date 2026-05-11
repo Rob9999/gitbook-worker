@@ -202,6 +202,7 @@ _DEFAULT_LUA_FILTERS: List[str] = [
     _resolve_module_path("lua/image-path-resolver.lua"),
     _resolve_module_path("lua/emoji-span.lua"),
     _resolve_module_path("lua/text-symbols.lua"),
+    _resolve_module_path("lua/url-breaks.lua"),
     _resolve_module_path("lua/erda-script-fonts.lua"),
     _resolve_module_path("lua/cjk-linebreak.lua"),
     _resolve_module_path("lua/latex-emoji.lua"),
@@ -1508,6 +1509,23 @@ def _code_block_wrap_lines(enabled: bool) -> List[str]:
     ]
 
 
+def _url_breaking_lines() -> List[str]:
+    return [
+        r"\makeatletter",
+        r"\AtBeginDocument{%",
+        r"  \@ifundefined{UrlBreaks}{}{%",
+        (
+            r"    \g@addto@macro\UrlBreaks{"
+            r"\do\/\do\.\do\-\do\_\do\?\do\&\do\=\do\#\do\%}%"
+        ),
+        r"    \Urlmuskip=0mu plus 2mu\relax",
+        r"  }%",
+        r"  \emergencystretch=3em",
+        r"}",
+        r"\makeatother",
+    ]
+
+
 def _build_font_header(
     *,
     main_font: str,
@@ -1534,6 +1552,7 @@ def _build_font_header(
 
     lines = ["\\newcommand{\\fallbackfeature}{}"]
     lines.extend(_block_heading_layout_lines())
+    lines.extend(_url_breaking_lines())
     lines.extend(_code_block_wrap_lines(code_block_wrap))
     lines.extend(_script_font_macro_lines("INDIC", "erdaIndic", "ERDAIndicFont"))
     lines.extend(

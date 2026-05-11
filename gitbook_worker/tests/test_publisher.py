@@ -112,6 +112,27 @@ def test_default_filters_include_cjk_linebreak_filter():
         str(path).endswith("text-symbols.lua")
         for path in publisher._DEFAULT_LUA_FILTERS
     )
+    assert any(
+        str(path).endswith("url-breaks.lua") for path in publisher._DEFAULT_LUA_FILTERS
+    )
+
+
+def test_font_header_configures_url_line_breaking():
+    header = publisher._build_font_header(
+        main_font="DejaVu Serif",
+        sans_font="DejaVu Sans",
+        mono_font="DejaVu Sans Mono",
+        emoji_font=None,
+        include_mainfont=True,
+        needs_harfbuzz=True,
+        manual_fallback_spec=None,
+        abort_if_missing_glyph=False,
+        temp_dir="/tmp/test-font-cache",
+    )
+
+    assert r"\UrlBreaks" in header
+    assert r"\Urlmuskip=0mu plus 2mu\relax" in header
+    assert r"\emergencystretch=3em" in header
 
 
 def test_luaotfload_rejects_invalid_resolved_font_file(monkeypatch, tmp_path):

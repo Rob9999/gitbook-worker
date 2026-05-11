@@ -1,7 +1,9 @@
 ---
-version: 1.3.0
-date: 2026-05-09
+version: 1.5.0
+date: 2026-05-11
 history:
+  - "1.5.0: 2026-05-11 — Long-Token-, Review-Marker- und Duplicate-Heading-Signale redaktionell fokussiert."
+  - "1.4.0: 2026-05-11 — Textlayer-Replacement-Signale als Warnung statt Font-Fail dokumentiert."
   - "1.3.0: 2026-05-09 — Pflicht-/Soll-Schnitt: erwartete PDF-Seiten, Overflow-Schwellen, Release-Doku-Scan und Built-in-Profile local/release/customer-handover dokumentiert."
   - "1.2.0: 2026-05-09 — Baseline und Restrisiken in eigene Acceptance-Eingaben ausgelagert."
   - "1.1.0: 2026-05-09 — Publish-Scope, PDF-Zielkorridore und Drift-Regeln als implementierte v2.9.0-Signale dokumentiert."
@@ -99,11 +101,13 @@ profiles:
 - Pflichtfelder je Rolle.
 - verbotene Frontmatter-Keys.
 - Target-Statuswerte.
-- lange Markdown-Tokens.
-- doppelte Markdown-Titel aus dem bestehenden Link-Audit.
+- lange Markdown-Tokens ohne Frontmatter- und URL-/Markdown-Link-Rauschen.
+- doppelte Markdown-Titel als nahe Wiederholungen im selben Dokument (`duplicate_heading_near_window`).
+- explizite Review-Marker wie `TODO`, `FIXME`, `XXX`, `REVIEW:`, `[REVIEW]` oder `<!-- REVIEW`; normale Fachbegriffe wie "peer review" sind kein Marker.
 - AI-Referenzkandidaten aus `ai_references` als sichtbare Signale.
 - Frontmatter-Syntaxsignale aus dem bestehenden Frontmatter-Checker.
 - PDF-Wenigzeiler- und Leerseiten-Metriken.
+- PDF-Textlayer-Replacement-Signale als Accessibility-/Copy-Paste-Warnung.
 - PDF-TOC/Outline-Metriken.
 - PDF-Seitenzahl-Zielkorridore ueber `pdf_targets`.
 - erwartete PDF-Sample-Seiten ueber `expected_pages`.

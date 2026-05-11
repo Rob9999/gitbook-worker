@@ -9,6 +9,7 @@ from pypdf import PdfWriter
 
 from gitbook_worker import __version__
 from gitbook_worker.tools.quality import editorial_acceptance
+from gitbook_worker.tools.quality import editorial_metrics as editorial_metrics_module
 from gitbook_worker.tools.quality.editorial_common import (
     EDITORIAL_HARD_FINDINGS_EXIT_CODE,
     AcceptanceProfile,
@@ -101,6 +102,122 @@ def test_markdown_metrics_detect_generic_target_frontmatter_rules(
     assert report["metrics"]["markdown"]["by_locale"] == {"ja": 1, "pl": 1}
 
 
+def test_markdown_long_token_ignores_frontmatter_and_urls(tmp_path: Path) -> None:
+    document = tmp_path / "chapter.md"
+    genuine_long_token = "layoutcriticaltoken" * 6
+    _write_markdown(
+        document,
+        f"""
+        ---
+        content_id: erda.book.1.aktuelle.lage.europas.herausforderungen.und.chancen.1.1.demokratische.erosion.und.geopolitische.fragmentierung
+        content_lang: de
+        ---
+        # Kapitel
+
+        Quelle https://example.invalid/legal-content/DE/TXT/?uri=CELEX:32023R1781
+        [https://example.invalid/really/long/reference/path/with/many/segments](https://example.invalid/really/long/reference/path/with/many/segments)
+        [Kurzer Link](https://example.invalid/really/long/reference/path/with/many/segments/and/a/long/query?alpha=bravo&charlie=delta)
+        {genuine_long_token}
+        """,
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        profile=AcceptanceProfile(name="test", pdf=PdfProfile()),
+        markdown_roots=(tmp_path,),
+    )
+
+    long_token_findings = [
+        finding
+        for finding in report["findings"]
+        if finding["rule_id"] == "markdown.long_token"
+    ]
+    assert [finding["evidence"] for finding in long_token_findings] == [
+        genuine_long_token
+    ]
+
+
+def test_duplicate_heading_signal_is_limited_to_nearby_repeats(
+    tmp_path: Path,
+) -> None:
+    _write_markdown(
+        tmp_path / "paper-a.md",
+        """
+        ---
+        content_id: paper-a
+        content_lang: de
+        ---
+        # References
+        """,
+    )
+    _write_markdown(
+        tmp_path / "paper-b.md",
+        """
+        ---
+        content_id: paper-b
+        content_lang: de
+        ---
+        # References
+        """,
+    )
+    _write_markdown(
+        tmp_path / "near-repeat.md",
+        """
+        ---
+        content_id: near-repeat
+        content_lang: de
+        ---
+        # Kapitel
+        ## Fazit
+        ### Fazit
+        """,
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        profile=AcceptanceProfile(name="test", pdf=PdfProfile()),
+        markdown_roots=(tmp_path,),
+    )
+
+    duplicate_findings = [
+        finding
+        for finding in report["findings"]
+        if finding["rule_id"] == "markdown.heading.duplicate_title"
+    ]
+    assert len(duplicate_findings) == 1
+    assert duplicate_findings[0]["artifact"] == "near-repeat.md"
+
+
+def test_review_marker_ignores_legitimate_review_prose(tmp_path: Path) -> None:
+    _write_markdown(
+        tmp_path / "chapter.md",
+        """
+        ---
+        content_id: chapter
+        content_lang: de
+        ---
+        # Kapitel
+
+        Peer review and literature review are ordinary editorial prose here.
+        REVIEW: Diese Notiz muss vor Freigabe geklaert werden.
+        """,
+    )
+
+    report = collect_editorial_metrics(
+        repo_root=tmp_path,
+        profile=AcceptanceProfile(name="test", pdf=PdfProfile()),
+        markdown_roots=(tmp_path,),
+    )
+
+    review_findings = [
+        finding
+        for finding in report["findings"]
+        if finding["rule_id"] == "markdown.review_marker"
+    ]
+    assert len(review_findings) == 1
+    assert review_findings[0]["location"] == "line 8"
+
+
 def test_markdown_metrics_detect_translation_content_id_mismatch(
     tmp_path: Path,
 ) -> None:
@@ -149,6 +266,7 @@ def test_markdown_metrics_reuses_existing_quality_signals(tmp_path: Path) -> Non
         ---
         # Shared Title
         TODO: verify this citation trail.
+        ## Shared Title
         """,
     )
     _write_markdown(
@@ -193,6 +311,69 @@ def test_pdf_metrics_detect_empty_text_layer(tmp_path: Path) -> None:
         {"page": 1, "lines": 0, "reason": "empty"}
     ]
     assert any(finding.rule_id == "pdf.text.empty_document" for finding in findings)
+
+
+def test_pdf_textlayer_replacement_signals_are_not_font_failures(
+    monkeypatch, tmp_path: Path
+) -> None:
+    sample_text = (
+        Path(__file__).parent
+        / "data"
+        / "anonymized"
+        / "pdf-textlayer-symbol-extraction.txt"
+    ).read_text(encoding="utf-8")
+    pdf = tmp_path / "anonymized-symbol-extraction.pdf"
+    pdf.write_bytes(b"%PDF-1.4\n% anonymized fixture placeholder\n")
+
+    class FakeMediaBox:
+        width = 595
+        height = 842
+
+    class FakePage:
+        mediabox = FakeMediaBox()
+
+        def extract_text(self) -> str:
+            return sample_text
+
+    class FakeReader:
+        pages = [FakePage()]
+        metadata = {}
+
+    monkeypatch.setattr(
+        editorial_metrics_module, "PdfReader", lambda _path: FakeReader()
+    )
+    monkeypatch.setattr(
+        editorial_metrics_module, "_safe_extract_fonts", lambda *args: []
+    )
+    monkeypatch.setattr(
+        editorial_metrics_module, "_safe_extract_pdf_toc", lambda *args: []
+    )
+
+    metrics, findings = analyze_pdf(tmp_path, pdf, _multilingual_profile())
+
+    replacement_findings = [
+        finding
+        for finding in findings
+        if finding.rule_id == "pdf.text.extraction_replacement"
+    ]
+    expected_replacement_count = sample_text.count("�") + sample_text.count("□")
+    assert (
+        metrics["text_extraction_replacement_signals_total"]
+        == expected_replacement_count
+    )
+    assert metrics["text_extraction_replacement_signals_by_page"] == [
+        {
+            "page": 1,
+            "replacement_character": sample_text.count("�"),
+            "white_square": sample_text.count("□"),
+            "total": expected_replacement_count,
+        }
+    ]
+    assert replacement_findings
+    assert replacement_findings[0].severity == "warn"
+    assert replacement_findings[0].category == "pdf.text"
+    assert "kein harter Font-/Glyphenfehler" in replacement_findings[0].editorial_impact
+    assert all(finding.rule_id != "pdf.text.replacement_glyph" for finding in findings)
 
 
 def test_pdf_targets_flag_page_count_outside_corridor(tmp_path: Path) -> None:

@@ -1,4 +1,4 @@
-# Agent Directives for GitBook Worker (v1.3.2)
+# Agent Directives for GitBook Worker (v1.3.3)
 
 ## Scope & How to Use This File
 - Diese Anweisungen gelten für das gesamte Repository; es gibt aktuell keine verschachtelten Abweichungen.
@@ -25,6 +25,7 @@
 12. **CLI-Ergonomie**: Validere Eingaben früh, liefere hilfreiche Fehlermeldungen und halte Interfaces konsistent.
 13. **Dokumentationspflicht**: Ergänze neue Funktionen mit kurzen, prägnanten Markdown-Notizen in `docs/` oder passenden Unterordnern; lege bei erkannten Lücken neue Seiten an.
 14. **Release- und PR-Hinweise**: Beschreibe im Commit/PR klar, was und warum geändert wurde. Vermeide Sammel-Commits; dokumentiere Tests und bekannte Einschränkungen transparent.
+- **Kundenproblem-Repros**: Kundendaten und Kunden-PDFs dienen nur der Diagnose. Fuer jedes kundenbezogene Problem muss vor einer Lieferung ein eigenes anonymisiertes Sample oder Fixture im Repo entstehen; Kundenrohdaten, extrahierte Kundentexte und Diagnoseartefakte duerfen nicht als Testfixture, Repo-Inhalt oder Release-Anhang verwendet werden.
 
 ## Font Management & License Compliance
 15. **No Hardcoded Fonts**: All fonts MUST be explicitly configured in `gitbook_worker/defaults/fonts.yml`. This is a critical design decision to ensure:

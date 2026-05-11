@@ -19,8 +19,8 @@ import os
 import sys
 from pathlib import Path
 
+from gitbook_worker.tools.publishing.publisher import get_publish_list
 from gitbook_worker.tools.utils.smart_manage_publish_flags import load_publish_manifest
-from publisher import get_publish_list
 from gitbook_worker.tools.utils.language_context import (
     build_language_env,
     resolve_language_context,

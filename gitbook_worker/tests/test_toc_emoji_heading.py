@@ -32,6 +32,7 @@ from pathlib import Path
 LUA_DIR = Path(__file__).parent.parent / "tools" / "publishing" / "lua"
 EMOJI_SPAN_LUA = LUA_DIR / "emoji-span.lua"
 TEXT_SYMBOLS_LUA = LUA_DIR / "text-symbols.lua"
+URL_BREAKS_LUA = LUA_DIR / "url-breaks.lua"
 LATEX_EMOJI_LUA = LUA_DIR / "latex-emoji.lua"
 
 # ---------------------------------------------------------------------------
@@ -80,6 +81,8 @@ def _check_lua_filters():
         pytest.skip(f"emoji-span.lua not found at {EMOJI_SPAN_LUA}")
     if not TEXT_SYMBOLS_LUA.exists():
         pytest.skip(f"text-symbols.lua not found at {TEXT_SYMBOLS_LUA}")
+    if not URL_BREAKS_LUA.exists():
+        pytest.skip(f"url-breaks.lua not found at {URL_BREAKS_LUA}")
     if not LATEX_EMOJI_LUA.exists():
         pytest.skip(f"latex-emoji.lua not found at {LATEX_EMOJI_LUA}")
 
@@ -129,6 +132,8 @@ def _run_pandoc_to_latex(
         str(EMOJI_SPAN_LUA),
         "--lua-filter",
         str(TEXT_SYMBOLS_LUA),
+        "--lua-filter",
+        str(URL_BREAKS_LUA),
         "--lua-filter",
         str(LATEX_EMOJI_LUA),
         # Pass metadata via --metadata flags (avoids MetaInlines splitting)
@@ -288,6 +293,74 @@ class TestTocEmojiHeading:
         assert r"\erdaTextSymbol{☒}" in tex
         assert r"\item[$\square$]" not in tex
         assert r"\item[$\boxtimes$]" not in tex
+
+    def test_visible_urls_are_rendered_with_breakable_url_macro(self, tmp_path):
+        r"""Visible URL text must be emitted as \url{...} for line breaking."""
+        _check_pandoc_available()
+        _check_lua_filters()
+
+        tex = _run_pandoc_to_latex(
+            """\
+# Quellen
+
+Helberger et al. https://doi.org/10.1080/01972243.2017.1391919.
+
+[https://decidim.org](https://decidim.org)
+""",
+            tmp_path,
+            with_toc=False,
+            standalone=False,
+        )
+
+        assert r"\url{https://doi.org/10.1080/01972243.2017.1391919}" in tex
+        assert r"\url{https://decidim.org}" in tex
+        assert r"\href{https://decidim.org}{https://decidim.org}" not in tex
+        assert r"\href{https://decidim.org}{\url{" not in tex
+
+    def test_visible_url_links_do_not_nest_url_inside_href(self, tmp_path):
+        r"""Visible URL links must not emit \href{...}{\url{...}}."""
+        _check_pandoc_available()
+        _check_lua_filters()
+
+        tex = _run_pandoc_to_latex(
+            """\
+# Quellen
+
+[https://example.invalid/legal-content/DE/TXT/?uri=CELEX(2024)1234](https://example.invalid/legal-content/DE/TXT/?uri=CELEX(2024)1234) (Zugriff: 2026-05-11)
+""",
+            tmp_path,
+            with_toc=False,
+            standalone=False,
+        )
+
+        assert (
+            r"\url{https://example.invalid/legal-content/DE/TXT/?uri=CELEX(2024)1234}"
+            in tex
+        )
+        assert r"\href{https://example.invalid" not in tex
+
+    def test_url_filter_keeps_access_marker_outside_url_macro(self, tmp_path):
+        r"""A missing space before access metadata must not poison \url{...}."""
+        _check_pandoc_available()
+        _check_lua_filters()
+
+        tex = _run_pandoc_to_latex(
+            """\
+# Quellen
+
+Quelle https://example.invalid/legal-content/DE/TXT/?uri=CELEX(Zugriff: 2026-05-11)
+""",
+            tmp_path,
+            with_toc=False,
+            standalone=False,
+        )
+
+        assert r"\url{https://example.invalid/legal-content/DE/TXT/?uri=CELEX}" in tex
+        assert (
+            r"\url{https://example.invalid/legal-content/DE/TXT/?uri=CELEX(Zugriff"
+            not in tex
+        )
+        assert "(Zugriff:" in tex
 
     # -----------------------------------------------------------------------
     # Prologue must contain the emoji font face setup

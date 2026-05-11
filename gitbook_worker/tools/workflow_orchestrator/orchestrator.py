@@ -222,6 +222,7 @@ class RuntimeContext:
         worker_tools_dir = package_dir / "tools"
         legacy_tools_dir = legacy_worker_dir / "tools"
         package_install_root = Path(__file__).resolve().parents[2]
+        package_source_root = package_install_root.parent
         package_install_tools = package_install_root / "tools"
 
         if worker_tools_dir.exists():
@@ -234,7 +235,7 @@ class RuntimeContext:
             # Fallback to the package install path so relative paths remain
             # stable even if tools are provisioned later during the run.
             self.tools_dir = package_install_tools
-        python_paths = [str(self.root), str(package_dir)]
+        python_paths = [str(self.root), str(package_source_root), str(package_dir)]
         if legacy_worker_dir.exists():
             python_paths.append(str(legacy_worker_dir))
         if legacy_tools_dir.exists():
@@ -1021,7 +1022,10 @@ def _step_converter(ctx: RuntimeContext) -> None:
     ctx.run_command(
         [
             ctx.python,
-            str(dump_script),
+            "-m",
+            "gitbook_worker.tools.publishing.dump_publish",
+            "--root",
+            str(ctx.root),
             "--manifest",
             str(ctx.config.manifest),
         ]

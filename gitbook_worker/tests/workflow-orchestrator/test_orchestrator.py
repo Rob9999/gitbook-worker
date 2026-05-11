@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import subprocess
 import textwrap
+import os
 from pathlib import Path
 
 import pytest
@@ -16,6 +17,7 @@ from gitbook_worker.tools.workflow_orchestrator.orchestrator import (
     DockerSettings,
     build_config,
     parse_args,
+    _step_converter,
     _step_publisher,
     RuntimeContext,
     _step_editorial_quality,
@@ -28,14 +30,12 @@ from gitbook_worker.tools.utils.smart_content import ContentEntry
 def temp_repo(tmp_path: Path) -> Path:
     manifest = tmp_path / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             publish:
               - path: ./
                 out: dummy.pdf
                 build: false
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     return tmp_path
@@ -44,8 +44,7 @@ def temp_repo(tmp_path: Path) -> Path:
 def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             profiles:
               default:
                 steps: [publisher]
@@ -53,8 +52,7 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     args = parse_args(
@@ -76,8 +74,7 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
 def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             profiles:
               default:
                 steps: [publisher]
@@ -85,8 +82,7 @@ def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     args = parse_args(
@@ -153,6 +149,94 @@ def test_build_config_resolves_quality_scope(temp_repo: Path) -> None:
     config = build_config(args)
 
     assert config.quality_scope == "configured"
+
+
+def test_runtime_context_pythonpath_includes_package_source_root_for_external_root(
+    tmp_path: Path,
+) -> None:
+    customer_root = tmp_path / "customer-root"
+    customer_root.mkdir()
+    manifest = customer_root / "publish.yml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    profile = OrchestratorProfile(
+        name="local",
+        steps=("converter",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    config = OrchestratorConfig(
+        root=customer_root,
+        manifest=manifest,
+        logs_dir=customer_root / "logs",
+        content_config_path=None,
+        language_id="default",
+        content_entry=ContentEntry(id="default", uri="./", type="local"),
+        language_root=customer_root,
+        profile=profile,
+        repo_visibility="public",
+        repository=None,
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+        isolated=False,
+    )
+
+    ctx = RuntimeContext(config)
+
+    package_source_root = Path(__file__).resolve().parents[3]
+    assert str(package_source_root) in ctx.python_path.split(os.pathsep)
+
+
+def test_step_converter_runs_dump_publish_as_package_module(
+    tmp_path: Path, monkeypatch
+):
+    customer_root = tmp_path / "customer-root"
+    customer_root.mkdir()
+    manifest = customer_root / "publish.yml"
+    manifest.write_text("publish: []\n", encoding="utf-8")
+    profile = OrchestratorProfile(
+        name="local",
+        steps=("converter",),
+        docker=DockerSettings(use_registry=False, image=None, cache=False),
+    )
+    config = OrchestratorConfig(
+        root=customer_root,
+        manifest=manifest,
+        logs_dir=customer_root / "logs",
+        content_config_path=None,
+        language_id="default",
+        content_entry=ContentEntry(id="default", uri="./", type="local"),
+        language_root=customer_root,
+        profile=profile,
+        repo_visibility="public",
+        repository=None,
+        commit=None,
+        base=None,
+        reset_others=False,
+        publisher_args=(),
+        dry_run=False,
+        isolated=False,
+    )
+    ctx = RuntimeContext(config)
+    commands: list[list[str]] = []
+
+    def fake_run_command(cmd, *, cwd=None, env=None, check=True):
+        commands.append(list(cmd))
+        return subprocess.CompletedProcess(cmd, 0)
+
+    monkeypatch.setattr(ctx, "run_command", fake_run_command)
+
+    _step_converter(ctx)
+
+    assert commands[0][:3] == [
+        ctx.python,
+        "-m",
+        "gitbook_worker.tools.publishing.dump_publish",
+    ]
+    assert "--root" in commands[0]
+    assert str(customer_root) in commands[0]
+    assert "gitbook_worker.tools.converter.convert_assets" in commands[1]
 
 
 def test_run_creates_missing_readme(tmp_path: Path) -> None:
@@ -343,8 +427,7 @@ def test_step_editorial_quality_configured_scope_runs_languages_and_project(
     content_config = repo / "content.yaml"
     manifest.write_text("publish: []\n", encoding="utf-8")
     content_config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             default: de
             contents:
@@ -361,8 +444,7 @@ def test_step_editorial_quality_configured_scope_runs_languages_and_project(
               - id: ua
                 type: git
                 uri: example.invalid/repo
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     profile = OrchestratorProfile(
@@ -440,8 +522,7 @@ def test_step_editorial_quality_configured_scope_gate_runs_all_before_failing(
     content_config = repo / "content.yaml"
     manifest.write_text("publish: []\n", encoding="utf-8")
     content_config.write_text(
-        textwrap.dedent(
-            """
+        textwrap.dedent("""
             version: 1.0.0
             default: de
             contents:
@@ -451,8 +532,7 @@ def test_step_editorial_quality_configured_scope_gate_runs_all_before_failing(
               - id: en
                 type: local
                 uri: en/
-            """
-        ),
+            """),
         encoding="utf-8",
     )
     profile = OrchestratorProfile(
