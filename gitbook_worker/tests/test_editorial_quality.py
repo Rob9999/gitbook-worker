@@ -463,7 +463,8 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
         encoding="utf-8",
     )
     (language_root / "publish.yml").write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 0.1.3
             publish:
               - path: ./
@@ -477,18 +478,21 @@ def test_publish_scope_uses_summary_and_blocks_missing_pdf(tmp_path: Path) -> No
                 pdf_options:
                   table_paper_strategy:
                     report: jsonl
-            """).lstrip(),
+            """
+        ).lstrip(),
         encoding="utf-8",
     )
     (tmp_path / "content.yaml").write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 1.0.0
             default: sample
             contents:
               - id: sample
                 type: local
                 uri: sample/
-            """).lstrip(),
+            """
+        ).lstrip(),
         encoding="utf-8",
     )
 
@@ -557,7 +561,8 @@ def test_publish_metadata_summary_order_and_release_docs_drift(
         encoding="utf-8",
     )
     (language_root / "publish.yml").write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 2.0.0
             title: Manifest Title
             language: en
@@ -571,18 +576,21 @@ def test_publish_metadata_summary_order_and_release_docs_drift(
                 use_book_json: true
                 build: true
                 summary_appendices_last: true
-            """).lstrip(),
+            """
+        ).lstrip(),
         encoding="utf-8",
     )
     (tmp_path / "content.yaml").write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 1.0.0
             default: sample
             contents:
               - id: sample
                 type: local
                 uri: sample/
-            """).lstrip(),
+            """
+        ).lstrip(),
         encoding="utf-8",
     )
     _write_markdown(

@@ -30,12 +30,14 @@ from gitbook_worker.tools.utils.smart_content import ContentEntry
 def temp_repo(tmp_path: Path) -> Path:
     manifest = tmp_path / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             publish:
               - path: ./
                 out: dummy.pdf
                 build: false
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     return tmp_path
@@ -44,7 +46,8 @@ def temp_repo(tmp_path: Path) -> Path:
 def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             profiles:
               default:
                 steps: [publisher]
@@ -52,7 +55,8 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     args = parse_args(
@@ -74,7 +78,8 @@ def test_build_config_resolves_profile_template(temp_repo: Path) -> None:
 def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
     manifest = temp_repo / "publish.yml"
     manifest.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             profiles:
               default:
                 steps: [publisher]
@@ -82,7 +87,8 @@ def test_build_config_lowercases_repo_for_template(temp_repo: Path) -> None:
                   use_registry: true
                   image: "ghcr.io/${repo}/publisher"
             publish: []
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     args = parse_args(
@@ -427,7 +433,8 @@ def test_step_editorial_quality_configured_scope_runs_languages_and_project(
     content_config = repo / "content.yaml"
     manifest.write_text("publish: []\n", encoding="utf-8")
     content_config.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 1.0.0
             default: de
             contents:
@@ -444,7 +451,8 @@ def test_step_editorial_quality_configured_scope_runs_languages_and_project(
               - id: ua
                 type: git
                 uri: example.invalid/repo
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     profile = OrchestratorProfile(
@@ -522,7 +530,8 @@ def test_step_editorial_quality_configured_scope_gate_runs_all_before_failing(
     content_config = repo / "content.yaml"
     manifest.write_text("publish: []\n", encoding="utf-8")
     content_config.write_text(
-        textwrap.dedent("""
+        textwrap.dedent(
+            """
             version: 1.0.0
             default: de
             contents:
@@ -532,7 +541,8 @@ def test_step_editorial_quality_configured_scope_gate_runs_all_before_failing(
               - id: en
                 type: local
                 uri: en/
-            """),
+            """
+        ),
         encoding="utf-8",
     )
     profile = OrchestratorProfile(
