@@ -1,7 +1,8 @@
 ---
-version: 1.11.0
-date: 2026-05-10
+version: 1.12.0
+date: 2026-05-11
 history:
+  - "1.12.0: 2026-05-11 — v2.9.1 fokussiert Long-Token-, Review-Marker- und Duplicate-Heading-Signale."
   - "1.11.0: 2026-05-10 — DejaVu Sans in mainfont_fallback fuer Checkbox-/Textsymbole dokumentiert"
   - "1.10.0: 2026-05-10 — Orchestrator --quality-scope fuer Sprach- und Gesamtprojekt-Dossiers dokumentiert"
   - "1.9.0: 2026-05-10 — editorial quality HTML-/Trend-/Snapshot-/SARIF-Ausgaben dokumentiert"
@@ -287,7 +288,7 @@ Template-basierte Docker-Namensvergabe.
 
 ## 6. editorial quality profile (CLI-Option `--profile-config`)
 
-Status: 🔨 Teilweise implementiert fuer `v2.9.0 Qualitaetskompass`. Die Profile
+Status: 🔨 Teilweise implementiert fuer `v2.9.1 Abnahmefix`. Die Profile
 werden von `gitbook_worker.tools.quality.editorial_metrics` und
 `gitbook_worker.tools.quality.editorial_acceptance` gelesen. Die Datei ist
 optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
@@ -308,8 +309,8 @@ optional; ohne Datei stehen Built-in-Profile zur Verfuegung.
 | `profiles.<name>.markdown.allowed_translation_status` | array | `draft`, `in-review`, `approved` | ✅ | Erlaubte Target-Statuswerte |
 | `profiles.<name>.markdown.exclude_dirs` | array | Tool-Default | ✅ | Ausgeschlossene Ordner fuer Markdown-Discovery |
 | `profiles.<name>.markdown.skip_filenames` | array | `SUMMARY.md` | ✅ | Dateien ohne Pflicht-Frontmatter-Pruefung |
-| `profiles.<name>.markdown.long_token_warn_chars` | int | `80` | ✅ | Schwelle fuer lange Token als Layout-Warnung |
-| `profiles.<name>.markdown.duplicate_heading_near_window` | int | `3` | ✅ | Kontextfenster fuer doppelte Titel/nahe PDF-Review-Signale |
+| `profiles.<name>.markdown.long_token_warn_chars` | int | `80` | ✅ | Schwelle fuer echte lange Layout-Tokens; Frontmatter und URL-/Markdown-Link-Tokens werden nicht als Rauschen gemeldet |
+| `profiles.<name>.markdown.duplicate_heading_near_window` | int | `3` | ✅ | Kontextfenster fuer nahe doppelte Titel im selben Dokument |
 | `profiles.<name>.pdf.low_text_page_threshold` | int | `15` | ✅ | Wenigzeiler-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.very_low_text_page_threshold` | int | `5` | ✅ | Sehr-wenig-Text-Schwelle pro PDF-Seite |
 | `profiles.<name>.pdf.required_fonts` | array | `[]` | ✅ | Erwartete eingebettete PDF-Fontnamen |
@@ -366,7 +367,7 @@ uebersprungen.
 
 ## 7. editorial accepted findings (CLI-Option `--accepted-findings`)
 
-Status: ✅ Implementiert fuer `v2.9.0 Qualitaetskompass`. Die Datei dokumentiert
+Status: ✅ Implementiert fuer `v2.9.1 Abnahmefix`. Die Datei dokumentiert
 bewusst akzeptierte Restrisiken fuer `editorial_acceptance`. Akzeptierte Befunde
 werden nicht versteckt; sie erscheinen im Dossier. Abgelaufene Akzeptanzen
 erzeugen ein hartes Finding.
@@ -380,7 +381,7 @@ erzeugen ein hartes Finding.
 | `accepted_findings[].role` | string | – | ✅ | Rolle der akzeptierenden Person, z. B. `editor` |
 | `accepted_findings[].date` | string | – | ✅ | Datum der Entscheidung (`YYYY-MM-DD`) |
 | `accepted_findings[].expires` | string | `null` | ✅ | Ablaufdatum; abgelaufene Akzeptanzen werden harte Findings |
-| `accepted_findings[].release` | string | `null` | ✅ | Optionaler Releasebezug, z. B. `v2.9.0` |
+| `accepted_findings[].release` | string | `null` | ✅ | Optionaler Releasebezug, z. B. `v2.9.1` |
 
 ---
 

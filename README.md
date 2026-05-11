@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.9.0 "Qualitaetskompass"** · [Release Notes](docs/releases/v2.9.0.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.9.1 "Abnahmefix"** · [Release Notes](docs/releases/v2.9.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.9.0-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.9.1-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -323,6 +323,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.9.1 "Abnahmefix" (11. Mai 2026)
+
+- **Kundenabnahme stabilisiert**: externe/ignorierte Kundenroots laufen im Orchestrator sauber ueber Package-Module.
+- **PDF-URL-Umbruch**: sichtbare URLs und DOI-Links werden in LaTeX als breakbare `\url{...}` gesetzt.
+- **Ehrlichere Quality-Signale**: Textlayer-Replacement ist Warnung statt Font-Fail; Markdown-Warnungen sind redaktionell fokussierter.
+
+→ [docs/releases/v2.9.1.md](docs/releases/v2.9.1.md)
+
 #### v2.9.0 "Qualitaetskompass" (10. Mai 2026)
 
 - **Qualitaetsdossiers**: Sprach- und Gesamtprojekt-Dossiers dokumentieren die Release-Freigabe nachvollziehbar.
@@ -556,7 +564,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.9.0-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.9.1-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -816,6 +824,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.9.1 "Abnahmefix" (May 11, 2026)
+
+- **Customer acceptance hardened**: external/ignored customer roots now run through package module subprocesses.
+- **PDF URL wrapping**: visible URLs and DOI links are emitted as breakable LaTeX `\url{...}` text.
+- **More honest quality signals**: text-layer replacement is a warning, and Markdown warnings are focused on editorial risks.
+
+→ [docs/releases/v2.9.1.md](docs/releases/v2.9.1.md)
 
 #### v2.9.0 "Qualitaetskompass" (May 10, 2026)
 
