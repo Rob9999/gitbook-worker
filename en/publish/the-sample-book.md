@@ -2029,26 +2029,24 @@ URL-CODE-FENCE-STRESS: https://www.example.org/reports/world-energy-outlook-2024
 | Support | Email | Priority     | 24/7       |
 | Price   | Free  | £50/month    | £200/month |
 
+
 \newpage
 \newgeometry{paperwidth=594mm, paperheight=420mm, left=18mm, right=18mm, top=18mm, bottom=18mm}
 
 
 \pagewidth=594mm
 \pageheight=420mm
+
 ### Wide Decision Table (Anonymized)
 
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{27.50mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{26.23mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{60.63mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{113.98mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{67.92mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{40.48mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{42.27mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{104.48mm}@{}}\toprule Area & Code & Governance grade & Charter status & Entry conditions & Cooperation & Partnership level & Core-group potential & Comment \\\midrule \endhead Area Alpha Network & A-A1 & high stable & charter frame reviewed, control path documented & Entry conditions with audit path, privacy impact review, and aligned safeguard clause & Professional cooperation, data room, crisis exercise & Associated with expansion path & plausible in the medium term & Anonymized long note with rationale, risk marker, and open review task \\Area Beta Corridor & A-B2 & moderately stable & transition status with external quality assurance & Integration only after evidence of reliable operating processes and consistent reporting duties & Pilot cooperation, training, shared situation report & Observing partnership & depends on follow-up review & Anonymized assessment with intentionally long text width for PDF table stress \\Area Gamma Mesh & A-C3 & uneven & charter comparison started, decision open & Preconditions: clarify responsibilities, finish data classification, confirm audit window & Expert dialogue and technical inventory & Preparatory cooperation & not currently robust & Neutral sample row without customer names, original places, or political classification \\\bottomrule \end{longtable}
+### Table With Long Script Runs
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{148.17mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{143.54mm}@{}}\toprule Language & Signal & Editorial purpose \\\midrule \endhead CJK & 生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估 & Long character runs without spaces are a general layout risk, not a German-only issue. \\Hangul & 민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가\allowbreak{}민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가 & Table paper selection must account for script runs and wide glyphs. \\\bottomrule \end{longtable}
 \restoregeometry
 \pagewidth=210mm
 \pageheight=297mm
 \newpage
-
-### Table With Long Script Runs
-
-| Language | Signal | Editorial purpose |
-|---|---|---|
-| CJK | 生命共同体治理结构连续性评估生命共同体治理结构连续性评估生命共同体治理结构连续性评估 | Long character runs without spaces are a general layout risk, not a German-only issue. |
-| Hangul | 민주적회복력전환거버넌스연속성평가민주적회복력전환거버넌스연속성평가 | Table paper selection must account for script runs and wide glyphs. |
 
 ### Table with Formatting
 

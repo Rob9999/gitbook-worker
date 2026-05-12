@@ -382,9 +382,6 @@ Bei der Technologieauswahl spielen verschiedene Faktoren eine Rolle:
 4. **Skalierbarkeit**: Wachstumspotenzial
 5. **Ökosystem**: Verfügbare Bibliotheken und Werkzeuge
 
-## Datenbankvergleich
-
-Ein weiteres häufiges Anwendungsgebiet sind Datenbankvergleiche:
 
 \newpage
 \newgeometry{paperwidth=297mm, paperheight=210mm, left=15mm, right=15mm, top=15mm, bottom=15mm}
@@ -392,6 +389,11 @@ Ein weiteres häufiges Anwendungsgebiet sind Datenbankvergleiche:
 
 \pagewidth=297mm
 \pageheight=210mm
+
+## Datenbankvergleich
+
+Ein weiteres häufiges Anwendungsgebiet sind Datenbankvergleiche:
+
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{}}\toprule Typ & Beispiel & Konsistenz & Skalierung & Anwendungsfall \\\midrule \endhead Relational & PostgreSQL & ACID & Vertikal & Transaktionen \\Dokument & MongoDB & Eventual & Horizontal & Flexible Schemas \\Schlüssel-Wert & Redis & Eventual & Horizontal & Caching \\Graph & Neo4j & ACID & Vertikal & Beziehungen \\Spalten & Cassandra & Eventual & Horizontal & Zeitreihen \\\bottomrule \end{longtable}
 \restoregeometry
 \pagewidth=210mm
@@ -1306,29 +1308,20 @@ URL-CODE-FENCE-STRESS: https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bev
 | Support      | E-Mail| Priorität    | 24/7         |
 | Preis        | Frei  | 50€/Monat    | 200€/Monat   |
 
+
 \newpage
 \newgeometry{paperwidth=841mm, paperheight=594mm, left=20mm, right=20mm, top=20mm, bottom=20mm}
 
 
 \pagewidth=841mm
 \pageheight=594mm
+
 ### Breite Entscheidungstabelle (anonymisiert)
 
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{34.75mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{26.04mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{86.71mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{171.56mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{87.35mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{47.70mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{43.11mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{133.70mm}@{}}\toprule Teilraum & Code & Governancegrad & Satzungsstatus & Bedingungen zur Integration & Kooperation & Partnerschafts-Level & Kernverbund-Potenzial & Kommentar \\\midrule \endhead Gebiet Alpha-Verbund & G-A1 & hoch stabil & Satzungsrahmen geprüft, Kontrollpfad dokumentiert & Aufnahmebedingungen mit Auditpfad, Datenschutzfolgeprüfung und abgestimmter Schutzklausel & Fachliche Kooperation, Datenraum, Krisenübung & Assoziiert mit Ausbaupfad & mittelfristig plausibel & Anonymisierte Langnotiz mit Begründung, Risikohinweis und offenem Prüfauftrag \\Gebiet Beta-Korridor & G-B2 & moderat stabil & Übergangsstatus mit externer Qualitätssicherung & Integration nur nach Nachweis belastbarer Betriebsprozesse und konsistenter Berichtspflichten & Pilotkooperation, Schulung, gemeinsamer Lagebericht & Beobachtende Partnerschaft & abhängig von Folgeprüfung & Anonymisierte Bewertung mit bewusst langer Textbreite für PDF-Tabellenstress \\Gebiet Gamma-Netz & G-C3 & uneinheitlich & Satzungsabgleich begonnen, Entscheidung offen & Vorbedingungen: Verantwortlichkeiten klären, Datenklassifizierung abschließen, Auditfenster bestätigen & Fachdialog und technische Bestandsaufnahme & Vorbereitende Kooperation & derzeit nicht belastbar & Neutrale Musterzeile ohne Kundennamen, Originalorte oder politische Einordnung \\\bottomrule \end{longtable}
-\restoregeometry
-\pagewidth=210mm
-\pageheight=297mm
-\newpage
-
-\newpage
-\newgeometry{paperwidth=297mm, paperheight=210mm, left=15mm, right=15mm, top=15mm, bottom=15mm}
-
-
-\pagewidth=297mm
-\pageheight=210mm
 ### Tabelle mit langen Script-Runs
 
-\begin{longtable}{@{}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{98.82mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{120.68mm}@{}}\toprule Sprache & Signal & Redaktioneller Zweck \\\midrule \endhead CJK & 生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估 & Lange Zeichenketten ohne Leerzeichen sind ein allgemeines Layout-Risiko und kein deutsches Sonderproblem. \\Hangul & 민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가\allowbreak{}민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가 & Das Tabellenlayout muss Script-Runs und breite Glyphen bei der Papierwahl berücksichtigen. \\\bottomrule \end{longtable}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{34.00mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{148.17mm}@{\hspace{4.50mm}}>{\raggedright\arraybackslash}p{177.84mm}@{}}\toprule Sprache & Signal & Redaktioneller Zweck \\\midrule \endhead CJK & 生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估\allowbreak{}生\allowbreak{}命\allowbreak{}共\allowbreak{}同\allowbreak{}体\allowbreak{}治\allowbreak{}理\allowbreak{}结\allowbreak{}构\allowbreak{}连\allowbreak{}续\allowbreak{}性\allowbreak{}评\allowbreak{}估 & Lange Zeichenketten ohne Leerzeichen sind ein allgemeines Layout-Risiko und kein deutsches Sonderproblem. \\Hangul & 민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가\allowbreak{}민\allowbreak{}주\allowbreak{}적\allowbreak{}회\allowbreak{}복\allowbreak{}력\allowbreak{}전\allowbreak{}환\allowbreak{}거\allowbreak{}버\allowbreak{}넌\allowbreak{}스\allowbreak{}연\allowbreak{}속\allowbreak{}성\allowbreak{}평\allowbreak{}가 & Das Tabellenlayout muss Script-Runs und breite Glyphen bei der Papierwahl berücksichtigen. \\\bottomrule \end{longtable}
 \restoregeometry
 \pagewidth=210mm
 \pageheight=297mm
