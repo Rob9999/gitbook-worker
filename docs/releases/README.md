@@ -6,6 +6,7 @@ Overview of all GitBook Worker releases.
 
 | Version | Date | Tag | Notes |
 |---------|------|-----|-------|
+| **v2.9.2** | 2026-05-12 | `release-v.2.9.2-hotfix` | [v2.9.2](v2.9.2.md) - landscape table context packets and source-reference rest-page cleanup |
 | **v2.9.1** | 2026-05-11 | `release-v.2.9.1-hotfix` | [v2.9.1](v2.9.1.md) - customer acceptance hardening, URL wrapping, focused editorial warnings |
 | **v2.9.0** | 2026-05-10 | `v2.9.0` | [v2.9.0](v2.9.0.md) - quality dossiers and PDF checklist text-symbol fallback |
 | **v2.8.0** | 2026-05-09 | `v2.8.0` | [v2.8.0](v2.8.0.md) - editorial table paper strategy with script-aware long-run scoring |

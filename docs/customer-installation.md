@@ -1,8 +1,9 @@
 ---
-version: 2.4.0
-date: 2026-05-11
+version: 2.5.0
+date: 2026-05-12
 status: stable
 history:
+  - "2.5.0: 2026-05-12 - Anwenderanleitung und Release-Verifikation fuer v2.9.2 Layoutpakete aktualisiert"
   - "2.4.0: 2026-05-11 - Anwenderanleitung und Release-Verifikation fuer v2.9.1 Abnahmefix aktualisiert"
   - "2.3.0: 2026-05-10 - Anwenderanleitung und Release-Verifikation fuer v2.9.0 Qualitaetskompass aktualisiert"
   - "2.2.2: 2026-05-10 - DejaVu-Sans-Hinweis fuer Checkbox-/Textsymbol-Fallbacks in Kundenlieferungen ergaenzt"
@@ -22,15 +23,15 @@ history:
   - "1.0.0: 2025-12-31 - init"
 ---
 
-# GitBook Worker Anwenderanleitung v2.9.1
+# GitBook Worker Anwenderanleitung v2.9.2
 
 Diese Anleitung ist der zentrale Einstieg fuer Anwenderinnen und Anwender von
-GitBook Worker v2.9.1. Sie beschreibt Installation, Projektstruktur,
+GitBook Worker v2.9.2. Sie beschreibt Installation, Projektstruktur,
 Konfiguration, lokale PDF-Builds, Docker-Builds, Font-Pruefungen,
 AI-Reference-QA und typische Fehlerbilder.
 
 Der Dokumentstatus `stable` bedeutet: Die Anleitung ist als User-Manual-Fassung
-fuer v2.9.1 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
+fuer v2.9.2 freigegeben. Die Checkliste am Ende bleibt als Liefer- und
 Support-Smoke fuer konkrete Kundenuebergaben erhalten.
 
 ## 1. Was GitBook Worker leistet
@@ -79,7 +80,7 @@ bleiben beim jeweiligen Projektteam.
 ### Lokal
 
 - Windows, Linux oder macOS.
-- Python 3.10 oder neuer; fuer v2.9.1 ist Python 3.11/3.12 empfohlen.
+- Python 3.10 oder neuer; fuer v2.9.2 ist Python 3.11/3.12 empfohlen.
 - Pandoc.
 - TeX Live mit LuaLaTeX.
 - Zugriff auf die konfigurierten Fonts oder einen erlaubten Downloadpfad.
@@ -116,7 +117,7 @@ python -m pip uninstall -y gitbook-worker tools
 Installation aus einem gelieferten Wheel:
 
 ```powershell
-python -m pip install --force-reinstall dist\gitbook_worker-2.9.1-py3-none-any.whl
+python -m pip install --force-reinstall dist\gitbook_worker-2.9.2-py3-none-any.whl
 ```
 
 Installation direkt aus dem Repository:
@@ -133,7 +134,7 @@ python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip uninstall -y gitbook-worker tools
-python -m pip install --force-reinstall dist/gitbook_worker-2.9.1-py3-none-any.whl
+python -m pip install --force-reinstall dist/gitbook_worker-2.9.2-py3-none-any.whl
 ```
 
 ## 5. Installation pruefen
@@ -147,7 +148,7 @@ python -c "import gitbook_worker, tools; print('version:', gitbook_worker.__vers
 
 Erwartung:
 
-- `version:` zeigt `2.9.1`.
+- `version:` zeigt `2.9.2`.
 - `gitbook_worker:` zeigt in die aktive `.venv` oder in das bewusst installierte
   Repository.
 - `tools shim:` zeigt auf den Kompatibilitaets-Shim aus `gitbook_worker`, nicht
@@ -389,7 +390,7 @@ python -m gitbook_worker.tools.docker.run_docker shell --use-dynamic
 
 Hinweise:
 
-- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.9.1` verwenden. `2.4.1`
+- Fuer pip-/sdist-basierte Docker-CI bitte mindestens `2.9.2` verwenden. `2.4.1`
   stellt sicher, dass die Dockerfiles und `gitbook_worker/tools/requirements.txt`
   im Lieferpaket enthalten sind; `2.4.2` ergaenzt den PDF-Font-Hotfix fuer
   CJK-Linebreak und ERDA-Script-Sichtpruefung; `2.4.3` haertet Windows-Font-Stubs
@@ -400,7 +401,9 @@ Hinweise:
   `2.8.0` bewertet Tabellenkandidaten redaktionell und script-aware;
   `2.9.0` ergaenzt Qualitaetsdossiers und den Checkbox-Textsymbol-Fallback;
   `2.9.1` stabilisiert Kundenabnahme-Laeufe, URL-/DOI-Umbrueche und
-  redaktionell fokussierte Quality-Signale.
+  redaktionell fokussierte Quality-Signale; `2.9.2` haelt kompakte
+  Quellen-/Querverweis- und Kontextpakete mit gewrappten Landscape-Tabellen
+  zusammen.
 - `--use-dynamic` ist weiterhin der Release-Pfad fuer dynamische Docker-Builds.
 - `Dockerfile.dynamic` verwendet `/usr/local/texlive/current` und keinen
   hartcodierten TeX-Live-Jahrgang.
@@ -459,7 +462,7 @@ Als JSON fuer CI oder Support:
 python -m gitbook_worker.tools.testing.pdf_validator --pdf de\publish\das-sample-buch.pdf --json
 ```
 
-Erwartete Signale fuer v2.9.1:
+Erwartete Signale fuer v2.9.2:
 
 - Der konfigurierte Emoji-Font `Twemoji Mozilla` ist eingebettet.
 - Der konfigurierte CJK-Font `ERDA CC-BY CJK` ist eingebettet.
@@ -580,7 +583,7 @@ Mehr konkrete Fehlerbilder stehen in den [FAQs](FAQs.md).
 
 Empfohlene Reihenfolge:
 
-1. Release Notes lesen: [v2.9.1 Release Notes](releases/v2.9.1.md).
+1. Release Notes lesen: [v2.9.2 Release Notes](releases/v2.9.2.md).
 2. Recovery-Punkt im Projekt setzen, bevor Build- oder Migrationslaeufe starten.
 3. Neue Version in einer sauberen `.venv` installieren.
 4. Importpfade und Version pruefen.
@@ -591,27 +594,26 @@ Empfohlene Reihenfolge:
 9. Optional Docker-Build mit `Dockerfile.dynamic` ausfuehren.
 10. AI-Reference-QA zuerst report-only testen.
 
-## 19. Release-Verifikation v2.9.1
+## 19. Release-Verifikation v2.9.2
 
-Der v2.9.1-Release wird lokal mit diesen Signalen geprueft:
+Der v2.9.2-Release wird lokal mit diesen Signalen geprueft:
 
-- Kundenabnahme `customer-de`: PDF-Build bestanden, Editorial Acceptance `passed_with_warnings` mit 0 Blockern, 0 Fails, 43 Warnungen und 7 Infos.
-- Impacted Regressionen fuer Publisher, URL-Filter, Editorial Metrics und Orchestrator: `77 passed, 7 skipped`.
-- Non-slow Test-Suite: `595 passed, 11 skipped, 10 deselected`, mit vier
+- Kundenlayout `customer-de`: PDF-Build bestanden; kompakte Quellen- und
+  Querverweis-Restseiten wurden mit den zugehoerigen Landscape-Tabellen
+  zusammengefuehrt, ohne Kundenartefakte ins Repository zu uebernehmen.
+- Fokussierte Preprocessor-Regressionen: `23 passed`.
+- Non-slow Test-Suite: `605 passed, 11 skipped, 10 deselected`, mit vier
   bekannten `Path.__enter__`-Deprecation-Warnungen.
 - `git diff --check`, `py_compile` und `black --check` fuer die beruehrten
   Python-Dateien: bestanden; `flake8` war in der lokalen Release-venv nicht
   installiert (`No module named flake8`).
-- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.9.1`: bestanden;
-  erzeugte Artefakte sind `gitbook_worker-2.9.1.tar.gz` und
-  `gitbook_worker-2.9.1-py3-none-any.whl`.
+- Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.9.2`: bestanden;
+  erzeugte Artefakte sind `gitbook_worker-2.9.2.tar.gz` und
+  `gitbook_worker-2.9.2-py3-none-any.whl`.
 - Wheel-Smoke in frischer virtueller Umgebung ausserhalb des Repositorys:
-  bestanden mit `version: 2.9.1` und startender Orchestrator-Hilfe.
+  bestanden mit `version: 2.9.2` und startender Orchestrator-Hilfe.
 - Deutscher und englischer PDF-Build sowie TOC-Extraktion: bestanden fuer
   `de/publish/das-sample-buch.pdf` und `en/publish/the-sample-book.pdf`.
-- Redigiertes Kundenabnahme-Zip:
-  `gitbook-worker-v2.9.1-customer-acceptance-redacted-2026-05-11.zip`,
-  SHA-256 `E7D44FC7DDFFD62B703128584640BB1B7A5A07FC671B17D166FABC5D369EAEC4`.
 - Sichtbare URLs und DOI-Links werden in PDFs breakbar gesetzt; verschachtelte
   `\href{...}{\url{...}}`-Ausgabe wird durch Regressionen verhindert.
 - Textlayer-Replacement-Signale werden als Copy/Paste-/Accessibility-Warnung
@@ -621,9 +623,9 @@ Der v2.9.1-Release wird lokal mit diesen Signalen geprueft:
 - Checklist-/Checkmark-Symbole bleiben als Textsymbole sichtbar; bei eigenen
   Fallback-Overrides bleibt `DejaVu Sans:mode=harf` Pflichtbestandteil der
   Lieferkommunikation.
-- Visual-Smoke: Englisch Seite 69 (`Wide Decision Table`) schneidet die
-  Kommentarspalte nicht mehr ab; Deutsch Seite 45 trennt Script-Run- und
-  Zweck-Spalten nach Break-Hints sauber.
+- Visual-Smoke: Kundenbeobachtete Landscape-Tabellen halten kurze
+  Einleitungen, Legenden, Quellenlisten und Querverweise zusammen, wenn der
+  Hoehencheck das Paket erlaubt.
 - Bekannte `Missing character`-Warnungen fuer weitere Sprachsamples bleiben
   im Log-Scan sichtbar, wurden aber nicht als Gate-Fehler gewertet.
 - Wide-Table- und Long-Script-Run-Stressbeispiele bleiben Bestandteil der

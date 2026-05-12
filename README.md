@@ -1,6 +1,6 @@
 # GitBook Worker
 
-**v2.9.1 "Abnahmefix"** · [Release Notes](docs/releases/v2.9.1.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
+**v2.9.2 "Layoutpakete"** · [Release Notes](docs/releases/v2.9.2.md) · [Kundenguide / Customer Guide](docs/customer-installation.md) · [FAQ](docs/FAQs.md) · [Lizenz / License](LICENSE)
 
 🇩🇪 [Deutsch](#-deutsch) · 🇬🇧 [English](#-english)
 
@@ -62,7 +62,7 @@ GitBook Worker ist das richtige Werkzeug, wenn du:
 python -m pip install --upgrade pip
 pip install -e .          # Entwicklermodus (empfohlen)
 # oder
-pip install dist/gitbook_worker-2.9.1-py3-none-any.whl   # fertige Distribution
+pip install dist/gitbook_worker-2.9.2-py3-none-any.whl   # fertige Distribution
 ```
 
 #### Schnellstart
@@ -323,6 +323,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 <details>
 <summary>📋 Release-Verlauf</summary>
 
+#### v2.9.2 "Layoutpakete" (12. Mai 2026)
+
+- **Landscape-Kontextpakete**: kurze Ueberschriften, Einleitungen, Legenden, Querverweise und Quellenlisten bleiben mit gewrappten Tabellen zusammen.
+- **Hoehenbewusste Papierwahl**: lange Landscape-Matrizen koennen auf groesseres Landscape-Papier wechseln statt gequetscht oder getrennt zu werden.
+- **Anonymisierte Regressionen**: Kundenbeobachtungen wurden als generische Tabellen-/Referenzlisten-Fixtures abgesichert.
+
+→ [docs/releases/v2.9.2.md](docs/releases/v2.9.2.md)
+
 #### v2.9.1 "Abnahmefix" (11. Mai 2026)
 
 - **Kundenabnahme stabilisiert**: externe/ignorierte Kundenroots laufen im Orchestrator sauber ueber Package-Module.
@@ -564,7 +572,7 @@ GitBook Worker is the right tool when you need to:
 python -m pip install --upgrade pip
 pip install -e .          # editable / dev mode (recommended)
 # or
-pip install dist/gitbook_worker-2.9.1-py3-none-any.whl   # pre-built distribution
+pip install dist/gitbook_worker-2.9.2-py3-none-any.whl   # pre-built distribution
 ```
 
 #### Quick Start
@@ -824,6 +832,14 @@ Details: [gitbook_worker/docs/architecture/smart-font-stack.md](gitbook_worker/d
 
 <details>
 <summary>📋 Release History</summary>
+
+#### v2.9.2 "Layoutpakete" (May 12, 2026)
+
+- **Landscape context packets**: short headings, intros, legends, cross-references, and source lists stay with wrapped tables.
+- **Height-aware paper choice**: long landscape matrices can move to larger landscape paper instead of being squeezed or split awkwardly.
+- **Anonymized regressions**: customer-observed layout cases are covered by generic table/reference fixtures.
+
+→ [docs/releases/v2.9.2.md](docs/releases/v2.9.2.md)
 
 #### v2.9.1 "Abnahmefix" (May 11, 2026)
 

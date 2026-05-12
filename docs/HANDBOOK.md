@@ -1,7 +1,8 @@
 ---
-version: 1.4.0
-date: 2026-05-11
+version: 1.4.1
+date: 2026-05-12
 history:
+  - "1.4.1: 2026-05-12 - v2.9.2 Layoutpakete und Quellenlisten-Kontext fuer Landscape-Tabellen dokumentiert"
   - "1.4.0: 2026-05-11 - v2.9.1 Abnahmefix, URL-Breaking und fokussierte Editorial-Signale dokumentiert"
   - "1.3.9: 2026-05-10 - Text-Checkbox-Symbole fuer PDF-Fallback ueber DejaVu Sans dokumentiert"
   - "1.3.8: 2026-05-09 - Tabellenprofi-Strategie fuer v2.8.0 dokumentiert"
@@ -69,6 +70,7 @@ maintained reference. The legacy archive remains read-only for deep dives.
 - v2.6.1 extends PDF code-fence wrapping for Pandoc token macros such as `\NormalTok{...}`. When `fvextra` is available, token arguments are routed through `\FV@InsertBreaks`; this keeps long URLs inside code fences within the page bounds while preserving a clean PDF text layer.
 - v2.7.0 improves wide Markdown table handling. Pipe tables are estimated by per-column text width and compared against usable text width after margins; the old column-count heuristic remains a lower bound, and oversized tables emit a warning instead of pretending that a standard paper size solved them.
 - v2.8.0 moves table paper choice into `table_strategy.py` and adds editorial scoring. The strategy compares candidate papers by expected wrapping, row height, header wraps, narrow columns, and unbreakable overflow; `pdf_options.table_paper_strategy` can tune thresholds, write JSONL layout reports, and accept per-table `gbw-table` paper overrides.
+- v2.9.2 keeps compact editorial context with wrapped landscape tables: short lead text, legends, sibling micro-tables, cross-references, and source/reference lists can travel with the table when bounded by the height check.
 - Checklist symbols such as `☐`, `☑`, `☒`, `✓`, and `✔` are text symbols, not colour emoji. The publisher routes them through `text-symbols.lua` and the configured sans font so Pandoc task-list markers do not fall back to math square placeholders or missing-glyph boxes.
 - v2.9.1 routes visible HTTP/HTTPS URLs through `url-breaks.lua` as breakable `\url{...}` LaTeX, avoids nested `\href{...}{\url{...}}`, and keeps access-date markers such as `(Zugriff: ...)` outside the URL macro.
 - Editorial quality signals are intentionally scoped for review usefulness: long-token warnings skip frontmatter and URL-bearing Markdown tokens, duplicate-heading warnings are near-document signals, and plain prose such as "peer review" is not treated as an open review marker.

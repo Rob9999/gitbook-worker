@@ -1,7 +1,8 @@
 ---
-version: 1.12.0
-date: 2026-05-11
+version: 1.12.1
+date: 2026-05-12
 history:
+  - "1.12.1: 2026-05-12 — v2.9.2 Tabellen-Kontextpakete ohne neue Konfigurationsschluessel dokumentiert."
   - "1.12.0: 2026-05-11 — v2.9.1 fokussiert Long-Token-, Review-Marker- und Duplicate-Heading-Signale."
   - "1.11.0: 2026-05-10 — DejaVu Sans in mainfont_fallback fuer Checkbox-/Textsymbole dokumentiert"
   - "1.10.0: 2026-05-10 — Orchestrator --quality-scope fuer Sprach- und Gesamtprojekt-Dossiers dokumentiert"
@@ -33,6 +34,12 @@ redaktionelle `pdf_options.table_paper_strategy`. Sie bewertet Kandidaten nach
 erwarteten Zellumbruechen, Kopfzeilen, Spaltentypen, CJK-/Script-Runs,
 Token-Risiken und nutzbarer Textbreite. Ohne Konfiguration bleibt die Strategie
 aktiv; `publish.yml` kann Kandidaten, Schwellen und Reports steuern.
+
+Hinweis fuer v2.9.2: Die Strategie haelt kompakte redaktionelle Kontextpakete
+mit gewrappten Landscape-Tabellen zusammen, darunter kurze Einleitungen,
+Legenden, Querverweise und Quellen-/Referenzlisten. Dafuer wurden keine neuen
+Konfigurationsschluessel eingefuehrt; bestehende Tabellenstrategie-Schalter
+gelten unveraendert.
 
 Hinweis fuer v2.6.1: PDF-Code-Fence-Wrapping ist als `pdf_options.code_block_wrap`
 konfigurierbar und standardmaessig aktiv. Die Option nutzt `fvextra`, wenn das

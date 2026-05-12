@@ -1,7 +1,8 @@
 ---
-version: 1.0.13
-date: 2026-05-11
+version: 1.0.14
+date: 2026-05-12
 history:
+	- "1.0.14: 2026-05-12 - Anwenderdokumentationsindex fuer v2.9.2 Layoutpakete aktualisiert"
 	- "1.0.13: 2026-05-11 - Anwenderdokumentationsindex fuer v2.9.1 Abnahmefix aktualisiert"
 	- "1.0.12: 2026-05-10 - Anwenderdokumentationsindex fuer v2.9.0 Qualitaetskompass aktualisiert"
 	- "1.0.11: 2026-05-10 - Editorial-Quality-Liefernachweise fuer v2.9.0 verlinkt"
@@ -24,7 +25,7 @@ Diese Seite buendelt die Anwenderdokumentation fuer GitBook Worker.
 
 ## Start Here
 
-- [GitBook Worker Anwenderanleitung v2.9.1](customer-installation.md) - zentrale Installation-, Betriebs- und Supportanleitung.
+- [GitBook Worker Anwenderanleitung v2.9.2](customer-installation.md) - zentrale Installation-, Betriebs- und Supportanleitung.
 - [Configuration Reference](configuration-reference.md) - vollstaendige Referenz der unterstuetzten Konfigurationsschluessel.
 - [Editorial Quality Tools](editorial-quality-tools.md) - Metrikreport und Abnahmedossier fuer redaktionelle Freigaben.
 - [Editorial Quality Editor Review Report](reviews/editorial-quality-editor-review-report.md) - Vorlage fuer Kundenredakteure mit Pflichtenheftstatus und offenen Entscheidungen.
