@@ -22,10 +22,6 @@ from pathlib import Path
 from typing import Any, List, Mapping
 
 from gitbook_worker.tools.logging_config import get_logger
-
-from gitbook_worker.tools.utils.image_info import get_image_width
-
-
 from gitbook_worker.tools.publishing.paper_info import (
     PaperInfo,
     get_valid_paper_measurements,
@@ -42,12 +38,12 @@ from gitbook_worker.tools.publishing.table_strategy import (
     TABLE_WIDTH_SAFETY_FACTOR,
     TablePaperStrategyConfig,
     available_text_width_mm,
-    evaluate_candidate_layout,
     estimate_table_width_mm,
     estimate_text_width_mm,
+    evaluate_candidate_layout,
     glyph_width_em,
-    is_table_separator_row,
     is_table_script_breakable,
+    is_table_separator_row,
     iter_paper_candidates,
     paper_for_columns,
     paper_for_table,
@@ -57,6 +53,7 @@ from gitbook_worker.tools.publishing.table_strategy import (
     split_table_row,
     table_column_count,
 )
+from gitbook_worker.tools.utils.image_info import get_image_width
 
 _FIGURE_START = re.compile(r"<figure\b", re.IGNORECASE)
 _FIGURE_END = re.compile(r"</figure>", re.IGNORECASE)
@@ -1108,7 +1105,9 @@ def process(
                 config=table_strategy_config,
                 override=table_override,
             )
-            escaped_lines = [_escape_table_line(l) for l in table_lines]
+            escaped_lines = [
+                _escape_table_line(table_line) for table_line in table_lines
+            ]
             logger.info(
                 "In document '%s': Detected table with %d columns, paper: %s",
                 path,

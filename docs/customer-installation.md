@@ -604,9 +604,8 @@ Der v2.9.2-Release wird lokal mit diesen Signalen geprueft:
 - Fokussierte Preprocessor-Regressionen: `23 passed`.
 - Non-slow Test-Suite: `605 passed, 11 skipped, 10 deselected`, mit vier
   bekannten `Path.__enter__`-Deprecation-Warnungen.
-- `git diff --check`, `py_compile` und `black --check` fuer die beruehrten
-  Python-Dateien: bestanden; `flake8` war in der lokalen Release-venv nicht
-  installiert (`No module named flake8`).
+- `git diff --check`, `py_compile`, `black --check`, `isort --check-only` und
+  `flake8` fuer die beruehrten Python-Dateien: bestanden.
 - Sauberer Wheel- und sdist-Build fuer `gitbook_worker-2.9.2`: bestanden;
   erzeugte Artefakte sind `gitbook_worker-2.9.2.tar.gz` und
   `gitbook_worker-2.9.2-py3-none-any.whl`.

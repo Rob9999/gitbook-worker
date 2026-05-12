@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 import pytest
+
 from gitbook_worker.tools.publishing import preprocess_md
 
 
