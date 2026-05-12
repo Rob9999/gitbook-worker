@@ -72,6 +72,16 @@ def _english_wide_decision_table(tmp_path):
     return md
 
 
+def _wrapped_block(out: str) -> str:
+    start = out.index("\\newgeometry")
+    end = out.index("\\restoregeometry")
+    return out[start:end]
+
+
+def _wrapped_blocks(out: str) -> list[str]:
+    return re.findall(r"\\newgeometry\{.*?\\restoregeometry", out, re.S)
+
+
 def test_relative_markdown_links_point_to_pdf_anchor(tmp_path):
     content_root = tmp_path / "content"
     chapter = content_root / "chapters" / "chapter-01.md"
@@ -224,6 +234,410 @@ def test_table_strategy_uses_wrapping_latex_columns(artifact_dir):
     assert_geometry(out, expected_w=594, expected_h=420)
     assert r"\begin{longtable}{@{}>{\raggedright\arraybackslash}p{" in out
     assert "lllllllll" not in out
+
+
+def test_wrapped_table_keeps_intro_with_heading(artifact_dir):
+    md = artifact_dir / "wide-table-with-intro.md"
+    header = "|" + "|".join([f"Column {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "### Decision overview",
+                "",
+                "The following table summarizes the anonymized decision path.",
+                "",
+                header,
+                sep,
+                row,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+
+    assert "### Decision overview" in block
+    assert "The following table summarizes the anonymized decision path." in block
+    assert out.index("The following table") > out.index("\\newgeometry")
+
+
+def test_wrapped_table_keeps_nearby_legend_table(artifact_dir):
+    md = artifact_dir / "wide-table-with-legend.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "## Control matrix",
+                "",
+                "The following matrix explains the anonymized control model.",
+                "",
+                "### Legend",
+                "",
+                "| Mark | Meaning |",
+                "|---|---|",
+                "| **A** | Accountable role |",
+                "| R | Review role |",
+                "",
+                "### Selected instruments",
+                "",
+                header,
+                sep,
+                row,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+
+    assert "## Control matrix" in block
+    assert "The following matrix explains" in block
+    assert "### Legend" in block
+    assert "Accountable role" in block
+    assert r"\textbf{A}" in block
+    assert "### Selected instruments" in block
+    assert "\\pageheight=420mm\n\n## Control matrix" in block
+    assert out.index("### Legend") > out.index("\\newgeometry")
+
+
+def test_wrapped_table_does_not_pull_previous_section_note(artifact_dir):
+    md = artifact_dir / "wide-table-with-previous-note.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "This closing note belongs to the previous section.",
+                "",
+                "### New table",
+                "",
+                header,
+                sep,
+                row,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+    before_block = out[: out.index("\\newgeometry")]  # noqa: E203
+
+    assert "This closing note belongs to the previous section." in before_block
+    assert "This closing note belongs to the previous section." not in block
+    assert "### New table" in block
+
+
+def test_wrapped_table_packs_short_chapter_lead_and_key_line(artifact_dir):
+    md = artifact_dir / "short-chapter-packet.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(5)]) + "|"
+    sep = "|" + "|".join(["---"] * 5) + "|"
+    row = "|" + "|".join(["long anonymized sample text"] * 5) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "# Chapter packet",
+                "",
+                "_An anonymized subtitle for a compact opening packet_",
+                "",
+                "***",
+                "",
+                "## Key impulses",
+                "",
+                "- First compact impulse for the reader.",
+                "- Second compact impulse for the reader.",
+                "",
+                "***",
+                "",
+                "## 1.1 First table",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+                "",
+                "Key: This short note belongs to the table packet.",
+                "",
+                "***",
+                "",
+                "## 1.2 Next section",
+                "",
+                "This section must stay outside the first packet.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+
+    assert "# Chapter packet" in block
+    assert "## Key impulses" in block
+    assert "## 1.1 First table" in block
+    assert "Key: This short note belongs" in block
+    assert "## 1.2 Next section" not in block
+
+
+def test_wrapped_table_packs_one_short_sibling_table(artifact_dir):
+    md = artifact_dir / "sibling-table-packet.md"
+    header = "| Element | Rule | Stability reason |"
+    sep = "|---|---|---|"
+    row = (
+        "| Mandate | "
+        "CompactAnonymizedGovernanceRuleWithoutBreaksForLandscapeReview | "
+        "StabilityRationaleWithoutBreaksForLayoutStress |"
+    )
+    md.write_text(
+        "\n".join(
+            [
+                "# Chapter packet",
+                "",
+                "_An anonymized subtitle for a compact opening packet_",
+                "",
+                "***",
+                "",
+                "## Key impulses",
+                "",
+                "- First compact impulse for the reader.",
+                "- Second compact impulse for the reader.",
+                "",
+                "***",
+                "",
+                "## 1.1 Who decides what",
+                "",
+                "### A) First mandate path",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+                "",
+                "### B) Second mandate path",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+                "",
+                "### C) Third mandate path",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    blocks = _wrapped_blocks(out)
+
+    assert len(blocks) >= 2
+    assert "# Chapter packet" in blocks[0]
+    assert "### A) First mandate path" in blocks[0]
+    assert "### B) Second mandate path" in blocks[0]
+    assert "### C) Third mandate path" not in blocks[0]
+
+
+def test_wrapped_table_packs_short_trailing_references(artifact_dir):
+    md = artifact_dir / "wide-table-with-trailing-references.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "## Accountability matrix",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                "",
+                "***",
+                "",
+                "## References",
+                "",
+                "See also Annex A, Annex B, and Annex C.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+
+    assert "## Accountability matrix" in block
+    assert "***" in block
+    assert "## References" in block
+    assert "See also Annex A" in block
+    assert out.index("## References") < out.index("\\restoregeometry")
+
+
+def test_wrapped_table_packs_short_trailing_source_list(artifact_dir):
+    md = artifact_dir / "wide-table-with-trailing-source-list.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "## Control checklist",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                "",
+                "***",
+                "",
+                "## Sources & References",
+                "",
+                "1. **Treaty source:** Short source note.",
+                "2. **Governance source:** Short source note.",
+                "3. **Project source:** Short source note.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+
+    assert "## Control checklist" in block
+    assert "## Sources & References" in block
+    assert "Treaty source" in block
+    assert out.index("## Sources & References") < out.index("\\restoregeometry")
+
+
+def test_wrapped_table_does_not_pack_unrelated_short_next_section(artifact_dir):
+    md = artifact_dir / "wide-table-with-next-section.md"
+    header = "|" + "|".join([f"Field {i}" for i in range(11)]) + "|"
+    sep = "|" + "|".join(["---"] * 11) + "|"
+    row = "|" + "|".join(["sample"] * 11) + "|"
+    md.write_text(
+        "\n".join(
+            [
+                "## Accountability matrix",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                "",
+                "## Next section",
+                "",
+                "This short section starts a new editorial unit.",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    block = _wrapped_block(out)
+    after_block = out[out.index("\\restoregeometry") :]
+
+    assert "## Next section" not in block
+    assert "## Next section" in after_block
+
+
+def test_adjacent_wrapped_packets_do_not_leave_separator_page(artifact_dir):
+    md = artifact_dir / "adjacent-wrapped-packets.md"
+    header = "| Element | Rule | Stability reason |"
+    sep = "|---|---|---|"
+    row = (
+        "| Mandate | "
+        "CompactAnonymizedGovernanceRuleWithoutBreaksForLandscapeReview | "
+        "StabilityRationaleWithoutBreaksForLayoutStress |"
+    )
+    md.write_text(
+        "\n".join(
+            [
+                "# Chapter packet",
+                "",
+                "_An anonymized subtitle for a compact opening packet_",
+                "",
+                "## 1.1 First table",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+                "",
+                "***",
+                "",
+                "## 1.2 Second table",
+                "",
+                header,
+                sep,
+                row,
+                row,
+                row,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+    blocks = _wrapped_blocks(out)
+    between_blocks = out[out.index("\\restoregeometry") : out.rindex("\\newgeometry")]
+
+    assert len(blocks) == 2
+    assert "***" in blocks[0]
+    assert "***" not in between_blocks
+    assert "\\newpage\n\n\\newpage" not in between_blocks
+
+
+def test_wrapped_long_matrix_promotes_paper_by_height(artifact_dir):
+    md = artifact_dir / "long-matrix-height.md"
+    header = "| Ministry | Instrument | Decides | Controls | Appeal |"
+    sep = "|---|---|---|---|---|"
+    rows = [
+        "| Area | InstrumentWithoutBreaksForLandscapeReview | "
+        "DecisionBodyWithoutBreaksForLayoutStress | "
+        "OversightChainWithoutBreaksForLayoutStress | ReviewPath |"
+        for _ in range(18)
+    ]
+    md.write_text(
+        "\n".join(
+            [
+                "## Control matrix",
+                "",
+                "The following matrix explains the anonymized control model.",
+                "",
+                "### Legend",
+                "",
+                "| Mark | Meaning |",
+                "|---|---|",
+                "| **A** | Accountable role |",
+                "| R | Review role |",
+                "",
+                "### Selected instruments",
+                "",
+                header,
+                sep,
+                *rows,
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    out = preprocess_md.process(str(md), paper_format="a4")
+
+    assert_geometry(out, expected_w=420, expected_h=297)
 
 
 def test_svg_skips_size_probe(monkeypatch, tmp_path):

@@ -78,6 +78,24 @@ _MARKDOWN_LINK_RE = re.compile(r"(?<!\!)\[(?P<label>[^\]]+)\]\((?P<inner>[^)]+)\
 _URL_SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
 _ANCHOR_CACHE: dict[Path, str] = {}
 _ANCHOR_ROOT_HINTS = ("content",)
+_TABLE_CONTEXT_MAX_PARAGRAPH_LINES = 3
+_TABLE_CONTEXT_MAX_BLOCKQUOTE_LINES = 6
+_TABLE_CONTEXT_MAX_LEGEND_TABLE_LINES = 12
+_TABLE_PACKET_MAX_LEAD_LINES = 18
+_TABLE_PACKET_MAX_EXTRA_TABLES = 1
+_TABLE_PACKET_MAX_EXTRA_TABLE_LINES = 8
+_TABLE_PACKET_MAX_REFERENCE_LINES = 6
+_TABLE_PACKET_HEIGHT_SAFETY_FACTOR = 0.92
+_TABLE_CONTEXT_LEGEND_RE = re.compile(
+    r"\b(legende|legend|zeichenerkl[aä]rung)\b", re.IGNORECASE
+)
+_TABLE_CONTEXT_TRAILING_REFERENCE_RE = re.compile(
+    r"\b(querverweise|quellen\s*(?:&|und)\s*verweise|references|"
+    r"sources?\s*(?:&|and)\s*references|cross[-\s]?references|see also)\b",
+    re.IGNORECASE,
+)
+_MARKDOWN_LIST_ITEM_RE = re.compile(r"^(?:[-*+]\s+|\d+[.)]\s+)")
+_TABLE_STRONG_RE = re.compile(r"(?<!\\)\*\*(?P<text>.+?)(?<!\\)\*\*")
 
 
 COLUMN_WIDTH_mm = COLUMN_WIDTH_MM
@@ -414,6 +432,506 @@ def _add_table_script_break_hints(text: str) -> str:
     return "".join(out)
 
 
+def _table_markdown_inline_to_latex(text: str) -> str:
+    return _TABLE_STRONG_RE.sub(
+        lambda match: r"\textbf{" + match.group("text") + "}", text
+    )
+
+
+def _format_latex_table_cell(value: str) -> str:
+    escaped = _escape_table_text(value.strip())
+    formatted = _table_markdown_inline_to_latex(escaped)
+    return _add_table_script_break_hints(formatted)
+
+
+def _is_blank_line(line: str) -> bool:
+    return not line.strip()
+
+
+def _is_heading_line(line: str) -> bool:
+    return line.lstrip().startswith("#")
+
+
+def _heading_level(line: str) -> int:
+    stripped = line.lstrip()
+    if not stripped.startswith("#"):
+        return 0
+    return len(stripped) - len(stripped.lstrip("#"))
+
+
+def _is_blockquote_line(line: str) -> bool:
+    return line.lstrip().startswith(">")
+
+
+def _is_thematic_break_line(line: str) -> bool:
+    stripped = line.strip()
+    return bool(stripped) and bool(re.fullmatch(r"(?:[-*_]\s*){3,}", stripped))
+
+
+def _is_table_row_line(line: str) -> bool:
+    stripped = line.strip()
+    return stripped.startswith("|") and "|" in stripped[1:]
+
+
+def _is_table_start(lines: List[str], index: int) -> bool:
+    return (
+        index + 1 < len(lines)
+        and "|" in lines[index]
+        and _is_table_separator_row(lines[index + 1])
+    )
+
+
+def _is_paragraph_context_line(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    if _is_thematic_break_line(line):
+        return False
+    if stripped.startswith(("#", ">", "|", "```", "~~~", "<!--")):
+        return False
+    if re.match(r"^(?:[-*+]\s+|\d+[.)]\s+)", stripped):
+        return False
+    return True
+
+
+def _is_reference_context_line(line: str) -> bool:
+    stripped = line.strip()
+    return (
+        _is_paragraph_context_line(line)
+        or _is_blockquote_line(line)
+        or bool(_MARKDOWN_LIST_ITEM_RE.match(stripped))
+    )
+
+
+def _is_trailing_reference_heading(line: str) -> bool:
+    return _is_heading_line(line) and bool(
+        _TABLE_CONTEXT_TRAILING_REFERENCE_RE.search(line)
+    )
+
+
+def _has_candidate_body(lines: List[str]) -> bool:
+    seen_heading = False
+    for line in lines:
+        if not seen_heading:
+            seen_heading = _is_heading_line(line)
+            continue
+        if _is_reference_context_line(line):
+            return True
+    return False
+
+
+def _is_complete_short_trailing_section(lines: List[str], index: int) -> bool:
+    if index >= len(lines):
+        return True
+    return _is_heading_line(lines[index]) or _is_thematic_break_line(lines[index])
+
+
+def _read_short_trailing_reference_section(
+    lines: List[str], index: int
+) -> tuple[List[str], int]:
+    start = index
+    candidate: list[str] = []
+    while index < len(lines) and _is_blank_line(lines[index]):
+        candidate.append(lines[index])
+        index += 1
+
+    if index >= len(lines) or not _is_trailing_reference_heading(lines[index]):
+        return [], start
+
+    candidate.append(lines[index])
+    index += 1
+    while index < len(lines) and _is_blank_line(lines[index]):
+        candidate.append(lines[index])
+        index += 1
+
+    body_lines = 0
+    while index < len(lines) and _is_reference_context_line(lines[index]):
+        if body_lines >= _TABLE_PACKET_MAX_REFERENCE_LINES:
+            return [], start
+        candidate.append(lines[index])
+        index += 1
+        body_lines += 1
+
+    while index < len(lines) and _is_blank_line(lines[index]):
+        candidate.append(lines[index])
+        index += 1
+
+    if body_lines == 0 or not _is_complete_short_trailing_section(lines, index):
+        return [], start
+    return candidate, index
+
+
+def _pop_trailing_blanks(lines: List[str]) -> List[str]:
+    popped: list[str] = []
+    while lines and _is_blank_line(lines[-1]):
+        popped.insert(0, lines.pop())
+    return popped
+
+
+def _pop_context_blockquotes(lines: List[str]) -> List[str]:
+    end = len(lines)
+    start = end
+    while start > 0 and _is_blockquote_line(lines[start - 1]):
+        start -= 1
+    if start == end or end - start > _TABLE_CONTEXT_MAX_BLOCKQUOTE_LINES:
+        return []
+    block = lines[start:end]
+    del lines[start:end]
+    return block
+
+
+def _pop_context_paragraph(lines: List[str]) -> List[str]:
+    end = len(lines)
+    start = end
+    while start > 0 and _is_paragraph_context_line(lines[start - 1]):
+        start -= 1
+    if start == end or end - start > _TABLE_CONTEXT_MAX_PARAGRAPH_LINES:
+        return []
+    block = lines[start:end]
+    del lines[start:end]
+    return block
+
+
+def _find_legend_context_start(lines: List[str], heading_index: int) -> int:
+    context_start = heading_index
+    probe = heading_index
+    while probe > 0 and _is_blank_line(lines[probe - 1]):
+        probe -= 1
+
+    paragraph_end = probe
+    paragraph_start = paragraph_end
+    while paragraph_start > 0 and _is_paragraph_context_line(
+        lines[paragraph_start - 1]
+    ):
+        paragraph_start -= 1
+    if (
+        paragraph_start < paragraph_end
+        and paragraph_end - paragraph_start <= _TABLE_CONTEXT_MAX_PARAGRAPH_LINES
+    ):
+        context_start = paragraph_start
+
+    probe = context_start
+    while probe > 0 and _is_blank_line(lines[probe - 1]):
+        probe -= 1
+    if probe > 0 and _is_heading_line(lines[probe - 1]):
+        context_start = probe - 1
+
+    return context_start
+
+
+def _pop_preceding_legend_table_context(lines: List[str]) -> List[str]:
+    table_context_end = len(lines)
+    table_end = table_context_end
+    while table_end > 0 and _is_blank_line(lines[table_end - 1]):
+        table_end -= 1
+    if table_end <= 0 or not _is_table_row_line(lines[table_end - 1]):
+        return []
+
+    table_start = table_end
+    while table_start > 0 and _is_table_row_line(lines[table_start - 1]):
+        table_start -= 1
+
+    table_line_count = table_end - table_start
+    if table_line_count > _TABLE_CONTEXT_MAX_LEGEND_TABLE_LINES:
+        return []
+    if not any(is_table_separator_row(line) for line in lines[table_start:table_end]):
+        return []
+
+    heading_index = table_start
+    while heading_index > 0 and _is_blank_line(lines[heading_index - 1]):
+        heading_index -= 1
+    if heading_index <= 0:
+        return []
+
+    heading_line_index = heading_index - 1
+    heading_line = lines[heading_line_index]
+    if not _is_heading_line(heading_line):
+        return []
+    if not _TABLE_CONTEXT_LEGEND_RE.search(heading_line):
+        return []
+
+    context_start = _find_legend_context_start(lines, heading_line_index)
+    block = lines[context_start:table_context_end]
+    del lines[context_start:table_context_end]
+    return block
+
+
+def _pop_table_context(lines: List[str]) -> List[str]:
+    prefix: list[str] = []
+
+    while True:
+        prefix[0:0] = _pop_trailing_blanks(lines)
+
+        blockquotes = _pop_context_blockquotes(lines)
+        if blockquotes:
+            prefix[0:0] = blockquotes
+            continue
+
+        paragraph = _pop_context_paragraph(lines)
+        if paragraph:
+            prefix[0:0] = paragraph
+            continue
+
+        if lines and _is_heading_line(lines[-1]):
+            prefix.insert(0, lines.pop())
+            legend_context = _pop_preceding_legend_table_context(lines)
+            if legend_context:
+                prefix[0:0] = legend_context
+            break
+
+        break
+
+    return prefix
+
+
+def _has_wrapped_or_table_content(lines: List[str]) -> bool:
+    return any(
+        _is_table_row_line(line)
+        or "\\newgeometry" in line
+        or "\\restoregeometry" in line
+        or "\\begin{longtable}" in line
+        for line in lines
+    )
+
+
+def _pop_section_packet_lead(lines: List[str]) -> List[str]:
+    end = len(lines)
+    while end > 0 and _is_blank_line(lines[end - 1]):
+        end -= 1
+    if end <= 0:
+        return []
+
+    start = end - 1
+    while start >= 0:
+        if _heading_level(lines[start]) == 1:
+            break
+        start -= 1
+    if start < 0:
+        return []
+
+    block = lines[start:]
+    content_block = lines[start:end]
+    if len(content_block) > _TABLE_PACKET_MAX_LEAD_LINES:
+        return []
+    if _has_wrapped_or_table_content(content_block):
+        return []
+
+    del lines[start:]
+    return block
+
+
+def _read_table_block(lines: List[str], index: int) -> tuple[List[str], int]:
+    table_lines = [lines[index], lines[index + 1]]
+    index += 2
+    while index < len(lines) and "|" in lines[index] and lines[index].strip():
+        table_lines.append(lines[index])
+        index += 1
+    return table_lines, index
+
+
+def _trim_trailing_blank_lines(lines: List[str]) -> None:
+    while lines and _is_blank_line(lines[-1]):
+        lines.pop()
+
+
+def _collect_wrapped_packet_suffix(
+    lines: List[str], index: int
+) -> tuple[List[str], int]:
+    suffix: list[str] = []
+    extra_tables = 0
+
+    while index < len(lines):
+        pending_blanks: list[str] = []
+        while index < len(lines) and _is_blank_line(lines[index]):
+            pending_blanks.append(lines[index])
+            index += 1
+
+        if index >= len(lines):
+            suffix.extend(pending_blanks)
+            return suffix, index
+
+        line = lines[index]
+        if _is_thematic_break_line(line):
+            separator = pending_blanks + [line]
+            index += 1
+            while index < len(lines) and _is_blank_line(lines[index]):
+                separator.append(lines[index])
+                index += 1
+
+            trailing_reference, reference_index = (
+                _read_short_trailing_reference_section(lines, index)
+            )
+            suffix.extend(separator)
+            if trailing_reference:
+                suffix.extend(trailing_reference)
+                return suffix, reference_index
+            return suffix, index
+
+        if _is_heading_line(line):
+            if extra_tables >= _TABLE_PACKET_MAX_EXTRA_TABLES:
+                _trim_trailing_blank_lines(suffix)
+                return suffix, index - len(pending_blanks)
+
+            candidate_start = index
+            candidate = pending_blanks + [line]
+            index += 1
+            while index < len(lines) and _is_blank_line(lines[index]):
+                candidate.append(lines[index])
+                index += 1
+
+            paragraph_lines = 0
+            while (
+                index < len(lines)
+                and _is_paragraph_context_line(lines[index])
+                and paragraph_lines < _TABLE_CONTEXT_MAX_PARAGRAPH_LINES
+            ):
+                candidate.append(lines[index])
+                index += 1
+                paragraph_lines += 1
+            while index < len(lines) and _is_blank_line(lines[index]):
+                candidate.append(lines[index])
+                index += 1
+
+            if not _is_table_start(lines, index):
+                if (
+                    _is_trailing_reference_heading(line)
+                    and _has_candidate_body(candidate)
+                    and _is_complete_short_trailing_section(lines, index)
+                ):
+                    suffix.extend(candidate)
+                    return suffix, index
+                _trim_trailing_blank_lines(suffix)
+                return suffix, candidate_start - len(pending_blanks)
+
+            table_lines, index = _read_table_block(lines, index)
+            if len(table_lines) > _TABLE_PACKET_MAX_EXTRA_TABLE_LINES:
+                _trim_trailing_blank_lines(suffix)
+                return suffix, candidate_start - len(pending_blanks)
+
+            suffix.extend(candidate)
+            suffix.extend(_escape_table_line(table_line) for table_line in table_lines)
+            extra_tables += 1
+            continue
+
+        if _is_paragraph_context_line(line) or _is_blockquote_line(line):
+            suffix.extend(pending_blanks)
+            paragraph_lines = 0
+            while index < len(lines) and (
+                _is_paragraph_context_line(lines[index])
+                or _is_blockquote_line(lines[index])
+            ):
+                suffix.append(lines[index])
+                index += 1
+                paragraph_lines += 1
+                if paragraph_lines >= _TABLE_CONTEXT_MAX_PARAGRAPH_LINES:
+                    break
+            continue
+
+        _trim_trailing_blank_lines(suffix)
+        return suffix, index - len(pending_blanks)
+
+    return suffix, index
+
+
+def _collapse_trailing_newpage_before_wrap(lines: List[str]) -> None:
+    if not lines:
+        return
+    marker = "\n\\newpage\n"
+    if lines[-1].endswith(marker):
+        lines[-1] = lines[-1][: -len(marker)] + "\n"
+
+
+def _usable_height_mm(paper_info: PaperInfo) -> float:
+    _, top, _, bottom = paper_info.margins_mm
+    return max(1.0, paper_info.size_mm[1] - top - bottom)
+
+
+def _standard_paper_candidates_for_height(base_paper: PaperInfo) -> list[PaperInfo]:
+    codes = ["a4", "a3", "a2", "a1"]
+    candidates: list[PaperInfo] = []
+    for code in codes:
+        candidate_code = f"{code}-landscape" if base_paper.rotated else code
+        candidate = get_valid_paper_measurements(candidate_code)
+        if (
+            candidate.size_mm[0] >= base_paper.size_mm[0]
+            and candidate.size_mm[1] >= base_paper.size_mm[1]
+        ):
+            candidates.append(candidate)
+    return candidates or [base_paper]
+
+
+def _estimate_text_block_height_mm(line: str, paper_info: PaperInfo) -> float:
+    stripped = line.strip()
+    if not stripped:
+        return 2.0
+    if _is_thematic_break_line(line):
+        return 4.0
+    level = _heading_level(line)
+    if level == 1:
+        return 14.0
+    if level == 2:
+        return 11.0
+    if level >= 3:
+        return 9.0
+
+    usable_width = available_text_width_mm(paper_info)
+    estimated_lines = max(1, int(estimate_text_width_mm(stripped) / usable_width) + 1)
+    return estimated_lines * 5.0
+
+
+def _estimate_table_block_height_mm(
+    table_lines: List[str],
+    paper_info: PaperInfo,
+    table_strategy_config: TablePaperStrategyConfig,
+) -> float:
+    evaluation = evaluate_candidate_layout(
+        table_lines, paper_info, table_strategy_config
+    )
+    data_rows = max(0, len(table_lines) - 2)
+    header_height = max(6.0, evaluation.max_header_lines * 4.4) + 5.0
+    row_height = max(5.2, evaluation.average_row_lines * 4.4 + 1.6)
+    return header_height + data_rows * row_height + 7.0
+
+
+def _estimate_wrapped_block_height_mm(
+    lines: List[str],
+    paper_info: PaperInfo,
+    table_strategy_config: TablePaperStrategyConfig,
+) -> float:
+    height = 0.0
+    index = 0
+    while index < len(lines):
+        if _is_table_start(lines, index):
+            table_lines, index = _read_table_block(lines, index)
+            height += _estimate_table_block_height_mm(
+                table_lines, paper_info, table_strategy_config
+            )
+            continue
+        height += _estimate_text_block_height_mm(lines[index], paper_info)
+        index += 1
+    return height
+
+
+def _paper_for_wrapped_block_height(
+    lines: List[str],
+    paper_info: PaperInfo,
+    table_strategy_config: TablePaperStrategyConfig,
+) -> PaperInfo:
+    if not paper_info.rotated:
+        return paper_info
+
+    for candidate in _standard_paper_candidates_for_height(paper_info):
+        estimated_height = _estimate_wrapped_block_height_mm(
+            lines, candidate, table_strategy_config
+        )
+        if (
+            estimated_height
+            <= _usable_height_mm(candidate) * _TABLE_PACKET_HEIGHT_SAFETY_FACTOR
+        ):
+            return candidate
+    return _standard_paper_candidates_for_height(paper_info)[-1]
+
+
 def wrap_block(
     lines: List[str],
     paper_info: PaperInfo,
@@ -498,7 +1016,7 @@ def wrap_block(
                     i += 1
 
                 header = [
-                    _add_table_script_break_hints(_escape_table_text(x.strip()))
+                    _format_latex_table_cell(x)
                     for x in _split_table_row(table_lines[0])
                 ]
                 alignments = _split_table_row(table_lines[1])
@@ -510,7 +1028,7 @@ def wrap_block(
                 out_lines.append("\\endhead ")
                 for table_line in table_lines[2:]:
                     row = [
-                        _add_table_script_break_hints(_escape_table_text(x.strip()))
+                        _format_latex_table_cell(x)
                         for x in _split_table_row(table_line)
                     ]
                     out_lines.append(f"{' & '.join(row)} \\\\")
@@ -536,7 +1054,7 @@ def wrap_block(
         f" left={margin_left}mm, right={margin_right}mm,"
         f" top={margin_top}mm, bottom={margin_bottom}mm}}\n\n"
     )
-    before += "\n" + f"\\pagewidth={width}mm" + "\n" + f"\\pageheight={height}mm"
+    before += "\n" + f"\\pagewidth={width}mm" + "\n" + f"\\pageheight={height}mm\n\n"
     logger.info("Using paper size: %smm x %smm", width, height)
     after = "\n" + "\\restoregeometry"
     after += (
@@ -599,17 +1117,19 @@ def process(
             )
             should_wrap = paper_info != current_paper_info or cols >= MIN_COLS_FOR_WRAP
             if should_wrap:
-                prefix: List[str] = []
-                # include heading, note and blank lines before the table
-                while out and (
-                    out[-1].strip() == ""
-                    or out[-1].lstrip().startswith("#")
-                    or out[-1].lstrip().startswith(">")
-                ):
-                    prefix.insert(0, out.pop())
+                prefix = _pop_table_context(out)
+                section_lead = _pop_section_packet_lead(out)
+                suffix, i = _collect_wrapped_packet_suffix(lines, i)
+                wrapped_lines = section_lead + prefix + escaped_lines + suffix
+                paper_info = _paper_for_wrapped_block_height(
+                    wrapped_lines,
+                    paper_info,
+                    table_strategy_config,
+                )
+                _collapse_trailing_newpage_before_wrap(out)
                 out.extend(
                     wrap_block(
-                        prefix + escaped_lines,
+                        wrapped_lines,
                         paper_info=paper_info,
                         current_paper_info=current_paper_info,
                         table_strategy_config=table_strategy_config,
@@ -628,6 +1148,7 @@ def process(
             width = get_image_width(Path(abs_img))
             paper_info = paper_for_width(width, base_paper=current_paper_info)
             if paper_info != current_paper_info:
+                _collapse_trailing_newpage_before_wrap(out)
                 out.extend(
                     wrap_block(
                         [line],

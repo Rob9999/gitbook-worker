@@ -1,9 +1,12 @@
 ---
-version: 1.0.0
-date: 2026-05-09
+version: 1.1.2
+date: 2026-05-11
 status: implemented
 history:
   - "1.0.0: 2026-05-09 - Editorial best-fit table paper strategy for the Tabellenprofi release."
+  - "1.1.0: 2026-05-11 - Added context packet and height-aware landscape page selection notes."
+  - "1.1.1: 2026-05-11 - Added compact trailing reference sections to table context packets."
+  - "1.1.2: 2026-05-12 - Added compact source/reference lists after wrapped tables."
 ---
 
 # Editorial Table Paper Strategy
@@ -55,6 +58,26 @@ Then every candidate paper receives a layout score using:
 The selected paper is the first candidate that satisfies the readability
 thresholds after the historical column-count lower bound. If no candidate is
 fully acceptable, the lowest score is used and the log/report explains why.
+
+## Context Packets And Height Checks
+
+When a table needs a dedicated landscape or large-format page, preprocessing now
+keeps nearby editorial context with the table when it is bounded and likely to
+fit:
+
+- direct headings, short introductory paragraphs, and blockquote notes,
+- nearby legend headings plus compact legend tables,
+- short chapter lead packets before the first table,
+- at most one short sibling table after the first wrapped table,
+- compact trailing reference sections such as `Querverweise`, `Quellen & Verweise`,
+  or `References`, including short numbered source lists.
+
+Before emitting the geometry switch, GitBook Worker estimates the combined
+height of the wrapped packet. Landscape packets can be promoted from A4
+landscape to larger landscape formats when the context plus table would be too
+tall. Portrait table behavior is intentionally not height-promoted by this
+heuristic, preserving existing portrait fixtures and avoiding surprising paper
+growth for ordinary narrow tables.
 
 ## Script And Long-Run Handling
 
